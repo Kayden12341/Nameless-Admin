@@ -2819,7 +2819,6 @@ cmd.add({"f3x","fex"},{"f3x","F3X for client"},function()
 end)
 
 cmd.add({"harked","comet"},{"harked (comet)","Executes Comet which is like harked"},function()
-	DoNotif("Join the discord to see supported games! Use the discord command to get the invite",7)
 	loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/Nameless-Admin/main/comet"))();
 end)
 
