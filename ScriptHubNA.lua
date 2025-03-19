@@ -156,10 +156,7 @@ local function search(q)
     local url = "https://www.scriptblox.com/api/script/search?q=" .. q
     local res = r({
         Url = url,
-        Method = "GET",
-        Headers = {
-            ["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
-        }
+        Method = "GET"
     })
 
     if res and res.Success then
