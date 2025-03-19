@@ -1,273 +1,351 @@
-local TweenService = game:GetService("TweenService");
-local RunService = game:GetService("RunService");
-local TextService = game:GetService("TextService");
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+local TextService = game:GetService("TextService")
+local UserInputService = game:GetService("UserInputService")
 
-local Player = game:GetService("Players").LocalPlayer;
-local search = RunService:IsStudio() and Player.PlayerGui or (game:GetService("CoreGui") or game:GetService("Players").LocalPlayer:FindFirstChildWhichIsA("PlayerGui"));
-if search:FindFirstChild("AkaliNotif") and _G.Notifss then
-	return _G.Notifss
+local PADDING = 10
+local TWEEN_TIME = 0.8
+local TWEEN_STYLE = Enum.EasingStyle.Quint
+local TWEEN_DIRECTION = Enum.EasingDirection.Out
+local BUTTON_COLORS = {
+    Default = Color3.fromRGB(45, 45, 45),
+    Hover = Color3.fromRGB(60, 60, 60),
+    Click = Color3.fromRGB(30, 30, 30)
+}
+local NOTIFICATION_COLORS = {
+    Background = Color3.fromRGB(25, 25, 30),
+    Shadow = Color3.fromRGB(10, 10, 15),
+    Text = Color3.fromRGB(255, 255, 255),
+    Title = Color3.fromRGB(220, 220, 255),
+    CloseButton = Color3.fromRGB(220, 80, 80),
+    Accent = Color3.fromRGB(80, 120, 255)
+}
+
+local Player = game:GetService("Players").LocalPlayer
+local search = RunService:IsStudio() and Player.PlayerGui or (game:GetService("CoreGui") or game:GetService("Players").LocalPlayer:FindFirstChildWhichIsA("PlayerGui"))
+local NotifGui, Container
+
+if search:FindFirstChild("EnhancedNotif") and _G.EnhancedNotifs then
+    return _G.EnhancedNotifs
 else
-	NotifGui= Instance.new("ScreenGui");
-	NotifGui.Name = "AkaliNotif";
-	NotifGui.Parent = search
-	Container = Instance.new("Frame");
-	Container.Name = "Container";
-	Container.Position = UDim2.new(0, 20, 0.5, 0);
-	Container.Size = UDim2.new(0, 300, 0.3, 0);
-	Container.AnchorPoint=Vector2.new(0,0.5);
-	Container.BackgroundTransparency = 1;
-	Container.Parent = NotifGui;
+    NotifGui = Instance.new("ScreenGui")
+    NotifGui.Name = "EnhancedNotif"
+    NotifGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    NotifGui.Parent = search
+    
+    Container = Instance.new("Frame")
+    Container.Name = "Container"
+    Container.Position = UDim2.new(1, -320, 1, -20)
+    Container.Size = UDim2.new(0, 300, 0.5, 0)
+    Container.AnchorPoint = Vector2.new(0, 1)
+    Container.BackgroundTransparency = 1
+    Container.Parent = NotifGui
 end
 
+local InstructionObjects = {}
+local CachedObjects = {}
+local LastTick = tick()
 
-local function Image(ID, Button)
-	local NewImage = Instance.new(string.format("Image%s", Button and "Button" or "Label"));
-	NewImage.Image = ID;
-	NewImage.BackgroundTransparency = 1;
-	return NewImage;
+local function CreateNotificationFrame(Y)
+    local Frame = Instance.new("Frame")
+    Frame.Size = UDim2.new(0, 300, 0, Y)
+    Frame.BackgroundColor3 = NOTIFICATION_COLORS.Background
+    Frame.BackgroundTransparency = .5
+    Frame.BorderSizePixel = 0
+    
+    local UICorner = Instance.new("UICorner")
+    UICorner.CornerRadius = UDim.new(0, 8)
+    UICorner.Parent = Frame
+    
+    local AccentBar = Instance.new("Frame")
+    AccentBar.Size = UDim2.new(0, 4, 1, 0)
+    AccentBar.Position = UDim2.new(0, 0, 0, 0)
+    AccentBar.BackgroundColor3 = NOTIFICATION_COLORS.Accent
+    AccentBar.BorderSizePixel = 0
+    AccentBar.Parent = Frame
+    
+    local UICornerAccent = Instance.new("UICorner")
+    UICornerAccent.CornerRadius = UDim.new(0, 8)
+    UICornerAccent.Parent = AccentBar
+    
+    local Shadow = Instance.new("Frame")
+    Shadow.Size = UDim2.new(1, 10, 1, 10)
+    Shadow.Position = UDim2.new(0.5, 0, 0.5, 0)
+    Shadow.AnchorPoint = Vector2.new(0.5, 0.5)
+    Shadow.BackgroundColor3 = NOTIFICATION_COLORS.Shadow
+    Shadow.BackgroundTransparency = .5
+    Shadow.BorderSizePixel = 0
+    Shadow.ZIndex = -1
+    Shadow.Parent = Frame
+    
+    local ShadowUICorner = Instance.new("UICorner")
+    ShadowUICorner.CornerRadius = UDim.new(0, 10)
+    ShadowUICorner.Parent = Shadow
+    
+    return Frame
 end
 
-local function Round2px()
-	local NewImage = Image("http://www.roblox.com/asset/?id=5761488251");
-	NewImage.ScaleType = Enum.ScaleType.Slice;
-	NewImage.SliceCenter = Rect.new(2, 2, 298, 298);
-	NewImage.ImageColor3 = Color3.fromRGB(12, 4, 20);
-	NewImage.ImageTransparency = 0.14
-	return NewImage;
+local function CreateTitle(Text, Parent)
+    local Title = Instance.new("TextLabel")
+    Title.Size = UDim2.new(1, -50, 0, 26)
+    Title.Position = UDim2.new(0, 15, 0, 5)
+    Title.BackgroundTransparency = 1
+    Title.Text = Text
+    Title.TextColor3 = NOTIFICATION_COLORS.Title
+    Title.TextSize = 16
+    Title.TextScaled = true
+    Title.Font = Enum.Font.GothamBold
+    Title.TextXAlignment = Enum.TextXAlignment.Left
+    Title.TextYAlignment = Enum.TextYAlignment.Center
+    Title.Parent = Parent
+    return Title
 end
 
-local function Shadow2px()
-	local NewImage = Image("http://www.roblox.com/asset/?id=5761498316");
-	NewImage.ScaleType = Enum.ScaleType.Slice;
-	NewImage.SliceCenter = Rect.new(17, 17, 283, 283);
-	NewImage.Size = UDim2.fromScale(1, 1) + UDim2.fromOffset(30, 30);
-	NewImage.Position = -UDim2.fromOffset(15, 15);
-	NewImage.ImageColor3 = Color3.fromRGB(26, 26, 26);
-	return NewImage;
+local function CreateDescription(Text, Parent, YPosition)
+    local Description = Instance.new("TextLabel")
+    Description.Size = UDim2.new(1, -30, 0, 0)
+    Description.Position = UDim2.new(0, 15, 0, YPosition)
+    Description.BackgroundTransparency = 1
+    Description.Text = Text
+    Description.TextColor3 = NOTIFICATION_COLORS.Text
+    Description.TextSize = 14
+    Description.Font = Enum.Font.Gotham
+    Description.TextXAlignment = Enum.TextXAlignment.Left
+    Description.TextYAlignment = Enum.TextYAlignment.Top
+    Description.TextWrapped = true
+    Description.Parent = Parent
+    
+    local textSize = TextService:GetTextSize(
+        Text, 
+        14, 
+        Enum.Font.Gotham, 
+        Vector2.new(Description.AbsoluteSize.X, math.huge)
+    )
+    
+    Description.Size = UDim2.new(1, -30, 0, textSize.Y)
+    
+    return Description, textSize.Y
 end
 
-local Padding = 10;
-local DescriptionPadding = 10;
-local InstructionObjects = {};
-local TweenTime = 1;
-local TweenStyle = Enum.EasingStyle.Sine;
-local TweenDirection = Enum.EasingDirection.Out;
+local function CreateCloseButton(Parent)
+    local CloseButton = Instance.new("TextButton")
+    CloseButton.Size = UDim2.new(0, 24, 0, 24)
+    CloseButton.Position = UDim2.new(1, -30, 0, 6)
+    CloseButton.BackgroundColor3 = NOTIFICATION_COLORS.CloseButton
+    CloseButton.Text = "×"
+    CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    CloseButton.TextSize = 18
+    CloseButton.Font = Enum.Font.GothamBold
+    CloseButton.Parent = Parent
+    
+    local UICorner = Instance.new("UICorner")
+    UICorner.CornerRadius = UDim.new(1, 0)
+    UICorner.Parent = CloseButton
+    
+    CloseButton.MouseEnter:Connect(function()
+        TweenService:Create(CloseButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(255, 100, 100)}):Play()
+    end)
+    
+    CloseButton.MouseLeave:Connect(function()
+        TweenService:Create(CloseButton, TweenInfo.new(0.2), {BackgroundColor3 = NOTIFICATION_COLORS.CloseButton}):Play()
+    end)
+    
+    return CloseButton
+end
 
-local LastTick = tick();
+local function CreateSquircleButton(Text, Width, Height, Parent, Position)
+    local Button = Instance.new("TextButton")
+    Button.Size = UDim2.new(0, Width, 0, Height)
+    Button.Position = Position
+    Button.Text = Text
+    Button.BackgroundColor3 = BUTTON_COLORS.Default
+    Button.TextColor3 = NOTIFICATION_COLORS.Text
+    Button.Font = Enum.Font.Gotham
+    Button.TextSize = 14
+    Button.Parent = Parent
+    
+    local UICorner = Instance.new("UICorner")
+    UICorner.CornerRadius = UDim.new(0.3, 0)
+    UICorner.Parent = Button
+    
+    Button.MouseEnter:Connect(function()
+        TweenService:Create(Button, TweenInfo.new(0.2), {BackgroundColor3 = BUTTON_COLORS.Hover}):Play()
+    end)
+    
+    Button.MouseLeave:Connect(function()
+        TweenService:Create(Button, TweenInfo.new(0.2), {BackgroundColor3 = BUTTON_COLORS.Default}):Play()
+    end)
+    
+    Button.MouseButton1Down:Connect(function()
+        TweenService:Create(Button, TweenInfo.new(0.1), {BackgroundColor3 = BUTTON_COLORS.Click}):Play()
+    end)
+    
+    Button.MouseButton1Up:Connect(function()
+        TweenService:Create(Button, TweenInfo.new(0.1), {BackgroundColor3 = BUTTON_COLORS.Hover}):Play()
+    end)
+    
+    return Button
+end
 
 local function CalculateBounds(TableOfObjects)
-	local TableOfObjects = typeof(TableOfObjects) == "table" and TableOfObjects or {};
-	local X, Y = 0, 0;
-	for _, Object in next, TableOfObjects do
-		X += Object.AbsoluteSize.X;
-		Y += Object.AbsoluteSize.Y;
-	end
-	return {X = X, Y = Y, x = X, y = Y};
+    local Y = 0
+    for _, Object in next, TableOfObjects do
+        Y += Object.AbsoluteSize.Y + PADDING
+    end
+    return Y
 end
-
-local CachedObjects = {};
 
 local function Update()
-	local DeltaTime = tick() - LastTick;
-	local PreviousObjects = {};
-	for CurObj, Object in next, InstructionObjects do
-		local Label, Delta, Done = Object[1], Object[2], Object[3];
-		if (not Done) then
-			if (Delta < TweenTime) then
-				Object[2] = math.clamp(Delta + DeltaTime, 0, 1);
-				Delta = Object[2];
-			else
-				Object[3] = true;
-			end
-		end
-		local NewValue = TweenService:GetValue(Delta, TweenStyle, TweenDirection);
-		local CurrentPos = Label.Position;
-		local PreviousBounds = CalculateBounds(PreviousObjects);
-		local TargetPos = UDim2.new(0, 0, 0, PreviousBounds.Y + (Padding * #PreviousObjects));
-		Label.Position = CurrentPos:Lerp(TargetPos, NewValue);
-		table.insert(PreviousObjects, Label);
-	end
-	CachedObjects = PreviousObjects;
-	LastTick = tick();
+    local DeltaTime = tick() - LastTick
+    local PreviousObjects = {}
+    
+    for _, Object in next, InstructionObjects do
+        local Label, Delta, Done = Object[1], Object[2], Object[3]
+        
+        if (not Done) then
+            if (Delta < TWEEN_TIME) then
+                Object[2] = math.clamp(Delta + DeltaTime, 0, TWEEN_TIME)
+                Delta = Object[2]
+            else
+                Object[3] = true
+            end
+        end
+        
+        local NewValue = TweenService:GetValue(Delta / TWEEN_TIME, TWEEN_STYLE, TWEEN_DIRECTION)
+        local CurrentPos = Label.Position
+        local TargetPos = UDim2.new(0, 0, 1, -CalculateBounds(PreviousObjects) - Label.AbsoluteSize.Y)
+        
+        Label.Position = CurrentPos:Lerp(TargetPos, NewValue)
+        table.insert(PreviousObjects, Label)
+    end
+    
+    CachedObjects = PreviousObjects
+    LastTick = tick()
 end
 
-RunService:BindToRenderStep("UpdateList", 0, Update);
-
-local TitleSettings = {
-	Font = Enum.Font.GothamSemibold;
-	Size = 14;
-}
-
-local DescriptionSettings = {
-	Font = Enum.Font.Gotham;
-	Size = 14;
-}
-
-local MaxWidth = (Container.AbsoluteSize.X - Padding - DescriptionPadding);
-
-local function Label(Text, Font, Size, Button)
-	local Label = Instance.new(string.format("Text%s", Button and "Button" or "Label"));
-	Label.Text = Text;
-	Label.Font = Font;
-	Label.TextSize = Size;
-	Label.BackgroundTransparency = 1;
-	Label.TextXAlignment = Enum.TextXAlignment.Left;
-	Label.RichText = true;
-	Label.TextColor3 = Color3.fromRGB(255, 255, 255);
-	return Label;
-end
-
-local function TitleLabel(Text)
-	return Label(Text, TitleSettings.Font, TitleSettings.Size);
-end
-
-local function DescriptionLabel(Text)
-	return Label(Text, DescriptionSettings.Font, DescriptionSettings.Size);
-end
+RunService:BindToRenderStep("UpdateNotifications", 0, Update)
 
 local PropertyTweenOut = {
-	Text = "TextTransparency",
-	Fram = "BackgroundTransparency",
-	Imag = "ImageTransparency"
+    Text = "TextTransparency",
+    Fram = "BackgroundTransparency",
+    Imag = "ImageTransparency"
 }
 
 local function FadeProperty(Object)
-	local Prop = PropertyTweenOut[string.sub(Object.ClassName, 1, 4)];
-	TweenService:Create(Object, TweenInfo.new(0.25, TweenStyle, TweenDirection), {
-		[Prop] = 1;
-	}):Play();
-end
-
-local function SearchTableFor(Table, For)
-	for _, v in next, Table do
-		if (v == For) then
-			return true;
-		end
-	end
-	return false;
+    local Prop = PropertyTweenOut[string.sub(Object.ClassName, 1, 4)]
+    if Prop then
+        TweenService:Create(Object, TweenInfo.new(0.25, TWEEN_STYLE, TWEEN_DIRECTION), {
+            [Prop] = 1
+        }):Play()
+    end
 end
 
 local function FindIndexByDependency(Table, Dependency)
-	for Index, Object in next, Table do
-		if (typeof(Object) == "table") then
-			local Found = SearchTableFor(Object, Dependency);
-			if (Found) then
-				return Index;
-			end
-		else
-			if (Object == Dependency) then
-				return Index;
-			end
-		end
-	end
+    for Index, Object in next, Table do
+        if (typeof(Object) == "table") then
+            for _, v in next, Object do
+                if v == Dependency then
+                    return Index
+                end
+            end
+        else
+            if (Object == Dependency) then
+                return Index
+            end
+        end
+    end
+    return nil
 end
 
 local function ResetObjects()
-	for _, Object in next, InstructionObjects do
-		Object[2] = 0;
-		Object[3] = false;
-	end
+    for _, Object in next, InstructionObjects do
+        Object[2] = 0
+        Object[3] = false
+    end
 end
 
 local function FadeOutAfter(Object, Seconds)
-	wait(Seconds);
-	FadeProperty(Object);
-	for _, SubObj in next, Object:GetDescendants() do
-		FadeProperty(SubObj);
-	end
-	wait(0.25);
-	table.remove(InstructionObjects, FindIndexByDependency(InstructionObjects, Object));
-	ResetObjects();
-	Object:Destroy();
+    task.spawn(function()
+        task.wait(Seconds)
+        FadeProperty(Object)
+        for _, SubObj in next, Object:GetDescendants() do
+            FadeProperty(SubObj)
+        end
+        task.wait(0.25)
+        local index = FindIndexByDependency(InstructionObjects, Object)
+        if index then
+            table.remove(InstructionObjects, index)
+            ResetObjects()
+        end
+        Object:Destroy()
+    end)
 end
-_G.Notifss = {
-	Notify = function(Properties)
-		local Properties = typeof(Properties) == "table" and Properties or {};
-		local Title = Properties.Title;
-		local Description = Properties.Description;
-		local Duration = Properties.Duration or 5;
-		local Buttons = Properties.Buttons or {};
-		local ButtonCount = #Buttons
-		local Y = Title and 26 or 0;
 
-		local ButtonYPosition = Title and 26 or 0
-
-		if (Description) then
-			local TextSize = TextService:GetTextSize(Description, DescriptionSettings.Size, DescriptionSettings.Font, Vector2.new(MaxWidth, math.huge))
-			local NumLines = math.ceil(TextSize.Y / (DescriptionSettings.Size + 5))
-
-			ButtonYPosition += TextSize.Y + 8
-			Y += TextSize.Y + (NumLines - 1) * 8
-		end
-
-		local RowsRequired = math.ceil(ButtonCount / 2)
-		Y += RowsRequired * 40
-
-		local NewLabel = Round2px()
-		NewLabel.Size = UDim2.new(1, 0, 0, Y)
-		--NewLabel.AnchorPoint=Vector2.new(0,0.5)
-		NewLabel.Position = UDim2.new(-1, 20, 0, CalculateBounds(CachedObjects).Y + (Padding * #CachedObjects))
-
-		if (Title) then
-			local NewTitle = TitleLabel(Title);
-			NewTitle.Size = UDim2.new(1, -10, 0, 26);
-			NewTitle.Position = UDim2.fromOffset(10, 0);
-			NewTitle.Parent = NewLabel;
-		end
-
-		if (Description) then
-			local NewDescription = DescriptionLabel(Description);
-			NewDescription.TextWrapped = true;
-			NewDescription.Size = UDim2.fromScale(1, 1) + UDim2.fromOffset(-DescriptionPadding, Title and -26 or 0);
-			NewDescription.Position = UDim2.fromOffset(10, Title and 26 or 0);
-			NewDescription.TextYAlignment = Enum.TextYAlignment[Title and "Top" or "Center"];
-			NewDescription.Parent = NewLabel;
-		end
-
-		if ButtonCount > 0 then
-			local ButtonSpacing = 10
-			local ButtonWidth = (MaxWidth - ButtonSpacing) / 2
-			local MaxButtonHeight = 30
-			local clicked = false
-
-			for row = 1, RowsRequired do
-				local rowButtonCount = math.min(2, ButtonCount - (row - 1) * 2)
-				local totalRowWidth = rowButtonCount * ButtonWidth + (rowButtonCount - 1) * ButtonSpacing
-				local startX = (MaxWidth - totalRowWidth) / 2
-
-				for col = 1, rowButtonCount do
-					local Button = Instance.new("TextButton")
-					Button.Size = UDim2.new(0, ButtonWidth, 0, MaxButtonHeight)
-					local buttonXPos = startX + (col - 1) * (ButtonWidth + ButtonSpacing)
-					Button.Position = UDim2.new(0.03, buttonXPos, 0, ButtonYPosition)
-					Button.Text = Buttons[(row - 1) * 2 + col].Text
-					Button.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-					Button.TextColor3 = Color3.fromRGB(255, 255, 255)
-					Button.Font = Enum.Font.Gotham
-					Button.TextScaled = true
-					Button.Parent = NewLabel
-
-					Button.MouseButton1Click:Connect(function()
-						if not clicked then
-							clicked = true
-							Buttons[(row - 1) * 2 + col].Callback()
-							coroutine.wrap(FadeOutAfter)(NewLabel)
-						end
-					end)
-				end
-
-				ButtonYPosition = ButtonYPosition + MaxButtonHeight + ButtonSpacing
-			end
-		end
-
-		Shadow2px().Parent = NewLabel;
-		NewLabel.Parent = Container;
-		table.insert(InstructionObjects, {NewLabel, 0, false});
-
-		if ButtonCount == 0 then
-			coroutine.wrap(FadeOutAfter)(NewLabel, Duration);
-		end
-
-	end,
+_G.EnhancedNotifs = {
+    Notify = function(Properties)
+        local Properties = typeof(Properties) == "table" and Properties or {}
+        local Title = Properties.Title
+        local Description = Properties.Description
+        local Duration = Properties.Duration or 5
+        local Buttons = Properties.Buttons or {}
+        local ButtonCount = #Buttons
+        
+        local Y = 10
+        if Title then Y += 30 end
+        
+        local NewNotif = CreateNotificationFrame(Y)
+        NewNotif.Position = UDim2.new(1, 300, 1, -CalculateBounds(CachedObjects) - Y)
+        
+        local YPosition = 10
+        if Title then
+            CreateTitle(Title, NewNotif)
+            YPosition += 30
+        end
+        
+        if Description then
+            local DescLabel, TextHeight = CreateDescription(Description, NewNotif, YPosition)
+            Y += TextHeight + 10
+            NewNotif.Size = UDim2.new(0, 300, 0, Y)
+        end
+        
+        if ButtonCount > 0 then
+            Y += 40
+            NewNotif.Size = UDim2.new(0, 300, 0, Y)
+            
+            local ButtonWidth = (280 - (10 * (ButtonCount - 1))) / ButtonCount
+            local ButtonY = Y - 35
+            
+            for i, ButtonInfo in ipairs(Buttons) do
+                local XPos = 15 + (i - 1) * (ButtonWidth + 10)
+                local Button = CreateSquircleButton(
+                    ButtonInfo.Text,
+                    ButtonWidth,
+                    30,
+                    NewNotif,
+                    UDim2.new(0, XPos, 0, ButtonY)
+                )
+                
+                Button.MouseButton1Click:Connect(function()
+                    if ButtonInfo.Callback then
+                        ButtonInfo.Callback()
+                    end
+                    FadeOutAfter(NewNotif, 0)
+                end)
+            end
+        else
+            local CloseBtn = CreateCloseButton(NewNotif)
+            CloseBtn.MouseButton1Click:Connect(function()
+                FadeOutAfter(NewNotif, 0)
+            end)
+        end
+        
+        NewNotif.Parent = Container
+        table.insert(InstructionObjects, {NewNotif, 0, false})
+        
+        if ButtonCount == 0 then
+            FadeOutAfter(NewNotif, Duration)
+        end
+    end
 }
-return _G.Notifss
+
+return _G.EnhancedNotifs
