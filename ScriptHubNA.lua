@@ -1,6 +1,7 @@
 local r = request or http_request or (syn and syn.request) or function() end
 local ts = game:GetService("TweenService")
 local uis = game:GetService("UserInputService")
+local http = game:GetService("HttpService")
 
 local sg = Instance.new("ScreenGui")
 sg.Parent = (game:GetService("CoreGui") or game:GetService("Players").LocalPlayer:FindFirstChild("PlayerGui"))
@@ -154,119 +155,168 @@ end)
 
 local function search(q)
     local url = "https://www.scriptblox.com/api/script/search?q=" .. q
-    local res = r({
-        Url = url,
-        Method = "GET"
-    })
-
-    if res and res.Success then
-        local results = res.Body
-        local decoded = game:GetService("HttpService"):JSONDecode(results)
-        if decoded and decoded.result and decoded.result.scripts then
-            local scripts = {}
-            for _, script in ipairs(decoded.result.scripts) do
-                if script.slug and script.title and script.script then
-                    table.insert(scripts, {
-                        rawLink = script.script,
-                        title = script.title,
-                        key = script.key,
-                        isUniversal = script.isUniversal,
-                        isPatched = script.isPatched,
-                        views = script.views
-                    })
-                end
-            end
-
-            if #scripts > 0 then
-                sf:ClearAllChildren()
-                sf.CanvasSize = UDim2.new(0, 0, 0, #scripts * 160)
-                for i, script in ipairs(scripts) do
-                    local b = Instance.new("TextButton")
-                    b.Size = UDim2.new(0, 280, 0, 30)
-                    b.Position = UDim2.new(0.5, -140, 0, (i - 1) * 160)
-                    b.Text = script.title
-                    b.BackgroundTransparency = 0.5
-                    b.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-                    b.BorderSizePixel = 0
-                    b.TextColor3 = Color3.fromRGB(255, 255, 255)
-                    b.TextWrapped = true
-                    b.Parent = sf
-
-                    local bc = Instance.new("UICorner")
-                    bc.CornerRadius = UDim.new(0, 15)
-                    bc.Parent = b
-
-                    local keyLabel = Instance.new("TextLabel")
-                    keyLabel.Size = UDim2.new(0, 280, 0, 20)
-                    keyLabel.Position = UDim2.new(0.5, -140, 0, (i - 1) * 160 + 40)
-                    keyLabel.Text = "Key: " .. tostring(script.key)
-                    keyLabel.BackgroundTransparency = 1
-                    keyLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-                    keyLabel.Parent = sf
-
-                    local isUniversalLabel = Instance.new("TextLabel")
-                    isUniversalLabel.Size = UDim2.new(0, 280, 0, 20)
-                    isUniversalLabel.Position = UDim2.new(0.5, -140, 0, (i - 1) * 160 + 60)
-                    isUniversalLabel.Text = "Is Universal: " .. tostring(script.isUniversal)
-                    isUniversalLabel.BackgroundTransparency = 1
-                    isUniversalLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-                    isUniversalLabel.Parent = sf
-
-                    local isPatchedLabel = Instance.new("TextLabel")
-                    isPatchedLabel.Size = UDim2.new(0, 280, 0, 20)
-                    isPatchedLabel.Position = UDim2.new(0.5, -140, 0, (i - 1) * 160 + 80)
-                    isPatchedLabel.Text = "Is Patched: " .. tostring(script.isPatched)
-                    isPatchedLabel.BackgroundTransparency = 1
-                    isPatchedLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-                    isPatchedLabel.Parent = sf
-
-                    local viewsLabel = Instance.new("TextLabel")
-                    viewsLabel.Size = UDim2.new(0, 280, 0, 20)
-                    viewsLabel.Position = UDim2.new(0.5, -140, 0, (i - 1) * 160 + 100)
-                    viewsLabel.Text = "Views: " .. tostring(script.views)
-                    viewsLabel.BackgroundTransparency = 1
-                    viewsLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-                    viewsLabel.Parent = sf
-
-                    b.MouseButton1Click:Connect(function()
-                        loadstring(script.rawLink)()
-                    end)
-                end
-            else
-                sf:ClearAllChildren()
-                local noResultsLabel = Instance.new("TextLabel")
-                noResultsLabel.Size = UDim2.new(1, 0, 0, 30)
-                noResultsLabel.Position = UDim2.new(0, 0, 0, 0)
-                noResultsLabel.Text = "No ScriptBlox links found"
-                noResultsLabel.BackgroundTransparency = 0.5
-                noResultsLabel.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-                noResultsLabel.BorderSizePixel = 0
-                noResultsLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-                noResultsLabel.Parent = sf
-            end
-        else
-            sf:ClearAllChildren()
-            local errorLabel = Instance.new("TextLabel")
-            errorLabel.Size = UDim2.new(1, 0, 0, 30)
-            errorLabel.Position = UDim2.new(0, 0, 0, 0)
-            errorLabel.Text = "Failed to retrieve data from ScriptBlox"
-            errorLabel.BackgroundTransparency = 0.5
-            errorLabel.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-            errorLabel.BorderSizePixel = 0
-            errorLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-            errorLabel.Parent = sf
-        end
-    else
-        sf:ClearAllChildren()
+    
+    local success, response = pcall(function()
+        return r({
+            Url = url,
+            Method = "GET"
+        })
+    end)
+    
+    sf:ClearAllChildren()
+    
+    if not success then
         local errorLabel = Instance.new("TextLabel")
         errorLabel.Size = UDim2.new(1, 0, 0, 30)
         errorLabel.Position = UDim2.new(0, 0, 0, 0)
-        errorLabel.Text = "Failed to retrieve data from ScriptBlox\nErr: "..(res and res.Body or "No response")
+        errorLabel.Text = "Error making request: " .. tostring(response)
         errorLabel.BackgroundTransparency = 0.5
         errorLabel.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
         errorLabel.BorderSizePixel = 0
         errorLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
         errorLabel.Parent = sf
+        return
+    end
+    
+    if not response or not response.Body then
+        local errorLabel = Instance.new("TextLabel")
+        errorLabel.Size = UDim2.new(1, 0, 0, 30)
+        errorLabel.Position = UDim2.new(0, 0, 0, 0)
+        errorLabel.Text = "No response received from ScriptBlox"
+        errorLabel.BackgroundTransparency = 0.5
+        errorLabel.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        errorLabel.BorderSizePixel = 0
+        errorLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+        errorLabel.Parent = sf
+        return
+    end
+    
+    local success, decoded = pcall(function()
+        return http:JSONDecode(response.Body)
+    end)
+    
+    if not success or not decoded then
+        local errorLabel = Instance.new("TextLabel")
+        errorLabel.Size = UDim2.new(1, 0, 0, 30)
+        errorLabel.Position = UDim2.new(0, 0, 0, 0)
+        errorLabel.Text = "Failed to decode JSON response"
+        errorLabel.BackgroundTransparency = 0.5
+        errorLabel.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        errorLabel.BorderSizePixel = 0
+        errorLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+        errorLabel.Parent = sf
+        return
+    end
+    
+    if not decoded.result or not decoded.result.scripts or #decoded.result.scripts == 0 then
+        local errorLabel = Instance.new("TextLabel")
+        errorLabel.Size = UDim2.new(1, 0, 0, 30)
+        errorLabel.Position = UDim2.new(0, 0, 0, 0)
+        errorLabel.Text = "No scripts found for your query"
+        errorLabel.BackgroundTransparency = 0.5
+        errorLabel.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        errorLabel.BorderSizePixel = 0
+        errorLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+        errorLabel.Parent = sf
+        return
+    end
+    
+    local scripts = {}
+    for _, script in ipairs(decoded.result.scripts) do
+        if script.script and script.title then
+            table.insert(scripts, {
+                rawLink = script.script,
+                title = script.title,
+                key = script.key or false,
+                isUniversal = script.isUniversal or false,
+                isPatched = script.isPatched or false,
+                views = script.views or 0
+            })
+        end
+    end
+    
+    if #scripts == 0 then
+        local errorLabel = Instance.new("TextLabel")
+        errorLabel.Size = UDim2.new(1, 0, 0, 30)
+        errorLabel.Position = UDim2.new(0, 0, 0, 0)
+        errorLabel.Text = "No valid scripts found"
+        errorLabel.BackgroundTransparency = 0.5
+        errorLabel.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        errorLabel.BorderSizePixel = 0
+        errorLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+        errorLabel.Parent = sf
+        return
+    end
+    
+    sf.CanvasSize = UDim2.new(0, 0, 0, #scripts * 160)
+    
+    for i, script in ipairs(scripts) do
+        local b = Instance.new("TextButton")
+        b.Size = UDim2.new(0, 280, 0, 30)
+        b.Position = UDim2.new(0.5, -140, 0, (i - 1) * 160)
+        b.Text = script.title
+        b.BackgroundTransparency = 0.5
+        b.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        b.BorderSizePixel = 0
+        b.TextColor3 = Color3.fromRGB(255, 255, 255)
+        b.TextWrapped = true
+        b.Parent = sf
+
+        local bc = Instance.new("UICorner")
+        bc.CornerRadius = UDim.new(0, 15)
+        bc.Parent = b
+
+        local keyLabel = Instance.new("TextLabel")
+        keyLabel.Size = UDim2.new(0, 280, 0, 20)
+        keyLabel.Position = UDim2.new(0.5, -140, 0, (i - 1) * 160 + 40)
+        keyLabel.Text = "Key: " .. tostring(script.key)
+        keyLabel.BackgroundTransparency = 1
+        keyLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+        keyLabel.Parent = sf
+
+        local isUniversalLabel = Instance.new("TextLabel")
+        isUniversalLabel.Size = UDim2.new(0, 280, 0, 20)
+        isUniversalLabel.Position = UDim2.new(0.5, -140, 0, (i - 1) * 160 + 60)
+        isUniversalLabel.Text = "Is Universal: " .. tostring(script.isUniversal)
+        isUniversalLabel.BackgroundTransparency = 1
+        isUniversalLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+        isUniversalLabel.Parent = sf
+
+        local isPatchedLabel = Instance.new("TextLabel")
+        isPatchedLabel.Size = UDim2.new(0, 280, 0, 20)
+        isPatchedLabel.Position = UDim2.new(0.5, -140, 0, (i - 1) * 160 + 80)
+        isPatchedLabel.Text = "Is Patched: " .. tostring(script.isPatched)
+        isPatchedLabel.BackgroundTransparency = 1
+        isPatchedLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+        isPatchedLabel.Parent = sf
+
+        local viewsLabel = Instance.new("TextLabel")
+        viewsLabel.Size = UDim2.new(0, 280, 0, 20)
+        viewsLabel.Position = UDim2.new(0.5, -140, 0, (i - 1) * 160 + 100)
+        viewsLabel.Text = "Views: " .. tostring(script.views)
+        viewsLabel.BackgroundTransparency = 1
+        viewsLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+        viewsLabel.Parent = sf
+
+        local executeButton = Instance.new("TextButton")
+        executeButton.Size = UDim2.new(0, 120, 0, 25)
+        executeButton.Position = UDim2.new(0.5, -60, 0, (i - 1) * 160 + 125)
+        executeButton.Text = "Execute"
+        executeButton.BackgroundTransparency = 0.5
+        executeButton.BackgroundColor3 = Color3.fromRGB(0, 120, 0)
+        executeButton.BorderSizePixel = 0
+        executeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+        executeButton.Parent = sf
+        
+        local ebc = Instance.new("UICorner")
+        ebc.CornerRadius = UDim.new(0, 10)
+        ebc.Parent = executeButton
+
+        executeButton.MouseButton1Click:Connect(function()
+            pcall(function()
+                loadstring(script.rawLink)()
+            end)
+        end)
     end
 end
 
