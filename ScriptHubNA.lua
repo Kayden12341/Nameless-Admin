@@ -261,7 +261,7 @@ local function search(q)
         local errorLabel = Instance.new("TextLabel")
         errorLabel.Size = UDim2.new(1, 0, 0, 30)
         errorLabel.Position = UDim2.new(0, 0, 0, 0)
-        errorLabel.Text = "Failed to retrieve data from ScriptBlox"
+        errorLabel.Text = "Failed to retrieve data from ScriptBlox\nErr: "..(res and res.Body or "No response")
         errorLabel.BackgroundTransparency = 0.5
         errorLabel.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
         errorLabel.BorderSizePixel = 0
