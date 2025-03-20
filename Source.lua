@@ -2,7 +2,7 @@ if getgenv().RealNamelessLoaded then return end
 
 local function NACaller(pp)--helps me log better
 	local s,err=pcall(pp)
-	if not s then warn("NA script err: "..err) end
+	if not s then print("NA script err: "..err) end
 end
 
 
@@ -1324,8 +1324,7 @@ cmd.add({"gotocampos","tocampos","tcp"},{"gotocampos (tocampos,tcp)","Teleports 
 end)
 
 cmd.add({"teleportgui","tpui","universeviewer","uviewer"},{"teleportgui (tpui,universeviewer,uviewer)","Gives an UI that grabs all places and teleports you by clicking a simple button"},function()
-	--loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/uuuuuuu/main/Game%20Universe%20Viewer"))()
-	gui.universeGui()
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/uuuuuuu/main/Universe%20Viewer"))();
 end)
 
 cmd.add({"serverremotespy","srs","sremotespy"},{"serverremotespy (srs,sremotespy)","Gives an UI that logs all the remotes being called from the server (thanks SolSpy lol)"},function()
@@ -1333,7 +1332,6 @@ cmd.add({"serverremotespy","srs","sremotespy"},{"serverremotespy (srs,sremotespy
 end)
 
 cmd.add({"updatelog","updlog","updates"},{"updatelog (updlog,updates)","show the update logs for Nameless Admin"},function()
-	--loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/uuuuuuu/main/Game%20Universe%20Viewer"))()
 	gui.updateLogs()
 end)
 
@@ -9691,9 +9689,6 @@ local commandsFrame=ScreenGui:FindFirstChild("Commands");
 local commandsFilter=commandsFrame:FindFirstChild("Container"):FindFirstChild("Filter");
 local commandsList=commandsFrame:FindFirstChild("Container"):FindFirstChild("List");
 local commandExample=commandsList:FindFirstChild("TextLabel");
-local UniverseViewerFrame=ScreenGui:FindFirstChild("UniverseViewer");
-local UniverseList=UniverseViewerFrame:FindFirstChild("Container"):FindFirstChild("List");
-local UniverseExample=UniverseList:FindFirstChildOfClass("TextButton");
 local UpdLogsFrame=ScreenGui:FindFirstChild("UpdLog");
 local UpdLogsTitle=UpdLogsFrame:FindFirstChild("Topbar"):FindFirstChild("TopBar"):FindFirstChild("Title");
 local UpdLogsList=UpdLogsFrame:FindFirstChild("Container"):FindFirstChild("List");
@@ -9715,9 +9710,10 @@ local resizeXY={
 cmdExample.Parent=nil
 chatExample.Parent=nil
 commandExample.Parent=nil
-UniverseExample.Parent=nil
 UpdLogsLabel.Parent=nil
 resizeFrame.Parent=nil
+
+pcall(function() if ScreenGui:FindFirstChild("UniverseViewer") then ScreenGui:FindFirstChild("UniverseViewer"):Destroy() end end)
 
 	--[[pcall(function()
 		for i,v in pairs(ScreenGui:GetDescendants()) do
@@ -9755,48 +9751,49 @@ gui.txtSize=function(ui,x,y)
 	local textService=game:GetService("TextService")
 	return textService:GetTextSize(ui.Text,ui.TextSize,ui.Font,Vector2.new(x,y))
 end
-gui.commands=function()
-	if not commandsFrame.Visible then
-		commandsFrame.Visible=true
-		commandsList.CanvasSize=UDim2.new(0,0,0,0)
-	end
-	for i,v in pairs(commandsList:GetChildren()) do
-		if v:IsA("TextLabel") then
-			v:Remove()
-		end
-	end
-	local i=0
-	for cmdName,tbl in pairs(Commands) do
-		local Cmd=commandExample:Clone()
-		Cmd.Parent=commandsList
-		Cmd.Name=cmdName
-		Cmd.Text=" "..tbl[2][1]
-		Cmd.MouseEnter:Connect(function()
-			description.Visible=true
-			description.Text=tbl[2][2]
-		end)
-		Cmd.MouseLeave:Connect(function()
-			if description.Text==tbl[2][2] then
-				description.Visible=false
-				description.Text=""
-			end
-		end)
-		i=i+1
-	end
-	commandsList.CanvasSize=UDim2.new(0,0,0,i*20+10)
-	commandsFrame.Position=UDim2.new(0.5,-283/2,0.5,-260/2)
+gui.commands = function()
+    local cFrame, cList = commandsFrame, commandsList
+    
+    if not cFrame.Visible then
+        cFrame.Visible = true
+        cList.CanvasSize = UDim2.new(0, 0, 0, 0)
+    end
+    
+    for _, v in ipairs(cList:GetChildren()) do
+        if v:IsA("TextLabel") then v:Destroy() end
+    end
+    
+    local yOffset = 5
+    for cmdName, tbl in pairs(Commands) do
+        local Cmd = commandExample:Clone()
+        Cmd.Parent = cList
+        Cmd.Name = cmdName
+        Cmd.Text = " " .. tbl[2][1]
+        Cmd.Position = UDim2.new(0, 0, 0, yOffset)
+        
+        Cmd.MouseEnter:Connect(function()
+            description.Visible = true
+            description.Text = tbl[2][2]
+        end)
+        
+        Cmd.MouseLeave:Connect(function()
+            if description.Text == tbl[2][2] then
+                description.Visible = false
+                description.Text = ""
+            end
+        end)
+        
+        yOffset = yOffset + 20
+    end
+    
+    cList.CanvasSize = UDim2.new(0, 0, 0, yOffset)
+    cFrame.Position = UDim2.new(0.5, -283/2, 0.5, -260/2)
 end
 gui.chatlogs=function()
 	if not chatLogsFrame.Visible then
 		chatLogsFrame.Visible=true
 	end
 	chatLogsFrame.Position=UDim2.new(0.5,-283/2+5,0.5,-260/2+5)
-end
-gui.universeGui=function()
-	if not UniverseViewerFrame.Visible then
-		UniverseViewerFrame.Visible=true
-	end
-	UniverseViewerFrame.Position=UDim2.new(0.5,-283/2+5,0.5,-260/2+5)
 end
 gui.updateLogs=function()
 	if not UpdLogsFrame.Visible and next(updLogs) then
@@ -10327,7 +10324,6 @@ gui.barDeselect(0)
 cmdBar.Visible=true
 gui.menuifyv2(chatLogsFrame)
 gui.menuify(commandsFrame)
-gui.menuify(UniverseViewerFrame)
 gui.menuify(UpdLogsFrame)
 gui.shiftlock(ShiftlockUi,ShiftlockUi.btnIcon)
 
@@ -10336,7 +10332,6 @@ gui.shiftlock(ShiftlockUi,ShiftlockUi.btnIcon)
 --table.find({Enum.Platform.IOS,Enum.Platform.Android},game:GetService("UserInputService"):GetPlatform()) | searches if the player is on mobile.
 gui.resizeable(chatLogsFrame)
 gui.resizeable(commandsFrame)
-gui.resizeable(UniverseViewerFrame)
 gui.resizeable(UpdLogsFrame)
 
 --[[ CMDS COMMANDS SEARCH FUNCTION ]]--
@@ -10499,30 +10494,7 @@ end)
 RunService.Stepped:Connect(function()
 	chatLogs.CanvasSize=UDim2.new(0,0,0,chatLogs:FindFirstChildOfClass("UIListLayout").AbsoluteContentSize.Y)
 	commandsList.CanvasSize=UDim2.new(0,0,0,commandsList:FindFirstChildOfClass("UIListLayout").AbsoluteContentSize.Y)
-	UniverseList.CanvasSize=UDim2.new(0,0,0,UniverseList:FindFirstChildOfClass("UIListLayout").AbsoluteContentSize.Y)
 	UpdLogsList.CanvasSize=UDim2.new(0,0,0,UpdLogsList:FindFirstChildOfClass("UIListLayout").AbsoluteContentSize.Y)
-end)
-
-NACaller(function()
-	local page=AssetService:GetGamePlacesAsync()
-	while true do
-		local template=UniverseExample
-		local list=UniverseList
-		for _,place in page:GetCurrentPage() do
-			local btn=template:Clone()
-			btn.Parent=list
-			btn.Name=place.Name
-			btn.Text=place.Name.." ("..place.PlaceId..")"
-			btn.MouseButton1Click:Connect(function()
-				TeleportService:Teleport(place.PlaceId)
-				DoNotif("Teleporting To Place: "..place.Name)
-			end)
-		end
-		if page.IsFinished then
-			break
-		end
-		page:AdvanceToNextPageAsync()
-	end
 end)
 
 NACaller(function()
@@ -10660,7 +10632,7 @@ NACaller(function()
 		})
 		task.wait(5)
 		DoNotif("Your Keybind Prefix: "..opt.prefix,10,adminName.." Keybind Prefix")
-		DoNotif('Added "updlog" command (displays any new changes added into '..adminName..')',3,"Info")
+		DoNotif('Added "updlog" command (displays any new changes added into '..adminName..')',nil,"Info")
 	end)
 
 	cmdInput.PlaceholderText=adminName.." V"..curVer

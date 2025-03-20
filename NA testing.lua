@@ -1340,8 +1340,7 @@ cmd.add({"gotocampos","tocampos","tcp"},{"gotocampos (tocampos,tcp)","Teleports 
 end)
 
 cmd.add({"teleportgui","tpui","universeviewer","uviewer"},{"teleportgui (tpui,universeviewer,uviewer)","Gives an UI that grabs all places and teleports you by clicking a simple button"},function()
-	--loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/uuuuuuu/main/Game%20Universe%20Viewer"))()
-	gui.universeGui()
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/uuuuuuu/main/Universe%20Viewer"))();
 end)
 
 cmd.add({"serverremotespy","srs","sremotespy"},{"serverremotespy (srs,sremotespy)","Gives an UI that logs all the remotes being called from the server (thanks SolSpy lol)"},function()
@@ -1349,7 +1348,6 @@ cmd.add({"serverremotespy","srs","sremotespy"},{"serverremotespy (srs,sremotespy
 end)
 
 cmd.add({"updatelog","updlog","updates"},{"updatelog (updlog,updates)","show the update logs for Nameless Admin"},function()
-	--loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/uuuuuuu/main/Game%20Universe%20Viewer"))()
 	gui.updateLogs()
 end)
 
@@ -9707,9 +9705,6 @@ local commandsFrame=ScreenGui:FindFirstChild("Commands");
 local commandsFilter=commandsFrame:FindFirstChild("Container"):FindFirstChild("Filter");
 local commandsList=commandsFrame:FindFirstChild("Container"):FindFirstChild("List");
 local commandExample=commandsList:FindFirstChild("TextLabel");
-local UniverseViewerFrame=ScreenGui:FindFirstChild("UniverseViewer");
-local UniverseList=UniverseViewerFrame:FindFirstChild("Container"):FindFirstChild("List");
-local UniverseExample=UniverseList:FindFirstChildOfClass("TextButton");
 local UpdLogsFrame=ScreenGui:FindFirstChild("UpdLog");
 local UpdLogsTitle=UpdLogsFrame:FindFirstChild("Topbar"):FindFirstChild("TopBar"):FindFirstChild("Title");
 local UpdLogsList=UpdLogsFrame:FindFirstChild("Container"):FindFirstChild("List");
@@ -9731,9 +9726,10 @@ local resizeXY={
 cmdExample.Parent=nil
 chatExample.Parent=nil
 commandExample.Parent=nil
-UniverseExample.Parent=nil
 UpdLogsLabel.Parent=nil
 resizeFrame.Parent=nil
+
+pcall(function() if ScreenGui:FindFirstChild("UniverseViewer") then ScreenGui:FindFirstChild("UniverseViewer"):Destroy() end end)
 
 	--[[pcall(function()
 		for i,v in pairs(ScreenGui:GetDescendants()) do
@@ -9814,12 +9810,6 @@ gui.chatlogs=function()
 		chatLogsFrame.Visible=true
 	end
 	chatLogsFrame.Position=UDim2.new(0.5,-283/2+5,0.5,-260/2+5)
-end
-gui.universeGui=function()
-	if not UniverseViewerFrame.Visible then
-		UniverseViewerFrame.Visible=true
-	end
-	UniverseViewerFrame.Position=UDim2.new(0.5,-283/2+5,0.5,-260/2+5)
 end
 gui.updateLogs=function()
 	if not UpdLogsFrame.Visible and next(updLogs) then
@@ -10350,7 +10340,6 @@ gui.barDeselect(0)
 cmdBar.Visible=true
 gui.menuifyv2(chatLogsFrame)
 gui.menuify(commandsFrame)
-gui.menuify(UniverseViewerFrame)
 gui.menuify(UpdLogsFrame)
 gui.shiftlock(ShiftlockUi,ShiftlockUi.btnIcon)
 
@@ -10359,7 +10348,6 @@ gui.shiftlock(ShiftlockUi,ShiftlockUi.btnIcon)
 --table.find({Enum.Platform.IOS,Enum.Platform.Android},game:GetService("UserInputService"):GetPlatform()) | searches if the player is on mobile.
 gui.resizeable(chatLogsFrame)
 gui.resizeable(commandsFrame)
-gui.resizeable(UniverseViewerFrame)
 gui.resizeable(UpdLogsFrame)
 
 --[[ CMDS COMMANDS SEARCH FUNCTION ]]--
@@ -10522,30 +10510,7 @@ end)
 RunService.Stepped:Connect(function()
 	chatLogs.CanvasSize=UDim2.new(0,0,0,chatLogs:FindFirstChildOfClass("UIListLayout").AbsoluteContentSize.Y)
 	commandsList.CanvasSize=UDim2.new(0,0,0,commandsList:FindFirstChildOfClass("UIListLayout").AbsoluteContentSize.Y)
-	UniverseList.CanvasSize=UDim2.new(0,0,0,UniverseList:FindFirstChildOfClass("UIListLayout").AbsoluteContentSize.Y)
 	UpdLogsList.CanvasSize=UDim2.new(0,0,0,UpdLogsList:FindFirstChildOfClass("UIListLayout").AbsoluteContentSize.Y)
-end)
-
-NACaller(function()
-	local page=AssetService:GetGamePlacesAsync()
-	while true do
-		local template=UniverseExample
-		local list=UniverseList
-		for _,place in page:GetCurrentPage() do
-			local btn=template:Clone()
-			btn.Parent=list
-			btn.Name=place.Name
-			btn.Text=place.Name.." ("..place.PlaceId..")"
-			btn.MouseButton1Click:Connect(function()
-				TeleportService:Teleport(place.PlaceId)
-				DoNotif("Teleporting To Place: "..place.Name)
-			end)
-		end
-		if page.IsFinished then
-			break
-		end
-		page:AdvanceToNextPageAsync()
-	end
 end)
 
 NACaller(function()
