@@ -1,7 +1,6 @@
 if getgenv().prtGrabLoaded then return print('Part Grabber is already running') end
 getgenv().prtGrabLoaded = true
 
--- Improved UI and functionality for Part Grabber
 local prtGrab = Instance.new("ScreenGui")
 local Main = Instance.new("Frame")
 local Container = Instance.new("Frame")
@@ -22,13 +21,11 @@ local UIGradient_2 = Instance.new("UIGradient")
 local UIStroke = Instance.new("UIStroke")
 local StatusLabel = Instance.new("TextLabel")
 
--- Set up the ScreenGui
 prtGrab.Name = "prtGrab"
 prtGrab.Parent = gethui() or (game:GetService("CoreGui") or game:GetService("Players").LocalPlayer:FindFirstChildWhichIsA("PlayerGui"))
 prtGrab.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 prtGrab.ResetOnSpawn = false
 
--- Main frame setup
 Main.Name = "Main"
 Main.Parent = prtGrab
 Main.Active = true
@@ -40,14 +37,12 @@ Main.Draggable = true
 Main.Position = UDim2.new(0.5, 0, 3, 0)
 Main.Size = UDim2.new(0, 420, 0, 180)
 
--- Add a stroke to the main frame
 UIStroke.Parent = Main
 UIStroke.Color = Color3.fromRGB(60, 60, 255)
 UIStroke.Thickness = 1.5
 UIStroke.Transparency = 0.2
 UIStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
--- Container setup
 Container.Name = "Container"
 Container.Parent = Main
 Container.AnchorPoint = Vector2.new(0.5, 1)
@@ -67,7 +62,6 @@ UIGradient.Color = ColorSequence.new{
 }
 UIGradient.Parent = Container
 
--- Status label
 StatusLabel.Name = "StatusLabel"
 StatusLabel.Parent = Container
 StatusLabel.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
@@ -81,7 +75,6 @@ StatusLabel.Text = "Click on a part to select it"
 StatusLabel.TextColor3 = Color3.fromRGB(200, 200, 255)
 StatusLabel.TextSize = 14
 
--- Path display
 Found.Name = "Found"
 Found.Parent = Container
 Found.Active = true
@@ -99,7 +92,6 @@ Found.TextXAlignment = Enum.TextXAlignment.Center
 Found.TextYAlignment = Enum.TextYAlignment.Center
 Found.ClipsDescendants = true
 
--- Copy path button
 grab.Name = "grab"
 grab.Parent = Container
 grab.BackgroundColor3 = Color3.fromRGB(40, 40, 80)
@@ -112,7 +104,6 @@ grab.TextColor3 = Color3.fromRGB(220, 220, 255)
 grab.TextSize = 14
 grab.AutoButtonColor = true
 
--- Copy instance button
 copy.Name = "copy"
 copy.Parent = Container
 copy.BackgroundColor3 = Color3.fromRGB(40, 40, 80)
@@ -125,7 +116,6 @@ copy.TextColor3 = Color3.fromRGB(220, 220, 255)
 copy.TextSize = 14
 copy.AutoButtonColor = true
 
--- Delete part button
 del.Name = "del"
 del.Parent = Container
 del.BackgroundColor3 = Color3.fromRGB(80, 40, 40)
@@ -138,14 +128,12 @@ del.TextColor3 = Color3.fromRGB(255, 220, 220)
 del.TextSize = 14
 del.AutoButtonColor = true
 
--- Add corner radius to buttons
 for _, button in pairs({grab, del, copy}) do
     local corner = Instance.new("UICorner")
     corner.CornerRadius = UDim.new(0, 6)
     corner.Parent = button
 end
 
--- Topbar setup
 Topbar.Name = "Topbar"
 Topbar.Parent = Main
 Topbar.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
@@ -217,12 +205,10 @@ UIGradient_2.Color = ColorSequence.new{
 }
 UIGradient_2.Parent = Main
 
--- Variables
 local selectedPart = nil
 local selectionBox = nil
 local mouseConnection = nil
 
--- Functions
 local function GetInstancePath(obj)
     local path = {}
     
@@ -265,7 +251,6 @@ local function highlightPart(part)
     selectionBox.SurfaceColor3 = Color3.fromRGB(60, 120, 255)
     selectionBox.Parent = part
     
-    -- Add pulse animation
     spawn(function()
         local t = 0
         while selectionBox and selectionBox.Parent do
@@ -293,7 +278,6 @@ local function selectPart()
     end
 end
 
--- Setup mouse connection
 local function setupMouseConnection()
     local player = game:GetService("Players").LocalPlayer
     local mouse = player:GetMouse()
@@ -304,14 +288,12 @@ local function setupMouseConnection()
     mouseConnection = mouse.Button1Down:Connect(selectPart)
 end
 
--- Button functions
 grab.MouseButton1Click:Connect(function()
     if Found.Text ~= ". . ." then
         setclipboard(Found.Text)
         StatusLabel.Text = "Path copied to clipboard!"
         StatusLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
         
-        -- Flash effect
         grab.BackgroundColor3 = Color3.fromRGB(60, 200, 60)
         wait(0.3)
         grab.BackgroundColor3 = Color3.fromRGB(40, 40, 80)
@@ -349,7 +331,6 @@ copy.MouseButton1Click:Connect(function()
             StatusLabel.Text = "Instance info copied to clipboard!"
             StatusLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
             
-            -- Flash effect
             copy.BackgroundColor3 = Color3.fromRGB(60, 200, 60)
             wait(0.3)
             copy.BackgroundColor3 = Color3.fromRGB(40, 40, 80)
@@ -376,7 +357,6 @@ del.MouseButton1Click:Connect(function()
             selectedPart = nil
             if selectionBox then selectionBox:Destroy() selectionBox = nil end
             
-            -- Flash effect
             del.BackgroundColor3 = Color3.fromRGB(200, 60, 60)
             wait(0.3)
             del.BackgroundColor3 = Color3.fromRGB(80, 40, 40)
@@ -397,7 +377,6 @@ Exit.MouseButton1Click:Connect(function()
     selectedPart = nil
     getgenv().prtGrabLoaded = false
     
-    -- Clean up any remaining UI elements
     for _, v in pairs(game:GetDescendants()) do
         if v.Name == "PartGrabberSelection" and v:IsA("SelectionBox") then
             v:Destroy()
@@ -418,17 +397,13 @@ Minimize.MouseButton1Click:Connect(function()
     end
 end)
 
--- Make the main frame draggable
 Main.Active = true
 Main.Draggable = true
 
--- Initial animation
 Main:TweenPosition(UDim2.new(0.5, 0, 0.5, 0), "Out", "Quint", 1, true)
 
--- Setup the mouse connection
 setupMouseConnection()
 
--- Add hover effects to buttons
 for _, button in pairs({grab, del, copy, Exit, Minimize}) do
     button.MouseEnter:Connect(function()
         game:GetService("TweenService"):Create(button, TweenInfo.new(0.3), {BackgroundTransparency = 0}):Play()
