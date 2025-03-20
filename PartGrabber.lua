@@ -29,7 +29,6 @@ prtGrab.ResetOnSpawn = false
 Main.Name = "Main"
 Main.Parent = prtGrab
 Main.Active = true
-Main.AnchorPoint = Vector2.new(0.5, 0.5)
 Main.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
 Main.BorderSizePixel = 0
 Main.ClipsDescendants = true
@@ -400,7 +399,7 @@ end)
 Main.Active = true
 Main.Draggable = true
 
-Main:TweenPosition(UDim2.new(0.5, 0, 0.5, 0), "Out", "Quint", 1, true)
+Main:TweenPosition(UDim2.new(0.5,-283/2+5,0.5,-260/2+5), "Out", "Quint", 1, true)
 
 setupMouseConnection()
 
