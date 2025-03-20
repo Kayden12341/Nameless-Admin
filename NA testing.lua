@@ -18,7 +18,7 @@ if getgenv().RealNamelessLoaded then return end
 
 local function NACaller(pp)--helps me log better
 	local s,err=pcall(pp)
-	if not s then warn("NA script err: "..err) end
+	if not s then print("NA script err: "..err) end
 end
 
 
@@ -10683,7 +10683,7 @@ NACaller(function()
 		})
 		task.wait(5)
 		DoNotif("Your Keybind Prefix: "..opt.prefix,10,adminName.." Keybind Prefix")
-		DoNotif('Added "updlog" command (displays any new changes added into '..adminName..')',3,"Info")
+		DoNotif('Added "updlog" command (displays any new changes added into '..adminName..')',nil,"Info")
 	end)
 
 	cmdInput.PlaceholderText=adminName.." V"..curVer
