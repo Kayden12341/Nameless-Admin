@@ -1599,6 +1599,9 @@ cmd.add({"ping"},{"ping","Shows your ping"},function()
 	local Pingtext=Instance.new("TextLabel")
 	local UICorner=Instance.new("UICorner")
 	local UIAspectRatioConstraint=Instance.new("UIAspectRatioConstraint")
+	local UIStroke=Instance.new("UIStroke")
+	local CloseButton=Instance.new("TextButton")
+	local UICornerClose=Instance.new("UICorner")
 
 	Ping.Name="Ping"
 	Ping.Parent=gethui()
@@ -1607,26 +1610,68 @@ cmd.add({"ping"},{"ping","Shows your ping"},function()
 
 	Pingtext.Name="Pingtext"
 	Pingtext.Parent=Ping
-	Pingtext.BackgroundColor3=Color3.fromRGB(12,4,20)
-	Pingtext.BackgroundTransparency=0.140
+	Pingtext.BackgroundColor3=Color3.fromRGB(25,25,35)
+	Pingtext.BackgroundTransparency=0.2
 	Pingtext.Position=UDim2.new(0,0,0,48)
 	Pingtext.Size=UDim2.new(0,201,0,35)
-	Pingtext.Font=Enum.Font.SourceSans
-	Pingtext.Text="FPS:"
+	Pingtext.Font=Enum.Font.GothamSemibold
+	Pingtext.Text="Ping: --"
 	Pingtext.TextColor3=Color3.fromRGB(255,255,255)
-	Pingtext.TextScaled=true
-	Pingtext.TextSize=14.000
+	Pingtext.TextSize=16
+	Pingtext.TextXAlignment=Enum.TextXAlignment.Center
 	Pingtext.TextWrapped=true
 
-	UICorner.CornerRadius=UDim.new(1,0)
+	CloseButton.Name="CloseButton"
+	CloseButton.Parent=Pingtext
+	CloseButton.BackgroundColor3=Color3.fromRGB(255,50,50)
+	CloseButton.Position=UDim2.new(1,-25,0.5,-10)
+	CloseButton.Size=UDim2.new(0,20,0,20)
+	CloseButton.Font=Enum.Font.GothamBold
+	CloseButton.Text="X"
+	CloseButton.TextColor3=Color3.fromRGB(255,255,255)
+	CloseButton.TextSize=14
+	CloseButton.ZIndex=10
+
+	UICornerClose.CornerRadius=UDim.new(0,10)
+	UICornerClose.Parent=CloseButton
+
+	UICorner.CornerRadius=UDim.new(0,10)
 	UICorner.Parent=Pingtext
+
+	UIStroke.Color=Color3.fromRGB(100,100,255)
+	UIStroke.Thickness=1.5
+	UIStroke.Parent=Pingtext
 
 	UIAspectRatioConstraint.Parent=Pingtext
 	UIAspectRatioConstraint.AspectRatio=5.743
 
+	CloseButton.MouseButton1Click:Connect(function()
+		Ping:Destroy()
+	end)
+
 	local RunService=game:GetService("RunService")
-	RunService.RenderStepped:Connect(function(ping) 
-		Pingtext.Text=("Ping: " ..game:GetService("Stats").Network.ServerStatsItem["Data Ping"]:GetValueString(math.round(2/ping)))--your ping
+	local lastUpdate=0
+	local updateInterval=0.5
+	
+	RunService.RenderStepped:Connect(function() 
+		local currentTime=tick()
+		if currentTime-lastUpdate>=updateInterval then
+			local pingValue=game:GetService("Stats").Network.ServerStatsItem["Data Ping"]
+			local ping=tonumber(pingValue:GetValueString():match("%d+"))
+			
+			local color
+			if ping<=50 then
+				color=Color3.fromRGB(0,255,100)
+			elseif ping<=100 then
+				color=Color3.fromRGB(255,255,0)
+			else
+				color=Color3.fromRGB(255,50,50)
+			end
+			
+			Pingtext.Text="Ping: "..ping.." ms"
+			Pingtext.TextColor3=color
+			lastUpdate=currentTime
+		end
 	end)
 	gui.draggable(Pingtext)
 end)
@@ -1636,6 +1681,9 @@ cmd.add({"fps"},{"fps","Shows your fps"},function()
 	local Fpstext=Instance.new("TextLabel")
 	local UICorner=Instance.new("UICorner")
 	local UIAspectRatioConstraint=Instance.new("UIAspectRatioConstraint")
+	local UIStroke=Instance.new("UIStroke")
+	local CloseButton=Instance.new("TextButton")
+	local UICornerClose=Instance.new("UICorner")
 
 	Fps.Name="Fps"
 	Fps.Parent=gethui()
@@ -1644,34 +1692,86 @@ cmd.add({"fps"},{"fps","Shows your fps"},function()
 
 	Fpstext.Name="Fpstext"
 	Fpstext.Parent=Fps
-	Fpstext.BackgroundColor3=Color3.fromRGB(12,4,20)
-	Fpstext.BackgroundTransparency=0.140
+	Fpstext.BackgroundColor3=Color3.fromRGB(25,25,35)
+	Fpstext.BackgroundTransparency=0.2
 	Fpstext.Position=UDim2.new(0,0,0,6)
 	Fpstext.Size=UDim2.new(0,201,0,35)
-	Fpstext.Font=Enum.Font.SourceSans
-	Fpstext.Text="FPS:"
+	Fpstext.Font=Enum.Font.GothamSemibold
+	Fpstext.Text="FPS: --"
 	Fpstext.TextColor3=Color3.fromRGB(255,255,255)
-	Fpstext.TextScaled=true
-	Fpstext.TextSize=14.000
+	Fpstext.TextSize=16
+	Fpstext.TextXAlignment=Enum.TextXAlignment.Center
 	Fpstext.TextWrapped=true
 
-	UICorner.CornerRadius=UDim.new(1,0)
+	CloseButton.Name="CloseButton"
+	CloseButton.Parent=Fpstext
+	CloseButton.BackgroundColor3=Color3.fromRGB(255,50,50)
+	CloseButton.Position=UDim2.new(1,-25,0.5,-10)
+	CloseButton.Size=UDim2.new(0,20,0,20)
+	CloseButton.Font=Enum.Font.GothamBold
+	CloseButton.Text="X"
+	CloseButton.TextColor3=Color3.fromRGB(255,255,255)
+	CloseButton.TextSize=14
+	CloseButton.ZIndex=10
+
+	UICornerClose.CornerRadius=UDim.new(0,10)
+	UICornerClose.Parent=CloseButton
+
+	UICorner.CornerRadius=UDim.new(0,10)
 	UICorner.Parent=Fpstext
+
+	UIStroke.Color=Color3.fromRGB(100,100,255)
+	UIStroke.Thickness=1.5
+	UIStroke.Parent=Fpstext
 
 	UIAspectRatioConstraint.Parent=Fpstext
 	UIAspectRatioConstraint.AspectRatio=5.743
 
-	local lastUpdate = 0
-	local updateInterval = 0.5
+	CloseButton.MouseButton1Click:Connect(function()
+		Fps:Destroy()
+	end)
 
-	RunService.RenderStepped:Connect(function(frame) 
-		local currentTime = tick()
-		if currentTime - lastUpdate >= updateInterval then
-			Fpstext.Text=("FPS: "..math.round(1/frame))
-			lastUpdate = currentTime
+	local RunService=game:GetService("RunService")
+	local frames={}
+	local lastUpdate=0
+	local updateInterval=0.5
+
+	RunService.RenderStepped:Connect(function(deltaTime) 
+		table.insert(frames,deltaTime)
+		
+		if #frames>30 then
+			table.remove(frames,1)
+		end
+		
+		local currentTime=tick()
+		if currentTime-lastUpdate>=updateInterval then
+			local sum=0
+			for _,frame in ipairs(frames) do
+				sum=sum+frame
+			end
+			local avgFrameTime=sum/#frames
+			local fps=math.round(1/avgFrameTime)
+			
+			local color
+			if fps>=50 then
+				color=Color3.fromRGB(0,255,100)
+			elseif fps>=30 then
+				color=Color3.fromRGB(255,255,0)
+			else
+				color=Color3.fromRGB(255,50,50)
+			end
+			
+			Fpstext.Text="FPS: "..fps
+			Fpstext.TextColor3=color
+			lastUpdate=currentTime
 		end
 	end)
 	gui.draggable(Fpstext)
+end)
+
+cmd.add({"stats"},{"stats","Shows both FPS and ping"},function()
+	cmd.run({"fps"})
+	cmd.run({"ping"})
 end)
 
 cmd.add({"commands","cmds"},{"commands (cmds)","Open the command list"},function()
@@ -1822,7 +1922,6 @@ cmd.add({"rejoin","rj"},{"rejoin (rj)","Rejoin the game"},function()
 	local localPlayer = players.LocalPlayer
 
 	local function onTeleportError(errorMessage)
-		warn("Teleport failed: " .. errorMessage)
 		DoNotif("Teleport failed: " .. errorMessage, 5)
 	end
 
@@ -2073,44 +2172,95 @@ cmd.add({"tweento","tweengoto"},{"tweengoto (tweento)","Teleportation method tha
 
 end)
 
-cmd.add({"reach"},{"reach {number}","Sword reach"},function(reachsize)
-	local reachsize=reachsize or 25
-	local Tool=getChar():FindFirstChildOfClass("Tool") or getBp():FindFirstChildOfClass("Tool")
-	local toolHnld = Tool:FindFirstChild("Handle") or Tool:FindFirstChildWhichIsA("BasePart")
-	if Tool:FindFirstChild("OGSize3") then
-		toolHnld.Size=Tool.OGSize3.Value
-		Tool.OGSize3:Destroy()
-		toolHnld.FunTIMES:Destroy()
-	end
-	local val=Instance.new("Vector3Value",Tool)
-	val.Name="OGSize3"
-	val.Value=toolHnld.Size
-	local sb=Instance.new("SelectionBox")
-	sb.Adornee=toolHnld
-	sb.Name="FunTIMES"
-	sb.Parent=toolHnld
-	toolHnld.Massless=true
-	toolHnld.Size=Vector3.new(toolHnld.Size.X,toolHnld.Size.Y,reachsize)
+cmd.add({"reach", "swordreach"}, {"reach [number] (swordreach)", "Extends sword reach in one direction"}, function(reachsize)
+    reachsize = tonumber(reachsize) or 25
+    
+    local char = getChar()
+    local bp = getBp()
+    local Tool = char and char:FindFirstChildOfClass("Tool") or bp and bp:FindFirstChildOfClass("Tool")
+    
+    if not Tool then return end
+    
+    local toolHnld = Tool:FindFirstChild("Handle") or Tool:FindFirstChildWhichIsA("BasePart")
+    if not toolHnld then return end
+    
+    if Tool:FindFirstChild("OGSize3") then
+        toolHnld.Size = Tool.OGSize3.Value
+        Tool.OGSize3:Destroy()
+        if toolHnld:FindFirstChild("FunTIMES") then
+            toolHnld.FunTIMES:Destroy()
+        end
+    end
+    
+    local val = Instance.new("Vector3Value", Tool)
+    val.Name = "OGSize3"
+    val.Value = toolHnld.Size
+    
+    local sb = Instance.new("SelectionBox")
+    sb.Adornee = toolHnld
+    sb.Name = "FunTIMES"
+    sb.LineThickness = 0.01
+    sb.Color3 = Color3.fromRGB(255, 0, 0)
+    sb.Transparency = 0.7
+    sb.Parent = toolHnld
+    
+    toolHnld.Massless = true
+    toolHnld.Size = Vector3.new(toolHnld.Size.X, toolHnld.Size.Y, reachsize)
 end)
 
-cmd.add({"boxreach", "aura"},{"boxreach {number} (aura)","Increases the hitbox of your held tool in a box shape"},function(reachsize)
-	local reachsize=reachsize or 25
-	local Tool=getChar():FindFirstChildOfClass("Tool") or getBp():FindFirstChildOfClass("Tool")
-	local toolHnld = Tool:FindFirstChild("Handle") or Tool:FindFirstChildWhichIsA("BasePart")
-	if Tool:FindFirstChild("OGSize3") then
-		toolHnld.Size=Tool.OGSize3.Value
-		Tool.OGSize3:Destroy()
-		toolHnld.FunTIMES:Destroy()
-	end
-	local val=Instance.new("Vector3Value",Tool)
-	val.Name="OGSize3"
-	val.Value=toolHnld.Size
-	local sb=Instance.new("SelectionBox")
-	sb.Adornee=toolHnld
-	sb.Name="FunTIMES"
-	sb.Parent=toolHnld
-	toolHnld.Massless=true
-	toolHnld.Size=Vector3.new(reachsize,reachsize,reachsize)
+cmd.add({"boxreach", "aura"}, {"boxreach [number] (aura)", "Creates a box-shaped hitbox around your tool"}, function(reachsize)
+    reachsize = tonumber(reachsize) or 25
+    
+    local char = getChar()
+    local bp = getBp()
+    local Tool = char and char:FindFirstChildOfClass("Tool") or bp and bp:FindFirstChildOfClass("Tool")
+    
+    if not Tool then return end
+    
+    local toolHnld = Tool:FindFirstChild("Handle") or Tool:FindFirstChildWhichIsA("BasePart")
+    if not toolHnld then return end
+    
+    if Tool:FindFirstChild("OGSize3") then
+        toolHnld.Size = Tool.OGSize3.Value
+        Tool.OGSize3:Destroy()
+        if toolHnld:FindFirstChild("FunTIMES") then
+            toolHnld.FunTIMES:Destroy()
+        end
+    end
+    
+    local val = Instance.new("Vector3Value", Tool)
+    val.Name = "OGSize3"
+    val.Value = toolHnld.Size
+    
+    local sb = Instance.new("SelectionBox")
+    sb.Adornee = toolHnld
+    sb.Name = "FunTIMES"
+    sb.LineThickness = 0.01
+    sb.Color3 = Color3.fromRGB(0, 0, 255)
+    sb.Transparency = 0.7
+    sb.Parent = toolHnld
+    
+    toolHnld.Massless = true
+    toolHnld.Size = Vector3.new(reachsize, reachsize, reachsize)
+end)
+
+cmd.add({"resetreach", "normalreach", "unreach"}, {"resetreach (normalreach, unreach)", "Resets tool to normal size"}, function()
+    local char = getChar()
+    local bp = getBp()
+    local Tool = char and char:FindFirstChildOfClass("Tool") or bp and bp:FindFirstChildOfClass("Tool")
+    
+    if not Tool then return end
+    
+    local toolHnld = Tool:FindFirstChild("Handle") or Tool:FindFirstChildWhichIsA("BasePart")
+    if not toolHnld then return end
+    
+    if Tool:FindFirstChild("OGSize3") then
+        toolHnld.Size = Tool.OGSize3.Value
+        Tool.OGSize3:Destroy()
+        if toolHnld:FindFirstChild("FunTIMES") then
+            toolHnld.FunTIMES:Destroy()
+        end
+    end
 end)
 
 AntiVoidConnect = nil
@@ -10034,61 +10184,52 @@ gui.searchCommands = function()
         if frame:IsA("Frame") then
             local cmdName = frame.Name:lower()
             local command = Commands[cmdName]
-            local displayName = command and command[2][1] or ""
-            local displayNameLower = displayName:lower()
-
-            local aliases = {}
-            local aliasText = displayName:match("%(([^%)]+)%)")
-            if aliasText then
-                for alias in aliasText:gmatch("[^,%s]+") do
-                    table.insert(aliases, alias:lower())
-                end
-            end
-
+            
+            if not command then continue end
+            
+            local displayName = command[2][1] or ""
             local score = 999
             local matchText = displayName
 
-            if cmdName == searchTerm or displayNameLower == searchTerm then
+            if cmdName == searchTerm then
                 score = 1
                 matchText = cmdName
-            else
-                for _, alias in ipairs(aliases) do
-                    if alias == searchTerm then
-                        score = 1
+            elseif displayName:lower() == searchTerm then
+                score = 1
+                matchText = displayName
+            elseif Aliases[searchTerm] and Aliases[searchTerm] == cmdName then
+                score = 1
+                matchText = searchTerm
+            end
+
+            if score == 999 and cmdName:sub(1, #searchTerm) == searchTerm then
+                score = 2
+                matchText = cmdName
+            elseif score == 999 and displayName:lower():sub(1, #searchTerm) == searchTerm then
+                score = 3
+                matchText = displayName
+            end
+            
+            if score == 999 then
+                for alias, cmd in pairs(Aliases) do
+                    if cmd == cmdName and alias:sub(1, #searchTerm) == searchTerm then
+                        score = 3
                         matchText = alias
                         break
                     end
                 end
             end
 
-            if score == 999 then
-                if cmdName:sub(1, #searchTerm) == searchTerm then
-                    score = 2
-                    matchText = cmdName
-                elseif displayNameLower:sub(1, #searchTerm) == searchTerm then
-                    score = 3
-                    matchText = displayName
-                else
-                    for _, alias in ipairs(aliases) do
-                        if alias:sub(1, #searchTerm) == searchTerm then
-                            score = 3
-                            matchText = alias
-                            break
-                        end
-                    end
-                end
-            end
-
             if score == 999 and #searchTerm >= 2 then
-                if cmdName:find(searchTerm, 1, true) ~= nil then
+                if cmdName:find(searchTerm, 1, true) then
                     score = 4
                     matchText = cmdName
-                elseif displayNameLower:find(searchTerm, 1, true) ~= nil then
+                elseif displayName:lower():find(searchTerm, 1, true) then
                     score = 5
                     matchText = displayName
                 else
-                    for _, alias in ipairs(aliases) do
-                        if alias:find(searchTerm, 1, true) ~= nil then
+                    for alias, cmd in pairs(Aliases) do
+                        if cmd == cmdName and alias:find(searchTerm, 1, true) then
                             score = 5
                             matchText = alias
                             break
@@ -10099,12 +10240,17 @@ gui.searchCommands = function()
 
             if score == 999 and #searchTerm >= 2 then
                 local cmdDistance = levenshtein(searchTerm, cmdName)
-                local displayDistance = levenshtein(searchTerm, displayNameLower)
-
-                local bestAliasDistance = math.huge
-                for _, alias in ipairs(aliases) do
-                    local aliasDistance = levenshtein(searchTerm, alias)
-                    bestAliasDistance = math.min(bestAliasDistance, aliasDistance)
+                local displayDistance = levenshtein(searchTerm, displayName:lower())
+                
+                local bestAlias, bestAliasDistance = "", math.huge
+                for alias, cmd in pairs(Aliases) do
+                    if cmd == cmdName then
+                        local aliasDistance = levenshtein(searchTerm, alias)
+                        if aliasDistance < bestAliasDistance then
+                            bestAliasDistance = aliasDistance
+                            bestAlias = alias
+                        end
+                    end
                 end
 
                 if cmdDistance <= math.min(2, #searchTerm - 1) then
@@ -10112,7 +10258,7 @@ gui.searchCommands = function()
                     matchText = cmdName
                 elseif bestAliasDistance <= math.min(2, #searchTerm - 1) then
                     score = 6 + bestAliasDistance
-                    matchText = alias
+                    matchText = bestAlias
                 elseif displayDistance <= math.min(2, #searchTerm - 1) then
                     score = 9 + displayDistance
                     matchText = displayName
@@ -10229,38 +10375,27 @@ commandsFilter.Changed:Connect(function(p)
         if v:IsA("TextLabel") then
             local commandName = v.Name:lower()
             local command = Commands[commandName]
-            local displayName = command and command[2][1] or ""
-            local displayNameLower = displayName:lower()
+            if not command then continue end
             
-            local aliases = {}
-            local aliasText = displayName:match("%(([^%)]+)%)")
-            if aliasText then
-                for alias in aliasText:gmatch("[^,%s]+") do
-                    table.insert(aliases, alias:lower())
-                end
-            end
-            
+            local displayName = command[2][1] or ""
             local score = 999
             
-            if commandName == searchQuery or displayNameLower == searchQuery then
+            if commandName == searchQuery then
                 score = 1
-            else
-                for _, alias in ipairs(aliases) do
-                    if alias == searchQuery then
-                        score = 1
-                        break
-                    end
-                end
+            elseif displayName:lower() == searchQuery then
+                score = 1
+            elseif Aliases[searchQuery] and Aliases[searchQuery] == commandName then
+                score = 1
             end
             
             if score == 999 then
                 if commandName:sub(1, #searchQuery) == searchQuery then
                     score = 2
-                elseif displayNameLower:sub(1, #searchQuery) == searchQuery then
+                elseif displayName:lower():sub(1, #searchQuery) == searchQuery then
                     score = 3
                 else
-                    for _, alias in ipairs(aliases) do
-                        if alias:sub(1, #searchQuery) == searchQuery then
+                    for alias, cmd in pairs(Aliases) do
+                        if cmd == commandName and alias:sub(1, #searchQuery) == searchQuery then
                             score = 3
                             break
                         end
@@ -10269,13 +10404,13 @@ commandsFilter.Changed:Connect(function(p)
             end
             
             if score == 999 and #searchQuery >= 2 then
-                if commandName:find(searchQuery, 1, true) ~= nil then
+                if commandName:find(searchQuery, 1, true) then
                     score = 4
-                elseif displayNameLower:find(searchQuery, 1, true) ~= nil then
+                elseif displayName:lower():find(searchQuery, 1, true) then
                     score = 5
                 else
-                    for _, alias in ipairs(aliases) do
-                        if alias:find(searchQuery, 1, true) ~= nil then
+                    for alias, cmd in pairs(Aliases) do
+                        if cmd == commandName and alias:find(searchQuery, 1, true) then
                             score = 5
                             break
                         end
@@ -10285,12 +10420,17 @@ commandsFilter.Changed:Connect(function(p)
             
             if score == 999 and #searchQuery >= 2 then
                 local cmdDistance = levenshtein(searchQuery, commandName)
-                local displayDistance = levenshtein(searchQuery, displayNameLower)
+                local displayDistance = levenshtein(searchQuery, displayName:lower())
                 
-                local bestAliasDistance = math.huge
-                for _, alias in ipairs(aliases) do
-                    local aliasDistance = levenshtein(searchQuery, alias)
-                    bestAliasDistance = math.min(bestAliasDistance, aliasDistance)
+                local bestAlias, bestAliasDistance = "", math.huge
+                for alias, cmd in pairs(Aliases) do
+                    if cmd == commandName then
+                        local aliasDistance = levenshtein(searchQuery, alias)
+                        if aliasDistance < bestAliasDistance then
+                            bestAliasDistance = aliasDistance
+                            bestAlias = alias
+                        end
+                    end
                 end
                 
                 if cmdDistance <= math.min(2, #searchQuery - 1) then
