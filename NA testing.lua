@@ -9771,36 +9771,43 @@ gui.txtSize=function(ui,x,y)
 	local textService=game:GetService("TextService")
 	return textService:GetTextSize(ui.Text,ui.TextSize,ui.Font,Vector2.new(x,y))
 end
-gui.commands=function()
-	if not commandsFrame.Visible then
-		commandsFrame.Visible=true
-		commandsList.CanvasSize=UDim2.new(0,0,0,0)
-	end
-	for i,v in pairs(commandsList:GetChildren()) do
-		if v:IsA("TextLabel") then
-			v:Remove()
-		end
-	end
-	local i=0
-	for cmdName,tbl in pairs(Commands) do
-		local Cmd=commandExample:Clone()
-		Cmd.Parent=commandsList
-		Cmd.Name=cmdName
-		Cmd.Text=" "..tbl[2][1]
-		Cmd.MouseEnter:Connect(function()
-			description.Visible=true
-			description.Text=tbl[2][2]
-		end)
-		Cmd.MouseLeave:Connect(function()
-			if description.Text==tbl[2][2] then
-				description.Visible=false
-				description.Text=""
-			end
-		end)
-		i=i+1
-	end
-	commandsList.CanvasSize=UDim2.new(0,0,0,i*20+10)
-	commandsFrame.Position=UDim2.new(0.5,-283/2,0.5,-260/2)
+gui.commands = function()
+    local cFrame, cList = commandsFrame, commandsList
+    
+    if not cFrame.Visible then
+        cFrame.Visible = true
+        cList.CanvasSize = UDim2.new(0, 0, 0, 0)
+    end
+    
+    for _, v in ipairs(cList:GetChildren()) do
+        if v:IsA("TextLabel") then v:Destroy() end
+    end
+    
+    local yOffset = 5
+    for cmdName, tbl in pairs(Commands) do
+        local Cmd = commandExample:Clone()
+        Cmd.Parent = cList
+        Cmd.Name = cmdName
+        Cmd.Text = " " .. tbl[2][1]
+        Cmd.Position = UDim2.new(0, 0, 0, yOffset)
+        
+        Cmd.MouseEnter:Connect(function()
+            description.Visible = true
+            description.Text = tbl[2][2]
+        end)
+        
+        Cmd.MouseLeave:Connect(function()
+            if description.Text == tbl[2][2] then
+                description.Visible = false
+                description.Text = ""
+            end
+        end)
+        
+        yOffset = yOffset + 20
+    end
+    
+    cList.CanvasSize = UDim2.new(0, 0, 0, yOffset)
+    cFrame.Position = UDim2.new(0.5, -283/2, 0.5, -260/2)
 end
 gui.chatlogs=function()
 	if not chatLogsFrame.Visible then
