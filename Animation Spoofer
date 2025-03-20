@@ -1,380 +1,365 @@
-local screenxD = Instance.new("ScreenGui")
-local Frame = Instance.new("Frame")
-local Container = Instance.new("Frame")
-local UICorner = Instance.new("UICorner")
-local UIGradient = Instance.new("UIGradient")
-local Topbar = Instance.new("Frame")
-local Icon = Instance.new("ImageLabel")
-local Exit = Instance.new("TextButton")
-local ImageLabel = Instance.new("ImageLabel")
-local Minimize = Instance.new("TextButton")
-local ImageLabel_2 = Instance.new("ImageLabel")
-local TopBar = Instance.new("Frame")
-local ImageLabel_3 = Instance.new("ImageLabel")
-local ImageLabel_4 = Instance.new("ImageLabel")
-local Title = Instance.new("TextLabel")
-local UICorner_2 = Instance.new("UICorner")
-local UIGradient_2 = Instance.new("UIGradient")
-local scroll = Instance.new("ScrollingFrame")
-local uilist = Instance.new("UIListLayout")
+local screenGui = Instance.new("ScreenGui")
+local mainFrame = Instance.new("Frame")
+local container = Instance.new("Frame")
+local topbar = Instance.new("Frame")
+local title = Instance.new("TextLabel")
+local exitButton = Instance.new("TextButton")
+local minimizeButton = Instance.new("TextButton")
+local scrollFrame = Instance.new("ScrollingFrame")
+local listLayout = Instance.new("UIListLayout")
+local searchBar = Instance.new("TextBox")
 
-screenxD.Name = "eternalness7"
-screenxD.Parent = gethui() or (game:GetService("CoreGui") or game:GetService("Players").LocalPlayer:FindFirstChildWhichIsA("PlayerGui"))
-screenxD.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+screenGui.Name = "AnimationSpooferX"
+screenGui.Parent = gethui() or (game:GetService("CoreGui") or game:GetService("Players").LocalPlayer:FindFirstChildWhichIsA("PlayerGui"))
+screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+screenGui.ResetOnSpawn = false
 
-Frame.Parent = screenxD
-Frame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-Frame.BackgroundTransparency = 0.140
-Frame.BorderColor3 = Color3.fromRGB(139, 139, 139)
-Frame.BorderSizePixel = 0
-Frame.Position = UDim2.new(0.651976228, 0, 0.542930365, 0)
-Frame.Size = UDim2.new(0, 402, 0, 262)
+mainFrame.Name = "MainFrame"
+mainFrame.Parent = screenGui
+mainFrame.BackgroundColor3 = Color3.fromRGB(25, 10, 40)
+mainFrame.BorderSizePixel = 0
+mainFrame.Position = UDim2.new(0.65, 0, 0.54, 0)
+mainFrame.Size = UDim2.new(0, 420, 0, 280)
+mainFrame.ClipsDescendants = true
 
-local drag = Instance.new("Frame", screenxD)
-drag.BackgroundColor3 = Color3.fromRGB(114, 137, 218)
-drag.BorderSizePixel = 1
-drag.BackgroundTransparency = 1
-drag.Position = UDim2.new(0.107, 0, 0.216, 0)
-drag.Size = UDim2.new(0, 256, 0, 20)
+local mainCorner = Instance.new("UICorner")
+mainCorner.CornerRadius = UDim.new(0, 10)
+mainCorner.Parent = mainFrame
 
-Container.Name = "Container"
-Container.Parent = Frame
-Container.AnchorPoint = Vector2.new(0.5, 1)
-Container.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-Container.BackgroundTransparency = 0.500
-Container.BorderColor3 = Color3.fromRGB(255, 255, 255)
-Container.BorderSizePixel = 0
-Container.ClipsDescendants = true
-Container.Position = UDim2.new(0.5, 0, 0.996153831, -5)
-Container.Size = UDim2.new(1, -10, 1.00769234, -30)
+local mainGradient = Instance.new("UIGradient")
+mainGradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(25, 10, 40)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(15, 5, 25)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(25, 10, 40))
+})
+mainGradient.Parent = mainFrame
 
-UICorner.CornerRadius = UDim.new(0, 9)
-UICorner.Parent = Container
+container.Name = "Container"
+container.Parent = mainFrame
+container.AnchorPoint = Vector2.new(0.5, 1)
+container.BackgroundColor3 = Color3.fromRGB(20, 8, 30)
+container.BackgroundTransparency = 0.2
+container.BorderSizePixel = 0
+container.Position = UDim2.new(0.5, 0, 1, -5)
+container.Size = UDim2.new(1, -10, 1, -65)
+container.ClipsDescendants = true
 
-UIGradient.Color =
-    ColorSequence.new {
-    ColorSequenceKeypoint.new(0.00, Color3.fromRGB(12, 4, 20)),
-    ColorSequenceKeypoint.new(0.50, Color3.fromRGB(12, 4, 20)),
-    ColorSequenceKeypoint.new(1.00, Color3.fromRGB(12, 4, 20))
-}
-UIGradient.Parent = Container
+local containerCorner = Instance.new("UICorner")
+containerCorner.CornerRadius = UDim.new(0, 8)
+containerCorner.Parent = container
 
-Topbar.Name = "Topbar"
-Topbar.Parent = Frame
-Topbar.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-Topbar.BackgroundTransparency = 1.000
-Topbar.Size = UDim2.new(1, 0, 0, 25)
+topbar.Name = "Topbar"
+topbar.Parent = mainFrame
+topbar.BackgroundColor3 = Color3.fromRGB(30, 12, 45)
+topbar.BackgroundTransparency = 0.1
+topbar.BorderSizePixel = 0
+topbar.Size = UDim2.new(1, 0, 0, 30)
 
-Icon.Name = "Icon"
-Icon.Parent = Topbar
-Icon.AnchorPoint = Vector2.new(0, 0.5)
-Icon.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-Icon.BackgroundTransparency = 1.000
-Icon.Position = UDim2.new(0, 10, 0.5, 0)
-Icon.Size = UDim2.new(0, 13, 0, 13)
-Icon.Image = "rbxgameasset://Images/menuIcon"
+local topbarCorner = Instance.new("UICorner")
+topbarCorner.CornerRadius = UDim.new(0, 8)
+topbarCorner.Parent = topbar
 
-Exit.Name = "Exit"
-Exit.Parent = Topbar
-Exit.BackgroundColor3 = Color3.fromRGB(12, 4, 20)
-Exit.BackgroundTransparency = 0.500
-Exit.BorderSizePixel = 0
-Exit.Position = UDim2.new(0.870000005, 0, 0, 0)
-Exit.Size = UDim2.new(-0.00899999961, 40, 1.04299998, -10)
-Exit.Font = Enum.Font.Gotham
-Exit.Text = "X"
-Exit.TextColor3 = Color3.fromRGB(255, 255, 255)
-Exit.TextSize = 13.000
+local topbarBottomCover = Instance.new("Frame")
+topbarBottomCover.Parent = topbar
+topbarBottomCover.BackgroundColor3 = Color3.fromRGB(30, 12, 45)
+topbarBottomCover.BorderSizePixel = 0
+topbarBottomCover.Position = UDim2.new(0, 0, 1, -8)
+topbarBottomCover.Size = UDim2.new(1, 0, 0, 8)
 
-ImageLabel.Parent = Exit
-ImageLabel.BackgroundColor3 = Color3.fromRGB(36, 36, 36)
-ImageLabel.BackgroundTransparency = 1.000
-ImageLabel.Position = UDim2.new(0.999998331, 0, 0, 0)
-ImageLabel.Size = UDim2.new(0, 9, 0, 16)
-ImageLabel.Image = "http://www.roblox.com/asset/?id=8650484523"
-ImageLabel.ImageColor3 = Color3.fromRGB(12, 4, 20)
-ImageLabel.ImageTransparency = 0.500
+title.Name = "Title"
+title.Parent = topbar
+title.BackgroundTransparency = 1
+title.Position = UDim2.new(0, 15, 0, 0)
+title.Size = UDim2.new(0.7, 0, 1, 0)
+title.Font = Enum.Font.GothamSemibold
+title.Text = "Animation Spoofer X"
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.TextSize = 16
+title.TextXAlignment = Enum.TextXAlignment.Left
 
-Minimize.Name = "Minimize"
-Minimize.Parent = Topbar
-Minimize.BackgroundColor3 = Color3.fromRGB(12, 4, 20)
-Minimize.BackgroundTransparency = 0.500
-Minimize.BorderSizePixel = 0
-Minimize.Position = UDim2.new(0.804174006, 0, 0, 0)
-Minimize.Size = UDim2.new(0.00100000005, 27, 1.04299998, -10)
-Minimize.Font = Enum.Font.Gotham
-Minimize.Text = "-"
-Minimize.TextColor3 = Color3.fromRGB(255, 255, 255)
-Minimize.TextSize = 18.000
+exitButton.Name = "ExitButton"
+exitButton.Parent = topbar
+exitButton.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
+exitButton.BackgroundTransparency = 0.3
+exitButton.Position = UDim2.new(1, -30, 0.5, -10)
+exitButton.Size = UDim2.new(0, 20, 0, 20)
+exitButton.Font = Enum.Font.GothamBold
+exitButton.Text = "X"
+exitButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+exitButton.TextSize = 14
+exitButton.AutoButtonColor = false
 
-ImageLabel_2.Parent = Minimize
-ImageLabel_2.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-ImageLabel_2.BackgroundTransparency = 1.000
-ImageLabel_2.Position = UDim2.new(-0.448, 0, 0, 0)
-ImageLabel_2.Size = UDim2.new(0, 12, 0, 15)
-ImageLabel_2.Image = "http://www.roblox.com/asset/?id=10555881849"
-ImageLabel_2.ImageColor3 = Color3.fromRGB(12, 4, 20)
-ImageLabel_2.ImageTransparency = 0.500
+local exitCorner = Instance.new("UICorner")
+exitCorner.CornerRadius = UDim.new(0, 4)
+exitCorner.Parent = exitButton
 
-TopBar.Name = "TopBar"
-TopBar.Parent = Topbar
-TopBar.BackgroundColor3 = Color3.fromRGB(12, 4, 20)
-TopBar.BackgroundTransparency = 0.500
-TopBar.BorderSizePixel = 0
-TopBar.Position = UDim2.new(0.268202901, 0, -0.00352294743, 0)
-TopBar.Size = UDim2.new(0, 186, 0, 16)
+minimizeButton.Name = "MinimizeButton"
+minimizeButton.Parent = topbar
+minimizeButton.BackgroundColor3 = Color3.fromRGB(80, 80, 255)
+minimizeButton.BackgroundTransparency = 0.3
+minimizeButton.Position = UDim2.new(1, -60, 0.5, -10)
+minimizeButton.Size = UDim2.new(0, 20, 0, 20)
+minimizeButton.Font = Enum.Font.GothamBold
+minimizeButton.Text = "-"
+minimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+minimizeButton.TextSize = 18
+minimizeButton.AutoButtonColor = false
 
-ImageLabel_3.Parent = TopBar
-ImageLabel_3.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-ImageLabel_3.BackgroundTransparency = 1.000
-ImageLabel_3.Position = UDim2.new(1, 0, 0.059, 0)
-ImageLabel_3.Size = UDim2.new(0, 12, 0, 15)
-ImageLabel_3.Image = "http://www.roblox.com/asset/?id=8650484523"
-ImageLabel_3.ImageColor3 = Color3.fromRGB(12, 4, 20)
-ImageLabel_3.ImageTransparency = 0.500
+local minimizeCorner = Instance.new("UICorner")
+minimizeCorner.CornerRadius = UDim.new(0, 4)
+minimizeCorner.Parent = minimizeButton
 
-ImageLabel_4.Parent = TopBar
-ImageLabel_4.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-ImageLabel_4.BackgroundTransparency = 1.000
-ImageLabel_4.Position = UDim2.new(-0.0817726701, 0, 0, 0)
-ImageLabel_4.Size = UDim2.new(0, 16, 0, 16)
-ImageLabel_4.Image = "http://www.roblox.com/asset/?id=10555881849"
-ImageLabel_4.ImageColor3 = Color3.fromRGB(12, 4, 20)
-ImageLabel_4.ImageTransparency = 0.500
+searchBar.Name = "SearchBar"
+searchBar.Parent = mainFrame
+searchBar.BackgroundColor3 = Color3.fromRGB(30, 15, 45)
+searchBar.BackgroundTransparency = 0.2
+searchBar.Position = UDim2.new(0.5, -150, 0, 40)
+searchBar.Size = UDim2.new(0, 300, 0, 30)
+searchBar.Font = Enum.Font.Gotham
+searchBar.PlaceholderText = "Search animations..."
+searchBar.Text = ""
+searchBar.TextColor3 = Color3.fromRGB(255, 255, 255)
+searchBar.TextSize = 14
+searchBar.ClearTextOnFocus = false
 
-Title.Name = "Title"
-Title.Parent = TopBar
-Title.AnchorPoint = Vector2.new(0, 0.5)
-Title.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-Title.BackgroundTransparency = 1.000
-Title.BorderSizePixel = 0
-Title.Position = UDim2.new(-0.150533721, 32, 0.415876389, 0)
-Title.Size = UDim2.new(0.522161067, 80, 1.11675644, -7)
-Title.Font = Enum.Font.SourceSansLight
-Title.Text = "Animation Spoofer"
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.TextSize = 17.000
-Title.TextWrapped = true
+local searchCorner = Instance.new("UICorner")
+searchCorner.CornerRadius = UDim.new(0, 6)
+searchCorner.Parent = searchBar
 
-UICorner_2.CornerRadius = UDim.new(0, 9)
-UICorner_2.Parent = Frame
+scrollFrame.Name = "ScrollFrame"
+scrollFrame.Parent = container
+scrollFrame.BackgroundTransparency = 1
+scrollFrame.Position = UDim2.new(0, 5, 0, 5)
+scrollFrame.Size = UDim2.new(1, -10, 1, -10)
+scrollFrame.BottomImage = ""
+scrollFrame.MidImage = ""
+scrollFrame.TopImage = ""
+scrollFrame.ScrollBarThickness = 4
+scrollFrame.ScrollBarImageColor3 = Color3.fromRGB(255, 255, 255)
+scrollFrame.ScrollBarImageTransparency = 0.7
+scrollFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
 
-UIGradient_2.Color =
-    ColorSequence.new {
-    ColorSequenceKeypoint.new(0.00, Color3.fromRGB(12, 4, 20)),
-    ColorSequenceKeypoint.new(0.38, Color3.fromRGB(4, 4, 4)),
-    ColorSequenceKeypoint.new(0.52, Color3.fromRGB(4, 4, 4)),
-    ColorSequenceKeypoint.new(0.68, Color3.fromRGB(4, 4, 4)),
-    ColorSequenceKeypoint.new(1.00, Color3.fromRGB(12, 4, 20))
-}
-UIGradient_2.Parent = Frame
+listLayout.Parent = scrollFrame
+listLayout.SortOrder = Enum.SortOrder.LayoutOrder
+listLayout.Padding = UDim.new(0, 5)
 
-scroll.Parent = Frame
-scroll.AnchorPoint = Vector2.new(0.5, 0.5)
-scroll.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-scroll.BackgroundTransparency = 1.000
-scroll.BorderColor3 = Color3.fromRGB(16, 16, 16)
-scroll.BorderSizePixel = 0
-scroll.Position = UDim2.new(0.5, 0, 0.530534327, 0)
-scroll.Size = UDim2.new(1, -10, 0.931297719, -10)
-scroll.BottomImage = "rbxgameasset://Images/scrollBottom (1)"
-scroll.MidImage = "rbxgameasset://Images/scrollMid"
-scroll.ScrollBarThickness = 4
-scroll.TopImage = "rbxgameasset://Images/scrollTop"
-scroll.AutomaticCanvasSize = "XY"
+local minimized = false
+local animationTable = {}
+local MarketplaceService = game:GetService("MarketplaceService")
+local UserInputService = game:GetService("UserInputService")
 
-uilist.Parent = scroll
-uilist.SortOrder = Enum.SortOrder.LayoutOrder
-uilist.Padding = UDim.new(0, 3)
-
-local function clicky()
-    Exit.MouseButton1Click:Connect(
-        function()
-            Exit.Parent.Parent.Parent:Destroy()
-        end
-    )
+local function createAnimationButton(id)
+    local str = string.match(tostring(id), "%d+")
+    local button = Instance.new("Frame")
+    button.Name = "AnimButton_" .. str
+    button.Parent = scrollFrame
+    button.BackgroundColor3 = Color3.fromRGB(40, 20, 60)
+    button.BackgroundTransparency = 0.2
+    button.BorderSizePixel = 0
+    button.Size = UDim2.new(1, 0, 0, 60)
+    
+    local buttonCorner = Instance.new("UICorner")
+    buttonCorner.CornerRadius = UDim.new(0, 6)
+    buttonCorner.Parent = button
+    
+    local nameLabel = Instance.new("TextLabel")
+    nameLabel.Name = "NameLabel"
+    nameLabel.Parent = button
+    nameLabel.BackgroundTransparency = 1
+    nameLabel.Position = UDim2.new(0, 10, 0, 5)
+    nameLabel.Size = UDim2.new(1, -20, 0, 25)
+    nameLabel.Font = Enum.Font.GothamSemibold
+    nameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    nameLabel.TextSize = 14
+    nameLabel.TextXAlignment = Enum.TextXAlignment.Left
+    
+    local idLabel = Instance.new("TextLabel")
+    idLabel.Name = "IdLabel"
+    idLabel.Parent = button
+    idLabel.BackgroundTransparency = 1
+    idLabel.Position = UDim2.new(0, 10, 0, 30)
+    idLabel.Size = UDim2.new(1, -20, 0, 20)
+    idLabel.Font = Enum.Font.Gotham
+    idLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+    idLabel.TextSize = 12
+    idLabel.Text = "ID: " .. str
+    idLabel.TextXAlignment = Enum.TextXAlignment.Left
+    
+    local copyButton = Instance.new("TextButton")
+    copyButton.Name = "CopyButton"
+    copyButton.Parent = button
+    copyButton.BackgroundColor3 = Color3.fromRGB(60, 30, 90)
+    copyButton.BackgroundTransparency = 0.2
+    copyButton.Position = UDim2.new(1, -80, 0.5, -15)
+    copyButton.Size = UDim2.new(0, 70, 0, 30)
+    copyButton.Font = Enum.Font.GothamSemibold
+    copyButton.Text = "Copy ID"
+    copyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    copyButton.TextSize = 12
+    
+    local copyCorner = Instance.new("UICorner")
+    copyCorner.CornerRadius = UDim.new(0, 4)
+    copyCorner.Parent = copyButton
+    
+    pcall(function()
+        local animInfo = MarketplaceService:GetProductInfo(tonumber(str))
+        nameLabel.Text = animInfo.Name or "Unknown Animation"
+    end)
+    
+    copyButton.MouseButton1Click:Connect(function()
+        setclipboard(str)
+        copyButton.Text = "Copied!"
+        copyButton.BackgroundColor3 = Color3.fromRGB(60, 180, 60)
+        task.delay(1, function()
+            copyButton.Text = "Copy ID"
+            copyButton.BackgroundColor3 = Color3.fromRGB(60, 30, 90)
+        end)
+    end)
+    
+    return button
 end
-coroutine.wrap(clicky)()
-local function itouch()
-    local UserInputService = game:GetService("UserInputService")
-    local runService = (game:GetService("RunService"))
 
-    local gui = Frame
-
-    local dragging
+local function setupDragging()
+    local dragging = false
     local dragInput
     local dragStart
     local startPos
-
-    function Lerp(a, b, m)
-        return a + (b - a) * m
+    
+    local function updateDrag(input)
+        local delta = input.Position - dragStart
+        mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
     end
-
-    local lastMousePos
-    local lastGoalPos
-    local DRAG_SPEED = (8)
-    function Update(dt)
-        if not (startPos) then
-            return
+    
+    topbar.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = mainFrame.Position
+            
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
         end
-        if not (dragging) and (lastGoalPos) then
-            gui.Position =
-                UDim2.new(
-                startPos.X.Scale,
-                Lerp(gui.Position.X.Offset, lastGoalPos.X.Offset, dt * DRAG_SPEED),
-                startPos.Y.Scale,
-                Lerp(gui.Position.Y.Offset, lastGoalPos.Y.Offset, dt * DRAG_SPEED)
-            )
-            return
+    end)
+    
+    topbar.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            dragInput = input
         end
-
-        local delta = (lastMousePos - UserInputService:GetMouseLocation())
-        local xGoal = (startPos.X.Offset - delta.X)
-        local yGoal = (startPos.Y.Offset - delta.Y)
-        lastGoalPos = UDim2.new(startPos.X.Scale, xGoal, startPos.Y.Scale, yGoal)
-        gui.Position =
-            UDim2.new(
-            startPos.X.Scale,
-            Lerp(gui.Position.X.Offset, xGoal, dt * DRAG_SPEED),
-            startPos.Y.Scale,
-            Lerp(gui.Position.Y.Offset, yGoal, dt * DRAG_SPEED)
-        )
-    end
-
-    gui.InputBegan:Connect(
-        function(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                dragging = true
-                dragStart = input.Position
-                startPos = gui.Position
-                lastMousePos = UserInputService:GetMouseLocation()
-
-                input.Changed:Connect(
-                    function()
-                        if input.UserInputState == Enum.UserInputState.End then
-                            dragging = false
-                        end
-                    end
-                )
-            end
+    end)
+    
+    UserInputService.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            updateDrag(input)
         end
-    )
-
-    gui.InputChanged:Connect(
-        function(input)
-            if
-                input.UserInputType == Enum.UserInputType.MouseMovement or
-                    input.UserInputType == Enum.UserInputType.Touch
-             then
-                dragInput = input
-            end
-        end
-    )
-
-    runService.Heartbeat:Connect(Update)
-end
-coroutine.wrap(itouch)()
-
-local UIS = game:GetService("UserInputService")
-local function dragify(Frame, boool)
-    local frametomove = Frame
-    local dragToggle, dragInput, dragStart, startPos
-    local dragSpeed = 0
-    local function updateInput(input)
-        local Delta = input.Position - dragStart
-        frametomove.Position =
-            UDim2.new(startPos.X.Scale, startPos.X.Offset + Delta.X, startPos.Y.Scale, startPos.Y.Offset + Delta.Y)
-    end
-    Frame.InputBegan:Connect(
-        function(input)
-            if
-                (input.UserInputType == Enum.UserInputType.MouseButton1 or
-                    input.UserInputType == Enum.UserInputType.Touch) and
-                    UIS:GetFocusedTextBox() == nil
-             then
-                dragToggle = true
-                dragStart = input.Position
-                startPos = frametomove.Position
-                input.Changed:Connect(
-                    function()
-                        if input.UserInputState == Enum.UserInputState.End then
-                            dragToggle = false
-                        end
-                    end
-                )
-            end
-        end
-    )
-    Frame.InputChanged:Connect(
-        function(input)
-            if
-                input.UserInputType == Enum.UserInputType.MouseMovement or
-                    input.UserInputType == Enum.UserInputType.Touch
-             then
-                dragInput = input
-            end
-        end
-    )
-    UIS.InputChanged:Connect(
-        function(input)
-            if input == dragInput and dragToggle then
-                updateInput(input)
-            end
-        end
-    )
-end
-dragify(drag)
-
-local function createbutton(id)
-    local str = string.match(tostring(id), "%d+")
-    local button = Instance.new("TextButton", scroll)
-    button.BorderSizePixel = 0
-    button.BackgroundColor3 = Color3.fromRGB(12, 4, 20)
-    button.BackgroundTransparency = 0.9
-    button.Size = UDim2.new(1, 0, 0, 50)
-    button.Text = ""
-    local name = Instance.new("TextLabel", button)
-    name.BackgroundTransparency = 1
-    name.Size = UDim2.new(1, 0, 0.5, 0)
-    name.TextSize = 14
-    name.Font = Enum.Font.Gotham
-    name.TextColor3 = Color3.fromRGB(255, 255, 255)
-    name.TextXAlignment = Enum.TextXAlignment.Center
-    local id = name:Clone()
-    id.Parent = button
-    id.AnchorPoint = Vector2.new(0, 1)
-    id.Position = UDim2.new(0, 0, 1, 0)
-    id.Text = str
-    name.Text = game:GetService("MarketplaceService"):GetProductInfo(tonumber(str)).Name
-    button.Activated:Connect(
-        function()
-            setclipboard(str)
-        end
-    )
+    end)
 end
 
-local animationtabl = {}
+local function setupButtonEffects()
+    local function setupButtonEffect(button)
+        button.MouseEnter:Connect(function()
+            button.BackgroundTransparency = 0
+        end)
+        
+        button.MouseLeave:Connect(function()
+            button.BackgroundTransparency = 0.3
+        end)
+        
+        button.MouseButton1Down:Connect(function()
+            button:TweenSize(UDim2.new(0, button.Size.X.Offset * 0.95, 0, button.Size.Y.Offset * 0.95), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.1, true)
+        end)
+        
+        button.MouseButton1Up:Connect(function()
+            button:TweenSize(UDim2.new(0, button.Size.X.Offset / 0.95, 0, button.Size.Y.Offset / 0.95), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.1, true)
+        end)
+    end
+    
+    setupButtonEffect(exitButton)
+    setupButtonEffect(minimizeButton)
+end
 
-while true do
-    local localPlayer = game:GetService("Players").LocalPlayer.Character:FindFirstChild("Humanoid")
-    if localPlayer then
-        local a = localPlayer:GetPlayingAnimationTracks()
-        for i, track in pairs(a) do
-            task.spawn(
-                function()
-                    local pass = true
-                    for _, v in pairs(animationtabl) do
-                        if v == track.Animation.AnimationId then
-                            pass = false
+local function setupSearchBar()
+    searchBar.Changed:Connect(function(prop)
+        if prop == "Text" then
+            local searchText = searchBar.Text:lower()
+            for _, button in pairs(scrollFrame:GetChildren()) do
+                if button:IsA("Frame") and button.Name:match("AnimButton_") then
+                    local nameLabel = button:FindFirstChild("NameLabel")
+                    local idLabel = button:FindFirstChild("IdLabel")
+                    
+                    if nameLabel and idLabel then
+                        if searchText == "" or 
+                           nameLabel.Text:lower():find(searchText) or 
+                           idLabel.Text:lower():find(searchText) then
+                            button.Visible = true
+                        else
+                            button.Visible = false
                         end
-                    end
-                    if pass then
-                        table.insert(animationtabl, track.Animation.AnimationId)
-                        createbutton(track.Animation.AnimationId)
                     end
                 end
-            )
+            end
+        end
+    end)
+end
+
+local function setupMinimizeButton()
+    minimizeButton.MouseButton1Click:Connect(function()
+        minimized = not minimized
+        if minimized then
+            container.Visible = false
+            searchBar.Visible = false
+            mainFrame:TweenSize(UDim2.new(0, 420, 0, 30), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.3, true)
+            minimizeButton.Text = "+"
+        else
+            mainFrame:TweenSize(UDim2.new(0, 420, 0, 280), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.3, true)
+            task.wait(0.3)
+            container.Visible = true
+            searchBar.Visible = true
+            minimizeButton.Text = "-"
+        end
+    end)
+end
+
+exitButton.MouseButton1Click:Connect(function()
+    screenGui:Destroy()
+end)
+
+setupDragging()
+setupButtonEffects()
+setupSearchBar()
+setupMinimizeButton()
+
+local function monitorAnimations()
+    while task.wait() do
+        local character = game:GetService("Players").LocalPlayer.Character
+        if character then
+            local humanoid = character:FindFirstChild("Humanoid")
+            if humanoid then
+                local tracks = humanoid:GetPlayingAnimationTracks()
+                for _, track in pairs(tracks) do
+                    task.spawn(function()
+                        local animId = track.Animation.AnimationId
+                        if animId and animId ~= "" then
+                            local alreadyAdded = false
+                            for _, id in pairs(animationTable) do
+                                if id == animId then
+                                    alreadyAdded = true
+                                    break
+                                end
+                            end
+                            
+                            if not alreadyAdded then
+                                table.insert(animationTable, animId)
+                                createAnimationButton(animId)
+                            end
+                        end
+                    end)
+                end
+            end
         end
     end
-    task.wait()
 end
+
+task.spawn(monitorAnimations)
