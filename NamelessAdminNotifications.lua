@@ -109,6 +109,7 @@ local function CreateDescription(Text, Parent, YPosition)
     Description.Text = Text
     Description.TextColor3 = NOTIFICATION_COLORS.Text
     Description.TextSize = 14
+    Description.TextScaled = true
     Description.Font = Enum.Font.Gotham
     Description.TextXAlignment = Enum.TextXAlignment.Left
     Description.TextYAlignment = Enum.TextYAlignment.Top
@@ -158,6 +159,7 @@ local function CreateSquircleButton(Text, Width, Height, Parent, Position)
     Button.Size = UDim2.new(0, Width, 0, Height)
     Button.Position = Position
     Button.Text = Text
+    Button.TextScaled = true
     Button.BackgroundColor3 = BUTTON_COLORS.Default
     Button.TextColor3 = NOTIFICATION_COLORS.Text
     Button.Font = Enum.Font.Gotham
@@ -306,31 +308,44 @@ _G.EnhancedNotifs = {
             local DescLabel, TextHeight = CreateDescription(Description, NewNotif, YPosition)
             Y += TextHeight + 10
             NewNotif.Size = UDim2.new(0, 300, 0, Y)
+            YPosition += TextHeight + 10
         end
         
         if ButtonCount > 0 then
-            Y += 40
+            local buttonsPerRow = ButtonCount <= 3 and ButtonCount or (ButtonCount <= 6 and 3 or 3)
+            local rows = math.ceil(ButtonCount / buttonsPerRow)
+            
+            Y += rows * 35 + (rows - 1) * 5 + 5
             NewNotif.Size = UDim2.new(0, 300, 0, Y)
             
-            local ButtonWidth = (280 - (10 * (ButtonCount - 1))) / ButtonCount
-            local ButtonY = Y - 35
-            
-            for i, ButtonInfo in ipairs(Buttons) do
-                local XPos = 15 + (i - 1) * (ButtonWidth + 10)
-                local Button = CreateSquircleButton(
-                    ButtonInfo.Text,
-                    ButtonWidth,
-                    30,
-                    NewNotif,
-                    UDim2.new(0, XPos, 0, ButtonY)
-                )
+            for row = 1, rows do
+                local buttonsInThisRow = math.min(buttonsPerRow, ButtonCount - (row - 1) * buttonsPerRow)
+                local buttonWidth = (270 - ((buttonsInThisRow - 1) * 10)) / buttonsInThisRow
                 
-                Button.MouseButton1Click:Connect(function()
-                    if ButtonInfo.Callback then
-                        ButtonInfo.Callback()
+                for col = 1, buttonsInThisRow do
+                    local buttonIndex = (row - 1) * buttonsPerRow + col
+                    local ButtonInfo = Buttons[buttonIndex]
+                    
+                    if ButtonInfo then
+                        local xPos = 15 + (col - 1) * (buttonWidth + 10)
+                        local yPos = YPosition + (row - 1) * 40
+                        
+                        local Button = CreateSquircleButton(
+                            ButtonInfo.Text,
+                            buttonWidth,
+                            30,
+                            NewNotif,
+                            UDim2.new(0, xPos, 0, yPos)
+                        )
+                        
+                        Button.MouseButton1Click:Connect(function()
+                            if ButtonInfo.Callback then
+                                ButtonInfo.Callback()
+                            end
+                            FadeOutAfter(NewNotif, 0)
+                        end)
                     end
-                    FadeOutAfter(NewNotif, 0)
-                end)
+                end
             end
         else
             local CloseBtn = CreateCloseButton(NewNotif)
