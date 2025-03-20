@@ -211,7 +211,7 @@ local function u()
     
     local lineText = ""
     for i = 1, lines do
-        lineText = lineText .. i .. "\n"
+        lineText = lineText..i.."\n"
     end
     ln.Text = lineText
     
@@ -306,47 +306,47 @@ local function highlightSyntax(text)
 
         if inComment then
             if char == "\n" then
-                result = result .. '<font color="rgb(100,100,100)">' .. char .. '</font>'
+                result = result..'<font color="rgb(100,100,100)">'..char..'</font>'
                 inComment = false
             else
-                result = result .. '<font color="rgb(100,100,100)">' .. char .. '</font>'
+                result = result..'<font color="rgb(100,100,100)">'..char..'</font>'
             end
         elseif inString then
             if char == stringChar and text:sub(i - 1, i - 1) ~= "\\" then
-                result = result .. '<font color="rgb(230,180,80)">' .. char .. '</font>'
+                result = result..'<font color="rgb(230,180,80)">'..char..'</font>'
                 inString = false
             else
-                result = result .. '<font color="rgb(230,180,80)">' .. char .. '</font>'
+                result = result..'<font color="rgb(230,180,80)">'..char..'</font>'
             end
         elseif nextChar == "--" then
-            result = result .. '<font color="rgb(100,100,100)">' .. nextChar .. '</font>'
+            result = result..'<font color="rgb(100,100,100)">'..nextChar..'</font>'
             inComment = true
             i = i + 1
         elseif char == "'" or char == '"' then
-            result = result .. '<font color="rgb(230,180,80)">' .. char .. '</font>'
+            result = result..'<font color="rgb(230,180,80)">'..char..'</font>'
             inString = true
             stringChar = char
         elseif char:match("%w") then
             local word = ""
             local j = i
             while j <= #text and text:sub(j, j):match("[%w_]") do
-                word = word .. text:sub(j, j)
+                word = word..text:sub(j, j)
                 j = j + 1
             end
 
             if keywords[word] then
-                result = result .. '<font color="rgb(180,100,200)">' .. word .. '</font>'
+                result = result..'<font color="rgb(180,100,200)">'..word..'</font>'
             elseif globals[word] then
-                result = result .. '<font color="rgb(100,180,255)">' .. word .. '</font>'
+                result = result..'<font color="rgb(100,180,255)">'..word..'</font>'
             elseif tonumber(word) then
-                result = result .. '<font color="rgb(180,180,100)">' .. word .. '</font>'
+                result = result..'<font color="rgb(180,180,100)">'..word..'</font>'
             else
-                result = result .. word
+                result = result..word
             end
 
             i = j - 1
         else
-            result = result .. char
+            result = result..char
         end
 
         i = i + 1
