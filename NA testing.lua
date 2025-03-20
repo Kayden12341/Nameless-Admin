@@ -10327,11 +10327,11 @@ end)
 
 --[[ CLOSE THE COMMAND BAR ]]--
 cmdInput.FocusLost:Connect(function(enterPressed)
-	--if enterPressed then
-	wrap(function()
-		lib.parseCommand(opt.prefix..cmdInput.Text)
-	end)
-	--end
+	if enterPressed then
+		wrap(function()
+			lib.parseCommand(opt.prefix..cmdInput.Text)
+		end)
+	end
 	gui.barDeselect()
 end)
 
