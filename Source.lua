@@ -1243,17 +1243,17 @@ cmd.add({"url"},{"url <link>","Run the script using url"},function(...)
 end)
 
 cmd.add({"loadstring","ls"},{"loadstring <code> (ls)","Run the code using the loadstring"},function(...)
-	local args={...}
-	local code=""
-
-	for i,v in ipairs(args) do
-		if i>1 then
-			code=code.." "..v
-		else
-			code=v
-		end
-	end
-	assert(loadstring(code))()
+    local args = {...}
+    local code = table.concat(args, " ")
+    local fn, err = loadstring(code)
+    if not fn then
+        return false, "Error loading code: " .. tostring(err)
+    end
+    local success, result = pcall(fn)
+    if not success then
+        return false, "Error executing code: " .. tostring(result)
+    end
+    return true, result
 end)
 
 cmd.add({"executor","exec"},{"executor (exec)","Very simple executor"},function()
