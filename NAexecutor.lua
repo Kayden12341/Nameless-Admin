@@ -4,9 +4,9 @@ local c1 = Instance.new("UICorner")
 local d = Instance.new("Frame")
 local c2 = Instance.new("UICorner")
 local s = Instance.new("ScrollingFrame")
-local t = Instance.new("TextBox")
 local ln = Instance.new("TextLabel")
-local l1 = Instance.new("UIListLayout")
+local hl = Instance.new("Frame")
+local t = Instance.new("TextBox")
 local bf = Instance.new("Frame")
 local gl = Instance.new("UIGridLayout")
 local ex = Instance.new("TextButton")
@@ -15,37 +15,12 @@ local cl = Instance.new("TextButton")
 local c3 = Instance.new("UICorner")
 local cp = Instance.new("TextButton")
 local c4 = Instance.new("UICorner")
-local sv = Instance.new("TextButton")
-local c7 = Instance.new("UICorner")
-local ld = Instance.new("TextButton")
-local c8 = Instance.new("UICorner")
-local sh = Instance.new("TextButton")
-local c9 = Instance.new("UICorner")
 local tb = Instance.new("Frame")
 local c6 = Instance.new("UICorner")
 local tt = Instance.new("TextLabel")
 local xt = Instance.new("TextButton")
 local mn = Instance.new("TextButton")
-local st = Instance.new("TextButton")
 local sb = Instance.new("TextLabel")
-local sf = Instance.new("Frame")
-local c10 = Instance.new("UICorner")
-local sl = Instance.new("ScrollingFrame")
-local l2 = Instance.new("UIListLayout")
-local st = Instance.new("TextLabel")
-local sc = Instance.new("TextButton")
-local sd = Instance.new("Frame")
-local c11 = Instance.new("UICorner")
-local svt = Instance.new("TextLabel")
-local sn = Instance.new("TextBox")
-local sb = Instance.new("TextButton")
-local sc = Instance.new("TextButton")
-local ld = Instance.new("Frame")
-local c12 = Instance.new("UICorner")
-local lt = Instance.new("TextLabel")
-local ss = Instance.new("ScrollingFrame")
-local l3 = Instance.new("UIListLayout")
-local lc = Instance.new("TextButton")
 
 e.Name = "AdvExec"
 e.Parent = gethui() or (game:GetService("CoreGui") or game:GetService("Players").LocalPlayer:FindFirstChildWhichIsA("PlayerGui"))
@@ -82,12 +57,14 @@ s.BorderSizePixel = 0
 s.Position = UDim2.new(0, 10, 0, 50)
 s.Size = UDim2.new(0, 480, 0, 230)
 s.ScrollBarThickness = 5
+s.ClipsDescendants = true
 
 ln.Name = "LineNum"
 ln.Parent = s
 ln.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
 ln.BackgroundTransparency = 0.7
 ln.BorderSizePixel = 0
+ln.Position = UDim2.new(0, 0, 0, 0)
 ln.Size = UDim2.new(0, 30, 1, 0)
 ln.Font = Enum.Font.Code
 ln.Text = "1"
@@ -95,12 +72,21 @@ ln.TextColor3 = Color3.fromRGB(150, 150, 150)
 ln.TextSize = 16
 ln.TextYAlignment = Enum.TextYAlignment.Top
 
+hl.Name = "Highlight"
+hl.Parent = s
+hl.BackgroundTransparency = 1
+hl.BorderSizePixel = 0
+hl.Position = UDim2.new(0, 35, 0, 0)
+hl.Size = UDim2.new(0, 440, 0, 230)
+hl.ZIndex = 1
+hl.ClipsDescendants = true
+
 t.Name = "Text"
 t.Parent = s
 t.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 t.BackgroundTransparency = 1
 t.Position = UDim2.new(0, 35, 0, 0)
-t.Size = UDim2.new(0.93, -35, 0, 230)
+t.Size = UDim2.new(0, 440, 0, 230)
 t.ClearTextOnFocus = false
 t.Font = Enum.Font.Code
 t.MultiLine = true
@@ -111,10 +97,8 @@ t.TextSize = 16
 t.TextWrapped = true
 t.TextXAlignment = Enum.TextXAlignment.Left
 t.TextYAlignment = Enum.TextYAlignment.Top
-
-l1.Parent = s
-l1.FillDirection = Enum.FillDirection.Horizontal
-l1.SortOrder = Enum.SortOrder.LayoutOrder
+t.ZIndex = 2
+t.TextTransparency = 0.1
 
 bf.Name = "Buttons"
 bf.Parent = m
@@ -216,13 +200,6 @@ sb.TextColor3 = Color3.fromRGB(100, 255, 100)
 sb.TextSize = 14
 sb.TextXAlignment = Enum.TextXAlignment.Left
 
-local savedScripts = {}
-local scriptHub = {
-    {name = "Infinite Yield", script = "loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()"},
-    {name = "Dex Explorer", script = "loadstring(game:HttpGet('https://raw.githubusercontent.com/infyiff/backup/main/dex.lua'))()"},
-    {name = "Simple Spy", script = "loadstring(game:HttpGet('https://raw.githubusercontent.com/exxtremestuffs/SimpleSpySource/master/SimpleSpy.lua'))()"}
-}
-
 local function u()
     local txt = t.Text
     local lines = 1
@@ -299,6 +276,129 @@ local function r()
     
     m:TweenPosition(UDim2.new(0.308, 0, 0.262, 0), "Out", "Quad", 1, true)
 end
+
+local function highlightSyntax(text)
+    local keywords = {
+        ["and"] = true, ["break"] = true, ["do"] = true, ["else"] = true,
+        ["elseif"] = true, ["end"] = true, ["false"] = true, ["for"] = true,
+        ["function"] = true, ["if"] = true, ["in"] = true, ["local"] = true,
+        ["nil"] = true, ["not"] = true, ["or"] = true, ["repeat"] = true,
+        ["return"] = true, ["then"] = true, ["true"] = true, ["until"] = true, ["while"] = true
+    }
+
+    local globals = {
+        ["print"] = true, ["warn"] = true, ["error"] = true, ["Instance"] = true,
+        ["Vector2"] = true, ["Vector3"] = true, ["CFrame"] = true, ["Color3"] = true,
+        ["UDim2"] = true, ["Enum"] = true, ["task"] = true, ["wait"] = true,
+        ["spawn"] = true, ["pcall"] = true, ["xpcall"] = true, ["loadstring"] = true,
+        ["require"] = true, ["game"] = true, ["workspace"] = true, ["script"] = true
+    }
+
+    local result = ""
+    local inString = false
+    local stringChar = nil
+    local inComment = false
+    local i = 1
+
+    while i <= #text do
+        local char = text:sub(i, i)
+        local nextChar = text:sub(i, i + 1)
+
+        if inComment then
+            if char == "\n" then
+                result = result .. '<font color="rgb(100,100,100)">' .. char .. '</font>'
+                inComment = false
+            else
+                result = result .. '<font color="rgb(100,100,100)">' .. char .. '</font>'
+            end
+        elseif inString then
+            if char == stringChar and text:sub(i - 1, i - 1) ~= "\\" then
+                result = result .. '<font color="rgb(230,180,80)">' .. char .. '</font>'
+                inString = false
+            else
+                result = result .. '<font color="rgb(230,180,80)">' .. char .. '</font>'
+            end
+        elseif nextChar == "--" then
+            result = result .. '<font color="rgb(100,100,100)">' .. nextChar .. '</font>'
+            inComment = true
+            i = i + 1
+        elseif char == "'" or char == '"' then
+            result = result .. '<font color="rgb(230,180,80)">' .. char .. '</font>'
+            inString = true
+            stringChar = char
+        elseif char:match("%w") then
+            local word = ""
+            local j = i
+            while j <= #text and text:sub(j, j):match("[%w_]") do
+                word = word .. text:sub(j, j)
+                j = j + 1
+            end
+
+            if keywords[word] then
+                result = result .. '<font color="rgb(180,100,200)">' .. word .. '</font>'
+            elseif globals[word] then
+                result = result .. '<font color="rgb(100,180,255)">' .. word .. '</font>'
+            elseif tonumber(word) then
+                result = result .. '<font color="rgb(180,180,100)">' .. word .. '</font>'
+            else
+                result = result .. word
+            end
+
+            i = j - 1
+        else
+            result = result .. char
+        end
+
+        i = i + 1
+    end
+
+    return result
+end
+
+local function updateSyntax(editor, highlightFrame)
+    local text = editor.Text
+    local highlightedText = highlightSyntax(text)
+
+    for _, child in pairs(highlightFrame:GetChildren()) do
+        child:Destroy()
+    end
+
+    local highlightLabel = Instance.new("TextLabel")
+    highlightLabel.BackgroundTransparency = 1
+    highlightLabel.Size = UDim2.new(1, 0, 1, 0)
+    highlightLabel.TextXAlignment = Enum.TextXAlignment.Left
+    highlightLabel.TextYAlignment = Enum.TextYAlignment.Top
+    highlightLabel.TextSize = 16
+    highlightLabel.RichText = true
+    highlightLabel.Font = Enum.Font.Code
+    highlightLabel.Text = highlightedText
+    highlightLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+    highlightLabel.Parent = highlightFrame
+end
+
+local function updateEditorSize()
+    local text = t.Text
+    local textSize = game:GetService("TextService"):GetTextSize(
+        text,
+        t.TextSize,
+        t.Font,
+        Vector2.new(math.huge, math.huge)
+    )
+
+    t.Size = UDim2.new(0, math.max(440, textSize.X + 10), 0, math.max(230, textSize.Y + 10))
+    s.CanvasSize = UDim2.new(0, t.Size.X.Offset, 0, t.Size.Y.Offset)
+
+    hl.Size = t.Size
+end
+
+t:GetPropertyChangedSignal("Text"):Connect(function()
+    if t.Text~='' then t.TextTransparency=.7 else t.TextTransparency=0 end
+    updateEditorSize()
+    updateSyntax(t, hl)
+end)
+
+updateSyntax(t, hl)
 
 r()
 u()
