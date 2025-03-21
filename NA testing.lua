@@ -2428,33 +2428,113 @@ cmd.add({"fpsbooster","lowgraphics","boostfps","lowg"},{"fpsbooster (lowgraphics
 	end)
 end)
 
-cmd.add({"antilag","boostfps"},{"antilag (boostfps)","Low Graphics"},function()
-	_G.Settings={
-		Players={
-			["Ignore Me"]=true,
-			["Ignore Others"]=true
-		},
-		Meshes={
-			Destroy=false,
-			LowDetail=true
-		},
-		Images={
-			Invisible=true,
-			LowDetail=true,
-			Destroy=true,
-		},
-		Other={
-			["No Particles"]=true,
-			["No Camera Effects"]=true,
-			["No Explosions"]=true,
-			["No Clothes"]=true,
-			["Low Water Graphics"]=true,
-			["No Shadows"]=true,
-			["Low Rendering"]=true,
-			["Low Quality Parts"]=true
-		}
-	}
-	loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/uuuuuuu/main/low%20detail"))()
+cmd.add({"antilag", "boostfps"}, {"antilag (boostfps)", "Low Graphics"}, function()
+    local ScreenGui = Instance.new("ScreenGui")
+    local Frame = Instance.new("Frame")
+    local Title = Instance.new("TextLabel")
+    local ApplyButton = Instance.new("TextButton")
+    local Options = {}
+
+    if syn and syn.protect_gui then
+        syn.protect_gui(ScreenGui)
+        ScreenGui.Parent = game:GetService("CoreGui")
+    elseif gethui then
+        ScreenGui.Parent = gethui()
+    else
+        ScreenGui.Parent = CoreGui or game.Players.LocalPlayer:WaitForChild("PlayerGui")
+    end
+
+    ScreenGui.Name = "LowDetailGUI"
+
+    Frame.Parent = ScreenGui
+    Frame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    Frame.Size = UDim2.new(0, 300, 0, 400)
+    Frame.Position = UDim2.new(0.5, -150, 0.5, -200)
+
+    Title.Parent = Frame
+    Title.Text = "Low Detail Settings"
+    Title.Size = UDim2.new(1, 0, 0, 50)
+    Title.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Title.Font = Enum.Font.SourceSansBold
+    Title.TextSize = 20
+
+    ApplyButton.Parent = Frame
+    ApplyButton.Text = "Apply Settings"
+    ApplyButton.Size = UDim2.new(1, 0, 0, 50)
+    ApplyButton.Position = UDim2.new(0, 0, 1, -50)
+    ApplyButton.BackgroundColor3 = Color3.fromRGB(30, 150, 30)
+    ApplyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    ApplyButton.Font = Enum.Font.SourceSansBold
+    ApplyButton.TextSize = 20
+
+    local settings = {
+        {name = "Ignore Me", category = "Players", default = true},
+        {name = "Ignore Others", category = "Players", default = true},
+        {name = "Destroy Meshes", category = "Meshes", default = false},
+        {name = "Low Detail Meshes", category = "Meshes", default = true},
+        {name = "Invisible Images", category = "Images", default = true},
+        {name = "Low Detail Images", category = "Images", default = true},
+        {name = "Destroy Images", category = "Images", default = true},
+        {name = "No Particles", category = "Other", default = true},
+        {name = "No Camera Effects", category = "Other", default = true},
+        {name = "No Explosions", category = "Other", default = true},
+        {name = "No Clothes", category = "Other", default = true},
+        {name = "Low Water Graphics", category = "Other", default = true},
+        {name = "No Shadows", category = "Other", default = true},
+        {name = "Low Rendering", category = "Other", default = true},
+        {name = "Low Quality Parts", category = "Other", default = true},
+    }
+
+    for i, setting in ipairs(settings) do
+        local Toggle = Instance.new("TextButton")
+        Toggle.Parent = Frame
+        Toggle.Text = setting.name .. ": " .. (setting.default and "ON" or "OFF")
+        Toggle.Size = UDim2.new(1, 0, 0, 30)
+        Toggle.Position = UDim2.new(0, 0, 0, 50 + (i - 1) * 30)
+        Toggle.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+        Toggle.TextColor3 = Color3.fromRGB(255, 255, 255)
+        Toggle.Font = Enum.Font.SourceSans
+        Toggle.TextSize = 16
+
+        Options[setting.name] = setting.default
+
+        Toggle.MouseButton1Click:Connect(function()
+            Options[setting.name] = not Options[setting.name]
+            Toggle.Text = setting.name .. ": " .. (Options[setting.name] and "ON" or "OFF")
+        end)
+    end
+
+    ApplyButton.MouseButton1Click:Connect(function()
+        _G.Settings = {
+            Players = {
+                ["Ignore Me"] = Options["Ignore Me"],
+                ["Ignore Others"] = Options["Ignore Others"],
+            },
+            Meshes = {
+                Destroy = Options["Destroy Meshes"],
+                LowDetail = Options["Low Detail Meshes"],
+            },
+            Images = {
+                Invisible = Options["Invisible Images"],
+                LowDetail = Options["Low Detail Images"],
+                Destroy = Options["Destroy Images"],
+            },
+            Other = {
+                ["No Particles"] = Options["No Particles"],
+                ["No Camera Effects"] = Options["No Camera Effects"],
+                ["No Explosions"] = Options["No Explosions"],
+                ["No Clothes"] = Options["No Clothes"],
+                ["Low Water Graphics"] = Options["Low Water Graphics"],
+                ["No Shadows"] = Options["No Shadows"],
+                ["Low Rendering"] = Options["Low Rendering"],
+                ["Low Quality Parts"] = Options["Low Quality Parts"],
+            },
+        }
+
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/uuuuuuu/main/low%20detail"))()
+        ScreenGui:Destroy()
+    end)
 end)
 
 local annoyloop=false
