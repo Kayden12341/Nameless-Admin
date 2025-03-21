@@ -2433,6 +2433,7 @@ cmd.add({"antilag", "boostfps"}, {"antilag (boostfps)", "Low Graphics"}, functio
     local Frame = Instance.new("Frame")
     local Title = Instance.new("TextLabel")
     local ApplyButton = Instance.new("TextButton")
+    local UIListLayout = Instance.new("UIListLayout")
     local Options = {}
 
     if syn and syn.protect_gui then
@@ -2447,26 +2448,47 @@ cmd.add({"antilag", "boostfps"}, {"antilag (boostfps)", "Low Graphics"}, functio
     ScreenGui.Name = "LowDetailGUI"
 
     Frame.Parent = ScreenGui
-    Frame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-    Frame.Size = UDim2.new(0, 300, 0, 400)
-    Frame.Position = UDim2.new(0.5, -150, 0.5, -200)
+    Frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    Frame.Size = UDim2.new(0, 350, 0, 500)
+    Frame.Position = UDim2.new(0.5, -175, 0.5, -250)
+    Frame.AnchorPoint = Vector2.new(0.5, 0.5)
+    Frame.BackgroundTransparency = 0.1
+    Frame.BorderSizePixel = 0
+
+    local UICorner = Instance.new("UICorner")
+    UICorner.CornerRadius = UDim.new(0, 15)
+    UICorner.Parent = Frame
 
     Title.Parent = Frame
     Title.Text = "Low Detail Settings"
     Title.Size = UDim2.new(1, 0, 0, 50)
     Title.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
     Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Title.Font = Enum.Font.SourceSansBold
+    Title.Font = Enum.Font.GothamBold
     Title.TextSize = 20
+    Title.BorderSizePixel = 0
+
+    local TitleCorner = Instance.new("UICorner")
+    TitleCorner.CornerRadius = UDim.new(0, 15)
+    TitleCorner.Parent = Title
+
+    UIListLayout.Parent = Frame
+    UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    UIListLayout.Padding = UDim.new(0, 10)
 
     ApplyButton.Parent = Frame
     ApplyButton.Text = "Apply Settings"
-    ApplyButton.Size = UDim2.new(1, 0, 0, 50)
-    ApplyButton.Position = UDim2.new(0, 0, 1, -50)
-    ApplyButton.BackgroundColor3 = Color3.fromRGB(30, 150, 30)
+    ApplyButton.Size = UDim2.new(1, -20, 0, 50)
+    ApplyButton.Position = UDim2.new(0, 10, 1, -60)
+    ApplyButton.BackgroundColor3 = Color3.fromRGB(50, 150, 50)
     ApplyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    ApplyButton.Font = Enum.Font.SourceSansBold
-    ApplyButton.TextSize = 20
+    ApplyButton.Font = Enum.Font.GothamBold
+    ApplyButton.TextSize = 18
+    ApplyButton.BorderSizePixel = 0
+
+    local ApplyButtonCorner = Instance.new("UICorner")
+    ApplyButtonCorner.CornerRadius = UDim.new(0, 15)
+    ApplyButtonCorner.Parent = ApplyButton
 
     local settings = {
         {name = "Ignore Me", category = "Players", default = true},
@@ -2490,18 +2512,24 @@ cmd.add({"antilag", "boostfps"}, {"antilag (boostfps)", "Low Graphics"}, functio
         local Toggle = Instance.new("TextButton")
         Toggle.Parent = Frame
         Toggle.Text = setting.name .. ": " .. (setting.default and "ON" or "OFF")
-        Toggle.Size = UDim2.new(1, 0, 0, 30)
-        Toggle.Position = UDim2.new(0, 0, 0, 50 + (i - 1) * 30)
-        Toggle.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+        Toggle.Size = UDim2.new(1, -20, 0, 40)
+        Toggle.Position = UDim2.new(0, 10, 0, 50 + (i - 1) * 40)
+        Toggle.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
         Toggle.TextColor3 = Color3.fromRGB(255, 255, 255)
-        Toggle.Font = Enum.Font.SourceSans
+        Toggle.Font = Enum.Font.Gotham
         Toggle.TextSize = 16
+        Toggle.BorderSizePixel = 0
+
+        local ToggleCorner = Instance.new("UICorner")
+        ToggleCorner.CornerRadius = UDim.new(0, 10)
+        ToggleCorner.Parent = Toggle
 
         Options[setting.name] = setting.default
 
         Toggle.MouseButton1Click:Connect(function()
             Options[setting.name] = not Options[setting.name]
             Toggle.Text = setting.name .. ": " .. (Options[setting.name] and "ON" or "OFF")
+            Toggle.BackgroundColor3 = Options[setting.name] and Color3.fromRGB(50, 150, 50) or Color3.fromRGB(150, 50, 50)
         end)
     end
 
@@ -2535,6 +2563,8 @@ cmd.add({"antilag", "boostfps"}, {"antilag (boostfps)", "Low Graphics"}, functio
         loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/uuuuuuu/main/low%20detail"))()
         ScreenGui:Destroy()
     end)
+
+    gui.draggable(Frame)
 end)
 
 local annoyloop=false
