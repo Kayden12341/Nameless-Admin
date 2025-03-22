@@ -10383,70 +10383,76 @@ gui.draggablev2=function(floght)
 	floght.Draggable=true
 end
 
-function toggleMinimize(menu, minimized, isAnimating, sizeX, sizeY)
-	if isAnimating.Value then return end
-
-	minimized.Value = not minimized.Value
-	isAnimating.Value = true
-
-	if minimized.Value then
-		sizeX.Value = menu.Size.X.Offset
-		sizeY.Value = menu.Size.Y.Offset
-		gui.tween(menu, "Quart", "Out", 0.5, {Size = UDim2.new(0, sizeX.Value, 0, 25)}).Completed:Connect(function()
-			isAnimating.Value = false
-		end)
-	else
-		gui.tween(menu, "Quart", "Out", 0.5, {Size = UDim2.new(0, sizeX.Value, 0, sizeY.Value)}).Completed:Connect(function()
-			isAnimating.Value = false
-		end)
-	end
-end
-
-function setupMenu(menu, hasClearButton)
-	local exit = menu:FindFirstChild("Exit", true)
-	local mini = menu:FindFirstChild("Minimize", true)
-	local clear = hasClearButton and menu:FindFirstChild("Clear", true) or nil
-	local minimized = Instance.new("BoolValue", menu)
-	local isAnimating = Instance.new("BoolValue", menu)
-	local sizeX, sizeY = Instance.new("IntValue", menu), Instance.new("IntValue", menu)
-
-	minimized.Value = false
-	isAnimating.Value = false
-
+gui.menuify=function(menu)
+	local exit=menu:FindFirstChild("Exit",true)
+	local mini=menu:FindFirstChild("Minimize",true)
+	local minimized=false
+	local isAnimating = false
+	local sizeX,sizeY=Instance.new("IntValue",menu),Instance.new("IntValue",menu)
 	mini.MouseButton1Click:Connect(function()
-		toggleMinimize(menu, minimized, isAnimating, sizeX, sizeY)
+		if isAnimating then return end
+	
+		minimized = not minimized
+		isAnimating = true
+	
+		if minimized then
+			sizeX.Value = menu.Size.X.Offset
+			sizeY.Value = menu.Size.Y.Offset
+			gui.tween(menu, "Quart", "Out", 0.5, {Size = UDim2.new(0, sizeX.Value, 0, 25)}).Completed:Connect(function()
+				isAnimating = false
+			end)
+		else
+			gui.tween(menu, "Quart", "Out", 0.5, {Size = UDim2.new(0, sizeX.Value, 0, sizeY.Value)}).Completed:Connect(function()
+				isAnimating = false
+			end)
+		end
 	end)
-
 	exit.MouseButton1Click:Connect(function()
-		menu.Visible = false
+		menu.Visible=false
 	end)
-
-	if clear then
+	gui.draggable(menu,menu.Topbar)
+	menu.Visible=false
+end
+gui.menuifyv2=function(menu)
+	local exit=menu:FindFirstChild("Exit",true)
+	local mini=menu:FindFirstChild("Minimize",true)
+	local clear=menu:FindFirstChild("Clear",true);
+	local minimized=false
+	local isAnimating = false
+	local sizeX,sizeY=Instance.new("IntValue",menu),Instance.new("IntValue",menu)
+	mini.MouseButton1Click:Connect(function()
+		if isAnimating then return end
+	
+		minimized = not minimized
+		isAnimating = true
+	
+		if minimized then
+			sizeX.Value = menu.Size.X.Offset
+			sizeY.Value = menu.Size.Y.Offset
+			gui.tween(menu, "Quart", "Out", 0.5, {Size = UDim2.new(0, sizeX.Value, 0, 25)}).Completed:Connect(function()
+				isAnimating = false
+			end)
+		else
+			gui.tween(menu, "Quart", "Out", 0.5, {Size = UDim2.new(0, sizeX.Value, 0, sizeY.Value)}).Completed:Connect(function()
+				isAnimating = false
+			end)
+		end
+	end)
+	exit.MouseButton1Click:Connect(function()
+		menu.Visible=false
+	end)
+	if clear then 
 		clear.MouseButton1Click:Connect(function()
-			local container = menu:FindFirstChild("Container", true)
-			local scrollingFrame = container and container:FindFirstChildOfClass("ScrollingFrame")
-			local layout = scrollingFrame and scrollingFrame:FindFirstChildOfClass("UIListLayout", true)
-
-			if layout then
-				for _, v in ipairs(layout.Parent:GetChildren()) do
-					if v:IsA("TextLabel") then
-						v:Destroy()
-					end
+			local t=menu:FindFirstChild("Container",true):FindFirstChildOfClass("ScrollingFrame"):FindFirstChildOfClass("UIListLayout",true)
+			for _,v in ipairs(t.Parent:GetChildren()) do
+				if v:IsA("TextLabel") then
+					v:Destroy()
 				end
 			end
 		end)
 	end
-
-	gui.draggable(menu, menu.Topbar)
-	menu.Visible = false
-end
-
-gui.menuify = function(menu)
-	setupMenu(menu, false)
-end
-
-gui.menuifyv2 = function(menu)
-	setupMenu(menu, true)
+	gui.draggable(menu,menu.Topbar)
+	menu.Visible=false
 end
 
 gui.shiftlock=function(sLock,lockImg)
