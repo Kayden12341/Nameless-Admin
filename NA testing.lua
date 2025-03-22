@@ -3147,28 +3147,7 @@ cmd.add({"triggerbot","tbot"},{"triggerbot (tbot)","Executes a script that autom
 	end
 
 	-- Functions
-	function setMouseToMiddle()
-		local screenWidth = workspace.CurrentCamera.ViewportSize.X
-		local screenHeight = workspace.CurrentCamera.ViewportSize.Y
-		local middleX = screenWidth / 2
-		local middleY = screenHeight / 2
-	
-		local mouse = game.Players.LocalPlayer:GetMouse()
-	
-		if setreadonly then
-			setreadonly(mouse, "X", false)
-			setreadonly(mouse, "Y", false)
-	
-			mouse.X = middleX
-			mouse.Y = middleY
-	
-			setreadonly(mouse, "X", true)
-			setreadonly(mouse, "Y", true)
-		end
-	end
-	
 	local function Click()
-		setMouseToMiddle()
 		mouse1click()
 	end
 
