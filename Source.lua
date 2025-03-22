@@ -690,100 +690,100 @@ function placeName()
 end
 
 function removeESP()
-	for i,c in pairs(COREGUI:GetChildren()) do
-		if string.sub(c.Name,-4)=='_ESP' then
-			c:Destroy()
-		end
-	end
+    for _, child in pairs(COREGUI:GetChildren()) do
+        if string.sub(child.Name, -4) == '_ESP' then
+            child:Destroy()
+        end
+    end
 end
 
-function ESP(plr)
-	task.spawn(function()
-		for i,v in pairs(COREGUI:GetChildren()) do
-			if v.Name==plr.Name..'_ESP' then
-				v:Destroy()
-			end
-		end
-		wait()
+function ESP(player)
+    task.spawn(function()
+        for _, child in pairs(COREGUI:GetChildren()) do
+            if child.Name == player.Name .. '_ESP' then
+                child:Destroy()
+            end
+        end
+        task.wait()
 
-		function makeESP()
-			if plr.Character and plr.Name~=Players.LocalPlayer.Name and not COREGUI:FindFirstChild(plr.Name..'_ESP') then
-				local ESPholder=Instance.new("Folder")
-				ESPholder.Name=plr.Name..'_ESP'
-				ESPholder.Parent=COREGUI
-				repeat wait(1) until plr.Character and getRoot(plr.Character) and plr.Character:FindFirstChildOfClass("Humanoid")
+        local function createESP()
+            if player.Character and player.Name ~= Players.LocalPlayer.Name and not COREGUI:FindFirstChild(player.Name .. '_ESP') then
+                local espHolder = Instance.new("Folder")
+                espHolder.Name = player.Name .. '_ESP'
+                espHolder.Parent = COREGUI
 
-				local a=Instance.new("Highlight")
-				a.Name=plr.Name
-				a.Parent=ESPholder
-				a.Adornee=plr.Character
-				a.FillTransparency=0.45
-				a.FillColor=Color3.fromRGB(0,255,0)
+                repeat task.wait(1) until player.Character and getRoot(player.Character) and player.Character:FindFirstChildOfClass("Humanoid")
 
-				if plr.Character and plr.Character:FindFirstChild('Head') then
-					local BillboardGui=Instance.new("BillboardGui")
-					local TextLabel=Instance.new("TextLabel")
-					BillboardGui.Adornee=plr.Character:FindFirstChild("Head")
-					BillboardGui.Name=plr.Name
-					BillboardGui.Parent=ESPholder
-					BillboardGui.Size=UDim2.new(0,100,0,150)
-					BillboardGui.StudsOffset=Vector3.new(0,1,0)
-					BillboardGui.AlwaysOnTop=true
-					TextLabel.Parent=BillboardGui
-					TextLabel.BackgroundTransparency=1
-					TextLabel.Position=UDim2.new(0,0,0,-50)
-					TextLabel.Size=UDim2.new(0,100,0,100)
-					TextLabel.Font=Enum.Font.SourceSansSemibold
-					TextLabel.TextSize=17
-					TextLabel.TextColor3=Color3.new(12,4,20)
-					TextLabel.TextStrokeTransparency=0.3
-					TextLabel.TextYAlignment=Enum.TextYAlignment.Bottom
-					TextLabel.Text='@'..plr.Name..' | '..plr.DisplayName..''
-					TextLabel.ZIndex=10
+                local highlight = Instance.new("Highlight")
+                highlight.Name = player.Name
+                highlight.Parent = espHolder
+                highlight.Adornee = player.Character
+                highlight.FillTransparency = 0.3
+                highlight.OutlineTransparency = 0.1
+                highlight.FillColor = Color3.fromRGB(0, 255, 0)
 
-					local espLoopFunc
-					espLoopFunc = RunService.RenderStepped:Connect(function()
-						if COREGUI:FindFirstChild(plr.Name..'_ESP') then
-							if plr.Character and getRoot(plr.Character) and plr.Character:FindFirstChildOfClass("Humanoid") and Players.LocalPlayer.Character and getRoot(Players.LocalPlayer.Character) and Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
-								local pos=math.floor((getRoot(Players.LocalPlayer.Character).Position-getRoot(plr.Character).Position).magnitude)
-								TextLabel.Text='@'..plr.Name..' | '..plr.DisplayName ..' | Studs: '..pos
-								a.Adornee=plr.Character
-								BillboardGui.Adornee=plr.Character:FindFirstChild("Head")
-							end
-						else
-							espLoopFunc:Disconnect()
-						end
-					end)
+                if player.Character:FindFirstChild("Head") then
+                    local billboardGui = Instance.new("BillboardGui")
+                    local textLabel = Instance.new("TextLabel")
 
-					ESPholder:SetAttribute("LoopConnection", true)
-				end
-			end
-		end
+                    billboardGui.Adornee = player.Character:FindFirstChild("Head")
+                    billboardGui.Name = player.Name
+                    billboardGui.Parent = espHolder
+                    billboardGui.Size = UDim2.new(0, 200, 0, 100)
+                    billboardGui.StudsOffset = Vector3.new(0, 2, 0)
+                    billboardGui.AlwaysOnTop = true
 
-		makeESP()
+                    textLabel.Parent = billboardGui
+                    textLabel.BackgroundTransparency = 1
+                    textLabel.Size = UDim2.new(1, 0, 1, 0)
+                    textLabel.Font = Enum.Font.GothamBold
+                    textLabel.TextSize = 14
+                    textLabel.TextStrokeTransparency = 0.2
+                    textLabel.TextYAlignment = Enum.TextYAlignment.Center
 
-		local addedConnection
-		addedConnection = plr.CharacterAdded:Connect(function()
-			if not ESPenabled then
-				addedConnection:Disconnect()
-				return
-			end
+                    local espLoop
+                    espLoop = RunService.RenderStepped:Connect(function()
+                        if COREGUI:FindFirstChild(player.Name .. '_ESP') then
+                            if player.Character and getRoot(player.Character) and player.Character:FindFirstChildOfClass("Humanoid") and Players.LocalPlayer.Character and getRoot(Players.LocalPlayer.Character) and Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
+                                local distance = math.floor((getRoot(Players.LocalPlayer.Character).Position - getRoot(player.Character).Position).magnitude)
+                                local health = math.floor(player.Character:FindFirstChildOfClass("Humanoid").Health)
+                                local maxHealth = math.floor(player.Character:FindFirstChildOfClass("Humanoid").MaxHealth)
+                                local teamColor = player.Team and player.Team.TeamColor.Color or Color3.fromRGB(255, 255, 255)
 
-			for i,v in pairs(COREGUI:GetChildren()) do
-				if v.Name==plr.Name..'_ESP' then
-					v:Destroy()
-				end
-			end
+                                local displayName = player.DisplayName == player.Name and '@' .. player.Name or player.DisplayName .. ' (@' .. player.Name .. ')'
 
-			task.wait(1)
+                                textLabel.Text = string.format("%s\nHealth: %d/%d\nStuds: %d\nTeam: %s", displayName, health, maxHealth, distance, player.Team and player.Team.Name or "None")
+                                textLabel.TextColor3 = distance < 50 and Color3.fromRGB(255, 0, 0) or distance < 100 and Color3.fromRGB(255, 165, 0) or Color3.fromRGB(0, 255, 0)
 
-			makeESP()
-		end)
+                                highlight.FillColor = teamColor
+                            end
+                        else
+                            espLoop:Disconnect()
+                        end
+                    end)
+                end
+            end
+        end
 
-		if COREGUI:FindFirstChild(plr.Name..'_ESP') then
-			COREGUI:FindFirstChild(plr.Name..'_ESP'):SetAttribute("AddedConnection", true)
-		end
-	end)
+        createESP()
+
+        local characterAddedConnection
+        characterAddedConnection = player.CharacterAdded:Connect(function()
+            if not ESPenabled then
+                characterAddedConnection:Disconnect()
+                return
+            end
+
+            for _, child in pairs(COREGUI:GetChildren()) do
+                if child.Name == player.Name .. '_ESP' then
+                    child:Destroy()
+                end
+            end
+
+            task.wait(1)
+            createESP()
+        end)
+    end)
 end
 
 
@@ -924,114 +924,113 @@ plr=cmdlp
 local cmdm=plr:GetMouse()
 local goofyFLY=nil
 function sFLY(vfly)
-	while not cmdlp or not cmdlp.Character or not cmdlp.Character:FindFirstChild('HumanoidRootPart') or not cmdlp.Character:FindFirstChild('Humanoid') or not cmdm do
-		wait()
-	end 
-	if goofyFLY then goofyFLY:Destroy() end
-	goofyFLY=Instance.new("Part",game:GetService("Workspace"))
-	goofyFLY.Name=randomString()
-	goofyFLY.Size, goofyFLY.CanCollide = Vector3.new(0.05, 0.05, 0.05), false
-	local CONTROL={F=0,B=0,L=0,R=0,Q=0,E=0}
-	local lCONTROL={F=0,B=0,L=0,R=0,Q=0,E=0}
-	local SPEED=0
-	function FLY()
-		FLYING=true
-		local BG=Instance.new('BodyGyro',goofyFLY)
-		local BV=Instance.new('BodyVelocity',goofyFLY)
-		local Weld=Instance.new("Weld",goofyFLY)
-		BG.Name=randomString()
-		BV.Name=randomString()
-		Weld.Name=randomString()
-		Weld.Part0, Weld.Part1, Weld.C0 = goofyFLY, cmdlp.Character:FindFirstChildWhichIsA("Humanoid").RootPart, CFrame.new(0, 0, 0)
-		BG.P=9e4
-		BG.maxTorque=Vector3.new(9e9,9e9,9e9)
-		BG.cframe=goofyFLY.CFrame
-		BV.velocity=Vector3.new(0,0,0)
-		BV.maxForce=Vector3.new(9e9,9e9,9e9)
-		spawn(function()
-			while FLYING do
-				if not vfly then
-					cmdlp.Character:FindFirstChild("Humanoid").PlatformStand=true
-				end
-				if CONTROL.L+CONTROL.R~=0 or CONTROL.F+CONTROL.B~=0 or CONTROL.Q+CONTROL.E~=0 then
-					SPEED=50
-				elseif not (CONTROL.L+CONTROL.R~=0 or CONTROL.F+CONTROL.B~=0 or CONTROL.Q+CONTROL.E~=0) and SPEED~=0 then
-					SPEED=0
-				end
-				if (CONTROL.L+CONTROL.R)~=0 or (CONTROL.F+CONTROL.B)~=0 or (CONTROL.Q+CONTROL.E)~=0 then
-					BV.velocity=((game:GetService("Workspace").CurrentCamera.CoordinateFrame.lookVector*(CONTROL.F+CONTROL.B))+((game:GetService("Workspace").CurrentCamera.CoordinateFrame*CFrame.new(CONTROL.L+CONTROL.R,(CONTROL.F+CONTROL.B+CONTROL.Q+CONTROL.E)*0.2,0).p)-game:GetService("Workspace").CurrentCamera.CoordinateFrame.p))*SPEED
-					lCONTROL={F=CONTROL.F,B=CONTROL.B,L=CONTROL.L,R=CONTROL.R}
-				elseif (CONTROL.L+CONTROL.R)==0 and (CONTROL.F+CONTROL.B)==0 and (CONTROL.Q+CONTROL.E)==0 and SPEED~=0 then
-					BV.velocity=((game:GetService("Workspace").CurrentCamera.CoordinateFrame.lookVector*(lCONTROL.F+lCONTROL.B))+((game:GetService("Workspace").CurrentCamera.CoordinateFrame*CFrame.new(lCONTROL.L+lCONTROL.R,(lCONTROL.F+lCONTROL.B+CONTROL.Q+CONTROL.E)*0.2,0).p)-game:GetService("Workspace").CurrentCamera.CoordinateFrame.p))*SPEED
-				else
-					BV.velocity=Vector3.new(0,0,0)
-				end
-				BG.cframe=game:GetService("Workspace").CurrentCamera.CoordinateFrame
-				wait()
-			end
-			CONTROL={F=0,B=0,L=0,R=0,Q=0,E=0}
-			lCONTROL={F=0,B=0,L=0,R=0,Q=0,E=0}
-			SPEED=0
-			BG:destroy()
-			BV:destroy()
-			cmdlp.Character.Humanoid.PlatformStand=false
-		end)
-	end
-	cmdm.KeyDown:connect(function(KEY)
-		if KEY:lower()=='w' then
-			if vfly then
-				CONTROL.F=speedofthevfly
-			else
-				CONTROL.F=speedofthefly
-			end
-		elseif KEY:lower()=='s' then
-			if vfly then
-				CONTROL.B=-speedofthevfly
-			else
-				CONTROL.B=-speedofthefly
-			end
-		elseif KEY:lower()=='a' then
-			if vfly then
-				CONTROL.L=-speedofthevfly
-			else
-				CONTROL.L=-speedofthefly
-			end
-		elseif KEY:lower()=='d' then
-			if vfly then
-				CONTROL.R=speedofthevfly
-			else
-				CONTROL.R=speedofthefly
-			end
-		elseif KEY:lower()=='y' then
-			if vfly then
-				CONTROL.Q=speedofthevfly*2
-			else
-				CONTROL.Q=speedofthefly*2
-			end
-		elseif KEY:lower()=='t' then
-			if vfly then
-				CONTROL.E=-speedofthevfly*2
-			else
-				CONTROL.E=-speedofthefly*2
-			end
-		end
-	end)
-	cmdm.KeyUp:connect(function(KEY)
-		if KEY:lower()=='w' then
-			CONTROL.F=0
-		elseif KEY:lower()=='s' then
-			CONTROL.B=0
-		elseif KEY:lower()=='a' then
-			CONTROL.L=0
-		elseif KEY:lower()=='d' then
-			CONTROL.R=0
-		elseif KEY:lower()=='y' then
-			CONTROL.Q=0
-		elseif KEY:lower()=='t' then
-			CONTROL.E=0
-		end
-	end)
-	FLY()
+    while not cmdlp or not cmdlp.Character or not cmdlp.Character:FindFirstChild('HumanoidRootPart') or not cmdlp.Character:FindFirstChild('Humanoid') or not cmdm do
+        wait()
+    end
+
+    if goofyFLY then goofyFLY:Destroy() end
+
+    goofyFLY = Instance.new("Part", game:GetService("Workspace"))
+    goofyFLY.Name = randomString()
+    goofyFLY.Size = Vector3.new(0.05, 0.05, 0.05)
+    goofyFLY.CanCollide = false
+
+    local CONTROL = { F = 0, B = 0, L = 0, R = 0, Q = 0, E = 0 }
+    local lCONTROL = { F = 0, B = 0, L = 0, R = 0, Q = 0, E = 0 }
+    local SPEED = 0
+
+    local function FLY()
+        FLYING = true
+
+        local BG = Instance.new('BodyGyro', goofyFLY)
+        local BV = Instance.new('BodyVelocity', goofyFLY)
+        local Weld = Instance.new("Weld", goofyFLY)
+
+        BG.Name = randomString()
+        BV.Name = randomString()
+        Weld.Name = randomString()
+        Weld.Part0 = goofyFLY
+        Weld.Part1 = cmdlp.Character:FindFirstChildWhichIsA("Humanoid").RootPart
+        Weld.C0 = CFrame.new(0, 0, 0)
+        BG.P = 9e4
+        BG.maxTorque = Vector3.new(9e9, 9e9, 9e9)
+        BG.cframe = goofyFLY.CFrame
+        BV.velocity = Vector3.new(0, 0, 0)
+        BV.maxForce = Vector3.new(9e9, 9e9, 9e9)
+
+        spawn(function()
+            while FLYING do
+                if not vfly then
+                    cmdlp.Character:FindFirstChild("Humanoid").PlatformStand = true
+                end
+
+                if CONTROL.L + CONTROL.R ~= 0 or CONTROL.F + CONTROL.B ~= 0 or CONTROL.Q + CONTROL.E ~= 0 then
+                    SPEED = 50
+                elseif SPEED ~= 0 then
+                    SPEED = 0
+                end
+
+                if CONTROL.L + CONTROL.R ~= 0 or CONTROL.F + CONTROL.B ~= 0 or CONTROL.Q + CONTROL.E ~= 0 then
+                    BV.velocity = ((game:GetService("Workspace").CurrentCamera.CoordinateFrame.lookVector * (CONTROL.F + CONTROL.B)) +
+                        ((game:GetService("Workspace").CurrentCamera.CoordinateFrame * CFrame.new(CONTROL.L + CONTROL.R, (CONTROL.F + CONTROL.B + CONTROL.Q + CONTROL.E) * 0.2, 0).p) -
+                        game:GetService("Workspace").CurrentCamera.CoordinateFrame.p)) * SPEED
+                    lCONTROL = { F = CONTROL.F, B = CONTROL.B, L = CONTROL.L, R = CONTROL.R }
+                elseif SPEED ~= 0 then
+                    BV.velocity = ((game:GetService("Workspace").CurrentCamera.CoordinateFrame.lookVector * (lCONTROL.F + lCONTROL.B)) +
+                        ((game:GetService("Workspace").CurrentCamera.CoordinateFrame * CFrame.new(lCONTROL.L + lCONTROL.R, (lCONTROL.F + lCONTROL.B + CONTROL.Q + CONTROL.E) * 0.2, 0).p) -
+                        game:GetService("Workspace").CurrentCamera.CoordinateFrame.p)) * SPEED
+                else
+                    BV.velocity = Vector3.new(0, 0, 0)
+                end
+
+                BG.cframe = game:GetService("Workspace").CurrentCamera.CoordinateFrame
+                wait()
+            end
+
+            CONTROL = { F = 0, B = 0, L = 0, R = 0, Q = 0, E = 0 }
+            lCONTROL = { F = 0, B = 0, L = 0, R = 0, Q = 0, E = 0 }
+            SPEED = 0
+            BG:Destroy()
+            BV:Destroy()
+            cmdlp.Character.Humanoid.PlatformStand = false
+        end)
+    end
+
+    cmdm.KeyDown:Connect(function(KEY)
+        local key = KEY:lower()
+        if key == 'w' then
+            CONTROL.F = vfly and speedofthevfly or speedofthefly
+        elseif key == 's' then
+            CONTROL.B = vfly and -speedofthevfly or -speedofthefly
+        elseif key == 'a' then
+            CONTROL.L = vfly and -speedofthevfly or -speedofthefly
+        elseif key == 'd' then
+            CONTROL.R = vfly and speedofthevfly or speedofthefly
+        elseif key == 'y' then
+            CONTROL.Q = vfly and speedofthevfly * 2 or speedofthefly * 2
+        elseif key == 't' then
+            CONTROL.E = vfly and -speedofthevfly * 2 or -speedofthefly * 2
+        end
+    end)
+
+    cmdm.KeyUp:Connect(function(KEY)
+        local key = KEY:lower()
+        if key == 'w' then
+            CONTROL.F = 0
+        elseif key == 's' then
+            CONTROL.B = 0
+        elseif key == 'a' then
+            CONTROL.L = 0
+        elseif key == 'd' then
+            CONTROL.R = 0
+        elseif key == 'y' then
+            CONTROL.Q = 0
+        elseif key == 't' then
+            CONTROL.E = 0
+        end
+    end)
+
+    FLY()
 end
 
 
@@ -1040,27 +1039,6 @@ spawn(function()
 	repeat wait() until getChar()
 	tool=getBp():FindFirstChildOfClass("Tool") or getChar():FindFirstChildOfClass("Tool") or nil
 end)
-
-function attachTool(tool,cf)
-	for i,v in pairs(tool:GetDescendants()) do
-		if not (v:IsA("BasePart") or v:IsA("Mesh") or v:IsA("SpecialMesh")) then
-			v:Destroy()
-		end
-	end
-	wait()
-	getChar().Humanoid.Name=1
-	local l=getChar()["1"]:Clone()
-	l.Parent=getChar()
-	l.Name="Humanoid"
-
-	getChar()["1"]:Destroy()
-	game:GetService("Workspace").CurrentCamera.CameraSubject=getChar()
-	getChar().Animate.Disabled=true
-	wait();
-	getChar().Humanoid.DisplayDistanceType="None"
-
-	tool.Parent=getChar()
-end
 
 local nc=false
 local ncLoop=nil
@@ -1290,15 +1268,8 @@ end
 
 cmd.add({"url"},{"url <link>","Run the script using url"},function(...)
 	local args={...}
-	local code=""
+	local code=table.concat(args, " ")
 
-	for i,v in ipairs(args) do
-		if i>1 then
-			code=code.." "..v
-		else
-			code=v
-		end
-	end
 	loadstring(game:HttpGet(code))()
 end,true)
 
@@ -2384,7 +2355,7 @@ cmd.add({"reach", "swordreach"}, {"reach [number] (swordreach)", "Extends sword 
     
     toolHnld.Massless = true
     toolHnld.Size = Vector3.new(toolHnld.Size.X, toolHnld.Size.Y, reachsize)
-end)
+end,true)
 
 cmd.add({"boxreach", "aura"}, {"boxreach [number] (aura)", "Creates a box-shaped hitbox around your tool"}, function(reachsize)
     reachsize = tonumber(reachsize) or 25
@@ -2420,7 +2391,7 @@ cmd.add({"boxreach", "aura"}, {"boxreach [number] (aura)", "Creates a box-shaped
     
     toolHnld.Massless = true
     toolHnld.Size = Vector3.new(reachsize, reachsize, reachsize)
-end)
+end,true)
 
 cmd.add({"resetreach", "normalreach", "unreach"}, {"resetreach (normalreach, unreach)", "Resets tool to normal size"}, function()
     local char = getChar()
@@ -3240,121 +3211,95 @@ cmd.add({"harked","comet"},{"harked (comet)","Executes Comet which is like harke
 	loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/Nameless-Admin/main/comet"))();
 end)
 
-cmd.add({"triggerbot","tbot"},{"triggerbot (tbot)","Executes a script that automatically clicks the mouse when the mouse is on a player"},function()
-	ToggleKey = Enum.KeyCode.Q
+cmd.add({"triggerbot", "tbot"}, {"triggerbot (tbot)", "Executes a script that automatically clicks the mouse when the mouse is on a player"}, function()
+    local ToggleKey = Enum.KeyCode.Q
+    local TriggerDistance = 100
+    local FieldOfView = 10
 
-	Player = game:GetService("Players").LocalPlayer
-	Char = Player.Character or Player.CharacterAdded:Wait()
-	Root = Char:FindFirstChild("HumanoidRootPart") or Char:WaitForChild("HumanoidRootPart")
-	local Camera = game:GetService("Workspace").CurrentCamera
-	local Mouse = Player:GetMouse()
-	local PlayerTeam = Player.Team
-	local Neutral = Player.Neutral
-	local UIS = game:GetService("UserInputService")
-	local Toggled = false
+    local Players = game:GetService("Players")
+    local RunService = game:GetService("RunService")
+    local UIS = game:GetService("UserInputService")
+    local Camera = game:GetService("Workspace").CurrentCamera
 
-	---==GUI==---
-	local GUI = Instance.new("ScreenGui")
-	local On = Instance.new("TextLabel")
-	local uicorner = Instance.new("UICorner")
-	GUI.Name = "GUI"
-	GUI.Parent = game:GetService("CoreGui")
-	On.Name = "On"
-	On.Parent = GUI
-	On.BackgroundColor3 = Color3.fromRGB(12, 4, 20)
-	On.BackgroundTransparency = 0.14
-	On.BorderSizePixel = 0
-	On.Position = UDim2.new(0.88, 0, 0.33, 0)
-	On.Size = UDim2.new(0, 160, 0, 20)
-	On.Font = Enum.Font.SourceSans
-	On.Text = "TriggerBot On: false"
-	On.TextColor3 = Color3.new(1, 1, 1)
-	On.TextScaled = true
-	On.TextSize = 14
-	On.TextWrapped = true
-	uicorner.Parent = On
-	---End Gui---
+    local Player = Players.LocalPlayer
+    local Mouse = Player:GetMouse()
+    local Toggled = false
 
-	function FindTeams()
-		local CC1 = false
-		local CC2 = false
+    local GUI = Instance.new("ScreenGui")
+    local On = Instance.new("TextLabel")
+    local uicorner = Instance.new("UICorner")
+    GUI.Name = "GUI"
+    GUI.Parent = game:GetService("CoreGui")
+    On.Name = "On"
+    On.Parent = GUI
+    On.BackgroundColor3 = Color3.fromRGB(12, 4, 20)
+    On.BackgroundTransparency = 0.14
+    On.BorderSizePixel = 0
+    On.Position = UDim2.new(0.88, 0, 0.33, 0)
+    On.Size = UDim2.new(0, 160, 0, 20)
+    On.Font = Enum.Font.SourceSans
+    On.Text = "TriggerBot On: false"
+    On.TextColor3 = Color3.new(1, 1, 1)
+    On.TextScaled = true
+    On.TextSize = 14
+    On.TextWrapped = true
+    uicorner.Parent = On
 
-		if PlayerTeam ~= nil and Neutral == false then
-			if #game:GetService("Teams"):GetTeams() > 0 then
-				CC1 = true
-				for _, v in pairs(game:GetService("Teams"):GetTeams()) do
-					if #v:GetPlayers() > 0 and v ~= PlayerTeam and CC1 == true then
-						CC2 = true
-					elseif #v:GetPlayers() <= 0 and CC1 == true then
-						return "FFA"
-					end
-				end
-			elseif #game:GetService("Teams"):GetTeams() <= 0 then
-				return "FFA"
-			end
-		elseif Neutral == true then
-			return "FFA"	
-		elseif PlayerTeam == nil then
-			return "FFA"
-		end
-		if CC1 == true and CC2 == true then
-			return "TEAMS"
-		end
-	end
+    local function IsInFieldOfView(target)
+        local targetPosition = target.Position
+        local screenPoint, onScreen = Camera:WorldToScreenPoint(targetPosition)
+        if onScreen then
+            local mousePosition = Vector2.new(Mouse.X, Mouse.Y)
+            local targetScreenPosition = Vector2.new(screenPoint.X, screenPoint.Y)
+            local distance = (mousePosition - targetScreenPosition).Magnitude
+            return distance <= FieldOfView
+        end
+        return false
+    end
 
-	-- Functions
-	function Click()
-		mouse1click()
-	end
+    local function GetClosestPlayer()
+        local closestPlayer = nil
+        local closestDistance = TriggerDistance
 
-	function CastRay(Mode)
-		local RaySPTR = Camera:ScreenPointToRay(Mouse.X, Mouse.Y)
-		local NewRay = Ray.new(RaySPTR.Origin, RaySPTR.Direction * 9999)
-		local Target, Position = game:GetService("Workspace"):FindPartOnRayWithIgnoreList(NewRay, {Char, Camera})
-		if Target and Position then
-			local TPlayer = game:GetService("Players"):GetPlayerFromCharacter(Target.Parent) or game:GetService("Players"):GetPlayerFromCharacter(Target.Parent.Parent)
-			if TPlayer and TPlayer ~= Player and TPlayer.Character and TPlayer.Character:FindFirstChild("Humanoid") and TPlayer.Character.Humanoid.Health > 0 then
-				if Mode == "FFA" or (Mode == "TEAMS" and TPlayer.Team ~= PlayerTeam) then
-					Click()
-				end
-			end
-		end
-	end
+        for _, otherPlayer in pairs(Players:GetPlayers()) do
+            if otherPlayer ~= Player and otherPlayer.Character and otherPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                local targetPart = otherPlayer.Character.HumanoidRootPart
+                local distance = (Player.Character.HumanoidRootPart.Position - targetPart.Position).Magnitude
 
-	-- Input Handling
-	UIS.InputBegan:Connect(function(Input, Processed)
-		if not Processed then
-			if Input.KeyCode == ToggleKey then
-				Toggled = not Toggled
-				On.Text = "Trigger Bot On: "..tostring(Toggled)
-			end
-		end
-	end)
+                if distance <= closestDistance and IsInFieldOfView(targetPart) then
+                    closestPlayer = otherPlayer
+                    closestDistance = distance
+                end
+            end
+        end
 
-	-- Mobile Support: Touch Input
-	UIS.TouchTap:Connect(function()
-		Toggled = not Toggled
-		On.Text = "Trigger Bot On: "..tostring(Toggled)
-	end)
+        return closestPlayer
+    end
 
-	local PreMode = FindTeams()
-	local O = false
-	game:GetService("RunService").Stepped:Connect(function()
-		local Mode = FindTeams()
-		if O == false then
-			O = true
-			print(Mode)
-		end
-		if Mode ~= PreMode then
-			PreMode = Mode
-			print(Mode)
-		end
-		if Toggled == true then
-			CastRay(Mode)
-		end
-	end)
-	gui.draggable(On)
-	DoNotif("Trigger Bot Loaded")
+    local function Click()
+        mouse1click()
+    end
+
+    UIS.InputBegan:Connect(function(input, processed)
+        if not processed and input.KeyCode == ToggleKey then
+            Toggled = not Toggled
+            On.Text = "TriggerBot On: " .. tostring(Toggled)
+        end
+    end)
+
+    RunService.RenderStepped:Connect(function()
+        if Toggled then
+            local targetPlayer = GetClosestPlayer()
+            if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("Humanoid") then
+                local humanoid = targetPlayer.Character.Humanoid
+                if humanoid.Health > 0 then
+                    Click()
+                end
+            end
+        end
+    end)
+
+    DoNotif("Advanced Trigger Bot Loaded")
 end)
 
 cmd.add({"nofog"},{"nofog","Removes all fog from the game"},function()
@@ -3613,7 +3558,7 @@ cmd.add({"getidfromusername","gidu"},{"getidfromusername (gidu)","Copy a user's 
 	setclipboard(tostring(idd))
 
 	DoNotif("Copied "..tostring(thingy).."'s UserId: "..tostring(idd))
-end)
+end,true)
 
 cmd.add({"getuserfromid","guid"},{"getuserfromid (guid)","Copy a user's Username by ID"}, function(thingy)
 	local s,naem=pcall(function()
@@ -3626,7 +3571,7 @@ cmd.add({"getuserfromid","guid"},{"getuserfromid (guid)","Copy a user's Username
 	setclipboard(tostring(naem))
 
 	DoNotif("Copied "..tostring(naem).."'s Username with ID of "..tostring(thingy))
-end)
+end,true)
 
 cmd.add({"synapsedex","sdex"},{"synapsedex (sdex)","Loads SynapseX's dex explorer"},function()
 	local rng=Random.new()
@@ -3815,7 +3760,7 @@ cmd.add({"vehiclespeed", "vspeed"}, {"vehiclespeed <amount> (vspeed)", "Change t
 	end)
 
 	DoNotif("Vehicle speed set to " .. intens)
-end)
+end,true)
 
 cmd.add({"unvehiclespeed", "unvspeed"}, {"unvehiclespeed (unvspeed)", "Stops the vehiclespeed command"}, function()
 	if vehicleloopspeed then
@@ -4057,40 +4002,39 @@ cmd.add({"disable"}, {"disable", "Disables a specific CoreGui"}, function()
 	})
 end)
 
-cmd.add({"esp"},{"esp","locate where the players are"},function()
-	ESPenabled=true
-	for _,v in pairs(Players:GetPlayers()) do
-		if v.Name~=Players.LocalPlayer.Name then
-			ESP(v)
-		end
-	end
+cmd.add({"esp"}, {"esp", "locate where the players are"}, function()
+    ESPenabled = true
+    for _, player in pairs(Players:GetPlayers()) do
+        if player.Name ~= Players.LocalPlayer.Name then
+            ESP(player)
+        end
+    end
 
-	if not _G.ESPJoinConnection then
-		_G.ESPJoinConnection = Players.PlayerAdded:Connect(function(plr)
-			if ESPenabled and plr.Name~=Players.LocalPlayer.Name then
-				ESP(plr)
-			end
-		end)
-	end
+    if not _G.ESPJoinConnection then
+        _G.ESPJoinConnection = Players.PlayerAdded:Connect(function(player)
+            if ESPenabled and player.Name ~= Players.LocalPlayer.Name then
+                ESP(player)
+            end
+        end)
+    end
 end)
 
-cmd.add({"locate"},{"locate <username>","locate where the players are"},function(...)
-	Username=(...)
-	local target=getPlr(Username)
-	if target then
-		ESP(target)
-	end
-end,true)
+cmd.add({"locate"}, {"locate <username>", "locate where the players are"}, function(...)
+    local username = (...)
+    local target = getPlr(username)
+    if target then
+        ESP(target)
+    end
+end, true)
 
+cmd.add({"unesp", "unlocate"}, {"unesp (unlocate)", "Disables esp"}, function()
+    ESPenabled = false
+    removeESP()
 
-cmd.add({"unesp","unlocate"},{"unesp (unlocate)","Disables esp"},function()
-	ESPenabled=false
-	removeESP()
-
-	if _G.ESPJoinConnection then
-		_G.ESPJoinConnection:Disconnect()
-		_G.ESPJoinConnection = nil
-	end
+    if _G.ESPJoinConnection then
+        _G.ESPJoinConnection:Disconnect()
+        _G.ESPJoinConnection = nil
+    end
 end)
 
 cmd.add({"crash"},{"crash","crashes ur client lol"},function()
@@ -5119,7 +5063,7 @@ cmd.add({"orbit"}, {"orbit <player> <distance>", "Orbit around a player"}, funct
 			end
 		end))
 	end
-end)
+end,true)
 
 cmd.add({"uporbit"}, {"uporbit <player> <distance>", "Orbit around a player on the Y axis"}, function(p,d)
 	lib.disconnect("orbit")
@@ -5145,7 +5089,7 @@ cmd.add({"uporbit"}, {"uporbit <player> <distance>", "Orbit around a player on t
 			end
 		end))
 	end
-end)
+end,true)
 
 cmd.add({"freezewalk"},{"freezewalk","Freezes your character on the server but lets you walk on the client"},function()
 	local Character=getChar()
@@ -5466,7 +5410,7 @@ cmd.add({"animationspeed", "animspeed"}, {"animationspeed <speed> (animspeed)", 
 	end)
 
 	DoNotif("Animation speed set to "..speed)
-end)
+end,true)
 
 cmd.add({"unanimationspeed", "unanimspeed"}, {"unanimationspeed (unanimspeed)", "stops the animation speed loop"}, function()
 	if animSpeed then
@@ -5674,24 +5618,35 @@ cmd.add({"saw"}, {"saw <challenge>", "shush"}, function(...)
         ZIndex = 0
     }, ScreenGui)
 
+    coroutine.wrap(function()
+        while not _G.SawFinish do
+            background.BackgroundTransparency = math.random(3, 7) / 10
+            task.wait(0.1)
+        end
+    end)()
+
     local imgLabel = createUIElement("ImageLabel", {
         AnchorPoint = Vector2.new(0.5, 0),
         BackgroundTransparency = 1,
         Position = UDim2.new(0.5, 0, 0.1, 0),
-        Size = UDim2.new(0, 100, 0, 100),
+        Size = UDim2.new(0, 150, 0, 150),
         Image = "rbxassetid://8747893766",
         ImageColor3 = Color3.fromRGB(255, 0, 0)
     }, ScreenGui)
 
-    local glow = createUIElement("ImageLabel", {
-        AnchorPoint = Vector2.new(0.5, 0),
-        BackgroundTransparency = 1,
-        Position = UDim2.new(0.5, 0, 0.1, 0),
-        Size = UDim2.new(0, 120, 0, 120),
-        Image = "rbxassetid://258128463",
-        ImageColor3 = Color3.fromRGB(255, 0, 0),
-        ZIndex = 1
-    }, ScreenGui)
+    coroutine.wrap(function()
+        while not _G.SawFinish do
+            local newSize = math.random(140, 160)
+            local newRotation = math.random(-10, 10)
+            local tween = game:GetService("TweenService"):Create(
+                imgLabel,
+                TweenInfo.new(0.2, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut),
+                { Size = UDim2.new(0, newSize, 0, newSize), Rotation = newRotation }
+            )
+            tween:Play()
+            tween.Completed:Wait()
+        end
+    end)()
 
     local ttLabelLeft = createUIElement("TextLabel", {
         BackgroundColor3 = Color3.fromRGB(0, 0, 0),
@@ -5739,6 +5694,7 @@ cmd.add({"saw"}, {"saw <challenge>", "shush"}, function(...)
         while not _G.SawFinish do
             ttLabelLeft.TextColor3 = Color3.fromRGB(math.random(200, 255), 0, 0)
             ttLabelRight.TextColor3 = Color3.fromRGB(math.random(200, 255), 0, 0)
+            ttLabelLeft.Text = "Challenge: "..challenge:sub(1, math.random(1, #challenge))
             task.wait(math.random(5, 15) / 100)
         end
     end
@@ -5779,29 +5735,9 @@ cmd.add({"saw"}, {"saw <challenge>", "shush"}, function(...)
         end
     end
 
-    function moveImage()
-        while not _G.SawFinish do
-            local newX = math.random(-10, 10)
-            local newY = math.random(-10, 10)
-            local tween = game:GetService("TweenService"):Create(
-                imgLabel,
-                TweenInfo.new(0.1, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut),
-                { Position = UDim2.new(0.5, newX, 0.1, newY) }
-            )
-            tween:Play()
-            tween.Completed:Wait()
-        end
-    end
-
-    function startChallenge()
-        playSound(469373418, 5)
-        coroutine.wrap(count)()
-        coroutine.wrap(flickerText)()
-        coroutine.wrap(moveImage)()
-    end
-
-    coroutine.wrap(startChallenge)()
-end,true)
+    coroutine.wrap(count)()
+    coroutine.wrap(flickerText)()
+end, true)
 
 cmd.add({"jend"}, {"jend", "nil"}, function()
     _G.SawFinish = true
@@ -5816,30 +5752,6 @@ cmd.add({"fling"},{"fling <player>", "Fling the given player"},function(plr)
 	local Player = Players.LocalPlayer
 
 	local AllBool = false
-
-	local GetPlayer = function(Name)
-		Name = Name:lower()
-		if Name == "all" or Name == "others" then
-			AllBool = true
-			return
-		elseif Name == "random" then
-			local GetPlayers = Players:GetPlayers()
-			if table.find(GetPlayers,Player) then table.remove(GetPlayers,table.find(GetPlayers,Player)) end
-			return GetPlayers[math.random(#GetPlayers)]
-		elseif Name ~= "random" and Name ~= "all" and Name ~= "others" then
-			for _,x in next, Players:GetPlayers() do
-				if x ~= Player then
-					if x.Name:lower():match("^"..Name) then
-						return x;
-					elseif x.DisplayName:lower():match("^"..Name) then
-						return x;
-					end
-				end
-			end
-		else
-			return
-		end
-	end
 
 	local Message = function(_Title, _Text, Time)
 		print(_Title)
@@ -6009,7 +5921,7 @@ cmd.add({"fling"},{"fling <player>", "Fling the given player"},function(plr)
 	end
 
 	getgenv().Welcome = true
-	if Targets[1] then for _,x in next, Targets do GetPlayer(x) end else return end
+	if Targets[1] then for _,x in next, Targets do getPlr(x) end else return end
 
 	if AllBool then
 		for _,x in next, Players:GetPlayers() do
@@ -6018,15 +5930,15 @@ cmd.add({"fling"},{"fling <player>", "Fling the given player"},function(plr)
 	end
 
 	for _,x in next, Targets do
-		if GetPlayer(x) and GetPlayer(x) ~= Player then
-			if GetPlayer(x).UserId ~= 1414978355 then
-				local TPlayer = GetPlayer(x)
+		if getPlr(x) and getPlr(x) ~= Player then
+			if getPlr(x).UserId ~= 1414978355 then
+				local TPlayer = getPlr(x)
 				if TPlayer then
 					SkidFling(TPlayer)
 				end
 			else
 			end
-		elseif not GetPlayer(x) and not AllBool then
+		elseif not getPlr(x) and not AllBool then
 		end
 	end
 end,true)
@@ -6113,46 +6025,54 @@ end)
 
 local conn, loop, plrLeftCon = nil, nil, nil
 
-cmd.add({"watch","view","spectate"}, {"view <p>","Spectate player"}, function(...)
-	if conn then conn:Disconnect() conn = nil end
-	if loop then coroutine.close(loop) loop = nil end
-	if plrLeftCon then plrLeftCon:Disconnect() plrLeftCon = nil end
+local function cleanup()
+    if conn then
+        conn:Disconnect()
+        conn = nil
+    end
+    if loop then
+        coroutine.close(loop)
+        loop = nil
+    end
+    if plrLeftCon then
+        plrLeftCon:Disconnect()
+        plrLeftCon = nil
+    end
+    game:GetService("Workspace").CurrentCamera.CameraSubject = getHum()
+end
 
-	local t = getPlr((...))
-	if not t then return end
+cmd.add({"watch", "view", "spectate"}, {"view <p>", "Spectate player"}, function(...)
+    cleanup()
 
-	conn = t.CharacterAdded:Connect(function(c)
-		repeat wait() until c:FindFirstChildWhichIsA("Humanoid")
-		game:GetService("Workspace").CurrentCamera.CameraSubject = c:FindFirstChildWhichIsA("Humanoid")
-	end)
+    local targetPlayer = getPlr((...))
+    if not targetPlayer then return end
 
-	plrLeftCon = game:GetService("Players").PlayerRemoving:Connect(function(plr)
-		if plr == t then
-			if conn then conn:Disconnect() conn = nil end
-			if loop then coroutine.close(loop) loop = nil end
-			if plrLeftCon then plrLeftCon:Disconnect() plrLeftCon = nil end
-			game:GetService("Workspace").CurrentCamera.CameraSubject = getHum()
-			DoNotif("Player left - camera reset")
-		end
-	end)
+    conn = targetPlayer.CharacterAdded:Connect(function(character)
+        repeat wait() until character:FindFirstChildWhichIsA("Humanoid")
+        game:GetService("Workspace").CurrentCamera.CameraSubject = character:FindFirstChildWhichIsA("Humanoid")
+    end)
 
-	loop = coroutine.create(function()
-		repeat
-			if t.Character and t.Character:FindFirstChildWhichIsA("Humanoid") then
-				game:GetService("Workspace").CurrentCamera.CameraSubject = t.Character:FindFirstChildWhichIsA("Humanoid")
-			end
-			wait()
-		until not conn
-	end)
+    plrLeftCon = game:GetService("Players").PlayerRemoving:Connect(function(player)
+        if player == targetPlayer then
+            cleanup()
+            DoNotif("Player left - camera reset")
+        end
+    end)
 
-	coroutine.resume(loop)
-end,true)
+    loop = coroutine.create(function()
+        while conn do
+            if targetPlayer.Character and targetPlayer.Character:FindFirstChildWhichIsA("Humanoid") then
+                game:GetService("Workspace").CurrentCamera.CameraSubject = targetPlayer.Character:FindFirstChildWhichIsA("Humanoid")
+            end
+            wait()
+        end
+    end)
 
-cmd.add({"unwatch","unview"}, {"unview","Stop spectating"}, function()
-	if conn then conn:Disconnect() conn = nil end
-	if loop then coroutine.close(loop) loop = nil end
-	if plrLeftCon then plrLeftCon:Disconnect() plrLeftCon = nil end
-	game:GetService("Workspace").CurrentCamera.CameraSubject = getHum()
+    coroutine.resume(loop)
+end, true)
+
+cmd.add({"unwatch", "unview"}, {"unview", "Stop spectating"}, function()
+    cleanup()
 end)
 
 cmd.add({"stealaudio","getaudio","steal","logaudio"},{"stealaudio <player> (getaudio,logaudio,steal)","Save all sounds a player is playing to a file -Cyrus"},function(p)
@@ -6320,30 +6240,6 @@ cmd.add({"loopfling"},{"loopfling <player>","Loop voids a player"},function(plr)
 
 		local AllBool=false
 
-		local GetPlayer=function(Name)
-			Name=Name:lower()
-			if Name=="all" or Name=="others" then
-				AllBool=true
-				return
-			elseif Name=="random" then
-				local GetPlayers=Players:GetPlayers()
-				if table.find(GetPlayers,Player) then table.remove(GetPlayers,table.find(GetPlayers,Player)) end
-				return GetPlayers[math.random(#GetPlayers)]
-			elseif Name~="random" and Name~="all" and Name~="others" then
-				for _,x in next,Players:GetPlayers() do
-					if x~=Player then
-						if x.Name:lower():match("^"..Name) then
-							return x;
-						elseif x.DisplayName:lower():match("^"..Name) then
-							return x;
-						end
-					end
-				end
-			else
-				return
-			end
-		end
-
 		local SkidFling=function(TargetPlayer)
 			local Character=Player.Character
 			local Humanoid=Character and Character:FindFirstChildOfClass("Humanoid")
@@ -6510,7 +6406,7 @@ cmd.add({"loopfling"},{"loopfling <player>","Loop voids a player"},function(plr)
 
 		if not Welcome then DoNotif("Enjoy!",5,"Script by AnthonyIsntHere") end
 		getgenv().Welcome=true
-		if Targets[1] then for _,x in next,Targets do GetPlayer(x) end else return end
+		if Targets[1] then for _,x in next,Targets do getPlayer(x) end else return end
 
 		if AllBool then
 			for _,x in next,Players:GetPlayers() do
@@ -6519,16 +6415,16 @@ cmd.add({"loopfling"},{"loopfling <player>","Loop voids a player"},function(plr)
 		end
 
 		for _,x in next,Targets do
-			if GetPlayer(x) and GetPlayer(x)~=Player then
-				if GetPlayer(x).UserId~=1414978355 then
-					local TPlayer=GetPlayer(x)
+			if getPlayer(x) and getPlayer(x)~=Player then
+				if getPlayer(x).UserId~=1414978355 then
+					local TPlayer=getPlayer(x)
 					if TPlayer then
 						SkidFling(TPlayer)
 					end
 				else
 					DoNotif("This user is whitelisted! (Owner)",5,"Error Occurred")
 				end
-			elseif not GetPlayer(x) and not AllBool then
+			elseif not getPlayer(x) and not AllBool then
 				DoNotif("Username Invalid",5,"Error Occurred")
 			end
 		end
@@ -6699,39 +6595,39 @@ cmd.add({"unheadstand"}, {"unheadstand", "Stop the headstand command."}, functio
 end)
 
 loopws = false
-wsLoop = nil
+--wsLoop = nil
 wsSignal = nil
 getgenv().NamelessWs = nil
 cmd.add({"loopwalkspeed", "loopws", "lws"}, {"loopwalkspeed <number> (loopws,lws)", "Loop walkspeed"}, function(...)
     val = {...}
     getgenv().NamelessWs = (val[1] or 16)
     loopws = true
-    if wsLoop then wsLoop:Disconnect() wsLoop = nil end
+    --if wsLoop then wsLoop:Disconnect() wsLoop = nil end
     if wsSignal then wsSignal:Disconnect() wsSignal = nil end
 
-    wsLoop = RunService.RenderStepped:Connect(function()
-        if loopws and getHum() then
-            getHum().WalkSpeed = getgenv().NamelessWs
-        end
-    end)
-
-    if getHum() then
+	if getHum() then
         wsSignal = getHum():GetPropertyChangedSignal("WalkSpeed"):Connect(function()
             if loopws then
                 getHum().WalkSpeed = getgenv().NamelessWs
             end
         end)
     end
+
+    --wsLoop = RunService.RenderStepped:Connect(function()
+        if loopws and getHum() then
+            getHum().WalkSpeed = getgenv().NamelessWs
+        end
+    --end)
 end,true)
 
 cmd.add({"unloopwalkspeed", "unloopws", "unlws"}, {"unloopwalkspeed <number> (unloopws,unlws)", "Disable loop walkspeed"}, function()
     loopws = false
-    if wsLoop then wsLoop:Disconnect() wsLoop = nil end
+    --if wsLoop then wsLoop:Disconnect() wsLoop = nil end
     if wsSignal then wsSignal:Disconnect() wsSignal = nil end
 end)
 
 loopjp = false
-jpLoop = nil
+--jpLoop = nil
 jpSignalPower = nil
 jpSignalHeight = nil
 getgenv().NamelessJP = nil
@@ -6739,21 +6635,11 @@ cmd.add({"loopjumppower", "loopjp", "ljp"}, {"loopjumppower <number> (loopjp,ljp
     val = {...}
     getgenv().NamelessJP = (val[1] or 50)
     loopjp = true
-    if jpLoop then jpLoop:Disconnect() jpLoop = nil end
+    --if jpLoop then jpLoop:Disconnect() jpLoop = nil end
     if jpSignalPower then jpSignalPower:Disconnect() jpSignalPower = nil end
     if jpSignalHeight then jpSignalHeight:Disconnect() jpSignalHeight = nil end
 
-    jpLoop = RunService.RenderStepped:Connect(function()
-        if loopjp and getHum() then
-            if getHum().UseJumpPower then
-                getHum().JumpPower = getgenv().NamelessJP
-            else
-                getHum().JumpHeight = getgenv().NamelessJP
-            end
-        end
-    end)
-
-    if getHum() then
+	if getHum() then
         jpSignalPower = getHum():GetPropertyChangedSignal("JumpPower"):Connect(function()
             if loopjp and getHum().UseJumpPower then
                 getHum().JumpPower = getgenv().NamelessJP
@@ -6765,11 +6651,21 @@ cmd.add({"loopjumppower", "loopjp", "ljp"}, {"loopjumppower <number> (loopjp,ljp
             end
         end)
     end
+
+    --jpLoop = RunService.RenderStepped:Connect(function()
+        if loopjp and getHum() then
+            if getHum().UseJumpPower then
+                getHum().JumpPower = getgenv().NamelessJP
+            else
+                getHum().JumpHeight = getgenv().NamelessJP
+            end
+        end
+    --end)
 end,true)
 
 cmd.add({"unloopjumppower", "unloopjp", "unljp"}, {"unloopjumppower <number> (unloopjp,unljp)", "Disable loop walkspeed"}, function()
     loopjp = false
-    if jpLoop then jpLoop:Disconnect() jpLoop = nil end
+    --if jpLoop then jpLoop:Disconnect() jpLoop = nil end
     if jpSignalPower then jpSignalPower:Disconnect() jpSignalPower = nil end
     if jpSignalHeight then jpSignalHeight:Disconnect() jpSignalHeight = nil end
 end)
@@ -6937,37 +6833,48 @@ cmd.add({"keyboard"},{"keyboard","provides a keyboard gui for mobile users"},fun
 	loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/uuuuuuu/refs/heads/main/VirtualKeyboard.lua"))();
 end)
 
-local HumanModCons={}
+local HumanModCons = {}
 
-cmd.add({"edgejump","ejump"},{"edgejump (ejump)","Automatically jumps when you get to the edge of an object"},function()
-	local Char=speaker.Character
-	local Human=Char and Char:FindFirstChildWhichIsA("Humanoid")
-	local state
-	local laststate
-	local lastcf
-	function edgejump()
-		if Char and Human then
-			laststate=state
-			state=Human:GetState()
-			if laststate~=state and state==Enum.HumanoidStateType.Freefall and laststate~=Enum.HumanoidStateType.Jumping then
-				getRoot(Char).CFrame=lastcf
-				getRoot(Char).Velocity=Vector3.new(getRoot(Char).Velocity.X,Human.JumpPower or Human.JumpHeight,getRoot(Char).Velocity.Z)
-			end
-			lastcf=getRoot(Char).CFrame
-		end
-	end
-	edgejump()
-	HumanModCons.ejLoop=(HumanModCons.ejLoop and HumanModCons.ejLoop:Disconnect() and false) or RunService.RenderStepped:Connect(edgejump)
-	HumanModCons.ejCA=(HumanModCons.ejCA and HumanModCons.ejCA:Disconnect() and false) or speaker.CharacterAdded:Connect(function(nChar)
-		Char,Human=nChar,nChar:WaitForChild("Humanoid")
-		edgejump()
-		HumanModCons.ejLoop=(HumanModCons.ejLoop and HumanModCons.ejLoop:Disconnect() and false) or RunService.RenderStepped:Connect(edgejump)
-	end)
+cmd.add({"edgejump", "ejump"}, {"edgejump (ejump)", "Automatically jumps when you get to the edge of an object"}, function()
+    local Char = speaker.Character
+    local Human = Char and Char:FindFirstChildWhichIsA("Humanoid")
+    local currentState
+    local previousState
+    local lastCFrame
+
+    local function edgeJump()
+        if Char and Human then
+            previousState = currentState
+            currentState = Human:GetState()
+            if previousState ~= currentState and currentState == Enum.HumanoidStateType.Freefall and previousState ~= Enum.HumanoidStateType.Jumping then
+                local rootPart = getRoot(Char)
+                rootPart.CFrame = lastCFrame
+                rootPart.Velocity = Vector3.new(rootPart.Velocity.X, Human.JumpPower or Human.JumpHeight, rootPart.Velocity.Z)
+            end
+            lastCFrame = getRoot(Char).CFrame
+        end
+    end
+
+    edgeJump()
+    HumanModCons.ejLoop = (HumanModCons.ejLoop and HumanModCons.ejLoop:Disconnect() and false) or RunService.RenderStepped:Connect(edgeJump)
+    HumanModCons.ejCA = (HumanModCons.ejCA and HumanModCons.ejCA:Disconnect() and false) or speaker.CharacterAdded:Connect(function(newChar)
+        Char = newChar
+        Human = newChar:WaitForChild("Humanoid")
+        edgeJump()
+        HumanModCons.ejLoop = (HumanModCons.ejLoop and HumanModCons.ejLoop:Disconnect() and false) or RunService.RenderStepped:Connect(edgeJump)
+    end)
 end)
 
-cmd.add({"unedgejump","noedgejump","noejump","unejump"},{"unedgejump (noedgejump,noejump,unejump)","Disables edgejump"},function()
-	HumanModCons.ejLoop=(HumanModCons.ejLoop and HumanModCons.ejLoop:Disconnect() and false) or nil
-	HumanModCons.ejCA=(HumanModCons.ejCA and HumanModCons.ejCA:Disconnect() and false) or nil
+cmd.add({"unedgejump", "noedgejump", "noejump", "unejump"}, {"unedgejump (noedgejump, noejump, unejump)", "Disables edgejump"}, function()
+    if HumanModCons.ejLoop then
+        HumanModCons.ejLoop:Disconnect()
+        HumanModCons.ejLoop = nil
+    end
+
+    if HumanModCons.ejCA then
+        HumanModCons.ejCA:Disconnect()
+        HumanModCons.ejCA = nil
+    end
 end)
 
 cmd.add({"equiptools","etools","equipt"},{"equiptools (etools,equipt)","Equips every tool in your inventory"},function()
@@ -7021,6 +6928,7 @@ cmd.add({"bang","fuck"},{"bang <player> <number>","Bangs the player by attaching
 end,true)
 
 glueloop=nil
+
 cmd.add({"glue","loopgoto","lgoto"},{"glue <player> (loopgoto,lgoto)","Loop teleport to a player"},function(...)
 	User=(...)
 	Target=getPlr(User)
@@ -7085,217 +6993,172 @@ cmd.add({"unbang","unfuck"},{"unbang","Unbangs the player"},function()
 	end
 end)
 
-Airwalker=nil
-awPart=nil
--- make it so all the vars are easiler gettable in this table
-local airwalk={
-	["Vars"]={
-		keybinds={
-			["Increase"]=Enum.KeyCode.E;
-			["Descrease"]=Enum.KeyCode.Q;
-		};
-		decrease=false;
-		increase=false;
-		offset=0;
-	};
-	c=nil;
-	b=nil;
-	rahh=nil;
-	rahh2=nil
+local Airwalker, awPart = nil, nil
+local airwalk = {
+    Vars = {
+        keybinds = {
+            Increase = Enum.KeyCode.E,
+            Decrease = Enum.KeyCode.Q,
+        },
+        decrease = false,
+        increase = false,
+        offset = 0,
+    },
+    connections = {},
+    guis = {},
 }
 
-cmd.add({"unairwalk","unfloat","unaw"},{"unairwalk (unfloat,unaw)","Stops the airwalk command"},function()
-	if Airwalker then Airwalker:Disconnect() Airwalker=nil end
-	if awPart then awPart:Destroy() awPart=nil end
-	if airwalk.c then airwalk.c:Disconnect() airwalk.c=nil end
-	if airwalk.b then airwalk.b:Disconnect() airwalk.b=nil end
-	if airwalk.rahh then airwalk.rahh:Destroy() airwalk.rahh=nil end
-	if airwalk.rahh2 then airwalk.rahh2:Destroy() airwalk.rahh2=nil end
-
-	wait();
-
-	DoNotif("Airwalk: OFF")
+cmd.add({"unairwalk", "unfloat", "unaw"}, {"unairwalk (unfloat, unaw)", "Stops the airwalk command"}, function()
+    if Airwalker then Airwalker:Disconnect() Airwalker = nil end
+    if awPart then awPart:Destroy() awPart = nil end
+    for _, conn in pairs(airwalk.connections) do
+        if conn then conn:Disconnect() end
+    end
+    airwalk.connections = {}
+    for _, gui in pairs(airwalk.guis) do
+        if gui then gui:Destroy() end
+    end
+    airwalk.guis = {}
+    DoNotif("Airwalk: OFF")
 end)
 
-cmd.add({"airwalk","float","aw"},{"airwalk (float,aw)","Press space to go up,unairwalk to stop"},function()
-	wait();
+cmd.add({"airwalk", "float", "aw"}, {"airwalk (float, aw)", "Press space to go up, unairwalk to stop"}, function()
+    DoNotif(IsOnMobile and "Airwalk: ON" or "Airwalk: ON (Q And E)")
+    if Airwalker then Airwalker:Disconnect() Airwalker = nil end
+    if awPart then awPart:Destroy() awPart = nil end
 
-	if IsOnMobile then 
-		DoNotif("Airwalk: ON")
-	else
-		DoNotif("Airwalk: ON (Q And E)")
-	end
+    local function createButton(parent, text, position, callbackDown, callbackUp)
+        local button = Instance.new("TextButton")
+        button.Parent = parent
+        button.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+        button.BackgroundTransparency = 0
+        button.Position = position
+        button.Size = UDim2.new(0.05, 0, 0.1, 0)
+        button.Font = Enum.Font.GothamBold
+        button.Text = text
+        button.TextColor3 = Color3.fromRGB(255, 255, 255)
+        button.TextSize = 18
+        button.TextScaled = true
+        button.AutoButtonColor = false
 
-	if Airwalker then Airwalker:Disconnect() Airwalker=nil end
-	if awPart then awPart:Destroy() awPart=nil end
-	local offset=-0.2
-	if IsOnMobile then 
-		if airwalk.rahh then airwalk.rahh:Destroy() rahh=nil end
-		airwalk.rahh=Instance.new("ScreenGui")
-		local TextButton2=Instance.new("TextButton")
-		local UICorner=Instance.new("UICorner")
-		local UIAspectRatioConstraint=Instance.new("UIAspectRatioConstraint")
+        local corner = Instance.new("UICorner", button)
+        corner.CornerRadius = UDim.new(0.2, 0)
 
-		airwalk.rahh.Parent=COREGUI
-		airwalk.rahh.ZIndexBehavior=Enum.ZIndexBehavior.Sibling
-		airwalk.rahh.ResetOnSpawn=false
+        local stroke = Instance.new("UIStroke", button)
+        stroke.Color = Color3.fromRGB(255, 255, 255)
+        stroke.Thickness = 2
 
-		TextButton2.Parent=airwalk.rahh
-		TextButton2.BackgroundColor3=Color3.fromRGB(12,4,20)
-		TextButton2.BackgroundTransparency=0.140
-		TextButton2.Position=UDim2.new(0.933,0,0.621+offset,0)
-		offset-=0.2
-		TextButton2.Size=UDim2.new(0.043,0,0.083,0)
-		TextButton2.Font=Enum.Font.SourceSansBold
-		TextButton2.Text="DOWN"
-		TextButton2.TextColor3=Color3.fromRGB(255,255,255)
-		TextButton2.TextSize=15.000
-		TextButton2.TextWrapped=true
-		TextButton2.Active=true
-		TextButton2.Draggable=true
-		TextButton2.TextScaled=true
+        local hoverEffect = function(isHovering)
+            button.BackgroundColor3 = isHovering and Color3.fromRGB(70, 70, 70) or Color3.fromRGB(45, 45, 45)
+        end
 
-		UICorner.Parent=TextButton2
+        button.MouseEnter:Connect(function() hoverEffect(true) end)
+        button.MouseLeave:Connect(function() hoverEffect(false) end)
+        button.MouseButton1Down:Connect(callbackDown)
+        button.MouseButton1Up:Connect(callbackUp)
+		gui.draggable(button)
 
-		UIAspectRatioConstraint.Parent=TextButton2
-		UIAspectRatioConstraint.AspectRatio=1.060
-		TextButton2.MouseButton1Down:connect(function()
-			airwalk.Vars.decrease=true;
-		end)
-		TextButton2.MouseButton1Up:Connect(function()
-			airwalk.Vars.decrease=false;
-		end)
-		gui.draggable(TextButton2)
+        return button
+    end
 
-		if airwalk.rahh2 then airwalk.rahh2:Destroy() rahh=nil end
-		airwalk.rahh2=Instance.new("ScreenGui")
-		local TextButton=Instance.new("TextButton")
-		local UICorner=Instance.new("UICorner")
-		local UIAspectRatioConstraint=Instance.new("UIAspectRatioConstraint")
+    if IsOnMobile then
+        local guiDown = Instance.new("ScreenGui", COREGUI)
+        guiDown.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+        guiDown.ResetOnSpawn = false
+        airwalk.guis.down = guiDown
+        createButton(guiDown, "DOWN", UDim2.new(0.9, 0, 0.7, 0), function() airwalk.Vars.decrease = true end, function() airwalk.Vars.decrease = false end)
 
-		airwalk.rahh2.Parent=COREGUI
-		airwalk.rahh2.ZIndexBehavior=Enum.ZIndexBehavior.Sibling
-		airwalk.rahh2.ResetOnSpawn=false
+        local guiUp = Instance.new("ScreenGui", COREGUI)
+        guiUp.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+        guiUp.ResetOnSpawn = false
+        airwalk.guis.up = guiUp
+        createButton(guiUp, "UP", UDim2.new(0.9, 0, 0.5, 0), function() airwalk.Vars.increase = true end, function() airwalk.Vars.increase = false end)
+    else
+        airwalk.connections.inputBegan = uis.InputBegan:Connect(function(input)
+            if input.KeyCode == airwalk.Vars.keybinds.Increase then airwalk.Vars.increase = true end
+            if input.KeyCode == airwalk.Vars.keybinds.Decrease then airwalk.Vars.decrease = true end
+        end)
+        airwalk.connections.inputEnded = uis.InputEnded:Connect(function(input)
+            if input.KeyCode == airwalk.Vars.keybinds.Increase then airwalk.Vars.increase = false end
+            if input.KeyCode == airwalk.Vars.keybinds.Decrease then airwalk.Vars.decrease = false end
+        end)
+    end
 
-		TextButton.Parent=airwalk.rahh2
-		TextButton.BackgroundColor3=Color3.fromRGB(12,4,20)
-		TextButton.BackgroundTransparency=0.140
-		TextButton.Position=UDim2.new(0.933,0,0.621+offset,0)
-		offset-=0.2
-		TextButton.Size=UDim2.new(0.043,0,0.083,0)
-		TextButton.Font=Enum.Font.SourceSansBold
-		TextButton.Text="UP"
-		TextButton.TextColor3=Color3.fromRGB(255,255,255)
-		TextButton.TextSize=15.000
-		TextButton.TextWrapped=true
-		TextButton.Active=true
-		TextButton.Draggable=true
-		TextButton.TextScaled=true
+    awPart = Instance.new("Part", game:GetService("Workspace"))
+    awPart.Size = Vector3.new(7, 2, 3)
+    awPart.CFrame = getRoot(getChar()).CFrame - Vector3.new(0, 4, 0)
+    awPart.Transparency = 1
+    awPart.Anchored = true
+    airwalk.Y = getRoot(getChar()).CFrame.y
 
-		UICorner.Parent=TextButton
-
-		UIAspectRatioConstraint.Parent=TextButton
-		UIAspectRatioConstraint.AspectRatio=1.060
-		TextButton.MouseButton1Down:connect(function()
-			airwalk.Vars.increase=true;
-		end)
-		TextButton.MouseButton1Up:Connect(function()
-			airwalk.Vars.increase=false;
-		end)
-		gui.draggable(TextButton)
-	else
-
-		if airwalk.c then airwalk.c:Disconnect() airwalk.c=nil end
-		if airwalk.b then airwalk.b:Disconnect() airwalk.b=nil end
-
-		airwalk.c=uis.InputBegan:Connect(function(Input)
-			if Input.KeyCode==airwalk.Vars.keybinds.Increase then
-				airwalk.Vars.increase=true;
-			end
-			if Input.KeyCode==airwalk.Vars.keybinds.Descrease then
-				airwalk.Vars.decrease=true;
-			end
-		end)
-
-		airwalk.b=uis.InputEnded:Connect(function(Input)
-			if Input.KeyCode==airwalk.Vars.keybinds.Increase then
-				airwalk.Vars.increase=false;
-			end
-			if Input.KeyCode==airwalk.Vars.keybinds.Descrease then
-				airwalk.Vars.decrease=false;
-			end
-		end)
-
-	end
-
-	awPart=Instance.new("Part",game:GetService("Workspace"))
-	awPart.Size=Vector3.new(7,2,3)
-	awPart.CFrame=getRoot(getChar()).CFrame-Vector3.new(0,4,0)
-	awPart.Transparency=1
-	awPart.Anchored=true
-	airwalk.Y=getRoot(getChar()).CFrame.y
-	Airwalker=RunService.RenderStepped:connect(function()
-		if (not awPart) then
-			Airwalker:disconnect()
-			return;
-		end
-		airwalk.Vars.offset=4
-
-		if airwalk.Vars.decrease then
-			airwalk.Vars.offset=5
-		end
-		if airwalk.Vars.increase then
-			airwalk.Vars.offset=3.5
-		end
-		if (airwalk.Vars.decrease and airwalk.Vars.offset==3.5) then airwalk.Vars.offset=4 end -- no change
-
-		if airwalk.Vars.offset==4 then
-			local smalldis=(getRoot(getChar()).CFrame.y - airwalk.Y) 
-			if smalldis < 0.01 then
-				getRoot(getChar()).CFrame=CFrame.new(getRoot(getChar()).CFrame.X,airwalk.Y,getRoot(getChar()).CFrame.Z) * getRoot(getChar()).CFrame.Rotation
-			end
-		end
-		airwalk.Y=getRoot(getChar()).CFrame.y
-		awPart.CFrame=getRoot(getChar()).CFrame-Vector3.new(0,airwalk.Vars.offset,0)
-	end)
+    Airwalker = RunService.RenderStepped:Connect(function()
+        if not awPart then Airwalker:Disconnect() return end
+        airwalk.Vars.offset = airwalk.Vars.decrease and 5 or (airwalk.Vars.increase and 3.5 or 4)
+        if airwalk.Vars.offset == 4 then
+            local smalldis = getRoot(getChar()).CFrame.y - airwalk.Y
+            if smalldis < 0.01 then
+                getRoot(getChar()).CFrame = CFrame.new(getRoot(getChar()).CFrame.X, airwalk.Y, getRoot(getChar()).CFrame.Z) * getRoot(getChar()).CFrame.Rotation
+            end
+        end
+        airwalk.Y = getRoot(getChar()).CFrame.y
+        awPart.CFrame = getRoot(getChar()).CFrame - Vector3.new(0, airwalk.Vars.offset, 0)
+    end)
 end)
 
-cmd.add({"cbring","clientbring"},{"clientbring <player> (cbring)","Brings the player on your client"},function(...)
-	Username=(...)
+cmd.add({"cbring", "clientbring"}, {"clientbring <player> (cbring)", "Brings the player on your client"}, function(...)
+    local username = (...)
 
-	if connections["noclip"] then lib.disconnect("noclip") return end
-	lib.connect("noclip",RunService.Stepped:Connect(function()
-		if not character then return end
-		for i,v in pairs(character:GetDescendants()) do
-			if v:IsA("BasePart") then
-				v.CanCollide=false
-			end
-		end
-	end))
+    if connections["noclip"] then
+        lib.disconnect("noclip")
+        return
+    end
 
-	if Username:lower()=="all" or Username:lower()=="others" then
-		bringc=RunService.RenderStepped:Connect(function()
-			for i,target in pairs(game:GetService("Players"):GetChildren()) do
-				if target.Name==game:GetService("Players").LocalPlayer.Name then
-				else
-					getRoot(target.Character).CFrame=getRoot(getChar()).CFrame+getRoot(getChar()).CFrame.lookVector*5
-				end
-			end
-		end)
-	else
-		target=getPlr(Username)
+    lib.connect("noclip", RunService.Stepped:Connect(function()
+        if not character then return end
+        for _, descendant in pairs(character:GetDescendants()) do
+            if descendant:IsA("BasePart") then
+                descendant.CanCollide = false
+            end
+        end
+    end))
 
-		bringc=RunService.RenderStepped:Connect(function()
-			if target.Character and getRoot(target.Character) then
-				getRoot(target.Character).CFrame=getRoot(getChar()).CFrame+getRoot(getChar()).CFrame.lookVector*3
-			end
-		end)
-	end
-end,true)
+    if username:lower() == "all" or username:lower() == "others" then
+        bringc = RunService.RenderStepped:Connect(function()
+            for _, target in pairs(game:GetService("Players"):GetPlayers()) do
+                if target.Name ~= game:GetService("Players").LocalPlayer.Name and target.Character then
+                    local targetRoot = getRoot(target.Character)
+                    local localRoot = getRoot(getChar())
+                    if targetRoot and localRoot then
+                        targetRoot.CFrame = localRoot.CFrame + localRoot.CFrame.LookVector * 5
+                    end
+                end
+            end
+        end)
+    else
+        local target = getPlr(username)
+        if not target then return end
 
-cmd.add({"uncbring","unclientbring"},{"unclientbring (uncbring)","Disable Client bring command"},function()
-	bringc:Disconnect()
-	if connections["noclip"] then lib.disconnect("noclip") return end
+        bringc = RunService.RenderStepped:Connect(function()
+            if target.Character then
+                local targetRoot = getRoot(target.Character)
+                local localRoot = getRoot(getChar())
+                if targetRoot and localRoot then
+                    targetRoot.CFrame = localRoot.CFrame + localRoot.CFrame.LookVector * 3
+                end
+            end
+        end)
+    end
+end, true)
+
+cmd.add({"uncbring", "unclientbring"}, {"unclientbring (uncbring)", "Disable Client bring command"}, function()
+    if bringc then
+        bringc:Disconnect()
+        bringc = nil
+    end
+
+    if connections["noclip"] then
+        lib.disconnect("noclip")
+    end
 end)
 
 cmd.add({"mute","muteboombox"},{"mute <player> (muteboombox)","Mutes the players boombox"},function(...)
@@ -7447,81 +7310,6 @@ cmd.add({"unloopmute","unloopmuteboombox"},{"unloopmute <player> (unloopmuteboom
 	wait();
 
 	DoNotif("Unloopmuted everyone")
-end)
-
-cmd.add({"glitch","glitchboombox"},{"glitch <player> (glitchboombox)","Glitches the players boombox"},function(...)
-	Username=(...)
-	Loopglitch=true
-	local players=getPlr(Username)
-	if players~=nil then
-		for i,x in next,players.Character:GetDescendants() do
-			if x:IsA("Sound") and x.Playing==true then
-				x.Playing=true
-			end
-		end
-		for i,x in next,players:FindFirstChildOfClass("Backpack"):GetDescendants() do
-			if x:IsA("Sound") and x.Playing==true then
-				x.Playing=true
-			end
-		end
-	end 
-	repeat wait()
-		for i,x in next,players:FindFirstChildOfClass("Backpack"):GetDescendants() do
-			if x:IsA("Sound") and x.Playing==false then
-				x.Playing=true
-			end
-		end
-		for i,x in next,players.Character:GetDescendants() do
-			if x:IsA("Sound") and x.Playing==false then
-				x.Playing=true
-			end
-		end
-		wait(0.2)
-		for i,x in next,players:FindFirstChildOfClass("Backpack"):GetDescendants() do
-			if x:IsA("Sound") and x.Playing==true then
-				x.Playing=false
-			end
-		end
-		for i,x in next,players.Character:GetDescendants() do
-			if x:IsA("Sound") and x.Playing==true then
-				x.Playing=false
-			end
-		end
-		wait(0.2)
-	until Loopglitch==false
-	if game:GetService("SoundService").RespectFilteringEnabled==true then
-
-
-
-		wait();
-
-		DoNotif("Boombox glitched. Status: Client Sided")
-	else
-		if game:GetService("SoundService").RespectFilteringEnabled==false then
-
-			wait();
-
-			DoNotif("Boombox glitched. Status: FE")
-		end
-	end
-end,true)
-
-cmd.add({"unglitch","unglitchboombox"},{"unglitch <player> (unglitchboombox)","Unglitches the players boombox"},function()
-	Loopglitch=false
-	wait()
-	if game:GetService("SoundService").RespectFilteringEnabled==true then
-
-		wait();
-
-		DoNotif("Boombox unglitched. Status: Client Sided")
-	else
-		if game:GetService("SoundService").RespectFilteringEnabled==false then
-
-			wait();
-
-			DoNotif("Boombox unglitched. Status: FE")
-		end
-	end
 end)
 
 cmd.add({"getmass"},{"getmass <player>","Get your mass"},function(...)
@@ -7710,21 +7498,29 @@ cmd.add({"fireclickdetectors","fcd","firecd"},{"fireclickdetectors (fcd,firecd)"
 	DoNotif("Fired "..ccamount.." amount of click detectors")
 end,true)
 
-cmd.add({"noclickdetectorlimits","nocdlimits","removecdlimits"},{"noclickdetectorlimits (nocdlimits,removecdlimits)","Sets all click detectors MaxActivationDistance to math.huge"},function()
+cmd.add({"noclickdetectorlimits","nocdlimits","removecdlimits"},{"noclickdetectorlimits <limit> (nocdlimits,removecdlimits)","Sets all click detectors MaxActivationDistance to math.huge"},function(...)
 	for i,v in ipairs(game:GetService("Workspace"):GetDescendants()) do
 		if v:IsA("ClickDetector") then
-			v.MaxActivationDistance=math.huge
+			if (...) == nil then
+				v.MaxActivationDistance=math.huge
+			else
+				v.MaxActivationDistance=(...)
+			end
 		end
 	end
-end)
+end,true)
 
-cmd.add({"noproximitypromptlimits","nopplimits","removepplimits"},{"noproximitypromptlimits (nopplimits,removepplimits)","Sets all proximity prompts MaxActivationDistance to math.huge"},function()
+cmd.add({"noproximitypromptlimits","nopplimits","removepplimits"},{"noproximitypromptlimits <limit> (nopplimits,removepplimits)","Sets all proximity prompts MaxActivationDistance to math.huge"},function(...)
 	for i,v in pairs(game:GetService("Workspace"):GetDescendants()) do
 		if v:IsA("ProximityPrompt") then
-			v.MaxActivationDistance=math.huge
+			if (...) == nil then
+				v.MaxActivationDistance=math.huge
+			else
+				v.MaxActivationDistance=(...)
+			end
 		end
 	end
-end)
+end,true)
 
 local doIpp=nil
 
@@ -7739,27 +7535,22 @@ cmd.add({"uninstantproximityprompts","uninstantpp","unipp"},{"uninstantproximity
 	if doIpp then doIpp:Disconnect() doIpp=nil end
 end)
 
-cmd.add({"light"},{"light <range> <brightness>","Gives your player dynamic light"},function(...)
-	local bruh={...}
-	local test1=bruh[1]
-	local test2=bruh[2]
-	local light=Instance.new("PointLight")
-	light.Parent=getRoot(Player.Character)
-	light.Range=30
-	if test1 then
-		light.Brightness=test2 or 1
-		light.Range=test1
-	else
-		light.Brightness=5
-	end
-end,true)
+cmd.add({"light"}, {"light <range> <brightness>", "Gives your player dynamic light"}, function(range, brightness)
+    range = tonumber(range) or 30
+    brightness = tonumber(brightness) or 1
 
-cmd.add({"unlight","nolight"},{"unlight (nolight)","Removes dynamic light from your player"},function()
-	for _,v in pairs(Player.Character:GetDescendants()) do
-		if v.ClassName=="PointLight" then
-			v:Destroy()
-		end
-	end
+    local light = Instance.new("PointLight")
+    light.Parent = getRoot(Player.Character)
+    light.Range = range
+    light.Brightness = brightness
+end, true)
+
+cmd.add({"unlight", "nolight"}, {"unlight (nolight)", "Removes dynamic light from your player"}, function()
+    for _, descendant in pairs(Player.Character:GetDescendants()) do
+        if descendant:IsA("PointLight") then
+            descendant:Destroy()
+        end
+    end
 end)
 
 cmd.add({"tweengotocampos","tweentocampos","tweentcp"},{"tweengotocampos (tweentcp)","Another version of goto camera position but bypassing more anti-cheats"},function()
@@ -7977,145 +7768,105 @@ cmd.add({"chardeleteclass","charremoveclass","chardeleteclassname","cdc"},{"char
 	end
 end,true)
 
-cmd.add({"gotopart","topart","toprt"},{"gotopart {partname} (topart,toprt)","Makes you teleport to a part you want"},function(...)
-	local args={...}
-	local code=""
+cmd.add({"gotopart", "topart", "toprt"}, {"gotopart {partname} (topart, toprt)", "Makes you teleport to a part you want"}, function(...)
+    local args = {...}
+    local partName = table.concat(args, " ")
 
-	for i,v in ipairs(args) do
-		if i>1 then
-			code=code.." "..v
-		else
-			code=v
-		end
-	end
-	grr=code
+    for _, descendant in pairs(game:GetService("Workspace"):GetDescendants()) do
+        if descendant:IsA("BasePart") and descendant.Name:lower() == partName:lower() then
+            if getHum() then 
+                getHum().Sit = false 
+                wait(0.1)
+            end
+            if getChar() then 
+                getChar():PivotTo(descendant:GetPivot()) 
+            end
+            wait(0.2)
+        end
+    end
+end, true)
 
-	for _,descendant in pairs(game:GetService("Workspace"):GetDescendants()) do
-		if descendant:IsA("BasePart") and descendant.Name:lower()==grr:lower() then
-			if getHum() then 
-				getHum().Sit=false 
-				wait(.1)
-			else
-			end
-			if getChar() then getChar():PivotTo(descendant:GetPivot()) end
-			wait(.2);
-		end
-	end
-end,true)
+cmd.add({"tweengotopart", "tgotopart", "ttopart", "ttoprt"}, {"tweengotopart {partname} (tgotopart, ttopart, ttoprt)", "Tweens your character to a part or multiple parts"}, function(...)
+    local args = {...}
+    local partName = table.concat(args, " ")
 
-cmd.add({"tweengotopart","tgotopart","ttopart","ttoprt"},{"tweengotopart {partname} (tgotopart,ttopart,ttoprt)","Tweens your character to a part or multiple parts"},function(...)
-	local args={...}
-	local code=""
+    for _, descendant in pairs(game:GetService("Workspace"):GetDescendants()) do
+        if descendant:IsA("BasePart") and descendant.Name:lower() == partName:lower() then
+            if getHum() then 
+                getHum().Sit = false 
+                wait(0.1)
+            end
+            TweenService:Create(
+                getRoot(getChar()), 
+                TweenInfo.new(1, Enum.EasingStyle.Linear), 
+                {CFrame = descendant.CFrame}
+            ):Play()
+            wait(1)
+        end
+    end
+end, true)
 
-	for i,v in ipairs(args) do
-		if i>1 then
-			code=code.." "..v
-		else
-			code=v
-		end
-	end
+cmd.add({"gotopartclass", "gpc", "gotopartc", "gotoprtc"}, {"gotopartclass {classname} (gpc, gotopartc, gotoprtc)", "Moves your character to a part or multiple parts based on classname"}, function(...)
+    local args = {...}
+    local className = args[1]
 
-	lol=code
+    for _, descendant in pairs(game:GetService("Workspace"):GetDescendants()) do
+        if descendant:IsA("BasePart") and descendant.ClassName:lower() == className:lower() then
+            if getHum() then 
+                getHum().Sit = false 
+                wait(0.1)
+            end
+            if getChar() then 
+                getChar():PivotTo(descendant:GetPivot()) 
+            end
+            wait(0.2)
+        end
+    end
+end, true)
 
-	for i,v in pairs(game:GetService("Workspace"):GetDescendants()) do
-		if v.Name:lower()==lol:lower() and v:IsA("BasePart") then
-			if getHum() then 
-				getHum().Sit=false 
-				wait(.1)
-			else
-			end
-			TweenService:Create(getRoot(getChar()),TweenInfo.new(1,Enum.EasingStyle.Linear),{CFrame=v.CFrame}):Play()
-			wait(1);
-		end
-	end
-end,true)
+cmd.add({"bringpart", "bpart", "bprt"}, {"bringpart {partname} (bpart, bprt)", "Brings the part(s) to you"}, function(...)
+    local args = {...}
+    local partName = table.concat(args, " ")
 
-cmd.add({"gotopartclass","gpc","gotopartc","gotoprtc"},{"gotopartclass {classname} (gpc,gotopartc,gotoprtc)","Moves your character to a part or multiple parts based on classname"},function(...)
-	local args={...}
+    for _, descendant in pairs(game:GetService("Workspace"):GetDescendants()) do
+        if descendant:IsA("BasePart") and descendant.Name:lower() == partName:lower() then
+            if getChar() then 
+                descendant:PivotTo(getChar():GetPivot()) 
+            end
+        end
+    end
+end, true)
 
-	local pooooo=args[1]
+cmd.add({"bringmodel", "bmodel"}, {"bringmodel {modelname} (bmodel)", "Brings the model(s) to you"}, function(...)
+    local args = {...}
+    local modelName = table.concat(args, " ")
 
-	for i,v in pairs(game:GetService("Workspace"):GetDescendants()) do
-		if v.ClassName:lower()==pooooo:lower() and v:IsA("BasePart") then
-			if getHum() then 
-				getHum().Sit=false 
-				wait(.1)
-			else
-			end
-			--getRoot(Player.Character).CFrame=v.CFrame
-			if getChar() then getChar():PivotTo(v:GetPivot()) end
-			wait(.2);
-		end
-	end
-end,true)
+    for _, descendant in pairs(game:GetService("Workspace"):GetDescendants()) do
+        if descendant:IsA("Model") and descendant.Name:lower() == modelName:lower() then
+            if getChar() then 
+                descendant:PivotTo(getChar():GetPivot()) 
+            end
+        end
+    end
+end, true)
 
-cmd.add({"bringpart","bpart","bprt"},{"bringpart {partname} (bpart,bprt)","Brings the part(s) to you"},function(...)
-	local args={...}
-	local code=""
+cmd.add({"gotomodel", "tomodel"}, {"gotomodel {modelname} (tomodel)", "Teleports you to the model"}, function(...)
+    local args = {...}
+    local modelName = table.concat(args, " ")
 
-	for i,v in ipairs(args) do
-		if i>1 then
-			code=code.." "..v
-		else
-			code=v
-		end
-	end
-	bringmeit=code
-
-	for i,v in pairs(game:GetService("Workspace"):GetDescendants()) do
-		if v.Name:lower()==bringmeit:lower() and v:IsA("BasePart") then
-			if getChar() then v:PivotTo(getChar():GetPivot()) end
-		end
-	end
-end,true)
-
-cmd.add({"bringmodel","bmodel"},{"bringmodel {modelname} (bmodel)","Brings the model(s) to you"},function(...)
-	local args={...}
-	local code=""
-
-	for i,v in ipairs(args) do
-		if i>1 then
-			code=code.." "..v
-		else
-			code=v
-		end
-	end
-
-	givemethemodel=code
-
-	for i,v in pairs(game:GetService("Workspace"):GetDescendants()) do
-		if v.Name:lower()==givemethemodel:lower() and v:IsA("Model") then
-			if getChar() then v:PivotTo(getChar():GetPivot()) end
-		end
-	end
-end,true)
-
-cmd.add({"gotomodel","tomodel"},{"gotomodel {modelname} (tomodel)","Teleports you to the model"},function(...)
-	local args={...}
-	local code=""
-
-	for i,v in ipairs(args) do
-		if i>1 then
-			code=code.." "..v
-		else
-			code=v
-		end
-	end
-
-	i_love_models=code
-
-	for i,v in pairs(game:GetService("Workspace"):GetDescendants()) do
-		if v.Name:lower()==i_love_models:lower() and v:IsA("Model") then
-			if getHum() then 
-				getHum().Sit=false 
-				wait(.1)
-			else
-			end
-			if getChar() then getChar():PivotTo(v:GetPivot()) end
-			wait(.2);
-		end
-	end
-end,true)
+    for _, descendant in pairs(game:GetService("Workspace"):GetDescendants()) do
+        if descendant:IsA("Model") and descendant.Name:lower() == modelName:lower() then
+            if getHum() then 
+                getHum().Sit = false 
+                wait(0.1)
+            end
+            if getChar() then 
+                getChar():PivotTo(descendant:GetPivot()) 
+            end
+            wait(0.2)
+        end
+    end
+end, true)
 
 cmd.add({"swim"},{"swim {speed}","Swim in the air"},function(...)
 	speaker=game:GetService("Players").LocalPlayer
@@ -8168,88 +7919,71 @@ cmd.add({"unswim"},{"unswim","Stops the swim script"},function()
 	end
 end)
 
-local espParts={}
-local partEspTrigger=nil
-function partAdded(part)
-	if #espParts>0 then
-		if FindInTable(espParts,part.Name:lower()) then
-			if part:IsA("BasePart") then
-				local a=Instance.new("BoxHandleAdornment")
-				a.Name=part.Name:lower().."_PESP"
-				a.Parent=part
-				a.Adornee=part
-				a.AlwaysOnTop=true
-				a.ZIndex=0
-				a.Size=part.Size
-				a.Transparency=0.45
-				a.Color=BrickColor.new("Lime green")
-			elseif part:IsA("Model") then
-				local a=Instance.new("BoxHandleAdornment")
-				a.Name=part.Name:lower().."_PESP"
-				a.Parent=part
-				a.Adornee=part
-				a.AlwaysOnTop=true
-				a.ZIndex=0
-				a.Transparency=0.40
-			else
-			end
-		end
-	else
-		if partEspTrigger then partEspTrigger:Disconnect() partEspTrigger=nil end
-	end
+local espParts = {}
+local partEspTrigger = nil
+
+local function createAdornment(part, color, transparency)
+    local adornment = Instance.new("BoxHandleAdornment")
+    adornment.Name = part.Name:lower() .. "_PESP"
+    adornment.Parent = part
+    adornment.Adornee = part
+    adornment.AlwaysOnTop = true
+    adornment.ZIndex = 0
+    adornment.Size = part:IsA("BasePart") and part.Size or Vector3.new(4, 4, 4)
+    adornment.Transparency = transparency or 0.45
+    adornment.Color = BrickColor.new(color or "Lime green")
+    return adornment
 end
 
+local function partAdded(part)
+    if #espParts > 0 then
+        if table.find(espParts, part.Name:lower()) then
+            if part:IsA("BasePart") or part:IsA("Model") then
+                createAdornment(part, "Lime green", 0.45)
+            end
+        end
+    else
+        if partEspTrigger then
+            partEspTrigger:Disconnect()
+            partEspTrigger = nil
+        end
+    end
+end
 
-cmd.add({"esppart","partesp","pesp"},{"esppart {partname} (partesp,pesp)","Makes you be able to see any part"},function(...)
-	local args={...}
-	local code=""
+cmd.add({"esppart", "partesp", "pesp"}, {"esppart {partname} (partesp, pesp)", "Makes you able to see any part"}, function(...)
+    local args = {...}
+    local partName = table.concat(args, " "):lower()
 
-	for i,v in ipairs(args) do
-		if i>1 then
-			code=code.." "..v
-		else
-			code=v
-		end
-	end
+    if not table.find(espParts, partName) then
+        table.insert(espParts, partName)
 
-	local partEspName=code:lower()
-	if not FindInTable(espParts,partEspName) then
-		table.insert(espParts,partEspName)
-		for i,v in pairs(game:GetService("Workspace"):GetDescendants()) do
-			if v:IsA("BasePart") and v.Name:lower()==partEspName then
-				local a=Instance.new("BoxHandleAdornment")
-				a.Name=partEspName.."_PESP"
-				a.Parent=v
-				a.Adornee=v
-				a.AlwaysOnTop=true
-				a.ZIndex=0
-				a.Size=v.Size
-				a.Transparency=0.45
-				a.Color=BrickColor.new("Lime green")
-			elseif v:IsA("Model") and v.Name:lower()==partEspName then
-				local a=Instance.new("BoxHandleAdornment")
-				a.Name=partEspName.."_PESP"
-				a.Parent=v
-				a.Adornee=v
-				a.AlwaysOnTop=true
-				a.ZIndex=0
-				a.Transparency=0.25
-			end
-		end
-	end
-	if partEspTrigger==nil then
-		partEspTrigger=game:GetService("Workspace").DescendantAdded:Connect(partAdded)
-	end
-end,true)
+        for _, descendant in pairs(game:GetService("Workspace"):GetDescendants()) do
+            if descendant.Name:lower() == partName then
+                if descendant:IsA("BasePart") or descendant:IsA("Model") then
+                    createAdornment(descendant, "Lime green", 0.45)
+                end
+            end
+        end
+    end
 
-cmd.add({"unesppart","unpartesp","unpesp"},{"unesppart (unpartesp,unpesp)","Removes the esp from the parts"},function()
-	if partEspTrigger then partEspTrigger:Disconnect() partEspTrigger=nil end
-	espParts={}
-	for i,v in pairs(game:GetService("Workspace"):GetDescendants()) do
-		if v:IsA("BoxHandleAdornment") and v.Name:sub(-5)=='_PESP' then
-			v:Destroy()
-		end
-	end
+    if not partEspTrigger then
+        partEspTrigger = game:GetService("Workspace").DescendantAdded:Connect(partAdded)
+    end
+end, true)
+
+cmd.add({"unesppart", "unpartesp", "unpesp"}, {"unesppart (unpartesp, unpesp)", "Removes the ESP from the parts"}, function()
+    if partEspTrigger then
+        partEspTrigger:Disconnect()
+        partEspTrigger = nil
+    end
+
+    espParts = {}
+
+    for _, descendant in pairs(game:GetService("Workspace"):GetDescendants()) do
+        if descendant:IsA("BoxHandleAdornment") and descendant.Name:sub(-5) == "_PESP" then
+            descendant:Destroy()
+        end
+    end
 end)
 
 cmd.add({"viewpart","viewp","vpart"},{"viewpart {partname} (viewp,vpart)","Views a part"},function(...)
