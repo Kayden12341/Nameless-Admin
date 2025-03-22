@@ -3213,7 +3213,6 @@ end)
 
 cmd.add({"triggerbot", "tbot"}, {"triggerbot (tbot)", "Executes a script that automatically clicks the mouse when the mouse is on a player"}, function()
     local ToggleKey = Enum.KeyCode.Q
-    local TriggerDistance = 100
     local FieldOfView = 10
 
     local Players = game:GetService("Players")
@@ -3258,22 +3257,16 @@ cmd.add({"triggerbot", "tbot"}, {"triggerbot (tbot)", "Executes a script that au
     end
 
     local function GetClosestPlayer()
-        local closestPlayer = nil
-        local closestDistance = TriggerDistance
-
         for _, otherPlayer in pairs(Players:GetPlayers()) do
-            if otherPlayer ~= Player and otherPlayer.Character and otherPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                local targetPart = otherPlayer.Character.HumanoidRootPart
-                local distance = (Player.Character.HumanoidRootPart.Position - targetPart.Position).Magnitude
-
-                if distance <= closestDistance and IsInFieldOfView(targetPart) then
-                    closestPlayer = otherPlayer
-                    closestDistance = distance
+            if otherPlayer ~= Player and otherPlayer.Character then
+                for _, part in pairs(otherPlayer.Character:GetChildren()) do
+                    if part:IsA("BasePart") and IsInFieldOfView(part) then
+                        return otherPlayer
+                    end
                 end
             end
         end
-
-        return closestPlayer
+        return nil
     end
 
     local function Click()
