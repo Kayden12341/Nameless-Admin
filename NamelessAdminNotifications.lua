@@ -283,6 +283,35 @@ local function FadeOutAfter(Object, Seconds)
     end)
 end
 
+local function CreateInputField(Parent, YPosition)
+    local InputField = Instance.new("TextBox")
+    InputField.Size = UDim2.new(1, -30, 0, 30)
+    InputField.Position = UDim2.new(0, 15, 0, YPosition)
+    InputField.BackgroundColor3 = BUTTON_COLORS.Default
+    InputField.TextColor3 = NOTIFICATION_COLORS.Text
+    InputField.TextSize = 14
+    InputField.Font = Enum.Font.Gotham
+    InputField.TextXAlignment = Enum.TextXAlignment.Left
+    InputField.TextYAlignment = Enum.TextYAlignment.Center
+    InputField.PlaceholderText = "Enter your input here..."
+    InputField.Text = ""
+    InputField.Parent = Parent
+
+    local UICorner = Instance.new("UICorner")
+    UICorner.CornerRadius = UDim.new(0.3, 0)
+    UICorner.Parent = InputField
+
+    InputField.MouseEnter:Connect(function()
+        TweenService:Create(InputField, TweenInfo.new(0.2), {BackgroundColor3 = BUTTON_COLORS.Hover}):Play()
+    end)
+
+    InputField.MouseLeave:Connect(function()
+        TweenService:Create(InputField, TweenInfo.new(0.2), {BackgroundColor3 = BUTTON_COLORS.Default}):Play()
+    end)
+
+    return InputField
+end
+
 _G.EnhancedNotifs = {
     Notify = function(Properties)
         local Properties = typeof(Properties) == "table" and Properties or {}
@@ -290,46 +319,55 @@ _G.EnhancedNotifs = {
         local Description = Properties.Description
         local Duration = Properties.Duration or 5
         local Buttons = Properties.Buttons or {}
+        local InputFieldEnabled = Properties.InputField or false
         local ButtonCount = #Buttons
-        
+
         local Y = 10
         if Title then Y += 30 end
-        
+
         local NewNotif = CreateNotificationFrame(Y)
         NewNotif.Position = UDim2.new(1, 300, 1, -CalculateBounds(CachedObjects) - Y)
-        
+
         local YPosition = 10
         if Title then
             CreateTitle(Title, NewNotif)
             YPosition += 30
         end
-        
+
         if Description then
             local DescLabel, TextHeight = CreateDescription(Description, NewNotif, YPosition)
             Y += TextHeight + 10
             NewNotif.Size = UDim2.new(0, 300, 0, Y)
             YPosition += TextHeight + 10
         end
-        
+
+        local InputField
+        if InputFieldEnabled then
+            InputField = CreateInputField(NewNotif, YPosition)
+            Y += 40
+            NewNotif.Size = UDim2.new(0, 300, 0, Y)
+            YPosition += 40
+        end
+
         if ButtonCount > 0 then
             local buttonsPerRow = ButtonCount <= 3 and ButtonCount or (ButtonCount <= 6 and 3 or 3)
             local rows = math.ceil(ButtonCount / buttonsPerRow)
-            
+
             Y += rows * 35 + (rows - 1) * 5 + 5
             NewNotif.Size = UDim2.new(0, 300, 0, Y)
-            
+
             for row = 1, rows do
                 local buttonsInThisRow = math.min(buttonsPerRow, ButtonCount - (row - 1) * buttonsPerRow)
                 local buttonWidth = (270 - ((buttonsInThisRow - 1) * 10)) / buttonsInThisRow
-                
+
                 for col = 1, buttonsInThisRow do
                     local buttonIndex = (row - 1) * buttonsPerRow + col
                     local ButtonInfo = Buttons[buttonIndex]
-                    
+
                     if ButtonInfo then
                         local xPos = 15 + (col - 1) * (buttonWidth + 10)
                         local yPos = YPosition + (row - 1) * 40
-                        
+
                         local Button = CreateSquircleButton(
                             ButtonInfo.Text,
                             buttonWidth,
@@ -337,10 +375,14 @@ _G.EnhancedNotifs = {
                             NewNotif,
                             UDim2.new(0, xPos, 0, yPos)
                         )
-                        
+
                         Button.MouseButton1Click:Connect(function()
                             if ButtonInfo.Callback then
-                                ButtonInfo.Callback()
+                                if InputFieldEnabled then
+                                    ButtonInfo.Callback(InputField.Text)
+                                else
+                                    ButtonInfo.Callback()
+                                end
                             end
                             FadeOutAfter(NewNotif, 0)
                         end)
@@ -353,10 +395,10 @@ _G.EnhancedNotifs = {
                 FadeOutAfter(NewNotif, 0)
             end)
         end
-        
+
         NewNotif.Parent = Container
         table.insert(InstructionObjects, {NewNotif, 0, false})
-        
+
         if ButtonCount == 0 then
             FadeOutAfter(NewNotif, Duration)
         end
