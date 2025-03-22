@@ -5441,8 +5441,10 @@ cmd.add({"saw"}, {"saw <challenge>", "shush"}, function(...)
     _G.SawFinish = false
 
     local ScreenGui = Instance.new("ScreenGui")
-    local ttLabel = Instance.new("TextLabel")
+    local ttLabelLeft = Instance.new("TextLabel")
+    local ttLabelRight = Instance.new("TextLabel")
     local imgLabel = Instance.new("ImageLabel")
+    local dramaticLabel = Instance.new("TextLabel")
     local con = nil
 
     local function doSound(id, vol)
@@ -5461,34 +5463,68 @@ cmd.add({"saw"}, {"saw <challenge>", "shush"}, function(...)
     ScreenGui.Name = randomString()
     ScreenGui.Parent = gethui()
 
-    ttLabel.Name = randomString()
-    ttLabel.Parent = ScreenGui
-    ttLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    ttLabel.BackgroundTransparency = 0.1
-    ttLabel.AnchorPoint = Vector2.new(0.5, 0.5)
-    ttLabel.Position = UDim2.new(0.5, 0, 0.5, 0)
-    ttLabel.Size = UDim2.new(0, 32, 0, 50)
-    ttLabel.Font = Enum.Font.Arcade
-    ttLabel.Text = "Do You Want to Play a Game?"
-    ttLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
-    ttLabel.TextSize = 24
-    ttLabel.TextWrapped = true
-    ttLabel.ZIndex = 9999
-
-    imgLabel.Parent = ttLabel
-    imgLabel.AnchorPoint = Vector2.new(0.5, 0.5)
+    imgLabel.Parent = ScreenGui
+    imgLabel.AnchorPoint = Vector2.new(0.5, 0)
     imgLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     imgLabel.BorderSizePixel = 0
-    imgLabel.Position = UDim2.new(0.5, 0, -1.5, 0)
+    imgLabel.Position = UDim2.new(0.5, 0, 0, 0)
     imgLabel.Size = UDim2.new(0, 150, 0, 150)
     imgLabel.Image = "rbxassetid://8747893766"
 
+    ttLabelLeft.Name = randomString()
+    ttLabelLeft.Parent = ScreenGui
+    ttLabelLeft.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    ttLabelLeft.BackgroundTransparency = 0.1
+    ttLabelLeft.AnchorPoint = Vector2.new(0, 0.5)
+    ttLabelLeft.Position = UDim2.new(0, 10, 0.5, 0)
+    ttLabelLeft.Size = UDim2.new(0, 200, 0, 50)
+    ttLabelLeft.Font = Enum.Font.Arcade
+    ttLabelLeft.Text = "Challenge: " .. challenge
+    ttLabelLeft.TextColor3 = Color3.fromRGB(255, 0, 0)
+    ttLabelLeft.TextSize = 20
+    ttLabelLeft.TextWrapped = true
+    ttLabelLeft.ZIndex = 9999
+
+    ttLabelRight.Name = randomString()
+    ttLabelRight.Parent = ScreenGui
+    ttLabelRight.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    ttLabelRight.BackgroundTransparency = 0.1
+    ttLabelRight.AnchorPoint = Vector2.new(1, 0.5)
+    ttLabelRight.Position = UDim2.new(1, -10, 0.5, 0)
+    ttLabelRight.Size = UDim2.new(0, 200, 0, 50)
+    ttLabelRight.Font = Enum.Font.Arcade
+    ttLabelRight.Text = "Time Remaining: 180 seconds"
+    ttLabelRight.TextColor3 = Color3.fromRGB(255, 0, 0)
+    ttLabelRight.TextSize = 20
+    ttLabelRight.TextWrapped = true
+    ttLabelRight.ZIndex = 9999
+
+    dramaticLabel.Name = randomString()
+    dramaticLabel.Parent = ScreenGui
+    dramaticLabel.BackgroundTransparency = 1
+    dramaticLabel.AnchorPoint = Vector2.new(0.5, 0.5)
+    dramaticLabel.Position = UDim2.new(0.5, 0, 0.5, 0)
+    dramaticLabel.Size = UDim2.new(0, 300, 0, 100)
+    dramaticLabel.Font = Enum.Font.Arcade
+    dramaticLabel.Text = ""
+    dramaticLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+    dramaticLabel.TextSize = 50
+    dramaticLabel.TextWrapped = true
+    dramaticLabel.ZIndex = 10000
+
     local function flickerText()
         while not _G.SawFinish do
-            ttLabel.TextColor3 = Color3.fromRGB(math.random(200, 255), 0, 0)
-            ttLabel.BackgroundTransparency = math.random(0, 20) / 100
+            ttLabelLeft.TextColor3 = Color3.fromRGB(math.random(200, 255), 0, 0)
+            ttLabelRight.TextColor3 = Color3.fromRGB(math.random(200, 255), 0, 0)
             task.wait(math.random(5, 15) / 100)
         end
+    end
+
+    local function dramaticCountdown(num)
+        dramaticLabel.Text = tostring(num)
+        doSound(138081500, 2)
+        task.wait(1)
+        dramaticLabel.Text = ""
     end
 
     local function count()
@@ -5498,12 +5534,20 @@ cmd.add({"saw"}, {"saw <challenge>", "shush"}, function(...)
                 if num > 0 then
                     num = num - 1
                     doSound(138081500, 1)
-                    ttLabel.Text = "Challenge: " .. challenge .. "\nTime Remaining: " .. num .. " seconds"
+                    ttLabelRight.Text = "Time Remaining: " .. num .. " seconds"
+                    if num == 30 or num == 20 or num == 10 then
+                        dramaticCountdown(num)
+                    elseif num <= 10 then
+                        dramaticLabel.Text = tostring(num)
+                        doSound(138081500, 2)
+                    end
                 else
                     game:GetService("Players").LocalPlayer:Kick("You Failed The Challenge")
                 end
             else
-                ttLabel.Text = "You Survived... For Now"
+                ttLabelLeft.Text = "You Survived... For Now"
+                ttLabelRight.Text = ""
+                dramaticLabel.Text = ""
                 doSound(9125915751, 5)
                 task.wait(2)
                 if con then
@@ -5516,6 +5560,13 @@ cmd.add({"saw"}, {"saw <challenge>", "shush"}, function(...)
         end
     end
 
+    local function moveImage()
+        while not _G.SawFinish do
+            imgLabel.Position = UDim2.new(0.5, math.random(-10, 10), 0, math.random(-10, 10))
+            task.wait(0.1)
+        end
+    end
+
     local function startChallenge()
         doSound(469373418, 5)
         if con then
@@ -5523,18 +5574,9 @@ cmd.add({"saw"}, {"saw <challenge>", "shush"}, function(...)
             con = nil
         end
 
-        con = RunService.Heartbeat:Connect(function()
-            local textWidth = game:GetService("TextService"):GetTextSize(ttLabel.Text, ttLabel.TextSize, ttLabel.Font, Vector2.new(math.huge, math.huge)).X
-            local newSize = UDim2.new(0, textWidth + 25, 0, 50)
-            ttLabel:TweenSize(newSize, "Out", "Quint", 1, true)
-        end)
-
-        gui.draggable(ttLabel)
-        task.wait(3.5)
-        ttLabel.Text = "Your Challenge Begins Now"
-        task.wait(1.5)
         coroutine.wrap(count)()
         coroutine.wrap(flickerText)()
+        coroutine.wrap(moveImage)()
     end
 
     coroutine.wrap(startChallenge)()
