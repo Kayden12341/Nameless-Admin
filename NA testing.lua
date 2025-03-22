@@ -2319,7 +2319,7 @@ cmd.add({"antivoid"},{"antivoid","Prevents you from falling into the void by lau
         end
     end)
 
-    DoNotif("AntiVoid Enabled", 3, "antivoid")
+    DoNotif("AntiVoid Enabled", 3)
 end)
 
 cmd.add({"unantivoid"},{"unantivoid","Disables antivoid"},function()
@@ -2328,7 +2328,7 @@ cmd.add({"unantivoid"},{"unantivoid","Disables antivoid"},function()
         AntiVoidConnect = nil
     end
 
-    DoNotif("AntiVoid Disabled", 3, "antivoid")
+    DoNotif("AntiVoid Disabled", 3)
 end)
 
 cmd.add({"droptools"},{"dropalltools","Drop all of your tools"},function()
@@ -2506,7 +2506,7 @@ cmd.add({"annoy"},{"annoy <player>","Annoys the given player"},function(...)
     local saveCFrame = root and root.CFrame
 
     if not target or not target.Character or not root then
-        DoNotif("Target or your character is invalid.", 3, "annoy")
+        DoNotif("Target or your character is invalid.", 3)
         annoyLoop = false
         return
     end
@@ -2636,13 +2636,13 @@ cmd.add({"seat"},{"seat","Finds a seat and automatically sits on it"},function()
     end
 
     if #seats == 0 then
-        DoNotif("No seats found in the game", 3, "seat")
+        DoNotif("No seats found in the game", 3)
         return
     end
 
     local humanoid = getChar() and getChar().Humanoid
     if not humanoid then
-        DoNotif("Your character or humanoid is invalid", 3, "seat")
+        DoNotif("Your character or humanoid is invalid", 3)
         return
     end
 
@@ -2821,14 +2821,14 @@ cmd.add({"antisit"},{"antisit","Prevents the player from sitting"},function()
     local humanoid = character and character:FindFirstChild("Humanoid")
 
     if not humanoid then
-        DoNotif("Your character or humanoid is invalid", 3, "antisit")
+        DoNotif("Your character or humanoid is invalid", 3)
         return
     end
 
     humanoid:SetStateEnabled("Seated", false)
     humanoid.Sit = true
 
-    DoNotif("Anti sit enabled", 3, "antisit")
+    DoNotif("Anti sit enabled", 3)
 end)
 
 cmd.add({"unantisit"},{"unantisit","Allows the player to sit again"},function()
@@ -2836,90 +2836,128 @@ cmd.add({"unantisit"},{"unantisit","Allows the player to sit again"},function()
     local humanoid = character and character:FindFirstChild("Humanoid")
 
     if not humanoid then
-        DoNotif("Your character or humanoid is invalid", 3, "unantisit")
+        DoNotif("Your character or humanoid is invalid", 3)
         return
     end
 
     humanoid:SetStateEnabled("Seated", true)
     humanoid.Sit = false
 
-    DoNotif("Anti sit disabled", 3, "unantisit")
+    DoNotif("Anti sit disabled", 3)
 end)
 
-cmd.add({"antikick","nokick","bypasskick","bk"},{"antikick (nokick,bypasskick,bk)","Bypass Kick on Most Games"}, function()
-	local getrawmt = (debug and debug.getmetatable) or getrawmetatable
-	local setReadOnly = setreadonly or (
-		make_writeable and function(table, readonly)
-			if readonly then
-				make_readonly(table)
-			else
-				make_writeable(table)
-			end
-		end
-	)
+cmd.add({"antikick", "nokick", "bypasskick", "bk"}, {"antikick (nokick, bypasskick, bk)", "Bypass Kick on Most Games"}, function()
+    local getRawMetatable = (debug and debug.getmetatable) or getrawmetatable
+    local setReadOnly = setreadonly or (
+        make_writeable and function(table, readonly)
+            if readonly then
+                make_readonly(table)
+            else
+                make_writeable(table)
+            end
+        end
+    )
 
-	player = game:GetService("Players").LocalPlayer
-	local meta = getrawmt(game)
-	local oldNamecall = meta.__namecall
+    if not getRawMetatable or not setReadOnly then
+        DoNotif("Required functions for metatable manipulation are not available")
+        return
+    end
 
-	setReadOnly(meta, false)
+    local player = game:GetService("Players").LocalPlayer
+    if not player then
+        DoNotif("LocalPlayer not found")
+        return
+    end
 
-	meta.__namecall = newcclosure(function(self, ...)
-		local method = getnamecallmethod()
+    local meta = getRawMetatable(game)
+    if not meta then
+        DoNotif("Failed to get the metatable of the game object.")
+        return
+    end
 
-		if (method == "Kick" or method == "kick") and self == player then
-			DoNotif("A kick attempt was blocked.")
-			return
-		elseif (method == "Destroy" or method == "destroy") and self == player then
-			DoNotif("An attempt to destroy you was blocked.")
-			return
-		end
+    local oldNamecall = meta.__namecall
+    local oldIndex = meta.__index
+    local oldNewIndex = meta.__newindex
 
-		return oldNamecall(self, ...)
-	end)
+    setReadOnly(meta, false)
 
-	setReadOnly(meta, true)
-	DoNotif("Anti-Kick Enabled")
+    meta.__namecall = newcclosure(function(self, ...)
+        local method = getnamecallmethod()
+        if typeof(method) == "string" then
+            if (method:lower() == "kick") and self == player then
+                DoNotif("A kick attempt was blocked.")
+                return
+            end
+            if (method:lower() == "destroy") and self == player then
+                DoNotif("An attempt to destroy you was blocked.")
+                return
+            end
+        end
+        return oldNamecall(self, ...)
+    end)
+
+    meta.__index = newcclosure(function(self, key)
+        if self == player and key == "Kick" then
+            DoNotif("An attempt to access Kick was blocked.")
+            return function() end
+        end
+        if self == player and key == "Destroy" then
+            DoNotif("An attempt to access Destroy was blocked.")
+            return function() end
+        end
+        return oldIndex(self, key)
+    end)
+
+    meta.__newindex = newcclosure(function(self, key, value)
+        if self == player and (key == "Kick" or key == "Destroy") then
+            DoNotif("An attempt to overwrite " .. key .. " was blocked.")
+            return
+        end
+        return oldNewIndex(self, key, value)
+    end)
+
+    setReadOnly(meta, true)
+    DoNotif("Anti-Kick Enabled")
 end)
 
-cmd.add({"bypassteleport","btp"},{"bypassteleport (btp)","Bypass Teleportation on Most Games"},function()
-	local getrawmt = (debug and debug.getmetatable) or getrawmetatable
-	local setReadOnly = setreadonly
-		or (
-			make_writeable
-			and function(table, readonly)
-				if readonly then
-					make_readonly(table)
-				else
-					make_writeable(table)
-				end
-			end
-		)
-	lp = game:GetService("Players").LocalPlayer
-	local meta = getrawmt(game)
-	local caller = checkcaller or is_protosmasher_caller
-	local index = meta.__index
-	local newindex = meta.__newindex
-	local namecall = meta.__namecall
-	setReadOnly(meta, false)
-	meta.__newindex = newcclosure(function(self, meme, value)
-		if caller() then
-			return newindex(self, meme, value)
-		end
-		if
-			tostring(self) == "HumanoidRootPart"
-			or tostring(self) == "Torso"
-			or tostring(self) == "UpperTorso"
-		then
-			if meme == "CFrame" or meme == "Position" then
-				return true
-			end
-		end
-		return newindex(self, meme, value)
-	end)
-	setReadOnly(meta, true)
+cmd.add({"bypassteleport", "btp"}, {"bypassteleport (btp)", "Bypass Teleportation on Most Games"}, function()
+    local getRawMetatable = (debug and debug.getmetatable) or getrawmetatable
+    local setReadOnly = setreadonly or (
+        make_writeable and function(table, readonly)
+            if readonly then
+                make_readonly(table)
+            else
+                make_writeable(table)
+            end
+        end
+    )
 
-	DoNotif("teleport bypass enabled.")
+    local localPlayer = game:GetService("Players").LocalPlayer
+    local meta = getRawMetatable(game)
+    local isCaller = checkcaller or is_protosmasher_caller
+    local originalIndex = meta.__index
+    local originalNewIndex = meta.__newindex
+
+    setReadOnly(meta, false)
+
+    meta.__newindex = newcclosure(function(self, property, value)
+        if isCaller() then
+            return originalNewIndex(self, property, value)
+        end
+
+        local objectName = tostring(self)
+        if objectName == "HumanoidRootPart" or objectName == "Torso" or objectName == "UpperTorso" then
+            if property == "CFrame" or property == "Position" then
+                return true
+            end
+        end
+
+        return originalNewIndex(self, property, value)
+    end)
+
+    setReadOnly(meta, true)
+
+    DoNotif("Teleport bypass enabled.")
 end)
 
 cmd.add({"anticframeteleport","acframetp","acftp"},{"anticframeteleport (acframetp,acftp)","Prevents scripts from teleporting you by resetting your CFrame"},function()
@@ -3047,125 +3085,120 @@ cmd.add({"harked","comet"},{"harked (comet)","Executes Comet which is like harke
 end)
 
 cmd.add({"triggerbot","tbot"},{"triggerbot (tbot)","Executes a script that automatically clicks the mouse when the mouse is on a player"},function()
-	ToggleKey=Enum.KeyCode.Q
+	ToggleKey = Enum.KeyCode.Q
 
-
-	Player=game:GetService("Players").LocalPlayer
-	Char=Player.Character or player.CharacterAdded:wait(1)
-	Root=getRoot(Char) or Char:WaitForChild("HumanoidRootPart")
-	local Camera=game:GetService("Workspace").CurrentCamera
-	local Mouse=Player:GetMouse()
-	local PlayerTeam=Player.Team
-	local Neutral=Player.Neutral
-	local UIS=game:GetService("UserInputService")
-	local Toggled=false
+	Player = game:GetService("Players").LocalPlayer
+	Char = Player.Character or Player.CharacterAdded:Wait()
+	Root = Char:FindFirstChild("HumanoidRootPart") or Char:WaitForChild("HumanoidRootPart")
+	local Camera = game:GetService("Workspace").CurrentCamera
+	local Mouse = Player:GetMouse()
+	local PlayerTeam = Player.Team
+	local Neutral = Player.Neutral
+	local UIS = game:GetService("UserInputService")
+	local Toggled = false
 
 	---==GUI==---
-	local GUI=Instance.new("ScreenGui")
-	local On=Instance.new("TextLabel")
-	local uicorner=Instance.new("UICorner")
-	GUI.Name="GUI"
-	GUI.Parent=COREGUI
-	On.Name="On"
-	On.Parent=GUI
-	On.BackgroundColor3=Color3.fromRGB(12,4,20)
-	On.BackgroundTransparency=0.14
-	On.BorderSizePixel=0
-	On.Position=UDim2.new(0.880059958,0,0.328616381,0)
-	On.Size=UDim2.new(0,160,0,20)
-	On.Font=Enum.Font.SourceSans
-	On.Text="TriggerBot On: false"
-	On.TextColor3=Color3.new(1,1,1)
-	On.TextScaled=true
-	On.TextSize=14
-	On.TextWrapped=true
-	uicorner.Parent=On
-	---End Gui--
+	local GUI = Instance.new("ScreenGui")
+	local On = Instance.new("TextLabel")
+	local uicorner = Instance.new("UICorner")
+	GUI.Name = "GUI"
+	GUI.Parent = game:GetService("CoreGui")
+	On.Name = "On"
+	On.Parent = GUI
+	On.BackgroundColor3 = Color3.fromRGB(12, 4, 20)
+	On.BackgroundTransparency = 0.14
+	On.BorderSizePixel = 0
+	On.Position = UDim2.new(0.88, 0, 0.33, 0)
+	On.Size = UDim2.new(0, 160, 0, 20)
+	On.Font = Enum.Font.SourceSans
+	On.Text = "TriggerBot On: false"
+	On.TextColor3 = Color3.new(1, 1, 1)
+	On.TextScaled = true
+	On.TextSize = 14
+	On.TextWrapped = true
+	uicorner.Parent = On
+	---End Gui---
 
-	local FindTeams=function()
-		local CC1=false
-		local CC2=false
+	local function FindTeams()
+		local CC1 = false
+		local CC2 = false
 
-		if PlayerTeam~=nil and Neutral==false then
-			if #game:GetService("Teams"):GetTeams()>0 then
-				CC1=true
-				for i,v in pairs(game:GetService("Teams"):GetTeams()) do
-					if #v:GetPlayers()>0 and v~=PlayerTeam and CC1==true then
-						CC2=true
-					elseif #v:GetPlayers() <=0 and CC1==true then
+		if PlayerTeam ~= nil and Neutral == false then
+			if #game:GetService("Teams"):GetTeams() > 0 then
+				CC1 = true
+				for _, v in pairs(game:GetService("Teams"):GetTeams()) do
+					if #v:GetPlayers() > 0 and v ~= PlayerTeam and CC1 == true then
+						CC2 = true
+					elseif #v:GetPlayers() <= 0 and CC1 == true then
 						return "FFA"
 					end
 				end
-			elseif #game:GetService("Teams"):GetTeams() <=0 then
+			elseif #game:GetService("Teams"):GetTeams() <= 0 then
 				return "FFA"
 			end
-		elseif Neutral==true then
+		elseif Neutral == true then
 			return "FFA"	
-		elseif PlayerTeam==nil then
+		elseif PlayerTeam == nil then
 			return "FFA"
 		end
-		if CC1==true and CC2==true then
+		if CC1 == true and CC2 == true then
 			return "TEAMS"
 		end
 	end
-	--{[/| Functions |\]}--
 
-	function Click()
+	-- Functions
+	local function Click()
 		mouse1click()
-		--print("Tripped")
 	end
-	function CastRay(Mode)
-		local RaySPTR=Camera:ScreenPointToRay(Mouse.X,Mouse.Y)--Hence the var name,the magnitude of this is 1.
-		local NewRay=Ray.new(RaySPTR.Origin,RaySPTR.Direction*9999)
-		local Target,Position=game:GetService("Workspace"):FindPartOnRayWithIgnoreList(NewRay,{Char,game:GetService("Workspace").CurrentCamera})
-		if Target and Position and game:GetService("Players"):GetPlayerFromCharacter(Target.Parent) and Target.Parent.Humanoid.Health>0 or Target and Position and game:GetService("Players"):GetPlayerFromCharacter(Target.Parent.Parent) and Target.Parent.Parent.Humanoid.Health>0 then
-			local TPlayer=game:GetService("Players"):GetPlayerFromCharacter(Target.Parent) or game:GetService("Players"):GetPlayerFromCharacter(Target.Parent.Parent)
-			if TPlayer.Team~=PlayerTeam and Mode~="FFA" and TPlayer~=Player then
-				Click()
-			elseif TPlayer.Team==PlayerTeam and TPlayer~=Player then
-				if Mode=="FFA" then
+
+	local function CastRay(Mode)
+		local RaySPTR = Camera:ScreenPointToRay(Mouse.X, Mouse.Y)
+		local NewRay = Ray.new(RaySPTR.Origin, RaySPTR.Direction * 9999)
+		local Target, Position = game:GetService("Workspace"):FindPartOnRayWithIgnoreList(NewRay, {Char, Camera})
+		if Target and Position then
+			local TPlayer = game:GetService("Players"):GetPlayerFromCharacter(Target.Parent) or game:GetService("Players"):GetPlayerFromCharacter(Target.Parent.Parent)
+			if TPlayer and TPlayer ~= Player and TPlayer.Character and TPlayer.Character:FindFirstChild("Humanoid") and TPlayer.Character.Humanoid.Health > 0 then
+				if Mode == "FFA" or (Mode == "TEAMS" and TPlayer.Team ~= PlayerTeam) then
 					Click()
 				end
 			end
 		end
 	end
-	--End Functions--
-	UIS.InputBegan:Connect(function(Input)
-		if Input.KeyCode==ToggleKey then
-			Toggled=not Toggled
-			On.Text="Trigger Bot On: ".. tostring(Toggled)
+
+	-- Input Handling
+	UIS.InputBegan:Connect(function(Input, Processed)
+		if not Processed then
+			if Input.KeyCode == ToggleKey then
+				Toggled = not Toggled
+				On.Text = "Trigger Bot On: " .. tostring(Toggled)
+			end
 		end
 	end)
 
-	local PreMode=FindTeams()
-	local O=false
-	game:GetService("RunService").Stepped:Connect(function()
-		local Mode=FindTeams()
-		if O==false then
-			O=true
-			print(Mode)
-		end
-		if Mode~=PreMode then
-			PreMode=Mode
-			print(Mode)
-		end
-		if Toggled==true then
+	-- Mobile Support: Touch Input
+	UIS.TouchTap:Connect(function()
+		Toggled = not Toggled
+		On.Text = "Trigger Bot On: " .. tostring(Toggled)
+	end)
 
+	local PreMode = FindTeams()
+	local O = false
+	game:GetService("RunService").Stepped:Connect(function()
+		local Mode = FindTeams()
+		if O == false then
+			O = true
+			print(Mode)
+		end
+		if Mode ~= PreMode then
+			PreMode = Mode
+			print(Mode)
+		end
+		if Toggled == true then
 			CastRay(Mode)
 		end
 	end)
 
-	print("BrokenCoding's Trigger Bot V4 Loaded")
-	spawn(function()
-		wait(2)
-		Loaded:Destroy()
-	end)
-
-
-
-	wait();
-
-	DoNotif("Keybind: Q")
+	print("Trigger Bot Loaded")
 end)
 
 cmd.add({"nofog"},{"nofog","Removes all fog from the game"},function()
@@ -3178,40 +3211,42 @@ cmd.add({"nofog"},{"nofog","Removes all fog from the game"},function()
 	end
 end)
 
-cmd.add({"setspawn","spawnpoint","ss"},{"setspawn (spawnpoint,ss)","Makes your spawn point be in the place where your character is"},function()
+cmd.add({"setspawn", "spawnpoint", "ss"}, {"setspawn (spawnpoint, ss)", "Sets your spawn point to the current character's position"}, function()
+    DoNotif("Spawn has been set")
+    local stationaryRespawn = true
+    local needsRespawning = false
+    local hasPosition = false
+    local spawnPosition = CFrame.new()
 
+    local function handleRespawn()
+        if stationaryRespawn and getChar().Humanoid.Health == 0 then
+            if not hasPosition then
+                spawnPosition = getRoot(getChar()).CFrame
+                hasPosition = true
+            end
+            needsRespawning = true
+        end
 
+        if needsRespawning then
+            getRoot(getChar()).CFrame = spawnPosition
+        end
+    end
 
-	wait();
+    RunService.Stepped:Connect(handleRespawn)
 
-	DoNotif("Spawn has been set")
-	local stationaryrespawn=true
-	local needsrespawning=false
-	local haspos=false
-	local pos=CFrame.new()
+    LocalPlayer.CharacterAdded:Connect(function()
+        wait(0.6)
+        needsRespawning = false
+        hasPosition = false
+    end)
+end)
 
-	game:GetService("UserInputService").InputBegan:connect(StatRespawn)
-
-	RunService.Stepped:connect(function()
-
-		if stationaryrespawn==true and getChar().Humanoid.Health==0 then
-			if haspos==false then
-				pos=getRoot(getChar()).CFrame
-				haspos=true
-			end
-			needsrespawning=true
-		end
-
-		if needsrespawning==true then
-			getRoot(getChar()).CFrame=pos
-		end
-	end)
-
-	LocalPlayer.CharacterAdded:connect(function()
-		wait(0.6)
-		needsrespawning=false
-		haspos=false
-	end)
+cmd.add({"disablespawn", "unsetspawn", "ds"}, {"disablespawn (unsetspawn, ds)", "Disables the previously set spawn point"}, function()
+    DoNotif("Spawn point has been disabled")
+    stationaryRespawn = false
+    needsRespawning = false
+    hasPosition = false
+    spawnPosition = CFrame.new()
 end)
 
 cmd.add({"hamster"},{"hamster <number>","Hamster ball"},function(...)
@@ -3310,48 +3345,48 @@ cmd.add({"unantiafk","unnoafk"},{"unantiafk (unnoafk)","Allows you to be kicked 
     end
 end)
 
-cmd.add({"clicktp","tptool"},{"clicktp (tptool)","Teleport where your mouse is"},function()
-	mouse=game:GetService("Players").LocalPlayer:GetMouse()
-	tool=Instance.new("Tool")
-	tool.RequiresHandle=false
-	tool.Name="Click TP"
-	tool.Activated:connect(function()
-		local pos=mouse.Hit+Vector3.new(0,2.5,0)
-		pos=CFrame.new(pos.X,pos.Y,pos.Z)
-		getRoot(getChar()).CFrame=pos
-	end)
-	tool.Parent=getBp()
-	wait(0.07)
-	local TweenService=game:GetService("TweenService")
-	local UserInputService=game:GetService("UserInputService")
-	local Players=game:GetService("Players")
+cmd.add({"clicktp", "tptool"}, {"clicktp (tptool)", "Teleport where your mouse is"}, function()
+    local mouse = game:GetService("Players").LocalPlayer:GetMouse()
 
-	local tool=Instance.new("Tool")
-	tool.RequiresHandle=false
-	tool.Name="Tween Click TP"
-	function onActivated()
-		local mouse=Players.LocalPlayer:GetMouse()
-		local pos=mouse.Hit+Vector3.new(0,2.5,0)
-		local humanoidRootPart=getRoot(getChar())
+    local instantTool = Instance.new("Tool")
+    instantTool.RequiresHandle = false
+    instantTool.Name = "Click TP"
 
-		local tweenInfo=TweenInfo.new(
-			1,
-			Enum.EasingStyle.Quad,	
-			Enum.EasingDirection.Out,
-			0,
-			false,
-			0
-		)
+    instantTool.Activated:Connect(function()
+        local pos = mouse.Hit + Vector3.new(0, 2.5, 0)
+        local targetCFrame = CFrame.new(pos.X, pos.Y, pos.Z)
+        getRoot(getChar()).CFrame = targetCFrame
+    end)
 
-		local tween=TweenService:Create(humanoidRootPart,tweenInfo,{
-			CFrame=CFrame.new(pos.X,pos.Y,pos.Z)
-		})
+    instantTool.Parent = getBp()
 
-		tween:Play()
-	end
+    wait(0.07)
 
-	tool.Activated:Connect(onActivated)
-	tool.Parent=getBp()
+    local tweenTool = Instance.new("Tool")
+    tweenTool.RequiresHandle = false
+    tweenTool.Name = "Tween Click TP"
+
+    local TweenService = game:GetService("TweenService")
+
+    local function onActivated()
+        local pos = mouse.Hit + Vector3.new(0, 2.5, 0)
+        local humanoidRootPart = getRoot(getChar())
+        local tweenInfo = TweenInfo.new(
+            1,
+            Enum.EasingStyle.Quad,
+            Enum.EasingDirection.Out,
+            0,
+            false,
+            0
+        )
+        local tween = TweenService:Create(humanoidRootPart, tweenInfo, {
+            CFrame = CFrame.new(pos.X, pos.Y, pos.Z)
+        })
+        tween:Play()
+    end
+
+    tweenTool.Activated:Connect(onActivated)
+    tweenTool.Parent = getBp()
 end)
 
 cmd.add({"dex"},{"dex","Using this you can see the parts / guis / scripts etc with this. A really good and helpful script."},function()
