@@ -10226,7 +10226,7 @@ gui.resizeable = function(ui, min, max)
     local lastPos = Vector2.new()
     local dragging = false
 
-    function updateResize(currentPos)
+    local function updateResize(currentPos)
         if not dragging or not mode then return end
         
         local xy = resizeXY[mode.Name]
@@ -10345,7 +10345,7 @@ gui.draggable=function(ui, dragui)
 	local dragStart
 	local startPos
 
-	function update(input)
+	local function update(input)
 		local delta = input.Position - dragStart
 		ui.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
 	end
@@ -10905,79 +10905,70 @@ NACaller(function()
 end)
 
 --[[ COMMAND BAR BUTTON ]]--
-local TextLabelLabel=Instance.new("TextLabel")
-local UICorner=Instance.new("UICorner")
-local ImageButton=Instance.new("ImageButton")
-local UICorner2=Instance.new("UICorner")
+local TextLabel = Instance.new("TextLabel")
+local UICorner = Instance.new("UICorner")
+local ImageButton = Instance.new("ImageButton")
+local UICorner2 = Instance.new("UICorner")
 
---TextLabelLabel.Name=randomString()
-NAProtection(TextLabelLabel)
-TextLabelLabel.Parent=ScreenGui
-TextLabelLabel.BackgroundColor3=Color3.fromRGB(4,4,4)
-TextLabelLabel.BackgroundTransparency=1.000
-TextLabelLabel.AnchorPoint=Vector2.new(0.5,0.5)
-TextLabelLabel.Position=UDim2.new(0.5,0,0.5,0)
-TextLabelLabel.Size=UDim2.new(0,2,0,33)
-TextLabelLabel.Font=Enum.Font.SourceSansBold
-TextLabelLabel.Text=adminName.." V"..curVer
-TextLabelLabel.TextColor3=Color3.fromRGB(255,255,255)
-TextLabelLabel.TextSize=20.000
-TextLabelLabel.TextWrapped=true
-TextLabelLabel.ZIndex=9999
+TextLabel.Parent = ScreenGui
+TextLabel.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+TextLabel.BackgroundTransparency = 0.2
+TextLabel.AnchorPoint = Vector2.new(0.5, 0.5)
+TextLabel.Position = UDim2.new(0.5, 0, 0.5, 0)
+TextLabel.Size = UDim2.new(0, 2, 0, 33)
+TextLabel.Font = Enum.Font.GothamBold
+TextLabel.Text = adminName .. " V" .. curVer
+TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+TextLabel.TextSize = 20
+TextLabel.TextWrapped = true
+TextLabel.ZIndex = 9999
 
---ImageButton.Name=randomString()
-NAProtection(ImageButton)
-ImageButton.Parent=ScreenGui
-ImageButton.AnchorPoint=Vector2.new(0.5,0)
-ImageButton.BackgroundColor3=Color3.fromRGB(255,255,255)
-ImageButton.BorderSizePixel=0
-ImageButton.Position=UDim2.new(0.48909232,0,-1,0)
-ImageButton.Size=UDim2.new(0,32,0,33)
-ImageButton.Image="rbxassetid://18567102564"
-ImageButton.ZIndex=9999
+ImageButton.Parent = ScreenGui
+ImageButton.AnchorPoint = Vector2.new(0.5, 0)
+ImageButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+ImageButton.BorderSizePixel = 0
+ImageButton.Position = UDim2.new(0.5, 0, -0.2, 0)
+ImageButton.Size = UDim2.new(0, 40, 0, 40)
+ImageButton.Image = "rbxassetid://18567102564"
+ImageButton.ZIndex = 9999
 
+UICorner.CornerRadius = UDim.new(0.5, 0)
+UICorner.Parent = ImageButton
 
-UICorner.CornerRadius=UDim.new(1,0)
-UICorner.Parent=ImageButton
-
-
-UICorner2.CornerRadius=UDim.new(1,0)
-UICorner2.Parent=TextLabelLabel
+UICorner2.CornerRadius = UDim.new(0.2, 0)
+UICorner2.Parent = TextLabel
 
 function Swoosh()
-	local imagebutton=ImageButton
-	imagebutton.Size=UDim2.new(0,32,0,33)
-	imagebutton.BackgroundTransparency=0
-	imagebutton:TweenPosition(UDim2.new(0.5,0,0,0),"Out","Quint",1,true)
-	gui.draggable(imagebutton)
+    ImageButton:TweenPosition(UDim2.new(0.5, 0, 0.1, 0), "Out", "Quint", 1, true)
+    ImageButton:TweenSize(UDim2.new(0, 50, 0, 50), "Out", "Quint", 1, true)
+	gui.draggable(ImageButton)
 end
+
 function mainNameless()
-	txtlabel=TextLabelLabel
-	txtlabel.Size=UDim2.new(0,2,0,33)
-	txtlabel.BackgroundTransparency=0.14
+    local txtLabel = TextLabel
+    txtLabel.Size = UDim2.new(0, 2, 0, 33)
+    txtLabel.BackgroundTransparency = 0.14
 
-	textWidth=game:GetService("TextService"):GetTextSize(txtlabel.Text,txtlabel.TextSize,txtlabel.Font,Vector2.new(math.huge,math.huge)).X
-	newSize=UDim2.new(0,textWidth+69,0,33)
+    local textWidth = game:GetService("TextService"):GetTextSize(txtLabel.Text, txtLabel.TextSize, txtLabel.Font, Vector2.new(math.huge, math.huge)).X
+    local newSize = UDim2.new(0, textWidth + 80, 0, 40)
 
-	txtlabel:TweenSize(newSize,"Out","Quint",1,true)
-	if IsOnMobile then
-		Swoosh()
-	else
-		ImageButton:Destroy()
-	end
-	wait(2)
-	game:GetService("TweenService"):Create(txtlabel,TweenInfo.new(.7,Enum.EasingStyle.Sine),{BackgroundTransparency=1}):Play()
-	h=game:GetService("TweenService"):Create(txtlabel,TweenInfo.new(.7,Enum.EasingStyle.Sine),{TextTransparency=1})
-	h:Play()
-	h.Completed:Connect(function()
-		--[[if IsOnMobile then
-			Swoosh()
-		else
-			ImageButton:Destroy()
-		end]]
-		txtlabel:Destroy()
-	end)
+    txtLabel:TweenSize(newSize, "Out", "Quint", 1, true)
+    if IsOnMobile then
+        Swoosh()
+    else
+        ImageButton:Destroy()
+    end
+
+    wait(2)
+    local tweenService = game:GetService("TweenService")
+    tweenService:Create(txtLabel, TweenInfo.new(0.7, Enum.EasingStyle.Sine), {BackgroundTransparency = 1}):Play()
+    local fadeOut = tweenService:Create(txtLabel, TweenInfo.new(0.7, Enum.EasingStyle.Sine), {TextTransparency = 1})
+    fadeOut:Play()
+    fadeOut.Completed:Connect(function()
+        txtLabel:Destroy()
+    end)
 end
+
 coroutine.wrap(mainNameless)()
 
 if IsOnMobile then
@@ -11014,7 +11005,6 @@ NACaller(function()
 		Notify({
 			Title = "Would you like to enabled QueueOnTeleport?",
 			Description = "With QueueOnTeleport "..adminName.." will automatically execute itself upon teleporting to a game or place.",
-			Duration = 3,
 			Buttons = {
 				{Text = "Yes", Callback = function() queueteleport(loader) end},
 				{Text = "No", Callback = function() end}
