@@ -836,7 +836,9 @@ function mobilefly(speed,vfly)
 		if character and humanoid and flyMobile and MobileWeld and bv and bg then
 			bv.MaxForce=Vector3.new(9e9,9e9,9e9)
 			bg.MaxTorque=Vector3.new(9e9,9e9,9e9)
-			humanoid.PlatformStand=vfly and false or true
+			if not vfly then
+			humanoid.PlatformStand=true
+			end
 
 			bg.CFrame=camera.CFrame
 			local direction=ctrlModule:GetMoveVector()
@@ -2149,6 +2151,12 @@ local vOn=false
 local vRAHH=nil
 
 cmd.add({"vfly","vehiclefly"},{"vehiclefly (vfly)","be able to fly vehicles"},function(...)
+		speed=(...)
+
+	if speed==nil then
+		speed=50
+	else
+		end
 	if IsOnMobile then 
 		wait()
 		DoNotif(adminName.." has detected you using mobile. You now have a vFly button. Click it to enable/disable mobile flying (for easier use).")
@@ -2193,6 +2201,7 @@ cmd.add({"vfly","vehiclefly"},{"vehiclefly (vfly)","be able to fly vehicles"},fu
             		TextButton.Text = "UnvFly"
             		TextButton.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
             		mobilefly(speed,true)
+			cmdlp.Character.Humanoid.PlatformStand=false
         		elseif vOn == true then
             		vOn = false
             		TextButton.Text = "vFly"
@@ -2226,13 +2235,18 @@ end)
 
 cmd.add({"unvfly","unvehiclefly"},{"unvehiclefly (unvfly)","disable vehicle fly"},function()
 
-
-
-	wait();
-
-	DoNotif("Vehicle fly disabled")
-	FLYING=false
-	cmdlp.Character.Humanoid.PlatformStand=false
+wait();
+	if IsOnMobile then
+		DoNotif("Mobile vFly Disabled")
+	else
+		DoNotif("Not flying anymore")
+		FLYING=false
+		cmdlp.Character.Humanoid.PlatformStand=false
+		if goofyFLY then goofyFLY:Destroy() end
+	end
+	unmobilefly()
+	vOn=false
+	if vRAHH then vRAHH:Destroy() vRAHH=nil end
 end)
 
 cmd.add({"equiptools","equipall"},{"equiptools","Equip all of your tools"},function()
@@ -3295,12 +3309,14 @@ cmd.add({"nofog"},{"nofog","Removes all fog from the game"},function()
 	end
 end)
 
+local stationaryRespawn = false
+local needsRespawning = false
+local hasPosition = false
+local spawnPosition = CFrame.new()
+
 cmd.add({"setspawn", "spawnpoint", "ss"}, {"setspawn (spawnpoint, ss)", "Sets your spawn point to the current character's position"}, function()
     DoNotif("Spawn has been set")
-    local stationaryRespawn = true
-    local needsRespawning = false
-    local hasPosition = false
-    local spawnPosition = CFrame.new()
+    stationaryRespawn = true
 
     local function handleRespawn()
         if stationaryRespawn and getChar().Humanoid.Health == 0 then
