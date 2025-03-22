@@ -3154,10 +3154,19 @@ cmd.add({"triggerbot","tbot"},{"triggerbot (tbot)","Executes a script that autom
 		local middleY = screenHeight / 2
 	
 		local mouse = game.Players.LocalPlayer:GetMouse()
-		mouse.X = middleX
-		mouse.Y = middleY
+	
+		if setreadonly then
+			setreadonly(mouse, "X", false)
+			setreadonly(mouse, "Y", false)
+	
+			mouse.X = middleX
+			mouse.Y = middleY
+	
+			setreadonly(mouse, "X", true)
+			setreadonly(mouse, "Y", true)
+		end
 	end
-
+	
 	local function Click()
 		setMouseToMiddle()
 		mouse1click()
