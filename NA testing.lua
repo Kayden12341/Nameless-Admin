@@ -10226,16 +10226,7 @@ gui.resizeable = function(ui, min, max)
     local lastPos = Vector2.new()
     local dragging = false
 
-    local function getInputPosition(input)
-        if input.UserInputType == Enum.UserInputType.Touch then
-            return input.Position
-        elseif input.UserInputType == Enum.UserInputType.MouseMovement then
-            return UserInputService:GetMouseLocation()
-        end
-        return Vector2.new()
-    end
-
-    local function updateResize(currentPos)
+    function updateResize(currentPos)
         if not dragging or not mode then return end
         
         local xy = resizeXY[mode.Name]
@@ -10300,17 +10291,10 @@ gui.resizeable = function(ui, min, max)
             if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
                 mode = button
                 dragging = true
-                local currentPos = getInputPosition(input)
+                local currentPos = UserInputService:GetMouseLocation()
                 lastPos = Vector2.new(currentPos.X, currentPos.Y)
                 lastSize = ui.AbsoluteSize
                 UIPos = ui.Position
-            end
-        end)
-        
-        button.InputChanged:Connect(function(input)
-            if dragging and (input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseMovement) then
-                local currentPos = getInputPosition(input)
-                updateResize(Vector2.new(currentPos.X, currentPos.Y))
             end
         end)
         
