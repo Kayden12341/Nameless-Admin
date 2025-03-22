@@ -375,35 +375,54 @@ end
 --[[ COMMAND FUNCTIONS ]]--
 local commandcount=0
 cmd={}
-cmd.add=function(...)
-	local vars={...}
-	local aliases,info,func=vars[1],vars[2],vars[3]
-	for i,cmdName in pairs(aliases) do
-		if i==1 then
-			Commands[cmdName:lower()]={func,info}
-		else
-			Aliases[cmdName:lower()]={func,info}
-		end
-	end
-	commandcount=commandcount+1
+cmd.add = function(...)
+    local vars = {...}
+    local aliases, info, func = vars[1], vars[2], vars[3]
+    for i, cmdName in pairs(aliases) do
+        if i == 1 then
+            Commands[cmdName:lower()] = {func, info}
+        else
+            Aliases[cmdName:lower()] = {func, info}
+        end
+    end
+    commandcount = commandcount + 1
 end
 
-cmd.run=function(args)
-	local caller,arguments=args[1],args; table.remove(args,1);
+cmd.run = function(args)
+    local caller, arguments = args[1], args
+    table.remove(args, 1)
 
-	local success,msg=pcall(function()
-		local command=Commands[caller:lower()] or Aliases[caller:lower()]
-		if command then
-			command[1](unpack(arguments))
-		else
-			local closest=didYouMean(caller:lower())
-			if closest then
-				DoNotif("Command [ "..caller.." ] doesn't exist\nDid you mean [ "..closest.." ]?")
-			else
-			end
-		end
-	end)
-	if not success then warn(adminName..": "..msg) end
+    local success, msg = pcall(function()
+        local command = Commands[caller:lower()] or Aliases[caller:lower()]
+        if command then
+            command[1](unpack(arguments))
+        else
+            local closest = didYouMean(caller:lower())
+            if closest then
+                Notify({
+                    Title = adminName,
+                    Description = "Command [ " .. caller .. " ] doesn't exist\nDid you mean [ " .. closest .. " ]?",
+                    Duration = 5,
+                    Buttons = {
+                        {
+                            Text = "Yes (execute)",
+                            Callback = function()
+                                local closestCommand = Commands[closest] or Aliases[closest]
+                                if closestCommand then
+                                    closestCommand[1](unpack(arguments))
+                                end
+                            end
+                        },
+                        {
+                            Text = "No",
+                            Callback = function() end
+                        }
+                    }
+                })
+            end
+        end
+    end)
+    if not success then end
 end
 
 function randomString()
@@ -537,57 +556,66 @@ function GetInTable(Table,Name)
 end
 
 --[[ FUNCTION TO GET A PLAYER ]]--
-local getPlr=function(Name)
-	if Name:lower()=="random" then
-		return Players:GetPlayers()[math.random(#Players:GetPlayers())]
-	elseif Name:lower()=="me" then
-		return game:GetService("Players").LocalPlayer
-	elseif not Name or Name=='' then
-		return game:GetService("Players").LocalPlayer
-	elseif Name:lower()=="friends" then
-		local friends={}
-		for _,plr in pairs(Players:GetPlayers()) do
-			if plr:IsFriendsWith(LocalPlayer.UserId) and plr~=LocalPlayer then
-				table.insert(friends,plr)
-			end
-		end
-		return friends
-	elseif Name:lower()=="nonfriends" then
-		local noFriends={}
-		for _,plr in pairs(Players:GetPlayers()) do
-			if not plr:IsFriendsWith(LocalPlayer.UserId) and plr~=LocalPlayer then
-				table.insert(noFriends,plr)
-			end
-		end
-		return noFriends
-	elseif Name:lower()=="enemies" then
-		local nonTeam={}
-		local team=LocalPlayer.Team
-		for _,plr in pairs(Players:GetPlayers()) do
-			if plr.Team~=team then
-				table.insert(nonTeam,plr)
-			end
-		end
-		return nonTeam
-	elseif Name:lower()=="allies" then
-		local teamBuddies={}
-		local team=LocalPlayer.Team
-		for _,plr in pairs(Players:GetPlayers()) do
-			if plr.Team==team then
-				table.insert(teamBuddies,plr)
-			end
-		end
-		return teamBuddies
-	else
-		Name=Name:lower():gsub("%s","")
-		for _,x in next,Players:GetPlayers() do
-			if x.Name:lower():match(Name) then
-				return x
-			elseif x.DisplayName:lower():match("^"..Name) then
-				return x
-			end
-		end
-	end
+local getPlr = function(Name)
+    local Players = game:GetService("Players")
+    local LocalPlayer = Players.LocalPlayer
+
+    if not Name or Name == "" or Name:lower() == "me" then
+        return LocalPlayer
+    elseif Name:lower() == "random" then
+        local otherPlayers = {}
+        for _, plr in ipairs(Players:GetPlayers()) do
+            if plr ~= LocalPlayer then
+                table.insert(otherPlayers, plr)
+            end
+        end
+        if #otherPlayers > 0 then
+            return otherPlayers[math.random(#otherPlayers)]
+        end
+    elseif Name:lower() == "friends" then
+        local friends = {}
+        for _, plr in ipairs(Players:GetPlayers()) do
+            if plr:IsFriendsWith(LocalPlayer.UserId) and plr ~= LocalPlayer then
+                table.insert(friends, plr)
+            end
+        end
+        return friends
+    elseif Name:lower() == "nonfriends" then
+        local nonFriends = {}
+        for _, plr in ipairs(Players:GetPlayers()) do
+            if not plr:IsFriendsWith(LocalPlayer.UserId) and plr ~= LocalPlayer then
+                table.insert(nonFriends, plr)
+            end
+        end
+        return nonFriends
+    elseif Name:lower() == "enemies" then
+        local nonTeam = {}
+        local team = LocalPlayer.Team
+        for _, plr in ipairs(Players:GetPlayers()) do
+            if plr.Team ~= team and plr ~= LocalPlayer then
+                table.insert(nonTeam, plr)
+            end
+        end
+        return nonTeam
+    elseif Name:lower() == "allies" then
+        local teamBuddies = {}
+        local team = LocalPlayer.Team
+        for _, plr in ipairs(Players:GetPlayers()) do
+            if plr.Team == team and plr ~= LocalPlayer then
+                table.insert(teamBuddies, plr)
+            end
+        end
+        return teamBuddies
+    else
+        Name = Name:lower():gsub("%s", "")
+        for _, plr in ipairs(Players:GetPlayers()) do
+            if plr.Name:lower():match(Name) then
+                return plr
+            elseif plr.DisplayName:lower():match("^" .. Name) then
+                return plr
+            end
+        end
+    end
 end
 
 --[[ MORE VARIABLES ]]--
@@ -733,7 +761,7 @@ local Signal1,Signal2=nil,nil
 local flyMobile=nil
 local MobileWeld=nil
 
-function mobilefly(speed)
+function mobilefly(speed,vfly)
 	local character=getChar() or LocalPlayer.CharacterAdded:Wait()
 	if flyMobile then flyMobile:Destroy() end
 	flyMobile=Instance.new("Part",game:GetService("Workspace"))
@@ -808,7 +836,7 @@ function mobilefly(speed)
 		if character and humanoid and flyMobile and MobileWeld and bv and bg then
 			bv.MaxForce=Vector3.new(9e9,9e9,9e9)
 			bg.MaxTorque=Vector3.new(9e9,9e9,9e9)
-			humanoid.PlatformStand=true
+			humanoid.PlatformStand=vfly and false or true
 
 			bg.CFrame=camera.CFrame
 			local direction=ctrlModule:GetMoveVector()
@@ -1781,51 +1809,74 @@ cmd.add({"commandcount","cc"},{"commandcount (cc)","Counds how many commands NA 
 	DoNotif(adminName.." currently has ".. commandcount.." commands")
 end)
 
-local hiddenfling=false
-cmd.add({"walkfling","wfling"},{"walkfling (wfling) [THANKS TO X]","probably the best fling lol"},function()
+hiddenfling = false
+flingConnection = nil
+
+cmd.add({"walkfling", "wfling"}, {"walkfling (wfling) [THANKS TO X]", "probably the best fling lol"}, function()
+	if hiddenfling then
+		DoNotif("Walkfling is already enabled!")
+		return
+	end
+
 	DoNotif("Walkfling enabled")
-	if NA_storage:FindFirstChild("juisdfj0i32i0eidsuf0iok") then
-		hiddenfling=true
-	else
-		hiddenfling=true
-		detection=Instance.new("Decal")
-		detection.Name="juisdfj0i32i0eidsuf0iok"
-		detection.Parent=NA_storage
-		function fling()
-			local hrp,c,vel,movel=nil,nil,nil,0.1
-			while true do
-				RunService.Heartbeat:Wait()
-				if hiddenfling then
-					local lp=game:GetService("Players").LocalPlayer
-					while hiddenfling and not (c and c.Parent and hrp and hrp.Parent) do
-						RunService.Heartbeat:Wait()
-						c=lp.Character
-						hrp=c:FindFirstChild("HumanoidRootPart") or c:FindFirstChild("Torso") or c:FindFirstChild("UpperTorso")
-					end
-					if hiddenfling then
-						vel=hrp.Velocity
-						hrp.Velocity=vel*10000+Vector3.new(0,10000,0)
-						RunService.RenderStepped:Wait()
-						if c and c.Parent and hrp and hrp.Parent then
-							hrp.Velocity=vel
-						end
-						game:GetService("RunService").Stepped:Wait()
-						if c and c.Parent and hrp and hrp.Parent then
-							hrp.Velocity=vel+Vector3.new(0,movel,0)
-							movel=movel*-1
-						end
-					end
-				end
-			end
+	hiddenfling = true
+
+	if not NA_storage:FindFirstChild("juisdfj0i32i0eidsuf0iok") then
+		local detection = Instance.new("Decal")
+		detection.Name = "juisdfj0i32i0eidsuf0iok"
+		detection.Parent = NA_storage
+	end
+
+	if flingConnection then
+		flingConnection:Disconnect()
+	end
+
+	flingConnection = RunService.Heartbeat:Connect(function()
+		if not hiddenfling then
+			return
 		end
 
-		fling()
-	end
+		local lp = game:GetService("Players").LocalPlayer
+		local character = lp.Character
+		local hrp = getRoot(character)
+
+		if character and hrp then
+			local originalVelocity = hrp.Velocity
+			hrp.Velocity = originalVelocity * 10000 + Vector3.new(0, 10000, 0)
+
+			RunService.RenderStepped:Wait()
+			if character and hrp then
+				hrp.Velocity = originalVelocity
+			end
+
+			RunService.Stepped:Wait()
+			if character and hrp then
+				hrp.Velocity = originalVelocity + Vector3.new(0, 0.1, 0)
+			end
+		end
+	end)
+
+	local lp = game:GetService("Players").LocalPlayer
+	lp.CharacterAdded:Connect(function()
+		if hiddenfling then
+			DoNotif("Re-enabling Walkfling")
+		end
+	end)
 end)
 
-cmd.add({"unwalkfling","unwfling"},{"unwalkfling (unwfling)","stop the walkfling command"},function()
+cmd.add({"unwalkfling", "unwfling"}, {"unwalkfling (unwfling)", "stop the walkfling command"}, function()
+	if not hiddenfling then
+		DoNotif("Walkfling is already disabled!")
+		return
+	end
+
 	DoNotif("Walkfling disabled")
-	hiddenfling=false
+	hiddenfling = false
+
+	if flingConnection then
+		flingConnection:Disconnect()
+		flingConnection = nil
+	end
 end)
 
 cmd.add({"rjre", "rejoinrefresh"}, {"rjre (rejoinrefresh)", "Rejoins and teleports you to your previous position"}, function()
@@ -2094,9 +2145,65 @@ cmd.add({"punch"},{"punch","punch tool that flings"},function()
 	loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/Nameless-Admin/main/punch",true))()
 end)
 
+local vOn=false
+local vRAHH=nil
+
 cmd.add({"vfly","vehiclefly"},{"vehiclefly (vfly)","be able to fly vehicles"},function(...)
-	if IsOnMobile then
-		DoNotif("command not supported for mobile :(")
+	if IsOnMobile then 
+		wait()
+		DoNotif(adminName.." has detected you using mobile. You now have a vFly button. Click it to enable/disable mobile flying (for easier use).")
+
+		if vRAHH then
+    		vRAHH:Destroy()
+    		vRAHH = nil
+		end
+
+		vRAHH = Instance.new("ScreenGui")
+		local TextButton = Instance.new("TextButton")
+		local UICorner = Instance.new("UICorner")
+		local UIAspectRatioConstraint = Instance.new("UIAspectRatioConstraint")
+
+		vRAHH.Parent = COREGUI
+		vRAHH.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+		vRAHH.ResetOnSpawn = false
+
+		TextButton.Parent = vRAHH
+		TextButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+		TextButton.BackgroundTransparency = 0.1
+		TextButton.Position = UDim2.new(0.9, 0, 0.6, 0)
+		TextButton.Size = UDim2.new(0.05, 0, 0.1, 0)
+		TextButton.Font = Enum.Font.GothamBold
+		TextButton.Text = "vFly"
+		TextButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+		TextButton.TextSize = 18
+		TextButton.TextWrapped = true
+		TextButton.Active = true
+		TextButton.TextScaled = true
+
+		UICorner.CornerRadius = UDim.new(0.2, 0)
+		UICorner.Parent = TextButton
+
+		UIAspectRatioConstraint.Parent = TextButton
+		UIAspectRatioConstraint.AspectRatio = 1.0
+
+		function FEPVI_fake_script()
+    		TextButton.MouseButton1Click:Connect(function()
+        		if vOn == false then
+            		vOn = true
+            		TextButton.Text = "UnvFly"
+            		TextButton.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+            		mobilefly(speed,true)
+        		elseif vOn == true then
+            		vOn = false
+            		TextButton.Text = "vFly"
+            		TextButton.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
+            		unmobilefly()
+        		end
+    		end)
+		end
+		coroutine.wrap(FEPVI_fake_script)()
+
+		gui.draggable(TextButton)
 	else
 		FLYING=false
 		cmdlp.Character.Humanoid.PlatformStand=false
@@ -2109,8 +2216,10 @@ cmd.add({"vfly","vehiclefly"},{"vehiclefly (vfly)","be able to fly vehicles"},fu
 		DoNotif("Vehicle fly enabled")
 		sFLY(true)
 		speedofthevfly=(...)
+		speedofthefly=(...)
 		if (...)==nil then
 			speedofthevfly=2
+			speedofthefly=2
 		end
 	end
 end)
@@ -2299,7 +2408,7 @@ cmd.add({"antivoid"},{"antivoid","Prevents you from falling into the void by lau
         local character = game:GetService("Players").LocalPlayer.Character
         local root = character and character:FindFirstChild("HumanoidRootPart")
         if root and root.Position.Y <= OrgDestroyHeight + 25 then
-            root.Velocity = Vector3.new(root.Velocity.X, 250, root.Velocity.Z)
+            root.Velocity = Vector3.new(root.Velocity.X, root.Velocity.Y + 250, root.Velocity.Z)
         end
     end)
 
@@ -2417,7 +2526,7 @@ cmd.add({"fpsbooster","lowgraphics","boostfps","lowg"},{"fpsbooster (lowgraphics
         elseif v:IsA("ShirtGraphic") and decalsYeeted then
             v.Graphic = 0
         elseif (v:IsA("Shirt") or v:IsA("Pants")) and decalsYeeted then
-            v[v.ClassName .. "Template"] = 0
+            v[v.ClassName.."Template"] = 0
         end
     end
 
@@ -2665,115 +2774,106 @@ cmd.add({"localtime","yourtime"},{"localtime (yourtime)","Shows your current tim
 	DoNotif("Your Local Time Is: "..clock)
 end)
 
-cmd.add({"cartornado","ctornado"},{"cartornado (ctornado)","Tornados a car just sit in the car"},function(...)
-	local SPart=Instance.new("Part");
-	local Player=game:GetService('Players').LocalPlayer;
-	repeat game:GetService('RunService').RenderStepped:Wait() until Player.Character;
-	local Character=Player.Character;
-	SPart.Anchored,SPart.CanCollide=true,true;
-	SPart.Parent=game:GetService("Workspace");
-	SPart.Size=Vector3.new(1,100,1)
-	SPart.Transparency=0.4
-	RunService.Stepped:Connect(function()
-		local Ray=Ray.new(Character.PrimaryPart.Position+Character.PrimaryPart.CFrame.LookVector*6,Vector3.new(0,-1,0)*4);
-		local FPOR=game:GetService("Workspace"):FindPartOnRayWithIgnoreList(Ray,{Character});
-		if (FPOR) then
-			SPart.CFrame=Character.PrimaryPart.CFrame+Character.PrimaryPart.CFrame.LookVector*6;
-		end
-		if SPart==nil then
-			Ray:destroy()
-			FPOR:destroy()
-		end
-	end)
+cmd.add({"cartornado", "ctornado"}, {"cartornado (ctornado)", "Tornados a car just sit in the car"}, function(...)
+    local SPart = Instance.new("Part")
+    local Player = game:GetService("Players").LocalPlayer
+    local RunService = game:GetService("RunService")
+    local Workspace = game:GetService("Workspace")
 
-	SPart.Touched:Connect(function(hit)
-		if hit:IsA("Seat") then
-			local IsFlying=False
-			local flyv
-			local flyg
-			local Player=game:GetService("Players").LocalPlayer
-			local Speed=50
-			local LastSpeed=Speed
-			local maxspeed=100
-			local IsRunning=false
-			local f=0
+    repeat RunService.RenderStepped:Wait() until Player.Character
+    local Character = Player.Character
 
-			IsFlying=true
-			flyv=Instance.new("BodyVelocity")
+    SPart.Anchored = true
+    SPart.CanCollide = true
+    SPart.Parent = Workspace
+    SPart.Size = Vector3.new(1, 100, 1)
+    SPart.Transparency = 0.4
 
-			flyv.Parent=Player.Character:FindFirstChild('Torso') or Player.Character:FindFirstChild('UpperTorso')
-			flyv.MaxForce=Vector3.new(math.huge,math.huge,math.huge)
+    RunService.Stepped:Connect(function()
+        if Character and Character.PrimaryPart then
+            local Ray = Ray.new(Character.PrimaryPart.Position + Character.PrimaryPart.CFrame.LookVector * 6, Vector3.new(0, -1, 0) * 4)
+            local FPOR = Workspace:FindPartOnRayWithIgnoreList(Ray, {Character})
 
-			flyg=Instance.new("BodyGyro")
-			flyg.Parent=Player.Character:FindFirstChild('Torso') or Player.Character:FindFirstChild('UpperTorso')
-			flyg.MaxTorque=Vector3.new(9e9,9e9,9e9)
-			flyg.P=1000
-			flyg.D=50
+            if FPOR then
+                SPart.CFrame = Character.PrimaryPart.CFrame + Character.PrimaryPart.CFrame.LookVector * 6
+            end
+        end
+    end)
 
-			Player.Character:WaitForChild('Humanoid').PlatformStand=true
+    SPart.Touched:Connect(function(hit)
+        if hit:IsA("Seat") then
+            local IsFlying = true
+            local flyv = Instance.new("BodyVelocity")
+            local flyg = Instance.new("BodyGyro")
+            local Speed = 50
+            local LastSpeed = Speed
+            local maxspeed = 100
+            local IsRunning = false
+            local f = 0
 
-			Player.Character.Humanoid.Changed:Connect(function(Prop)
+            flyv.Parent = Character:FindFirstChild("Torso") or Character:FindFirstChild("UpperTorso")
+            flyv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
 
-				if Player.Character.Humanoid.MoveDirection==Vector3.new(0,0,0) then
-					IsRunning=false
-				else
-					IsRunning=true
-				end 
-			end)
+            flyg.Parent = Character:FindFirstChild("Torso") or Character:FindFirstChild("UpperTorso")
+            flyg.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
+            flyg.P = 1000
+            flyg.D = 50
 
-			spawn(function()
-				while true do
-					wait()
-					if IsFlying then
+            Character:WaitForChild("Humanoid").PlatformStand = true
 
-						flyg.CFrame=game:GetService("Workspace").CurrentCamera.CoordinateFrame*CFrame.Angles(-math.rad((f+0)*50*Speed/maxspeed),0,0) 
-						flyv.Velocity=game:GetService("Workspace").CurrentCamera.CoordinateFrame.LookVector*Speed
-						wait(0.1)
+            Character.Humanoid.Changed:Connect(function()
+                IsRunning = Character.Humanoid.MoveDirection ~= Vector3.new(0, 0, 0)
+            end)
 
-						if Speed<0 then
-							Speed=0
-							f=0
-						end
-					end
-					if IsRunning then
-						Speed=LastSpeed
-					else
-						if not Speed==0 then
-							LastSpeed=Speed
-						end 
-						Speed=0
-					end
-				end
-			end)
-			Speed=0.1
-			wait(0.3)
-			hit:Sit(getChar().Humanoid)
-			SPart:Destroy()
-			wait(0.3)
-			speaker=game:GetService("Players").LocalPlayer
-			seat=speaker.Character:FindFirstChildOfClass('Humanoid').SeatPart
-			vehicleModel=seat.Parent
-			repeat
-				if vehicleModel.ClassName~="Model" then
-					vehicleModel=vehicleModel.Parent
-				end
-			until vehicleModel.ClassName=="Model"
-			wait(0.1)
-			for i,v in pairs(vehicleModel:GetDescendants()) do
-				if v:IsA("BasePart") and v.CanCollide then
-					v.CanCollide=false
-				end
-			end
+            spawn(function()
+                while IsFlying do
+                    flyg.CFrame = Workspace.CurrentCamera.CFrame * CFrame.Angles(-math.rad(f * 50 * Speed / maxspeed), 0, 0)
+                    flyv.Velocity = Workspace.CurrentCamera.CFrame.LookVector * Speed
+                    wait(0.1)
 
-			wait(0.2)
-			Speed=80
-			local Spin=Instance.new("BodyAngularVelocity")
-			Spin.Name="Spinning"
-			Spin.Parent=getRoot(speaker.Character)
-			Spin.MaxTorque=Vector3.new(0,math.huge,0) 
-			Spin.AngularVelocity=Vector3.new(0,2000,0)
-		end
-	end)
+                    if Speed < 0 then
+                        Speed = 0
+                        f = 0
+                    end
+
+                    if IsRunning then
+                        Speed = LastSpeed
+                    else
+                        if Speed ~= 0 then
+                            LastSpeed = Speed
+                        end
+                        Speed = 0
+                    end
+                end
+            end)
+
+            wait(0.3)
+            hit:Sit(Character.Humanoid)
+            SPart:Destroy()
+
+            local seat = Character:FindFirstChildOfClass("Humanoid").SeatPart
+            local vehicleModel = seat.Parent
+
+            while vehicleModel.ClassName ~= "Model" do
+                vehicleModel = vehicleModel.Parent
+            end
+
+            for _, v in pairs(vehicleModel:GetDescendants()) do
+                if v:IsA("BasePart") and v.CanCollide then
+                    v.CanCollide = false
+                end
+            end
+
+            wait(0.2)
+            Speed = 80
+
+            local Spin = Instance.new("BodyAngularVelocity")
+            Spin.Name = "Spinning"
+            Spin.Parent = Character.PrimaryPart
+            Spin.MaxTorque = Vector3.new(0, math.huge, 0)
+            Spin.AngularVelocity = Vector3.new(0, 2000, 0)
+        end
+    end)
 end)
 
 cmd.add({"unspam","unlag","unchatspam","unanimlag","unremotespam"},{"unspam","Stop all attempts to lag/spam"},function()
@@ -2894,7 +2994,7 @@ cmd.add({"antikick", "nokick", "bypasskick", "bk"}, {"antikick (nokick, bypasski
 
     meta.__newindex = newcclosure(function(self, key, value)
         if self == player and (key == "Kick" or key == "Destroy") then
-            DoNotif("An attempt to overwrite " .. key .. " was blocked.")
+            DoNotif("An attempt to overwrite "..key.." was blocked.")
             return
         end
         return oldNewIndex(self, key, value)
@@ -3154,7 +3254,7 @@ cmd.add({"triggerbot","tbot"},{"triggerbot (tbot)","Executes a script that autom
 		if not Processed then
 			if Input.KeyCode == ToggleKey then
 				Toggled = not Toggled
-				On.Text = "Trigger Bot On: " .. tostring(Toggled)
+				On.Text = "Trigger Bot On: "..tostring(Toggled)
 			end
 		end
 	end)
@@ -3162,7 +3262,7 @@ cmd.add({"triggerbot","tbot"},{"triggerbot (tbot)","Executes a script that autom
 	-- Mobile Support: Touch Input
 	UIS.TouchTap:Connect(function()
 		Toggled = not Toggled
-		On.Text = "Trigger Bot On: " .. tostring(Toggled)
+		On.Text = "Trigger Bot On: "..tostring(Toggled)
 	end)
 
 	local PreMode = FindTeams()
@@ -3435,7 +3535,7 @@ cmd.add({"getidfromusername","gidu"},{"getidfromusername (gidu)","Copy a user's 
 
 	if not s then return warn("err: "..tostring(idd)) end
 
-	if not setclipboard then return print("no setclipboard") end
+	if not setclipboard then return DoNotif("no setclipboard") end
 	setclipboard(tostring(idd))
 
 	DoNotif("Copied "..tostring(thingy).."'s UserId: "..tostring(idd))
@@ -3448,7 +3548,7 @@ cmd.add({"getuserfromid","guid"},{"getuserfromid (guid)","Copy a user's Username
 
 	if not s then return warn("err: "..tostring(naem)) end
 
-	if not setclipboard then return print("no setclipboard") end
+	if not setclipboard then return DoNotif("no setclipboard") end
 	setclipboard(tostring(naem))
 
 	DoNotif("Copied "..tostring(naem).."'s Username with ID of "..tostring(thingy))
@@ -3533,43 +3633,43 @@ cmd.add({"antifling"}, {"antifling", "makes other players non-collidable with yo
 	af = true
 	partStates = {}
 
-	function nc(p)
-		if af and p.Character then
-			for _, x in pairs(p.Character:GetDescendants()) do
-				if x:IsA("BasePart") then
-					local id = p.UserId.."_"..x:GetFullName()
+	function handleCollision(player)
+		if af and player.Character then
+			for _, part in pairs(player.Character:GetDescendants()) do
+				if part:IsA("BasePart") then
+					local id = player.UserId .. "_" .. part:GetFullName()
 					if partStates[id] == nil then
-						partStates[id] = x.CanCollide
+						partStates[id] = part.CanCollide
 					end
-					x.CanCollide = false
+					part.CanCollide = false
 				end
 			end
 		end
 	end
 
-	for _, c in pairs(afc) do
-		if c then c:Disconnect() end
+	for _, connection in pairs(afc or {}) do
+		if connection then connection:Disconnect() end
 	end
 	afc = {}
 
-	for _, p in pairs(game:GetService("Players"):GetPlayers()) do
-		if p ~= game:GetService("Players").LocalPlayer then
-			local c = RunService.Stepped:Connect(function()
-				nc(p)
+	for _, player in pairs(game:GetService("Players"):GetPlayers()) do
+		if player ~= game:GetService("Players").LocalPlayer then
+			local connection = RunService.Stepped:Connect(function()
+				handleCollision(player)
 			end)
-			table.insert(afc, c)
+			table.insert(afc, connection)
 		end
 	end
 
-	local pac = game:GetService("Players").PlayerAdded:Connect(function(p)
-		if p ~= game:GetService("Players").LocalPlayer then
-			local c = RunService.Stepped:Connect(function()
-				nc(p)
+	local playerAddedConnection = game:GetService("Players").PlayerAdded:Connect(function(player)
+		if player ~= game:GetService("Players").LocalPlayer then
+			local connection = RunService.Stepped:Connect(function()
+				handleCollision(player)
 			end)
-			table.insert(afc, c)
+			table.insert(afc, connection)
 		end
 	end)
-	table.insert(afc, pac)
+	table.insert(afc, playerAddedConnection)
 
 	DoNotif("Anti fling enabled")
 end)
@@ -3577,18 +3677,18 @@ end)
 cmd.add({"unantifling"}, {"unantifling", "restores collision for other players"}, function()
 	af = false
 
-	for _, c in pairs(afc) do
-		if c then c:Disconnect() end
+	for _, connection in pairs(afc or {}) do
+		if connection then connection:Disconnect() end
 	end
 	afc = {}
 
-	for _, p in pairs(game:GetService("Players"):GetPlayers()) do
-		if p ~= game:GetService("Players").LocalPlayer and p.Character then
-			for _, x in pairs(p.Character:GetDescendants()) do
-				if x:IsA("BasePart") then
-					local id = p.UserId.."_"..x:GetFullName()
+	for _, player in pairs(game:GetService("Players"):GetPlayers()) do
+		if player ~= game:GetService("Players").LocalPlayer and player.Character then
+			for _, part in pairs(player.Character:GetDescendants()) do
+				if part:IsA("BasePart") then
+					local id = player.UserId .. "_" .. part:GetFullName()
 					if partStates[id] ~= nil then
-						x.CanCollide = partStates[id]
+						part.CanCollide = partStates[id]
 					end
 				end
 			end
@@ -3617,28 +3717,40 @@ cmd.add({"unlockws","unlockworkspace"},{"unlockws (unlockworkspace)","Unlocks th
 	end
 end)
 
-cmd.add({"vehiclespeed","vspeed"},{"vehiclespeed <amount> (vspeed)","Change the vehicle speed"},function(...)
+local vehicleloopspeed
+
+cmd.add({"vehiclespeed", "vspeed"}, {"vehiclespeed <amount> (vspeed)", "Change the vehicle speed"}, function(amount)
 	if vehicleloopspeed then
 		vehicleloopspeed:Disconnect()
+		vehicleloopspeed = nil
 	end
-	local UserInputService=game:GetService("UserInputService")
-	local GuiService=game:GetService("GuiService")
-	local LocalPlayer=game:GetService("Players").LocalPlayer
 
-	local intens=(...)
+	local intens = tonumber(amount)
+	if not intens or intens <= 0 then
+		DoNotif("Invalid speed amount. Please provide a positive number.")
+		return
+	end
 
-	vehicleloopspeed=game:GetService("RunService").Stepped:Connect(function()
-		local Humanoid=game:GetService("Workspace").CurrentCamera.CameraSubject;
-		if Humanoid:IsA("Humanoid") then
-			Humanoid.SeatPart:ApplyImpulse(Humanoid.SeatPart.CFrame.LookVector*Vector3.new(intens,intens,intens))
-		elseif Humanoid:IsA("BasePart") then
-			Humanoid:ApplyImpulse(Humanoid.CFrame.LookVector*Vector3.new(intens,intens,intens))
+	vehicleloopspeed = game:GetService("RunService").Stepped:Connect(function()
+		local subject = game:GetService("Workspace").CurrentCamera.CameraSubject
+		if subject and subject:IsA("Humanoid") and subject.SeatPart then
+			subject.SeatPart:ApplyImpulse(subject.SeatPart.CFrame.LookVector * Vector3.new(intens, 0, intens))
+		elseif subject and subject:IsA("BasePart") then
+			subject:ApplyImpulse(subject.CFrame.LookVector * Vector3.new(intens, 0, intens))
 		end
 	end)
+
+	DoNotif("Vehicle speed set to " .. intens)
 end)
 
-cmd.add({"unvehiclespeed","unvspeed"},{"unvehiclespeed (unvspeed)","Stops the vehiclespeed command"},function()
-	vehicleloopspeed=vehicleloopspeed:Disconnect()
+cmd.add({"unvehiclespeed", "unvspeed"}, {"unvehiclespeed (unvspeed)", "Stops the vehiclespeed command"}, function()
+	if vehicleloopspeed then
+		vehicleloopspeed:Disconnect()
+		vehicleloopspeed = nil
+		DoNotif("Vehicle speed disabled")
+	else
+		DoNotif("Vehicle speed is not active")
+	end
 end)
 
 cmd.add({"controlnpcs","cnpcs"},{"controlnpcs (cnpcs)","Mobile: Touch and hold on an NPC, PC: CTRL+LEFTCLICK"},function()
@@ -4698,53 +4810,59 @@ cmd.add({"fly"},{"fly [speed]","Enable flight"},function(...)
 	else
 	end
 	if IsOnMobile then 
-		wait();
-		DoNotif(adminName.." has detected you using mobile you now have a mfly button click it to enable / disable mobile flying (For easier use)")
+		wait()
+		DoNotif(adminName.." has detected you using mobile. You now have a Fly button. Click it to enable/disable mobile flying (for easier use).")
 
-		if rahh then rahh:Destroy() rahh=nil end
+		if rahh then
+    		rahh:Destroy()
+    		rahh = nil
+		end
 
-		rahh=Instance.new("ScreenGui")
-		local TextButton=Instance.new("TextButton")
-		local UICorner=Instance.new("UICorner")
-		local UIAspectRatioConstraint=Instance.new("UIAspectRatioConstraint")
+		rahh = Instance.new("ScreenGui")
+		local TextButton = Instance.new("TextButton")
+		local UICorner = Instance.new("UICorner")
+		local UIAspectRatioConstraint = Instance.new("UIAspectRatioConstraint")
 
-		rahh.Parent=COREGUI
-		rahh.ZIndexBehavior=Enum.ZIndexBehavior.Sibling
-		rahh.ResetOnSpawn=false
+		rahh.Parent = COREGUI
+		rahh.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+		rahh.ResetOnSpawn = false
 
-		TextButton.Parent=rahh
-		TextButton.BackgroundColor3=Color3.fromRGB(12,4,20)
-		TextButton.BackgroundTransparency=0.140
-		TextButton.Position=UDim2.new(0.933,0,0.621,0)
-		TextButton.Size=UDim2.new(0.043,0,0.083,0)
-		TextButton.Font=Enum.Font.SourceSansBold
-		TextButton.Text="Fly"
-		TextButton.TextColor3=Color3.fromRGB(255,255,255)
-		TextButton.TextSize=15.000
-		TextButton.TextWrapped=true
-		TextButton.Active=true
-		TextButton.Draggable=true
-		TextButton.TextScaled=true
+		TextButton.Parent = rahh
+		TextButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+		TextButton.BackgroundTransparency = 0.1
+		TextButton.Position = UDim2.new(0.9, 0, 0.6, 0)
+		TextButton.Size = UDim2.new(0.05, 0, 0.1, 0)
+		TextButton.Font = Enum.Font.GothamBold
+		TextButton.Text = "Fly"
+		TextButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+		TextButton.TextSize = 18
+		TextButton.TextWrapped = true
+		TextButton.Active = true
+		TextButton.TextScaled = true
 
-		UICorner.Parent=TextButton
+		UICorner.CornerRadius = UDim.new(0.2, 0)
+		UICorner.Parent = TextButton
 
-		UIAspectRatioConstraint.Parent=TextButton
-		UIAspectRatioConstraint.AspectRatio=1.060
+		UIAspectRatioConstraint.Parent = TextButton
+		UIAspectRatioConstraint.AspectRatio = 1.0
 
 		function FEPVI_fake_script()
-			TextButton.MouseButton1Click:Connect(function()
-				if on==false then
-					on=true
-					TextButton.Text="Unfly"
-					mobilefly(speed)
-				elseif on==true then
-					on=false
-					TextButton.Text="Fly"
-					unmobilefly()
-				end
-			end)
+    		TextButton.MouseButton1Click:Connect(function()
+        		if on == false then
+            		on = true
+            		TextButton.Text = "Unfly"
+            		TextButton.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+            		mobilefly(speed)
+        		elseif on == true then
+            		on = false
+            		TextButton.Text = "Fly"
+            		TextButton.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
+            		unmobilefly()
+        		end
+    		end)
 		end
 		coroutine.wrap(FEPVI_fake_script)()
+
 		gui.draggable(TextButton)
 	else
 		FLYING=false
@@ -4752,10 +4870,12 @@ cmd.add({"fly"},{"fly [speed]","Enable flight"},function(...)
 		wait();
 
 		DoNotif("Fly enabled")
-		sFLY(true)
+		sFLY()
 		speedofthevfly=(...)
+		speedofthefly=(...)
 		if (...)==nil then
 			speedofthevfly=2
+			speedofthefly=2
 		end
 	end
 end)
@@ -5459,77 +5579,95 @@ cmd.add({"saw"}, {"saw <challenge>", "shush"}, function(...)
     local challenge = table.concat({...}, " ")
     _G.SawFinish = false
 
-    local ScreenGui = Instance.new("ScreenGui")
-    local ttLabelLeft = Instance.new("TextLabel")
-    local ttLabelRight = Instance.new("TextLabel")
-    local imgLabel = Instance.new("ImageLabel")
-    local dramaticLabel = Instance.new("TextLabel")
-    local con = nil
-
-    local function doSound(id, vol)
-        id = id or 0
-        vol = vol or 1
+    local function playSound(id, vol)
         local sfx = Instance.new("Sound")
         sfx.Parent = PlrGui
-        sfx.SoundId = "rbxassetid://" .. id
-        sfx.Volume = vol
+        sfx.SoundId = "rbxassetid://"..id
+        sfx.Volume = vol or 1
         sfx:Play()
         sfx.Ended:Connect(function()
             sfx:Destroy()
         end)
     end
 
-    ScreenGui.Name = randomString()
-    ScreenGui.Parent = gethui()
+    local function createUIElement(class, properties, parent)
+        local element = Instance.new(class)
+        for prop, value in pairs(properties) do
+            element[prop] = value
+        end
+        element.Parent = parent
+        return element
+    end
 
-    imgLabel.Parent = ScreenGui
-    imgLabel.AnchorPoint = Vector2.new(0.5, 0)
-    imgLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    imgLabel.BorderSizePixel = 0
-    imgLabel.Position = UDim2.new(0.5, 0, 0, 0)
-    imgLabel.Size = UDim2.new(0, 150, 0, 150)
-    imgLabel.Image = "rbxassetid://8747893766"
+    local ScreenGui = createUIElement("ScreenGui", { Name = randomString() }, gethui())
 
-    ttLabelLeft.Name = randomString()
-    ttLabelLeft.Parent = ScreenGui
-    ttLabelLeft.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    ttLabelLeft.BackgroundTransparency = 0.1
-    ttLabelLeft.AnchorPoint = Vector2.new(0, 0.5)
-    ttLabelLeft.Position = UDim2.new(0, 10, 0.5, 0)
-    ttLabelLeft.Size = UDim2.new(0, 200, 0, 50)
-    ttLabelLeft.Font = Enum.Font.Arcade
-    ttLabelLeft.Text = "Challenge: " .. challenge
-    ttLabelLeft.TextColor3 = Color3.fromRGB(255, 0, 0)
-    ttLabelLeft.TextSize = 20
-    ttLabelLeft.TextWrapped = true
-    ttLabelLeft.ZIndex = 9999
+    local background = createUIElement("Frame", {
+        BackgroundColor3 = Color3.fromRGB(0, 0, 0),
+        BackgroundTransparency = 0.5,
+        Size = UDim2.new(1, 0, 1, 0),
+        ZIndex = 0
+    }, ScreenGui)
 
-    ttLabelRight.Name = randomString()
-    ttLabelRight.Parent = ScreenGui
-    ttLabelRight.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    ttLabelRight.BackgroundTransparency = 0.1
-    ttLabelRight.AnchorPoint = Vector2.new(1, 0.5)
-    ttLabelRight.Position = UDim2.new(1, -10, 0.5, 0)
-    ttLabelRight.Size = UDim2.new(0, 200, 0, 50)
-    ttLabelRight.Font = Enum.Font.Arcade
-    ttLabelRight.Text = "Time Remaining: 180 seconds"
-    ttLabelRight.TextColor3 = Color3.fromRGB(255, 0, 0)
-    ttLabelRight.TextSize = 20
-    ttLabelRight.TextWrapped = true
-    ttLabelRight.ZIndex = 9999
+    local imgLabel = createUIElement("ImageLabel", {
+        AnchorPoint = Vector2.new(0.5, 0),
+        BackgroundTransparency = 1,
+        Position = UDim2.new(0.5, 0, 0.1, 0),
+        Size = UDim2.new(0, 100, 0, 100),
+        Image = "rbxassetid://8747893766",
+        ImageColor3 = Color3.fromRGB(255, 0, 0)
+    }, ScreenGui)
 
-    dramaticLabel.Name = randomString()
-    dramaticLabel.Parent = ScreenGui
-    dramaticLabel.BackgroundTransparency = 1
-    dramaticLabel.AnchorPoint = Vector2.new(0.5, 0.5)
-    dramaticLabel.Position = UDim2.new(0.5, 0, 0.5, 0)
-    dramaticLabel.Size = UDim2.new(0, 300, 0, 100)
-    dramaticLabel.Font = Enum.Font.Arcade
-    dramaticLabel.Text = ""
-    dramaticLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
-    dramaticLabel.TextSize = 50
-    dramaticLabel.TextWrapped = true
-    dramaticLabel.ZIndex = 10000
+    local glow = createUIElement("ImageLabel", {
+        AnchorPoint = Vector2.new(0.5, 0),
+        BackgroundTransparency = 1,
+        Position = UDim2.new(0.5, 0, 0.1, 0),
+        Size = UDim2.new(0, 120, 0, 120),
+        Image = "rbxassetid://258128463",
+        ImageColor3 = Color3.fromRGB(255, 0, 0),
+        ZIndex = 1
+    }, ScreenGui)
+
+    local ttLabelLeft = createUIElement("TextLabel", {
+        BackgroundColor3 = Color3.fromRGB(0, 0, 0),
+        BackgroundTransparency = 0.3,
+        AnchorPoint = Vector2.new(0, 0.5),
+        Position = UDim2.new(0, 10, 0.5, 0),
+        Size = UDim2.new(0.3, 0, 0.1, 0),
+        Font = Enum.Font.SciFi,
+        Text = "Challenge: "..challenge,
+        TextColor3 = Color3.fromRGB(255, 0, 0),
+        TextSize = 24,
+        TextWrapped = true,
+        ZIndex = 2
+    }, ScreenGui)
+
+    local ttLabelRight = createUIElement("TextLabel", {
+        BackgroundColor3 = Color3.fromRGB(0, 0, 0),
+        BackgroundTransparency = 0.3,
+        AnchorPoint = Vector2.new(1, 0.5),
+        Position = UDim2.new(1, -10, 0.5, 0),
+        Size = UDim2.new(0.3, 0, 0.1, 0),
+        Font = Enum.Font.SciFi,
+        Text = "Time Remaining: 180 seconds",
+        TextColor3 = Color3.fromRGB(255, 0, 0),
+        TextSize = 24,
+        TextWrapped = true,
+        ZIndex = 2
+    }, ScreenGui)
+
+    local dramaticLabel = createUIElement("TextLabel", {
+        BackgroundTransparency = 1,
+        AnchorPoint = Vector2.new(0.5, 0.5),
+        Position = UDim2.new(0.5, 0, 0.7, 0),
+        Size = UDim2.new(0.5, 0, 0.2, 0),
+        Font = Enum.Font.SciFi,
+        Text = "",
+        TextColor3 = Color3.fromRGB(255, 0, 0),
+        TextSize = 50,
+        TextStrokeTransparency = 0.5,
+        TextWrapped = true,
+        ZIndex = 3
+    }, ScreenGui)
 
     local function flickerText()
         while not _G.SawFinish do
@@ -5541,7 +5679,7 @@ cmd.add({"saw"}, {"saw <challenge>", "shush"}, function(...)
 
     local function dramaticCountdown(num)
         dramaticLabel.Text = tostring(num)
-        doSound(138081500, 2)
+        playSound(138081500, 2)
         task.wait(1)
         dramaticLabel.Text = ""
     end
@@ -5552,13 +5690,13 @@ cmd.add({"saw"}, {"saw <challenge>", "shush"}, function(...)
             if not _G.SawFinish then
                 if num > 0 then
                     num = num - 1
-                    doSound(138081500, 1)
-                    ttLabelRight.Text = "Time Remaining: " .. num .. " seconds"
+                    playSound(138081500, 1)
+                    ttLabelRight.Text = "Time Remaining: "..num.." seconds"
                     if num == 30 or num == 20 or num == 10 then
                         dramaticCountdown(num)
                     elseif num <= 10 then
                         dramaticLabel.Text = tostring(num)
-                        doSound(138081500, 2)
+                        playSound(138081500, 2)
                     end
                 else
                     game:GetService("Players").LocalPlayer:Kick("You Failed The Challenge")
@@ -5567,12 +5705,8 @@ cmd.add({"saw"}, {"saw <challenge>", "shush"}, function(...)
                 ttLabelLeft.Text = "You Survived... For Now"
                 ttLabelRight.Text = ""
                 dramaticLabel.Text = ""
-                doSound(9125915751, 5)
+                playSound(9125915751, 5)
                 task.wait(2)
-                if con then
-                    con:Disconnect()
-                    con = nil
-                end
                 ScreenGui:Destroy()
                 break
             end
@@ -5581,18 +5715,20 @@ cmd.add({"saw"}, {"saw <challenge>", "shush"}, function(...)
 
     local function moveImage()
         while not _G.SawFinish do
-            imgLabel.Position = UDim2.new(0.5, math.random(-10, 10), 0, math.random(-10, 10))
-            task.wait(0.1)
+            local newX = math.random(-10, 10)
+            local newY = math.random(-10, 10)
+            local tween = game:GetService("TweenService"):Create(
+                imgLabel,
+                TweenInfo.new(0.1, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut),
+                { Position = UDim2.new(0.5, newX, 0.1, newY) }
+            )
+            tween:Play()
+            tween.Completed:Wait()
         end
     end
 
     local function startChallenge()
-        doSound(469373418, 5)
-        if con then
-            con:Disconnect()
-            con = nil
-        end
-
+        playSound(469373418, 5)
         coroutine.wrap(count)()
         coroutine.wrap(flickerText)()
         coroutine.wrap(moveImage)()
@@ -5603,69 +5739,6 @@ end)
 
 cmd.add({"jend"}, {"jend", "nil"}, function()
     _G.SawFinish = true
-end)
-
-cmd.add({"fling2"},{"fling2 <player>","Fling the given player 2"},function(...)
-	Target=(...)
-	flinghh=1000
-
-	target=getPlr(Target)
-	game:GetService("Workspace").CurrentCamera.CameraSubject=target.Character.Humanoid
-
-
-	local lp=game:GetService("Players").LocalPlayer
-	for i,v in pairs(game:GetService("Players"):GetPlayers()) do
-		if v.Name:lower():match("^"..Target:lower()) or v.DisplayName:lower():match("^"..Target:lower()) then
-			Target=v
-			break
-		end
-	end
-
-	if type(Target)=="string" then return end
-
-	local oldpos=getRoot(lp.Character).CFrame
-	local oldhh=lp.Character.Humanoid.HipHeight
-
-	local carpetAnim=Instance.new("Animation")
-	carpetAnim.AnimationId="rbxassetid://282574440"
-	carpet=lp.Character:FindFirstChildOfClass('Humanoid'):LoadAnimation(carpetAnim)
-	carpet:Play(.1,1,1)
-
-	local carpetLoop
-
-	local tTorso=Target.Character:FindFirstChild("Torso") or Target.Character:FindFirstChild("LowerTorso") or Target.Character:FindFirstChild("HumanoidRootPart")
-
-	spawn(function()
-		carpetLoop=game:GetService('RunService').Heartbeat:Connect(function()
-			pcall(function()
-				if tTorso.Velocity.magnitude <=28 then--if target uses netless just target their local position
-					local pos={x=0,y=0,z=0}
-					pos.x=tTorso.Position.X
-					pos.y=tTorso.Position.Y
-					pos.z=tTorso.Position.Z
-					pos.x=pos.x+tTorso.Velocity.X / 2
-					pos.y=pos.y+tTorso.Velocity.Y / 2
-					pos.z=pos.z+tTorso.Velocity.Z / 2
-					getRoot(getChar()).CFrame=CFrame.new(Vector3.new(pos.x,pos.y,pos.z))
-				else
-					getRoot(getChar()).CFrame=tTorso.CFrame
-				end
-			end)
-		end)
-	end)
-
-	wait()
-
-	lp.Character.Humanoid.HipHeight=flinghh
-
-	wait(.5)
-
-	carpetLoop:Disconnect()
-	game:GetService("Workspace").CurrentCamera.CameraSubject=target.Character.Humanoid
-	wait(1)
-	lp.Character.Humanoid.Health=0
-	wait(game:GetService("Players").RespawnTime+.6)
-	getRoot(getChar()).CFrame=oldpos
 end)
 
 cmd.add({"fling"},{"fling <player>", "Fling the given player"},function(plr)
@@ -5932,31 +6005,44 @@ cmd.add({"goto","to","tp","teleport"},{"goto <player/X,Y,Z>","Teleport to the gi
 	local target=getPlr(Username)
 	getRoot(getChar()).CFrame=target.Character.Humanoid.RootPart.CFrame
 end)
-Stare=false
-cmd.add({"lookat","stare"},{"stare <player> (lookat)","Stare at a player"},function(...)
-	Username=(...)
-	local Target=getPlr(Username)
-	if Staring then
-		Staring:Disconnect()
-	end
-	if not Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart") and Target.Character:FindFirstChild("HumanoidRootPart") then return end
-	function Stare()
-		if Players.LocalPlayer.Character.PrimaryPart and Players:FindFirstChild(Target.Name) and Target.Character~=nil and Target.Character:FindFirstChild("HumanoidRootPart") then
-			local CharPos=Players.LocalPlayer.Character.PrimaryPart.Position
-			local tpos=Target.Character:FindFirstChild("HumanoidRootPart").Position
-			local TPos=Vector3.new(tpos.X,CharPos.Y,tpos.Z)
-			local NewCFrame=CFrame.new(CharPos,TPos)
-			Players.LocalPlayer.Character:SetPrimaryPartCFrame(NewCFrame)
-		elseif not Players:FindFirstChild(Target.Name) then
-			Staring:Disconnect()
-		end
-	end
 
-	Staring=RunService.RenderStepped:Connect(Stare)
+local StaringConnection = nil
+
+cmd.add({"lookat", "stare"}, {"stare <player> (lookat)", "Stare at a player"}, function(...)
+    local Username = (...)
+    local Target = getPlr(Username)
+
+    if StaringConnection then
+        StaringConnection:Disconnect()
+        StaringConnection = nil
+    end
+
+    if not (Players.LocalPlayer.Character and Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")) then return end
+    if not (Target and Target.Character and Target.Character:FindFirstChild("HumanoidRootPart")) then return end
+
+    local function Stare()
+        if Players.LocalPlayer.Character.PrimaryPart and Target.Character and Target.Character:FindFirstChild("HumanoidRootPart") then
+            local LocalCharPos = Players.LocalPlayer.Character.PrimaryPart.Position
+            local TargetPos = Target.Character.HumanoidRootPart.Position
+            local AdjustedTargetPos = Vector3.new(TargetPos.X, LocalCharPos.Y, TargetPos.Z)
+            local NewCFrame = CFrame.new(LocalCharPos, AdjustedTargetPos)
+            Players.LocalPlayer.Character:SetPrimaryPartCFrame(NewCFrame)
+        else
+            if not Players:FindFirstChild(Target.Name) then
+                StaringConnection:Disconnect()
+                StaringConnection = nil
+            end
+        end
+    end
+
+    StaringConnection = RunService.RenderStepped:Connect(Stare)
 end)
 
-cmd.add({"unlookat","unstare"},{"unstare (unlookat)","Stops staring"},function()
-	Staring:Disconnect()
+cmd.add({"unlookat", "unstare"}, {"unstare (unlookat)", "Stops staring"}, function()
+    if StaringConnection then
+        StaringConnection:Disconnect()
+        StaringConnection = nil
+    end
 end)
 
 local conn, loop, plrLeftCon = nil, nil, nil
@@ -6383,69 +6469,115 @@ cmd.add({"loopfling"},{"loopfling <player>","Loop voids a player"},function(plr)
 	until Loopvoid==false
 end)
 
-cmd.add({"freegamepass","freegp"},{"freegamepass (freegp)","Makes the client think you own every gamepass in the game"},function()
-	local mt = getrawmetatable(game)
-	local old = mt.__namecall
-	local readonly = setreadonly or make_writeable
+cmd.add({"freegamepass", "freegp"}, {"freegamepass (freegp)", "Makes the client think you own every gamepass in the game"}, function()
+    local mt = getrawmetatable(game)
+    local oldNamecall = mt.__namecall
+    local setReadOnly = setreadonly or make_writeable
 
-	local MarketplaceService = game:GetService("MarketplaceService")
+    local MarketplaceService = game:GetService("MarketplaceService")
 
-	readonly(mt, false)
+    setReadOnly(mt, false)
 
-	mt.__namecall = function(self, ...)
-		local args = {...}
-		local method = getnamecallmethod()
+    mt.__namecall = function(self, ...)
+        local args = {...}
+        local method = getnamecallmethod()
 
-		if self == MarketplaceService and method == "UserOwnsGamePassAsync" then
-			return true
-		end
+        if self == MarketplaceService and method == "UserOwnsGamePassAsync" then
+            return true
+        end
 
-		return old(self, ...)
-	end
+        return oldNamecall(self, ...)
+    end
 
-	wait()
+    setReadOnly(mt, true)
 
-	DoNotif("Free gamepass has been executed, keep in mind this won't always work")
+    DoNotif("Free gamepass has been executed. Keep in mind this won't always work.")
 end)
 
-local headSit,sitDied=nil,nil
+local headSit, sitDied = nil, nil
 
 cmd.add({"headsit"}, {"headsit <player>", "Head sit."}, function(...)
-	local Username = (...)
-	if headSit then headSit:Disconnect() headSit = nil end
+    local Username = (...)
+    local plr = getPlr(Username)
+    if not plr then return end
 
-	local plr = getPlr(Username)
-	if not plr then return end
+    local char = getChar()
+    local hum = char and char:FindFirstChildOfClass("Humanoid")
+    if not hum then return end
 
-	local char = getChar()
-	local hum = char and char:FindFirstChildOfClass("Humanoid")
-	if not hum then return end
+    if headSit then
+        headSit:Disconnect()
+        headSit = nil
+    end
 
-	sitDied = hum.Died:Connect(function()
-		if headSit then headSit:Disconnect() headSit = nil end
-	end)
+    if sitDied then
+        sitDied:Disconnect()
+        sitDied = nil
+    end
 
-	hum.Sit = true
+    local charRoot = getRoot(char)
+    local plrRoot = getRoot(plr.Character)
+    if not charRoot or not plrRoot then return end
 
-	headSit = RunService.Heartbeat:Connect(function()
-		if game.Players:FindFirstChild(plr.Name) and plr.Character then
-			local plrRoot, charRoot = getRoot(plr.Character), getRoot(char)
-			if plrRoot and charRoot and hum.Sit then
-				charRoot.CFrame = plrRoot.CFrame * CFrame.new(0, 1.6, 0.4)
-				return
-			end
-		end
-		headSit:Disconnect()
-		headSit = nil
-	end)
+    hum.Sit = true
+
+    sitDied = hum.Died:Connect(function()
+        if headSit then
+            headSit:Disconnect()
+            headSit = nil
+        end
+    end)
+
+    local alignPos = charRoot:FindFirstChildOfClass("AlignPosition") or Instance.new("AlignPosition", charRoot)
+    alignPos.Attachment0 = charRoot:FindFirstChild("RootAttachment") or Instance.new("Attachment", charRoot)
+    alignPos.Attachment1 = plrRoot:FindFirstChild("RootAttachment") or Instance.new("Attachment", plrRoot)
+    alignPos.RigidityEnabled = true
+    alignPos.MaxForce = 100000
+    alignPos.Responsiveness = 200
+    alignPos.Attachment1.Position = Vector3.new(0, 1.6, 0.4)
+
+    local alignOri = charRoot:FindFirstChildOfClass("AlignOrientation") or Instance.new("AlignOrientation", charRoot)
+    alignOri.Attachment0 = charRoot:FindFirstChild("RootAttachment")
+    alignOri.Attachment1 = plrRoot:FindFirstChild("RootAttachment")
+    alignOri.RigidityEnabled = true
+    alignOri.MaxTorque = 100000
+    alignOri.Responsiveness = 200
+
+    headSit = RunService.Heartbeat:Connect(function()
+        if not game.Players:FindFirstChild(plr.Name) or not plr.Character or not plr.Character:FindFirstChild("HumanoidRootPart") or hum.Sit == false then
+            alignPos:Destroy()
+            alignOri:Destroy()
+            headSit:Disconnect()
+            headSit = nil
+        end
+    end)
 end)
 
 cmd.add({"unheadsit"}, {"unheadsit", "Stop the headsit command."}, function()
-	if headSit then headSit:Disconnect() headSit = nil end
-	if sitDied then sitDied:Disconnect() sitDied = nil end
+    if headSit then
+        headSit:Disconnect()
+        headSit = nil
+    end
 
-	local hum = getChar():FindFirstChildOfClass("Humanoid")
-	if hum then hum:ChangeState(Enum.HumanoidStateType.Jumping) end
+    if sitDied then
+        sitDied:Disconnect()
+        sitDied = nil
+    end
+
+    local char = getChar()
+    local hum = char and char:FindFirstChildOfClass("Humanoid")
+    if hum then
+        hum:ChangeState(Enum.HumanoidStateType.Jumping)
+    end
+
+    local charRoot = getRoot(char)
+    if charRoot then
+        for _, child in ipairs(charRoot:GetChildren()) do
+            if child:IsA("AlignPosition") or child:IsA("AlignOrientation") then
+                child:Destroy()
+            end
+        end
+    end
 end)
 
 cmd.add({"jump"},{"jump","jump."},function()
