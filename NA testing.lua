@@ -2165,6 +2165,12 @@ local vOn=false
 local vRAHH=nil
 
 cmd.add({"vfly","vehiclefly"},{"vehiclefly (vfly)","be able to fly vehicles"},function(...)
+		speed=(...)
+
+	if speed==nil then
+		speed=50
+	else
+		end
 	if IsOnMobile then 
 		wait()
 		DoNotif(adminName.." has detected you using mobile. You now have a vFly button. Click it to enable/disable mobile flying (for easier use).")
@@ -2242,13 +2248,18 @@ end)
 
 cmd.add({"unvfly","unvehiclefly"},{"unvehiclefly (unvfly)","disable vehicle fly"},function()
 
-
-
-	wait();
-
-	DoNotif("Vehicle fly disabled")
-	FLYING=false
-	cmdlp.Character.Humanoid.PlatformStand=false
+wait();
+	if IsOnMobile then
+		DoNotif("Mobile vFly Disabled")
+	else
+		DoNotif("Not flying anymore")
+		FLYING=false
+		cmdlp.Character.Humanoid.PlatformStand=false
+		if goofyFLY then goofyFLY:Destroy() end
+	end
+	unmobilefly()
+	vOn=false
+	if vRAHH then vRAHH:Destroy() vRAHH=nil end
 end)
 
 cmd.add({"equiptools","equipall"},{"equiptools","Equip all of your tools"},function()
