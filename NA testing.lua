@@ -9404,28 +9404,43 @@ cmd.add({"fireremotes"},{"fireremotes","Fires every remote"},function()
 
 end)
 
---tween works better for some reason
+local fovcon = nil
+local monitorcon = nil
 
 cmd.add({"fov"},{"fov <number>","Makes your FOV to something custom you want (1-120 FOV)"},function(num)
-	local field=(num or 70)
-	--game:GetService("Workspace").CurrentCamera.FieldOfView=tonumber(arg[1])
-	local hh=game:GetService("TweenService"):Create(game:GetService("Workspace").CurrentCamera,TweenInfo.new(0,Enum.EasingStyle.Linear),{FieldOfView=tonumber(field)})
-	hh:Play()
+    local field = tonumber(num) or 70
+    local hh = game:GetService("TweenService"):Create(
+        game:GetService("Workspace").CurrentCamera,
+        TweenInfo.new(0, Enum.EasingStyle.Linear),
+        {FieldOfView = field}
+    )
+    hh:Play()
 end)
-
-local fovcon=nil
 
 cmd.add({"loopfov","lfov"},{"loopfov <number> (lfov)","Makes your FOV to something custom you want (1-120 FOV) on loop"},function(num)
-	local field=(num or 70)
-	if fovcon then fovcon:Disconnect() fovcon=nil end
-	fovcon=game:GetService("RunService").RenderStepped:Connect(function()
-		local hh=game:GetService("TweenService"):Create(game:GetService("Workspace").CurrentCamera,TweenInfo.new(0,Enum.EasingStyle.Linear),{FieldOfView=tonumber(field)})
-		hh:Play()
-	end)
+    local field = tonumber(num) or 70
+    if fovcon then fovcon:Disconnect() fovcon = nil end
+    if monitorcon then monitorcon:Disconnect() monitorcon = nil end
+
+    fovcon = game:GetService("RunService").RenderStepped:Connect(function()
+        local hh = game:GetService("TweenService"):Create(
+            game:GetService("Workspace").CurrentCamera,
+            TweenInfo.new(0, Enum.EasingStyle.Linear),
+            {FieldOfView = field}
+        )
+        hh:Play()
+    end)
+
+    monitorcon = game:GetService("Workspace").CurrentCamera:GetPropertyChangedSignal("FieldOfView"):Connect(function()
+        if game:GetService("Workspace").CurrentCamera.FieldOfView ~= field then
+            game:GetService("Workspace").CurrentCamera.FieldOfView = field
+        end
+    end)
 end)
 
-cmd.add({"unloopfov","unlfov"},{"unloopfov <number> (unlfov)",""},function()
-	if fovcon then fovcon:Disconnect() fovcon=nil end
+cmd.add({"unloopfov","unlfov"},{"unloopfov (unlfov)","Stops the looped FOV"},function()
+    if fovcon then fovcon:Disconnect() fovcon = nil end
+    if monitorcon then monitorcon:Disconnect() monitorcon = nil end
 end)
 
 cmd.add({"homebrew"},{"homebrew","Executes homebrew admin"},function()
