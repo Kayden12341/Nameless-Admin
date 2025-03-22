@@ -852,7 +852,9 @@ function mobilefly(speed,vfly)
 		if character and humanoid and flyMobile and MobileWeld and bv and bg then
 			bv.MaxForce=Vector3.new(9e9,9e9,9e9)
 			bg.MaxTorque=Vector3.new(9e9,9e9,9e9)
-			humanoid.PlatformStand=vfly and false or true
+			if not vfly then
+			humanoid.PlatformStand=true
+			end
 
 			bg.CFrame=camera.CFrame
 			local direction=ctrlModule:GetMoveVector()
@@ -2215,6 +2217,7 @@ cmd.add({"vfly","vehiclefly"},{"vehiclefly (vfly)","be able to fly vehicles"},fu
             		TextButton.Text = "UnvFly"
             		TextButton.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
             		mobilefly(speed,true)
+			cmdlp.Character.Humanoid.PlatformStand=false
         		elseif vOn == true then
             		vOn = false
             		TextButton.Text = "vFly"
