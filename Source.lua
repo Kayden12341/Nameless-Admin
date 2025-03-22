@@ -1,6 +1,6 @@
 if getgenv().RealNamelessLoaded then return end
 
-local function NACaller(pp)--helps me log better
+function NACaller(pp)--helps me log better
 	local s,err=pcall(pp)
 	if not s then print("NA script err: "..err) end
 end
@@ -87,7 +87,7 @@ until Notification~=nil --waits for the module to load (cause loadstring takes a
 
 local Notify=Notification.Notify;
 
-local function DoNotif(txt,dur,naem)
+function DoNotif(txt,dur,naem)
 	if not dur then dur=5 end
 	if not naem then naem=adminName end
 	Notify({
@@ -375,14 +375,13 @@ end
 --[[ COMMAND FUNCTIONS ]]--
 local commandcount=0
 cmd={}
-cmd.add = function(...)
-    local vars = {...}
-    local aliases, info, func = vars[1], vars[2], vars[3]
+cmd.add = function(aliases, info, func, requiresArguments)
+    requiresArguments = requiresArguments or false
     for i, cmdName in pairs(aliases) do
         if i == 1 then
-            Commands[cmdName:lower()] = {func, info}
+            Commands[cmdName:lower()] = {func, info, requiresArguments}
         else
-            Aliases[cmdName:lower()] = {func, info}
+            Aliases[cmdName:lower()] = {func, info, requiresArguments}
         end
     end
     commandcount = commandcount + 1
@@ -399,30 +398,62 @@ cmd.run = function(args)
         else
             local closest = didYouMean(caller:lower())
             if closest then
-                Notify({
-                    Title = adminName,
-                    Description = "Command [ " .. caller .. " ] doesn't exist\nDid you mean [ " .. closest .. " ]?",
-                    Duration = 5,
-                    Buttons = {
-                        {
-                            Text = "Yes (execute)",
-                            Callback = function()
-                                local closestCommand = Commands[closest] or Aliases[closest]
-                                if closestCommand then
-                                    closestCommand[1](unpack(arguments))
+                local commandFunc = Commands[closest] and Commands[closest][1] or Aliases[closest] and Aliases[closest][1]
+                local requiresInput = Commands[closest] and Commands[closest][3] or Aliases[closest] and Aliases[closest][3]
+
+                if requiresInput then
+                    Notify({
+                        Title = adminName,
+                        Description = "Command [ " .. caller .. " ] doesn't exist\nDid you mean [ " .. closest .. " ]?",
+                        InputField = true,
+                        Buttons = {
+                            {
+                                Text = "Submit",
+                                Callback = function(input)
+                                    local parsedArguments = ParseArguments(input)
+                                    commandFunc(unpack(parsedArguments))
                                 end
-                            end
-                        },
-                        {
-                            Text = "No",
-                            Callback = function() end
+                            },
+                            {
+                                Text = "Cancel",
+                                Callback = function() end
+                            }
                         }
-                    }
-                })
+                    })
+                else
+                    Notify({
+                        Title = adminName,
+                        Description = "Command [ " .. caller .. " ] doesn't exist\nDid you mean [ " .. closest .. " ]?",
+                        Buttons = {
+                            {
+                                Text = "Run Command",
+                                Callback = function()
+                                    commandFunc()
+                                end
+                            },
+                            {
+                                Text = "Cancel",
+                                Callback = function() end
+                            }
+                        }
+                    })
+                end
             end
         end
     end)
     if not success then end
+end
+
+function ParseArguments(input)
+    if not input or input:match("^%s*$") then
+        return nil
+    end
+
+    local args = {}
+    for arg in string.gmatch(input, "[^%s]+") do
+        table.insert(args, arg)
+    end
+    return args
 end
 
 function randomString()
@@ -642,7 +673,7 @@ function round(num,numDecimalPlaces)
 	return math.floor(num*mult+0.5) / mult
 end
 
-local function placeName()
+function placeName()
 	local page=game:GetService("AssetService"):GetGamePlacesAsync()
 	while true do
 		for _,place in ipairs(page:GetCurrentPage()) do
@@ -675,7 +706,7 @@ function ESP(plr)
 		end
 		wait()
 
-		local function makeESP()
+		function makeESP()
 			if plr.Character and plr.Name~=Players.LocalPlayer.Name and not COREGUI:FindFirstChild(plr.Name..'_ESP') then
 				local ESPholder=Instance.new("Folder")
 				ESPholder.Name=plr.Name..'_ESP'
@@ -1269,7 +1300,7 @@ cmd.add({"url"},{"url <link>","Run the script using url"},function(...)
 		end
 	end
 	loadstring(game:HttpGet(code))()
-end)
+end,true)
 
 cmd.add({"loadstring","ls"},{"loadstring <code> (ls)","Run the code using the loadstring"},function(...)
     local args = {...}
@@ -1283,7 +1314,7 @@ cmd.add({"loadstring","ls"},{"loadstring <code> (ls)","Run the code using the lo
         return false, "Error executing code: "..tostring(result)
     end
     return true, result
-end)
+end,true)
 
 cmd.add({"executor","exec"},{"executor (exec)","Very simple executor"},function()
 	loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/Nameless-Admin/main/NAexecutor.lua"))()
@@ -1311,7 +1342,7 @@ cmd.add({"prefix"},{"prefix <prefix>","Changes the admin prefix"},function(...)
 		opt.prefix = PrefixChange
 		DoNotif("Prefix set to: "..PrefixChange)
 	end
-end)
+end,true)
 
 
 cmd.add({"saveprefix"},{"saveprefix <prefix>","Saves the prefix to what u want"},function(...)
@@ -1329,7 +1360,7 @@ cmd.add({"saveprefix"},{"saveprefix <prefix>","Saves the prefix to what u want"}
 		opt.prefix=PrefixChange
 		DoNotif("Prefix saved to: "..PrefixChange)
 	end
-end)
+end,true)
 
 --[ UTILITY ]--
 
@@ -1955,7 +1986,7 @@ cmd.add({"rejoin","rj"},{"rejoin (rj)","Rejoin the game"},function()
 	local teleportService = game:GetService("TeleportService")
 	local localPlayer = players.LocalPlayer
 
-	local function onTeleportError(errorMessage)
+	function onTeleportError(errorMessage)
 		DoNotif("Teleport failed: "..errorMessage, 5)
 	end
 
@@ -1989,7 +2020,7 @@ cmd.add({"teleporttoplace","toplace","ttp"},{"teleporttoplace (PlaceId) (toplace
 	args={...}
 	pId=tonumber(args[1])
 	game:GetService("TeleportService"):Teleport(pId)
-end)
+end,true)
 
 --made by the_king.78
 cmd.add({"adonisbypass","bypassadonis","badonis","adonisb"},{"adonisbypass (bypassadonis,badonis,adonisb)","bypasses adonis admin detection"},function()
@@ -2133,7 +2164,7 @@ cmd.add({"accountage","accage"},{"accountage <player> (accage)","Tells the accou
 	wait();
 
 	DoNotif(accountage)
-end)
+end,true)
 
 cmd.add({"hitboxes"},{"hitboxes","shows all the hitboxes"},function()
 	settings():GetService("RenderSettings").ShowBoundingBoxes=true
@@ -2231,7 +2262,7 @@ cmd.add({"vfly","vehiclefly"},{"vehiclefly (vfly)","be able to fly vehicles"},fu
 			speedofthefly=2
 		end
 	end
-end)
+end,true)
 
 cmd.add({"unvfly","unvehiclefly"},{"unvehiclefly (unvfly)","disable vehicle fly"},function()
 
@@ -2317,7 +2348,7 @@ cmd.add({"tweento","tweengoto"},{"tweengoto (tweento)","Teleportation method tha
 	local players=getPlr(Username)
 	TweenService:Create(getRoot(speaker.Character),TweenInfo.new(2,Enum.EasingStyle.Linear),{CFrame=getRoot(players.Character).CFrame+Vector3.new(3,1,0)}):Play()
 
-end)
+end,true)
 
 cmd.add({"reach", "swordreach"}, {"reach [number] (swordreach)", "Extends sword reach in one direction"}, function(reachsize)
     reachsize = tonumber(reachsize) or 25
@@ -2518,7 +2549,7 @@ cmd.add({"fpsbooster","lowgraphics","boostfps","lowg"},{"fpsbooster (lowgraphics
     local l = g:GetService("Lighting")
     local t = w.Terrain
 
-    local function optimizeInstance(v)
+    function optimizeInstance(v)
         if v:IsA("BasePart") and not v:IsA("MeshPart") then
             v.Material = "Plastic"
             v.Reflectance = 0
@@ -2630,7 +2661,7 @@ cmd.add({"annoy"},{"annoy <player>","Annoys the given player"},function(...)
     if saveCFrame then
         root.CFrame = saveCFrame
     end
-end)
+end,true)
 
 cmd.add({"unannoy"},{"unannoy","Stops the annoy command"},function()
     annoyLoop = false
@@ -2671,19 +2702,19 @@ cmd.add({"replicationlag","backtrack"},{"replicationlag (backtrack)","Set Incomi
 	if tonumber(args) then
 		settings():GetService("NetworkSettings").IncomingReplicationLag=args
 	end
-end)
+end,true)
 
-cmd.add({"norender"},{"norender","Disable 3d Rendering to decrease the amount of CPU the client uses"},function(...)
+cmd.add({"norender"},{"norender","Disable 3d Rendering to decrease the amount of CPU the client uses"},function()
 	RunService:Set3dRenderingEnabled(false)
 end)
 
-cmd.add({"render"},{"render","Enable 3d Rendering"},function(...)
+cmd.add({"render"},{"render","Enable 3d Rendering"},function()
 	RunService:Set3dRenderingEnabled(true)
 end)
 
 oofing=false
 
-cmd.add({"loopoof"},{"loopoof","Loops everyones character sounds (everyone can hear)"},function(...)
+cmd.add({"loopoof"},{"loopoof","Loops everyones character sounds (everyone can hear)"},function()
 	oofing=true
 	repeat wait(0.1)
 		for i,v in pairs(Players:GetPlayers()) do
@@ -2696,7 +2727,7 @@ cmd.add({"loopoof"},{"loopoof","Loops everyones character sounds (everyone can h
 	until oofing==false
 end)
 
-cmd.add({"unloopoof"},{"unloopoof","Stops the oof chaos"},function(...)
+cmd.add({"unloopoof"},{"unloopoof","Stops the oof chaos"},function()
 	oofing=false
 end)
 
@@ -2711,9 +2742,9 @@ cmd.add({"strengthen"},{"strengthen","Makes your character more dense (CustomPhy
 			end
 		end
 	end
-end)
+end,true)
 
-cmd.add({"unweaken","unstrengthen"},{"unweaken (unstrengthen)","Sets your characters CustomPhysicalProperties to default"},function(...)
+cmd.add({"unweaken","unstrengthen"},{"unweaken (unstrengthen)","Sets your characters CustomPhysicalProperties to default"},function()
 	for _,child in pairs(Player.Character:GetDescendants()) do
 		if child.ClassName=="Part" then
 			child.CustomPhysicalProperties=PhysicalProperties.new(0.7,0.3,0.5)
@@ -2732,7 +2763,7 @@ cmd.add({"weaken"},{"weaken","Makes your character less dense"},function(...)
 			end
 		end
 	end
-end)
+end,true)
 
 cmd.add({"seat"},{"seat","Finds a seat and automatically sits on it"},function()
     local seats = {}
@@ -2768,7 +2799,7 @@ cmd.add({"copytools","ctools"},{"copytools <player> (ctools)","Copies the tools 
 			v:Clone().Parent=game:GetService("Players").LocalPlayer:FindFirstChildOfClass("Backpack")
 		end
 	end
-end)
+end,true)
 
 cmd.add({"localtime","yourtime"},{"localtime (yourtime)","Shows your current time"},function()
 	local hour=os.date("*t")['hour']
@@ -2788,7 +2819,7 @@ cmd.add({"localtime","yourtime"},{"localtime (yourtime)","Shows your current tim
 	DoNotif("Your Local Time Is: "..clock)
 end)
 
-cmd.add({"cartornado", "ctornado"}, {"cartornado (ctornado)", "Tornados a car just sit in the car"}, function(...)
+cmd.add({"cartornado", "ctornado"}, {"cartornado (ctornado)", "Tornados a car just sit in the car"}, function()
     local SPart = Instance.new("Part")
     local Player = game:GetService("Players").LocalPlayer
     local RunService = game:GetService("RunService")
@@ -3106,6 +3137,33 @@ cmd.add({"trip"},{"trip","get up NOW"},function()
 	getChar():FindFirstChild("HumanoidRootPart").Velocity=getChar():FindFirstChild("HumanoidRootPart").CFrame.LookVector*25
 end)
 
+noTripCon = nil
+
+cmd.add({"antitrip"}, {"antitrip", "no tripping today bruh"}, function()
+    function antiTrip(char)
+        local hum = getHum()
+        local root = getRoot(char)
+
+        if hum and root then
+            if noTripCon then noTripCon:Disconnect() noTripCon = nil end
+            noTripCon = hum.FallingDown:Connect(function()
+                root.Velocity = Vector3.new(0, 0, 0)
+                hum:ChangeState(Enum.HumanoidStateType.GettingUp)
+            end)
+        end
+    end
+
+    if p.Character then antiTrip(p.Character) end
+    p.CharacterAdded:Connect(antiTrip)
+end)
+
+cmd.add({"unantitrip"}, {"unantitrip", "tripping allowed now"}, function()
+    if noTripCon then
+        noTripCon:Disconnect()
+        noTripCon = nil
+    end
+end)
+
 cmd.add({"checkrfe"},{"checkrfe","Checks if the game has respect filtering enabled off"},function()
 	if game:GetService("SoundService").RespectFilteringEnabled==true then
 		DoNotif("Respect Filtering Enabled is on")
@@ -3136,7 +3194,7 @@ cmd.add({"spin"},{"spin","Spin yourself at the speed you want"},function(d)
 	Spin.Parent=getRoot(speaker.Character)
 	Spin.MaxTorque=Vector3.new(0,math.huge,0)
 	Spin.AngularVelocity=Vector3.new(0,spinSpeed,0)
-end)
+end,true)
 
 cmd.add({"oldroblox"},{"oldroblox","Old skybox and studs"},function()
 	for i,v in pairs(game:GetService("Workspace"):GetDescendants()) do
@@ -3217,7 +3275,7 @@ cmd.add({"triggerbot","tbot"},{"triggerbot (tbot)","Executes a script that autom
 	uicorner.Parent = On
 	---End Gui---
 
-	local function FindTeams()
+	function FindTeams()
 		local CC1 = false
 		local CC2 = false
 
@@ -3245,11 +3303,11 @@ cmd.add({"triggerbot","tbot"},{"triggerbot (tbot)","Executes a script that autom
 	end
 
 	-- Functions
-	local function Click()
+	function Click()
 		mouse1click()
 	end
 
-	local function CastRay(Mode)
+	function CastRay(Mode)
 		local RaySPTR = Camera:ScreenPointToRay(Mouse.X, Mouse.Y)
 		local NewRay = Ray.new(RaySPTR.Origin, RaySPTR.Direction * 9999)
 		local Target, Position = game:GetService("Workspace"):FindPartOnRayWithIgnoreList(NewRay, {Char, Camera})
@@ -3414,7 +3472,7 @@ cmd.add({"hamster"},{"hamster <number>","Hamster ball"},function(...)
 
 	Camera.CameraSubject=ball
 	humanoid.Died:Connect(function() tc:Disconnect() end)
-end)
+end,true)
 
 local antiAFKConnection = nil
 
@@ -3468,7 +3526,7 @@ cmd.add({"clicktp", "tptool"}, {"clicktp (tptool)", "Teleport where your mouse i
 
     local TweenService = game:GetService("TweenService")
 
-    local function onActivated()
+    function onActivated()
         local pos = mouse.Hit + Vector3.new(0, 2.5, 0)
         local humanoidRootPart = getRoot(getChar())
         local tweenInfo = TweenInfo.new(
@@ -3500,7 +3558,7 @@ cmd.add({"Decompiler"},{"Decompiler","Allows you to decompile LocalScript/Module
 		local API: string = "http://api.plusgiant5.com/"
 
 		local last_call = 0
-		local function call(konstantType: string, scriptPath: Script | ModuleScript | LocalScript): string
+		function call(konstantType: string, scriptPath: Script | ModuleScript | LocalScript): string
 			local success: boolean, bytecode: string = pcall(getscriptbytecode, scriptPath)
 
 			if (not success) then
@@ -3528,11 +3586,11 @@ cmd.add({"Decompiler"},{"Decompiler","Allows you to decompile LocalScript/Module
 			end
 		end
 
-		local function decompile(scriptPath: Script | ModuleScript | LocalScript): string
+		function decompile(scriptPath: Script | ModuleScript | LocalScript): string
 			return call("/konstant/decompile", scriptPath)
 		end
 
-		local function disassemble(scriptPath: Script | ModuleScript | LocalScript): string
+		function disassemble(scriptPath: Script | ModuleScript | LocalScript): string
 			return call("/konstant/disassemble", scriptPath)
 		end
 
@@ -3784,7 +3842,7 @@ cmd.add({"controlnpcs","cnpcs"},{"controlnpcs (cnpcs)","Mobile: Touch and hold o
 	local player = game:GetService("Players").LocalPlayer
 	local mouse = player:GetMouse()
 
-	local function controlNPC(npc)
+	function controlNPC(npc)
 		if not npc then return end
 
 		local character = getChar()
@@ -4022,7 +4080,7 @@ cmd.add({"locate"},{"locate <username>","locate where the players are"},function
 	if target then
 		ESP(target)
 	end
-end)
+end,true)
 
 
 cmd.add({"unesp","unlocate"},{"unesp (unlocate)","Disables esp"},function()
@@ -4071,7 +4129,7 @@ cmd.add({"creep","ctp","scare"},{"ctp <player> (creep,scare)","Teleports from a 
 	wait()
 	lib.disconnect("noclip")
 
-end)
+end,true)
 
 cmd.add({"netless","net"},{"netless (net)","Executes netless which makes scripts more stable"},function()
 	for i,v in next,getChar():GetDescendants() do
@@ -4124,7 +4182,7 @@ cmd.add({"admin"},{"admin","whitelist someone to allow them to use commands"},fu
 	else
 		DoNotif("No player found",15)
 	end
-end)
+end,true)
 
 cmd.add({"unadmin"},{"unadmin <player>","removes someone from being admin"},function(...)
 	function ChatMessage(Message,Whisper)	game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer(Message,Whisper or "All")
@@ -4137,7 +4195,7 @@ cmd.add({"unadmin"},{"unadmin <player>","removes someone from being admin"},func
 	else
 		DoNotif("Player not found",15)
 	end
-end)
+end,true)
 
 cmd.add({"removedn","nodn","nodpn"},{"removedn (nodn,nodpn)","Removes all display names"},function()
 
@@ -4193,7 +4251,7 @@ cmd.add({"joinjobid","joinjid","jjobid","jjid"},{"joinjobid <jobid> (joinjid,jjo
 	zeId={...}
 	id=zeId[1]
 	TeleportService:TeleportToPlaceInstance(PlaceId,id)
-end)
+end,true)
 
 cmd.add({"serverhop","shop"},{"serverhop (shop)","serverhop"},function()
 	wait();
@@ -4607,7 +4665,7 @@ cmd.add({"functionspy"},{"functionspy","Check console"},function()
 			end
 		end
 		
-		local function GetFunctionInfo(func)
+		function GetFunctionInfo(func)
 			if type(func) ~= "function" then return tostring(func) end
 
 			local info = debug.getinfo(func)
@@ -4815,8 +4873,8 @@ cmd.add({"functionspy"},{"functionspy","Check console"},function()
 	coroutine.wrap(PRML_fake_script)()
 end)
 
-local on=false
-local rahh=nil
+local mOn=false
+local mFlyBruh=nil
 
 cmd.add({"fly"},{"fly [speed]","Enable flight"},function(...)
 	speed=(...)
@@ -4829,21 +4887,21 @@ cmd.add({"fly"},{"fly [speed]","Enable flight"},function(...)
 		wait()
 		DoNotif(adminName.." has detected you using mobile. You now have a Fly button. Click it to enable/disable mobile flying (for easier use).")
 
-		if rahh then
-    		rahh:Destroy()
-    		rahh = nil
+		if mFlyBruh then
+    		mFlyBruh:Destroy()
+    		mFlyBruh = nil
 		end
 
-		rahh = Instance.new("ScreenGui")
+		mFlyBruh = Instance.new("ScreenGui")
 		local TextButton = Instance.new("TextButton")
 		local UICorner = Instance.new("UICorner")
 		local UIAspectRatioConstraint = Instance.new("UIAspectRatioConstraint")
 
-		rahh.Parent = COREGUI
-		rahh.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-		rahh.ResetOnSpawn = false
+		mFlyBruh.Parent = COREGUI
+		mFlyBruh.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+		mFlyBruh.ResetOnSpawn = false
 
-		TextButton.Parent = rahh
+		TextButton.Parent = mFlyBruh
 		TextButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 		TextButton.BackgroundTransparency = 0.1
 		TextButton.Position = UDim2.new(0.9, 0, 0.6, 0)
@@ -4864,13 +4922,13 @@ cmd.add({"fly"},{"fly [speed]","Enable flight"},function(...)
 
 		function FEPVI_fake_script()
     		TextButton.MouseButton1Click:Connect(function()
-        		if on == false then
-            		on = true
+        		if mOn == false then
+            		mOn = true
             		TextButton.Text = "Unfly"
             		TextButton.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
             		mobilefly(speed)
-        		elseif on == true then
-            		on = false
+        		elseif mOn == true then
+            		mOn = false
             		TextButton.Text = "Fly"
             		TextButton.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
             		unmobilefly()
@@ -4894,7 +4952,7 @@ cmd.add({"fly"},{"fly [speed]","Enable flight"},function(...)
 			speedofthefly=2
 		end
 	end
-end)
+end,true)
 
 TFlyEnabled = false
 tflyCORE = nil
@@ -4993,7 +5051,7 @@ cmd.add({"tfly", "tweenfly"},{"tfly [speed] (tweenfly)","Basically smooth flying
 	end
 	Hum.PlatformStand = false
 	speed = 10
-end)
+end,true)
 
 cmd.add({"untfly","untweenfly"},{"untfly (untweenfly)","Disables tween fly"},function()
 	TFlyEnabled = false
@@ -5017,16 +5075,8 @@ cmd.add({"unfly"},{"unfly","Disable flight"},function()
 		if goofyFLY then goofyFLY:Destroy() end
 	end
 	unmobilefly()
-	on=false
-	if rahh then rahh:Destroy() rahh=nil end
-end)
-
-cmd.add({"mobilefly","mfly"},{"mobilefly [speed] (mfly)","nil"},function()
-	DoNotif("moved into the (fly) command")
-end)
-
-cmd.add({"unmobilefly","unmfly"},{"unmobilefly (unmfly)","nil"},function()
-	DoNotif("moved into the (unfly) command")
+	mOn=false
+	if mFlyBruh then mFlyBruh:Destroy() mFlyBruh=nil end
 end)
 
 cmd.add({"noclip","nclip","nc"},{"noclip","Disable your player's collision"},function()
@@ -5204,7 +5254,7 @@ cmd.add({"freecam","fc","fcam"},{"freecam [speed] (fc,fcam)","Enable free camera
 			dir.q=false
 		end
 	end))
-end)
+end,true)
 
 cmd.add({"unfreecam","unfc","unfcam"},{"unfreecam (unfc,unfcam)","Disable free camera"},function()
 	lib.disconnect("freecam")
@@ -5287,7 +5337,7 @@ cmd.add({"hide","unshow"},{"hide <player> (unshow)","places the selected player 
 			target.Character.Parent=game:GetService("Lighting")
 		end
 	end
-end)
+end,true)
 
 cmd.add({"unhide","show"},{"show <player> (unhide)","places the selected player back to workspace"},function(...)
 
@@ -5321,7 +5371,7 @@ cmd.add({"unhide","show"},{"show <player> (unhide)","places the selected player 
 			lib.LocalPlayerChat(A_1,A_2)
 		end
 	end
-end)
+end,true)
 
 cmd.add({"aimbot","aimbotui","aimbotgui"},{"aimbot (aimbotui,aimbotgui)","aimbot and yeah"},function()
 	--loadstring(game:HttpGet('https://raw.githubusercontent.com/fatesc/fates-esp/main/main.lua'))()
@@ -5464,7 +5514,7 @@ cmd.add({"copyname","cname"},{"copyname <player> (cname)","Copies the username o
 	wait();
 
 	DoNotif("Copied the username of "..target.DisplayName)
-end)
+end,true)
 
 cmd.add({"copydisplay","cdisplay"},{"copydisplay <player> (cdisplay)","Copies the display name of the target"},function(...)
 	Username=(...)
@@ -5478,7 +5528,7 @@ cmd.add({"copydisplay","cdisplay"},{"copydisplay <player> (cdisplay)","Copies th
 	wait();
 
 	DoNotif("Copied the display name of "..target.Name)
-end)
+end,true)
 
 cmd.add({"copyid","id"},{"copyid <player> (id)","Copies the UserId of the target"},function(...)
 	Username=(...)
@@ -5493,10 +5543,10 @@ cmd.add({"copyid","id"},{"copyid <player> (id)","Copies the UserId of the target
 	wait();
 
 	DoNotif("Copied the UserId of "..target.name)
-end)
+end,true)
 
 --[ PLAYER ]--
-local function toggleKB(enable)
+function toggleKB(enable)
     local p = game:GetService("Players").LocalPlayer
     local hrp = getRoot(p.Character)
     local parts = game:GetService("Workspace"):GetPartBoundsInRadius(hrp.Position, 10)
@@ -5517,7 +5567,7 @@ end)
 
 cmd.add({"height","hipheight","hh"},{"height <number> (hipheight,hh)","Changes your hipheight"},function(...)
 	getHum().HipHeight=(...)
-end)
+end,true)
 
 cmd.add({"netbypass", "netb"}, {"netbypass (netb)", "Net bypass"}, function()
     wait()
@@ -5548,7 +5598,7 @@ cmd.add({"chat","message"},{"chat <text> (message)","Chats you,useful if youre m
 	end
 	local A_2="All"
 	lib.LocalPlayerChat(A_1,A_2)
-end)
+end,true)
 
 cmd.add({"privatemessage", "pm"}, {"privatemessage <player> <text> (pm)", "Sends a private message to a player"}, function(...)
     local args = {...}
@@ -5574,7 +5624,7 @@ cmd.add({"privatemessage", "pm"}, {"privatemessage <player> <text> (pm)", "Sends
         task.wait(.3)
         lib.LocalPlayerChat(message, Player.Name)
     end
-end)
+end,true)
 
 cmd.add({"fixcam", "fix"}, {"fixcam", "Fix your camera"}, function()
     local ws = game:GetService("Workspace")
@@ -5595,7 +5645,7 @@ cmd.add({"saw"}, {"saw <challenge>", "shush"}, function(...)
     local challenge = table.concat({...}, " ")
     _G.SawFinish = false
 
-    local function playSound(id, vol)
+    function playSound(id, vol)
         local sfx = Instance.new("Sound")
         sfx.Parent = PlrGui
         sfx.SoundId = "rbxassetid://"..id
@@ -5606,7 +5656,7 @@ cmd.add({"saw"}, {"saw <challenge>", "shush"}, function(...)
         end)
     end
 
-    local function createUIElement(class, properties, parent)
+    function createUIElement(class, properties, parent)
         local element = Instance.new(class)
         for prop, value in pairs(properties) do
             element[prop] = value
@@ -5685,7 +5735,7 @@ cmd.add({"saw"}, {"saw <challenge>", "shush"}, function(...)
         ZIndex = 3
     }, ScreenGui)
 
-    local function flickerText()
+    function flickerText()
         while not _G.SawFinish do
             ttLabelLeft.TextColor3 = Color3.fromRGB(math.random(200, 255), 0, 0)
             ttLabelRight.TextColor3 = Color3.fromRGB(math.random(200, 255), 0, 0)
@@ -5693,14 +5743,14 @@ cmd.add({"saw"}, {"saw <challenge>", "shush"}, function(...)
         end
     end
 
-    local function dramaticCountdown(num)
+    function dramaticCountdown(num)
         dramaticLabel.Text = tostring(num)
         playSound(138081500, 2)
         task.wait(1)
         dramaticLabel.Text = ""
     end
 
-    local function count()
+    function count()
         local num = 180
         while task.wait(1) do
             if not _G.SawFinish then
@@ -5729,7 +5779,7 @@ cmd.add({"saw"}, {"saw <challenge>", "shush"}, function(...)
         end
     end
 
-    local function moveImage()
+    function moveImage()
         while not _G.SawFinish do
             local newX = math.random(-10, 10)
             local newY = math.random(-10, 10)
@@ -5743,7 +5793,7 @@ cmd.add({"saw"}, {"saw <challenge>", "shush"}, function(...)
         end
     end
 
-    local function startChallenge()
+    function startChallenge()
         playSound(469373418, 5)
         coroutine.wrap(count)()
         coroutine.wrap(flickerText)()
@@ -5751,7 +5801,7 @@ cmd.add({"saw"}, {"saw <challenge>", "shush"}, function(...)
     end
 
     coroutine.wrap(startChallenge)()
-end)
+end,true)
 
 cmd.add({"jend"}, {"jend", "nil"}, function()
     _G.SawFinish = true
@@ -5979,7 +6029,7 @@ cmd.add({"fling"},{"fling <player>", "Fling the given player"},function(plr)
 		elseif not GetPlayer(x) and not AllBool then
 		end
 	end
-end)
+end,true)
 
 --[[cmd.add({"commitoof","suicide","kys"},{"commitoof (suicide,kys)","FE KILL YOURSELF SCRIPT this will be bad when taken out of context"},function()
 	local A_1="Okay.. i will do it."
@@ -6004,13 +6054,13 @@ end)]]
 cmd.add({"volume","vol"},{"volume <1-10> (vol)","Changes your volume"},function(vol)
 	amount=vol/10
 	UserSettings():GetService("UserGameSettings").MasterVolume=amount
-end)
+end,true)
 
 cmd.add({"sensitivity","sens"},{"sensitivity <1-10> (tr)","Changes your sensitivity"},function(ss)
 	game:GetService("UserInputService").MouseDeltaSensitivity=ss
-end)
+end,true)
 
-cmd.add({"torandom","tr"},{"torandom (tr)","Teleports to a random player"},function(...)
+cmd.add({"torandom","tr"},{"torandom (tr)","Teleports to a random player"},function()
 	target=getPlr("random")
 	getRoot(getChar()).CFrame=target.Character.Humanoid.RootPart.CFrame
 end)
@@ -6020,7 +6070,7 @@ cmd.add({"goto","to","tp","teleport"},{"goto <player/X,Y,Z>","Teleport to the gi
 
 	local target=getPlr(Username)
 	getRoot(getChar()).CFrame=target.Character.Humanoid.RootPart.CFrame
-end)
+end,true)
 
 local StaringConnection = nil
 
@@ -6036,7 +6086,7 @@ cmd.add({"lookat", "stare"}, {"stare <player> (lookat)", "Stare at a player"}, f
     if not (Players.LocalPlayer.Character and Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")) then return end
     if not (Target and Target.Character and Target.Character:FindFirstChild("HumanoidRootPart")) then return end
 
-    local function Stare()
+    function Stare()
         if Players.LocalPlayer.Character.PrimaryPart and Target.Character and Target.Character:FindFirstChild("HumanoidRootPart") then
             local LocalCharPos = Players.LocalPlayer.Character.PrimaryPart.Position
             local TargetPos = Target.Character.HumanoidRootPart.Position
@@ -6052,7 +6102,7 @@ cmd.add({"lookat", "stare"}, {"stare <player> (lookat)", "Stare at a player"}, f
     end
 
     StaringConnection = RunService.RenderStepped:Connect(Stare)
-end)
+end,true)
 
 cmd.add({"unlookat", "unstare"}, {"unstare (unlookat)", "Stops staring"}, function()
     if StaringConnection then
@@ -6096,7 +6146,7 @@ cmd.add({"watch","view","spectate"}, {"view <p>","Spectate player"}, function(..
 	end)
 
 	coroutine.resume(loop)
-end)
+end,true)
 
 cmd.add({"unwatch","unview"}, {"unview","Stop spectating"}, function()
 	if conn then conn:Disconnect() conn = nil end
@@ -6122,7 +6172,7 @@ cmd.add({"stealaudio","getaudio","steal","logaudio"},{"stealaudio <player> (geta
 	setclipboard(tostring(audios))
 
 	DoNotif("Audio link has been copied to your clipboard")
-end)
+end,true)
 
 cmd.add({"follow","stalk","walk"},{"follow <player>","Follow a player wherever they go"},function(p)
 	lib.disconnect("follow")
@@ -6139,7 +6189,7 @@ cmd.add({"follow","stalk","walk"},{"follow <player>","Follow a player wherever t
 			end
 		end
 	end))
-end)
+end,true)
 
 cmd.add({"unfollow","unstalk","unwalk","unpathfind"},{"unfollow","Stop all attempts to follow a player"},function()
 	lib.disconnect("follow")
@@ -6195,7 +6245,7 @@ cmd.add({"pathfind"}, {"pathfind <player>", "Follow a player using the pathfinde
         end
         debounce = false
     end))
-end)
+end,true)
 
 cmd.add({"freeze","thaw","anchor","fr"},{"freeze (thaw,anchor,fr)","Freezes your character"},function()
 	getRoot(getChar()).Anchored=true
@@ -6209,7 +6259,7 @@ cmd.add({"disableanimations","disableanims"},{"disableanimations (disableanims)"
 	getChar().Animate.Disabled=true
 end)
 
-cmd.add({"undisableanimations","undisableanims"},{"undisableanimations (undisableanims)","Unfreezes your animations"},function(...)
+cmd.add({"undisableanimations","undisableanims"},{"undisableanimations (undisableanims)","Unfreezes your animations"},function()
 	getChar().Animate.Disabled=false
 end)
 
@@ -6255,7 +6305,7 @@ cmd.add({"firekey","fkey"},{"firekey <key> (fkey)","makes you fire a keybind usi
 		vim:SendKeyEvent(true, keyCode, 0, game)
 		vim:SendKeyEvent(false, keyCode, 0, game)
 	end
-end)
+end,true)
 
 cmd.add({"loopfling"},{"loopfling <player>","Loop voids a player"},function(plr)
 	local Targets={plr}
@@ -6483,7 +6533,7 @@ cmd.add({"loopfling"},{"loopfling <player>","Loop voids a player"},function(plr)
 			end
 		end
 	until Loopvoid==false
-end)
+end,true)
 
 cmd.add({"freegamepass", "freegp"}, {"freegamepass (freegp)", "Makes the client think you own every gamepass in the game"}, function()
     local mt = getrawmetatable(game)
@@ -6567,7 +6617,7 @@ cmd.add({"headsit"}, {"headsit <player>", "Head sit."}, function(...)
             headSit = nil
         end
     end)
-end)
+end,true)
 
 cmd.add({"unheadsit"}, {"unheadsit", "Stop the headsit command."}, function()
     if headSit then
@@ -6641,55 +6691,87 @@ cmd.add({"headstand"}, {"headstand <player>", "Stand on someone's head."}, funct
 			headStand = nil
 		end
 	end)
-end)
+end,true)
 
 cmd.add({"unheadstand"}, {"unheadstand", "Stop the headstand command."}, function()
 	if headStand then headStand:Disconnect() headStand = nil end
 	if standDied then standDied:Disconnect() standDied = nil end
 end)
 
-local loopws=false
-local wsLoop=nil
-getgenv().NamelessWs=nil
-cmd.add({"loopwalkspeed","loopws","lws"},{"loopwalkspeed <number> (loopws,lws)","Loop walkspeed"},function(...)
-	val={...}
-	getgenv().NamelessWs=(val[1] or 16)
-	loopws=true
-	if wsLoop then wsLoop:Disconnect() wsLoop=nil end
-	wsLoop=RunService.RenderStepped:connect(function()
-		if loopws and getHum() then
-			getHum().WalkSpeed=getgenv().NamelessWs
-		end
-	end)
+loopws = false
+wsLoop = nil
+wsSignal = nil
+getgenv().NamelessWs = nil
+cmd.add({"loopwalkspeed", "loopws", "lws"}, {"loopwalkspeed <number> (loopws,lws)", "Loop walkspeed"}, function(...)
+    val = {...}
+    getgenv().NamelessWs = (val[1] or 16)
+    loopws = true
+    if wsLoop then wsLoop:Disconnect() wsLoop = nil end
+    if wsSignal then wsSignal:Disconnect() wsSignal = nil end
+
+    wsLoop = RunService.RenderStepped:Connect(function()
+        if loopws and getHum() then
+            getHum().WalkSpeed = getgenv().NamelessWs
+        end
+    end)
+
+    if getHum() then
+        wsSignal = getHum():GetPropertyChangedSignal("WalkSpeed"):Connect(function()
+            if loopws then
+                getHum().WalkSpeed = getgenv().NamelessWs
+            end
+        end)
+    end
+end,true)
+
+cmd.add({"unloopwalkspeed", "unloopws", "unlws"}, {"unloopwalkspeed <number> (unloopws,unlws)", "Disable loop walkspeed"}, function()
+    loopws = false
+    if wsLoop then wsLoop:Disconnect() wsLoop = nil end
+    if wsSignal then wsSignal:Disconnect() wsSignal = nil end
 end)
 
-cmd.add({"unloopwalkspeed","unloopws","unlws"},{"unloopwalkspeed <number> (unloopws,unlws)","Disable loop walkspeed"},function()
-	loopws=false
-	if wsLoop then wsLoop:Disconnect() wsLoop=nil end
-end)
+loopjp = false
+jpLoop = nil
+jpSignalPower = nil
+jpSignalHeight = nil
+getgenv().NamelessJP = nil
+cmd.add({"loopjumppower", "loopjp", "ljp"}, {"loopjumppower <number> (loopjp,ljp)", "Loop JumpPower"}, function(...)
+    val = {...}
+    getgenv().NamelessJP = (val[1] or 50)
+    loopjp = true
+    if jpLoop then jpLoop:Disconnect() jpLoop = nil end
+    if jpSignalPower then jpSignalPower:Disconnect() jpSignalPower = nil end
+    if jpSignalHeight then jpSignalHeight:Disconnect() jpSignalHeight = nil end
 
-local loopjp=false
-local jpLoop=nil
-getgenv().NamelessJP=nil
-cmd.add({"loopjumppower","loopjp","ljp"},{"loopjumppower <number> (loopjp,ljp)","Loop JumpPower"},function(...)
-	val={...}
-	getgenv().NamelessJP=(val[1] or 50)
-	loopjp=true
-	if jpLoop then jpLoop:Disconnect() jpLoop=nil end
-	jpLoop=RunService.RenderStepped:connect(function()
-		if loopjp and getHum() then
-			if getHum().UseJumpPower then
-				getHum().JumpPower=getgenv().NamelessJP
-			else
-				getHum().JumpHeight=getgenv().NamelessJP
-			end
-		end
-	end)
-end)
+    jpLoop = RunService.RenderStepped:Connect(function()
+        if loopjp and getHum() then
+            if getHum().UseJumpPower then
+                getHum().JumpPower = getgenv().NamelessJP
+            else
+                getHum().JumpHeight = getgenv().NamelessJP
+            end
+        end
+    end)
 
-cmd.add({"unloopjumppower","unloopjp","unljp"},{"unloopjumppower <number> (unloopjp,unljp)","Disable loop walkspeed"},function()
-	loopjp=false
-	if jpLoop then jpLoop:Disconnect() jpLoop=nil end
+    if getHum() then
+        jpSignalPower = getHum():GetPropertyChangedSignal("JumpPower"):Connect(function()
+            if loopjp and getHum().UseJumpPower then
+                getHum().JumpPower = getgenv().NamelessJP
+            end
+        end)
+        jpSignalHeight = getHum():GetPropertyChangedSignal("JumpHeight"):Connect(function()
+            if loopjp and not getHum().UseJumpPower then
+                getHum().JumpHeight = getgenv().NamelessJP
+            end
+        end)
+    end
+end,true)
+
+cmd.add({"unloopjumppower", "unloopjp", "unljp"}, {"unloopjumppower <number> (unloopjp,unljp)", "Disable loop walkspeed"}, function()
+    loopjp = false
+    if jpLoop then jpLoop:Disconnect() jpLoop = nil end
+    if jpSignalPower then jpSignalPower:Disconnect() jpSignalPower = nil end
+    if jpSignalHeight then jpSignalHeight:Disconnect() jpSignalHeight = nil end
 end)
 
 cmd.add({"stopanimations","stopanims","stopanim","noanim"},{"stopanimations (stopanims,stopanim,noanim)","Stops running animations"},function()
@@ -6727,7 +6809,7 @@ cmd.add({"loopwaveat","loopwat"},{"loopwaveat <player> (loopwat)","Wave to a pla
 		wave:Stop()
 	until loopwave==false
 	getRoot(getChar()).CFrame=oldcframe
-end)
+end,true)
 
 cmd.add({"unloopwaveat","unloopwat"},{"unloopwaveat <player> (unloopwat)","Stops the loopwaveat command"},function()
 	loopwave=false
@@ -6782,7 +6864,7 @@ cmd.add({"waveat","wat"},{"waveat <player> (wat)","Wave to a player"},function(.
 	wait(1.6)
 	wave:Stop()
 	getRoot(getChar()).CFrame=oldcframe
-end)
+end,true)
 
 cmd.add({"headbang","mouthbang","hb","mb"},{"headbang <player> (mouthbang,hb,mb)","Bang them in the mouth because you are gay"},function(h,d)
 	RunService=game:GetService("RunService")
@@ -6828,9 +6910,9 @@ cmd.add({"headbang","mouthbang","hb","mb"},{"headbang <player> (mouthbang,hb,mb)
 			Players.LocalPlayer.Character:SetPrimaryPartCFrame(NewCFrame)
 		end)
 	end)
-end)
+end,true)
 
-cmd.add({"unheadbang","unmouthbang","unhb","unmb"},{"unheadbang (unmouthbang,unhb,unmb)","Bang them in the mouth because you are gay"},function(h,d)
+cmd.add({"unheadbang","unmouthbang","unhb","unmb"},{"unheadbang (unmouthbang,unhb,unmb)","Bang them in the mouth because you are gay"},function()
 	if bangLoop then
 		bangLoop=bangLoop:Disconnect()
 		bang:Stop()
@@ -6839,19 +6921,19 @@ cmd.add({"unheadbang","unmouthbang","unhb","unmb"},{"unheadbang (unmouthbang,unh
 	end
 end)
 
-cmd.add({"improvetextures"},{"improvetextures","Switches Textures"},function(h,d)
+cmd.add({"improvetextures"},{"improvetextures","Switches Textures"},function()
 	sethidden(game:GetService("MaterialService"), "Use2022Materials", true)
 end)
 
-cmd.add({"undotextures"},{"undotextures","Switches Textures"},function(h,d)
+cmd.add({"undotextures"},{"undotextures","Switches Textures"},function()
 	sethidden(game:GetService("MaterialService"), "Use2022Materials", false)
 end)
 
-cmd.add({"serverlist","serverlister","slist"},{"serverlist (serverlister,slist)","list of servers to join in"},function(h,d)
+cmd.add({"serverlist","serverlister","slist"},{"serverlist (serverlister,slist)","list of servers to join in"},function()
 	loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/uuuuuuu/refs/heads/main/ServerLister.lua"))();
 end)
 
-cmd.add({"keyboard"},{"keyboard","provides a keyboard gui for mobile users"},function(h,d)
+cmd.add({"keyboard"},{"keyboard","provides a keyboard gui for mobile users"},function()
 	loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/uuuuuuu/refs/heads/main/VirtualKeyboard.lua"))();
 end)
 
@@ -6936,7 +7018,7 @@ cmd.add({"bang","fuck"},{"bang <player> <number>","Bangs the player by attaching
 			getRoot(getChar()).CFrame=otherRoot.CFrame*bangOffet
 		end)
 	end)
-end)
+end,true)
 
 glueloop=nil
 cmd.add({"glue","loopgoto","lgoto"},{"glue <player> (loopgoto,lgoto)","Loop teleport to a player"},function(...)
@@ -6946,7 +7028,7 @@ cmd.add({"glue","loopgoto","lgoto"},{"glue <player> (loopgoto,lgoto)","Loop tele
 	glueloop=RunService.RenderStepped:Connect(function()
 		getRoot(getChar()).CFrame=getRoot(Target.Character).CFrame
 	end)
-end)
+end,true)
 
 cmd.add({"unglue","unloopgoto","noloopgoto"},{"unglue (unloopgoto,noloopgoto)","Stops teleporting you to a player"},function()
 	if glueloop then glueloop:Disconnect() glueloop=nil end
@@ -6967,7 +7049,7 @@ cmd.add({"spook","scare"},{"spook <player> (scare)","Teleports next to a player 
 		getRoot(getChar()).CFrame=oldCF
 	end
 
-end)
+end,true)
 
 loopspook=false
 cmd.add({"loopspook","loopscare"},{"loopspook <player> (loopscare)","Teleports next to a player for a few seconds and then again and again"},function(...)
@@ -6988,7 +7070,7 @@ cmd.add({"loopspook","loopscare"},{"loopspook <player> (loopscare)","Teleports n
 		end
 		wait(0.3)
 	until loopspook==false
-end)
+end,true)
 
 cmd.add({"unloopspook","unloopscare"},{"unloopspook <player> (unloopscare)","Stops the loopspook command"},function()
 	loopspook=false
@@ -7209,7 +7291,7 @@ cmd.add({"cbring","clientbring"},{"clientbring <player> (cbring)","Brings the pl
 			end
 		end)
 	end
-end)
+end,true)
 
 cmd.add({"uncbring","unclientbring"},{"unclientbring (uncbring)","Disable Client bring command"},function()
 	bringc:Disconnect()
@@ -7260,7 +7342,7 @@ cmd.add({"mute","muteboombox"},{"mute <player> (muteboombox)","Mutes the players
 			end 
 		end
 	end
-end)
+end,true)
 
 TPWalk = false
 local TPWalkingConnection
@@ -7287,7 +7369,7 @@ cmd.add({"tpwalk", "tpwalk"}, {"tpwalk <number>", "More undetectable walkspeed s
 			end
 		end
 	end)
-end)
+end,true)
 
 cmd.add({"untpwalk"}, {"untpwalk", "Stops the tpwalk command"}, function()
 	TPWalk = false
@@ -7353,10 +7435,10 @@ cmd.add({"loopmute","loopmuteboombox"},{"loopmute <player> (loopmuteboombox)","L
 			end
 		end
 	end
-end)
+end,true)
 
 
-cmd.add({"unloopmute","unloopmuteboombox"},{"unloopmute <player> (unloopmuteboombox)","Unloop mutes the players boombox"},function(...)
+cmd.add({"unloopmute","unloopmuteboombox"},{"unloopmute <player> (unloopmuteboombox)","Unloop mutes the players boombox"},function()
 	Loopmute=false
 	wait()
 
@@ -7422,9 +7504,9 @@ cmd.add({"glitch","glitchboombox"},{"glitch <player> (glitchboombox)","Glitches 
 			DoNotif("Boombox glitched. Status: FE")
 		end
 	end
-end)
+end,true)
 
-cmd.add({"unglitch","unglitchboombox"},{"unglitch <player> (unglitchboombox)","Unglitches the players boombox"},function(...)
+cmd.add({"unglitch","unglitchboombox"},{"unglitch <player> (unglitchboombox)","Unglitches the players boombox"},function()
 	Loopglitch=false
 	wait()
 	if game:GetService("SoundService").RespectFilteringEnabled==true then
@@ -7448,7 +7530,7 @@ cmd.add({"getmass"},{"getmass <player>","Get your mass"},function(...)
 	wait();
 
 	DoNotif(target.Name.."'s mass is "..mass)
-end)
+end,true)
 
 cmd.add({"equiptools"},{"equiptools","Equips every tool in your inventory at once"},function()
 	for i,v in pairs(Player:FindFirstChildOfClass("Backpack"):GetChildren()) do
@@ -7462,7 +7544,7 @@ cmd.add({"unequiptools"},{"unequiptools","Unequips every tool you are currently 
 	Player.Character:FindFirstChildOfClass('Humanoid'):UnequipTools()
 end)
 
-cmd.add({"unloopfling"},{"unloopfling","Stops loop flinging a player"},function(...)
+cmd.add({"unloopfling"},{"unloopfling","Stops loop flinging a player"},function()
 	Loopvoid=false
 end)
 
@@ -7471,7 +7553,7 @@ cmd.add({"inspect"},{"examine","checks a user's items"},function(args)
 		GuiService:CloseInspectMenu()
 		GuiService:InspectPlayerFromUserId(Players[v].UserId)
 	end
-end)
+end,true)
 
 cmd.add({"noprompt","nopurchaseprompts","noprompts"},{"noprompt (nopurchaseprompts,noprompts)","remove the stupid purchase prompt"},function()
 	wait();
@@ -7527,7 +7609,7 @@ cmd.add({"spin"},{"spin {amount}","Makes your character spin as fast as you want
 	spinThingy.AngularVelocity=Vector3.new(0,spinSpeed,0)
 
 	DoNotif("Spinning...")
-end)
+end,true)
 
 cmd.add({"unspin"},{"unspin","Makes your character unspin"},function()
 	wait();
@@ -7602,7 +7684,7 @@ end)
 
 cmd.add({"gravity","grav"},{"gravity <amount> (grav)","sets game gravity to whatever u want"},function(...)
 	game:GetService("Workspace").Gravity=(...)
-end)
+end,true)
 
 cmd.add({"fireclickdetectors","fcd","firecd"},{"fireclickdetectors (fcd,firecd)","Fires every click detector that's in workspace"},function(...)
 	local ccamount=0
@@ -7626,7 +7708,7 @@ cmd.add({"fireclickdetectors","fcd","firecd"},{"fireclickdetectors (fcd,firecd)"
 	wait();
 
 	DoNotif("Fired "..ccamount.." amount of click detectors")
-end)
+end,true)
 
 cmd.add({"noclickdetectorlimits","nocdlimits","removecdlimits"},{"noclickdetectorlimits (nocdlimits,removecdlimits)","Sets all click detectors MaxActivationDistance to math.huge"},function()
 	for i,v in ipairs(game:GetService("Workspace"):GetDescendants()) do
@@ -7670,7 +7752,7 @@ cmd.add({"light"},{"light <range> <brightness>","Gives your player dynamic light
 	else
 		light.Brightness=5
 	end
-end)
+end,true)
 
 cmd.add({"unlight","nolight"},{"unlight (nolight)","Removes dynamic light from your player"},function()
 	for _,v in pairs(Player.Character:GetDescendants()) do
@@ -7680,7 +7762,7 @@ cmd.add({"unlight","nolight"},{"unlight (nolight)","Removes dynamic light from y
 	end
 end)
 
-cmd.add({"tweengotocampos","tweentocampos","tweentcp"},{"tweengotocampos (tweentcp)","Another version of goto camera position but bypassing more anti-cheats"},function(...)
+cmd.add({"tweengotocampos","tweentocampos","tweentcp"},{"tweengotocampos (tweentcp)","Another version of goto camera position but bypassing more anti-cheats"},function()
 	local player=game:GetService("Players").LocalPlayer
 	local UserInputService=game:GetService("UserInputService")
 	local TweenService=game:GetService("TweenService")
@@ -7733,7 +7815,7 @@ cmd.add({"delete","remove","del"},{"delete {partname} (remove,del)","Removes any
 	else
 		DoNotif(bra.." not found to delete",2.5)
 	end
-end)
+end,true)
 
 local autoRemover={}
 local autormv=nil
@@ -7777,7 +7859,7 @@ cmd.add({"autodelete","autoremove","autodel"},{"autodelete {partname} (autoremov
 
 
 	DoNotif("Auto deleting Instances with name: "..bra,2.5)
-end)
+end,true)
 
 cmd.add({"unautodelete","unautoremove","unautodel"},{"unautodelete {partname} (unautoremove,unautodel)","disables autodelete"},function()
 	if autormv then autormv:Disconnect() autormv=nil end
@@ -7804,7 +7886,7 @@ cmd.add({"deleteclass","removeclass","dc"},{"deleteclass {ClassName} (removeclas
 	else
 		DoNotif(JJ.." not found to delete",2.5)
 	end
-end)
+end,true)
 
 local autoclassic={}
 local autoclass=nil
@@ -7841,9 +7923,9 @@ cmd.add({"autodeleteclass","autoremoveclass","autodc"},{"autodeleteclass {ClassN
 
 
 	DoNotif("Auto deleting Instances with ClassName: "..classicauto,2.5)
-end)
+end,true)
 
-cmd.add({"unautodeleteclass","unautoremoveclass","unautodc"},{"unautodeleteclass {ClassName} (unautoremoveclass,unautodc)","disabled autodeleteclass"},function(...)
+cmd.add({"unautodeleteclass","unautoremoveclass","unautodc"},{"unautodeleteclass {ClassName} (unautoremoveclass,unautodc)","disabled autodeleteclass"},function()
 	if autoclass then autoclass:Disconnect() autoclass=nil end
 	autoclassic={}
 end)
@@ -7873,7 +7955,7 @@ cmd.add({"chardelete","charremove","chardel","cdelete","cremove","cdel"},{"chard
 	else
 		DoNotif(hh.." not found to delete",2.5)
 	end
-end)
+end,true)
 
 cmd.add({"chardeleteclass","charremoveclass","chardeleteclassname","cdc"},{"chardeleteclass {ClassName} (charremoveclass,chardeleteclassname,cdc)","Removes any part with a certain classname from your character"},function(...)
 	local charclass=0
@@ -7893,7 +7975,7 @@ cmd.add({"chardeleteclass","charremoveclass","chardeleteclassname","cdc"},{"char
 	else
 		DoNotif(poopy.." not found to delete",2.5)
 	end
-end)
+end,true)
 
 cmd.add({"gotopart","topart","toprt"},{"gotopart {partname} (topart,toprt)","Makes you teleport to a part you want"},function(...)
 	local args={...}
@@ -7919,7 +8001,7 @@ cmd.add({"gotopart","topart","toprt"},{"gotopart {partname} (topart,toprt)","Mak
 			wait(.2);
 		end
 	end
-end)
+end,true)
 
 cmd.add({"tweengotopart","tgotopart","ttopart","ttoprt"},{"tweengotopart {partname} (tgotopart,ttopart,ttoprt)","Tweens your character to a part or multiple parts"},function(...)
 	local args={...}
@@ -7946,7 +8028,7 @@ cmd.add({"tweengotopart","tgotopart","ttopart","ttoprt"},{"tweengotopart {partna
 			wait(1);
 		end
 	end
-end)
+end,true)
 
 cmd.add({"gotopartclass","gpc","gotopartc","gotoprtc"},{"gotopartclass {classname} (gpc,gotopartc,gotoprtc)","Moves your character to a part or multiple parts based on classname"},function(...)
 	local args={...}
@@ -7965,7 +8047,7 @@ cmd.add({"gotopartclass","gpc","gotopartc","gotoprtc"},{"gotopartclass {classnam
 			wait(.2);
 		end
 	end
-end)
+end,true)
 
 cmd.add({"bringpart","bpart","bprt"},{"bringpart {partname} (bpart,bprt)","Brings the part(s) to you"},function(...)
 	local args={...}
@@ -7985,7 +8067,7 @@ cmd.add({"bringpart","bpart","bprt"},{"bringpart {partname} (bpart,bprt)","Bring
 			if getChar() then v:PivotTo(getChar():GetPivot()) end
 		end
 	end
-end)
+end,true)
 
 cmd.add({"bringmodel","bmodel"},{"bringmodel {modelname} (bmodel)","Brings the model(s) to you"},function(...)
 	local args={...}
@@ -8006,7 +8088,7 @@ cmd.add({"bringmodel","bmodel"},{"bringmodel {modelname} (bmodel)","Brings the m
 			if getChar() then v:PivotTo(getChar():GetPivot()) end
 		end
 	end
-end)
+end,true)
 
 cmd.add({"gotomodel","tomodel"},{"gotomodel {modelname} (tomodel)","Teleports you to the model"},function(...)
 	local args={...}
@@ -8033,7 +8115,7 @@ cmd.add({"gotomodel","tomodel"},{"gotomodel {modelname} (tomodel)","Teleports yo
 			wait(.2);
 		end
 	end
-end)
+end,true)
 
 cmd.add({"swim"},{"swim {speed}","Swim in the air"},function(...)
 	speaker=game:GetService("Players").LocalPlayer
@@ -8060,9 +8142,9 @@ cmd.add({"swim"},{"swim {speed}","Swim in the air"},function(...)
 	if (...)==nil then
 		if getHum() then getHum().WalkSpeed=16 end
 	end
-end)
+end,true)
 
-cmd.add({"unswim"},{"unswim","Stops the swim script"},function(...)
+cmd.add({"unswim"},{"unswim","Stops the swim script"},function()
 	speaker=Player
 	game:GetService("Workspace").Gravity=168
 	if getHum() then 
@@ -8158,7 +8240,7 @@ cmd.add({"esppart","partesp","pesp"},{"esppart {partname} (partesp,pesp)","Makes
 	if partEspTrigger==nil then
 		partEspTrigger=game:GetService("Workspace").DescendantAdded:Connect(partAdded)
 	end
-end)
+end,true)
 
 cmd.add({"unesppart","unpartesp","unpesp"},{"unesppart (unpartesp,unpesp)","Removes the esp from the parts"},function()
 	if partEspTrigger then partEspTrigger:Disconnect() partEspTrigger=nil end
@@ -8202,7 +8284,7 @@ cmd.add({"viewpart","viewp","vpart"},{"viewpart {partname} (viewp,vpart)","Views
 			end
 		end
 	end
-end)
+end,true)
 
 cmd.add({"unviewpart","unviewp"},{"unviewpart (unviewp)","Unviews the part"},function()
 	game:GetService("Workspace").CurrentCamera.CameraSubject = getHum()
@@ -8260,7 +8342,7 @@ cmd.add({"hitbox","hbox"},{"hitbox {amount}","Makes everyones hitbox as much as 
 			end
 		end)
 	end
-end)
+end,true)
 
 
 cmd.add({"unhitbox","unhbox"},{"unhitbox","Disables hitbox"},function(h)
@@ -8764,7 +8846,7 @@ cmd.add({"loopnofog","lnofog","lnf", "loopnf"},{"loopnofog (lnofog,lnf,loopnf)",
 		fogCon:Disconnect()
 	end
 	Lighting.FogEnd=786543
-	local function fogFunc()
+	function fogFunc()
 		for i,v in pairs(Lighting:GetDescendants()) do
 			if v:IsA("Atmosphere") then
 				v:Destroy()
@@ -8789,7 +8871,7 @@ end)
 
 cmd.add({"brightness"},{"brightness","Changes the brightness lighting property"},function(...)
 	Lighting.Brightness=(...)
-end)
+end,true)
 
 cmd.add({"globalshadows","gshadows"},{"globalshadows (gshadows)","Enables global shadows"},function()
 	Lighting.GlobalShadows=true
@@ -8823,7 +8905,7 @@ cmd.add({"fireproximityprompts","fpp","firepp"},{"fireproximityprompts (fpp,fire
 	wait();
 
 	DoNotif("Fired "..fppamount.." of proximity prompts")
-end)
+end,true)
 
 cmd.add({"iy"},{"iy {command}","Executes infinite yield scripts"},function(...)
 	if IYLOADED==false then
@@ -8852,7 +8934,7 @@ cmd.add({"iy"},{"iy {command}","Executes infinite yield scripts"},function(...)
 		IYLOADED=true
 	end
 	execCmd((...))
-end)
+end,true)
 
 -- this seriously looks ridiculous
 --[[cmd.add({"bhop"},{"bhop","bhop bhop bhop bhop bhop bhop bhop bla bla bla idk what im saying"},function()
@@ -9217,7 +9299,7 @@ cmd.add({"maxzoom"},{"maxzoom <amount>","Set your maximum camera distance"},func
 		num=tonumber(num)
 	end
 	game:GetService("Players").LocalPlayer.CameraMaxZoomDistance=num
-end)
+end,true)
 
 cmd.add({"minzoom"},{"minzoom <amount>","Set your minimum camera distance"},function(...)
 	local args={...}
@@ -9229,7 +9311,7 @@ cmd.add({"minzoom"},{"minzoom <amount>","Set your minimum camera distance"},func
 		num=tonumber(num)
 	end
 	game:GetService("Players").LocalPlayer.CameraMinZoomDistance=num
-end)
+end,true)
 
 cmd.add({"cameranoclip","camnoclip","cnoclip","nccam"},{"cameranoclip (camnoclip,cnoclip,nccam)","Makes your camera clip through walls"},function()
 	SetConstant=(debug and debug.setconstant) or setconstant
@@ -9293,7 +9375,7 @@ end)
 
 cmd.add({"fpscap"},{"fpscap <number>","Sets the fps cap to whatever you want"},function(...)
 	setfpscap(...)
-end)
+end,true)
 
 cmd.add({"toolinvisible","tinvis"},{"toolinvisible (tinvis)","Be invisible while still be able to use tools"},function()
 	local offset=1100
@@ -9680,7 +9762,7 @@ cmd.add({"fov"},{"fov <number>","Makes your FOV to something custom you want (1-
         {FieldOfView = field}
     )
     hh:Play()
-end)
+end,true)
 
 cmd.add({"loopfov","lfov"},{"loopfov <number> (lfov)","Makes your FOV to something custom you want (1-120 FOV) on loop"},function(num)
     local field = tonumber(num) or 70
@@ -9701,7 +9783,7 @@ cmd.add({"loopfov","lfov"},{"loopfov <number> (lfov)","Makes your FOV to somethi
             game:GetService("Workspace").CurrentCamera.FieldOfView = field
         end
     end)
-end)
+end,true)
 
 cmd.add({"unloopfov","unlfov"},{"unloopfov (unlfov)","Stops the looped FOV"},function()
     if fovcon then fovcon:Disconnect() fovcon = nil end
@@ -9761,7 +9843,7 @@ cmd.add({"ws","speed","walkspeed"},{"walkspeed <number> (speed,ws)","Makes your 
 			getHum().WalkSpeed=speed
 		end
 	end
-end)
+end,true)
 
 cmd.add({"jp","jumppower"},{"jumppower <number> (jp)","Makes your JumpPower whatever you want"},function(...)
 	local args={...}
@@ -9773,7 +9855,7 @@ cmd.add({"jp","jumppower"},{"jumppower <number> (jp)","Makes your JumpPower what
 			getHum().JumpHeight=jpower
 		end
 	end
-end)
+end,true)
 
 cmd.add({"oofspam"},{"oofspam","Spams oof"},function()
 	_G.enabled=true
@@ -9842,15 +9924,15 @@ end)
 
 cmd.add({"setname"},{"setname","set your Name to anything"},function(...)
 	Player.Name=(...)
-end)
+end,true)
 
 cmd.add({"setid"},{"setid","set your UserId to anything"},function(...)
 	Player.UserId=tonumber(...)
-end)
+end,true)
 
 cmd.add({"setdisplay"},{"setdisplay","set your DisplayName to anything"},function(...)
 	Player.DisplayName=(...)
-end)
+end,true)
 
 cmd.add({"errorchat"},{"errorchat","Makes the chat error appear when roblox chat is slow"},function()
 	for i=1,3 do 
@@ -10807,79 +10889,70 @@ NACaller(function()
 end)
 
 --[[ COMMAND BAR BUTTON ]]--
-local TextLabelLabel=Instance.new("TextLabel")
-local UICorner=Instance.new("UICorner")
-local ImageButton=Instance.new("ImageButton")
-local UICorner2=Instance.new("UICorner")
+local TextLabel = Instance.new("TextLabel")
+local UICorner = Instance.new("UICorner")
+local ImageButton = Instance.new("ImageButton")
+local UICorner2 = Instance.new("UICorner")
 
---TextLabelLabel.Name=randomString()
-NAProtection(TextLabelLabel)
-TextLabelLabel.Parent=ScreenGui
-TextLabelLabel.BackgroundColor3=Color3.fromRGB(4,4,4)
-TextLabelLabel.BackgroundTransparency=1.000
-TextLabelLabel.AnchorPoint=Vector2.new(0.5,0.5)
-TextLabelLabel.Position=UDim2.new(0.5,0,0.5,0)
-TextLabelLabel.Size=UDim2.new(0,2,0,33)
-TextLabelLabel.Font=Enum.Font.SourceSansBold
-TextLabelLabel.Text=adminName.." V"..curVer
-TextLabelLabel.TextColor3=Color3.fromRGB(255,255,255)
-TextLabelLabel.TextSize=20.000
-TextLabelLabel.TextWrapped=true
-TextLabelLabel.ZIndex=9999
+TextLabel.Parent = ScreenGui
+TextLabel.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+TextLabel.BackgroundTransparency = 0.2
+TextLabel.AnchorPoint = Vector2.new(0.5, 0.5)
+TextLabel.Position = UDim2.new(0.5, 0, 0.5, 0)
+TextLabel.Size = UDim2.new(0, 2, 0, 33)
+TextLabel.Font = Enum.Font.GothamBold
+TextLabel.Text = adminName .. " V" .. curVer
+TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+TextLabel.TextSize = 20
+TextLabel.TextWrapped = true
+TextLabel.ZIndex = 9999
 
---ImageButton.Name=randomString()
-NAProtection(ImageButton)
-ImageButton.Parent=ScreenGui
-ImageButton.AnchorPoint=Vector2.new(0.5,0)
-ImageButton.BackgroundColor3=Color3.fromRGB(255,255,255)
-ImageButton.BorderSizePixel=0
-ImageButton.Position=UDim2.new(0.48909232,0,-1,0)
-ImageButton.Size=UDim2.new(0,32,0,33)
-ImageButton.Image="rbxassetid://18567102564"
-ImageButton.ZIndex=9999
+ImageButton.Parent = ScreenGui
+ImageButton.AnchorPoint = Vector2.new(0.5, 0)
+ImageButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+ImageButton.BorderSizePixel = 0
+ImageButton.Position = UDim2.new(0.5, 0, -0.2, 0)
+ImageButton.Size = UDim2.new(0, 40, 0, 40)
+ImageButton.Image = "rbxassetid://18567102564"
+ImageButton.ZIndex = 9999
 
+UICorner.CornerRadius = UDim.new(0.5, 0)
+UICorner.Parent = ImageButton
 
-UICorner.CornerRadius=UDim.new(1,0)
-UICorner.Parent=ImageButton
-
-
-UICorner2.CornerRadius=UDim.new(1,0)
-UICorner2.Parent=TextLabelLabel
+UICorner2.CornerRadius = UDim.new(0.2, 0)
+UICorner2.Parent = TextLabel
 
 function Swoosh()
-	local imagebutton=ImageButton
-	imagebutton.Size=UDim2.new(0,32,0,33)
-	imagebutton.BackgroundTransparency=0
-	imagebutton:TweenPosition(UDim2.new(0.5,0,0,0),"Out","Quint",1,true)
-	gui.draggable(imagebutton)
+    ImageButton:TweenPosition(UDim2.new(0.5, 0, 0.1, 0), "Out", "Quint", 1, true)
+    ImageButton:TweenSize(UDim2.new(0, 50, 0, 50), "Out", "Quint", 1, true)
+	gui.draggable(ImageButton)
 end
+
 function mainNameless()
-	txtlabel=TextLabelLabel
-	txtlabel.Size=UDim2.new(0,2,0,33)
-	txtlabel.BackgroundTransparency=0.14
+    local txtLabel = TextLabel
+    txtLabel.Size = UDim2.new(0, 2, 0, 33)
+    txtLabel.BackgroundTransparency = 0.14
 
-	textWidth=game:GetService("TextService"):GetTextSize(txtlabel.Text,txtlabel.TextSize,txtlabel.Font,Vector2.new(math.huge,math.huge)).X
-	newSize=UDim2.new(0,textWidth+69,0,33)
+    local textWidth = game:GetService("TextService"):GetTextSize(txtLabel.Text, txtLabel.TextSize, txtLabel.Font, Vector2.new(math.huge, math.huge)).X
+    local newSize = UDim2.new(0, textWidth + 80, 0, 40)
 
-	txtlabel:TweenSize(newSize,"Out","Quint",1,true)
-	if IsOnMobile then
-		Swoosh()
-	else
-		ImageButton:Destroy()
-	end
-	wait(2)
-	game:GetService("TweenService"):Create(txtlabel,TweenInfo.new(.7,Enum.EasingStyle.Sine),{BackgroundTransparency=1}):Play()
-	h=game:GetService("TweenService"):Create(txtlabel,TweenInfo.new(.7,Enum.EasingStyle.Sine),{TextTransparency=1})
-	h:Play()
-	h.Completed:Connect(function()
-		--[[if IsOnMobile then
-			Swoosh()
-		else
-			ImageButton:Destroy()
-		end]]
-		txtlabel:Destroy()
-	end)
+    txtLabel:TweenSize(newSize, "Out", "Quint", 1, true)
+    if IsOnMobile then
+        Swoosh()
+    else
+        ImageButton:Destroy()
+    end
+
+    wait(2)
+    local tweenService = game:GetService("TweenService")
+    tweenService:Create(txtLabel, TweenInfo.new(0.7, Enum.EasingStyle.Sine), {BackgroundTransparency = 1}):Play()
+    local fadeOut = tweenService:Create(txtLabel, TweenInfo.new(0.7, Enum.EasingStyle.Sine), {TextTransparency = 1})
+    fadeOut:Play()
+    fadeOut.Completed:Connect(function()
+        txtLabel:Destroy()
+    end)
 end
+
 coroutine.wrap(mainNameless)()
 
 if IsOnMobile then
@@ -10916,7 +10989,6 @@ NACaller(function()
 		Notify({
 			Title = "Would you like to enabled QueueOnTeleport?",
 			Description = "With QueueOnTeleport "..adminName.." will automatically execute itself upon teleporting to a game or place.",
-			Duration = 3,
 			Buttons = {
 				{Text = "Yes", Callback = function() queueteleport(loader) end},
 				{Text = "No", Callback = function() end}
@@ -10938,6 +11010,15 @@ print([[
 	┃┃ ┃┃┃╭╮┃┃┃┃┃━┫╰┫┃━╋━━┣━━┃┃╭━╮┃╰╯┃┃┃┃┃┃┃┃
 	╰╯ ╰━┻╯╰┻┻┻┻━━┻━┻━━┻━━┻━━╯╰╯ ╰┻━━┻┻┻┻┻╯╰╯
 	]])
+
+task.spawn(function()
+	while task.wait() do
+		if getHum() then
+			getHum().AutoJumpEnabled=false
+			break
+		end
+	end
+end)
 
 task.spawn(function()
 	NACaller(function()--better saveinstance support
