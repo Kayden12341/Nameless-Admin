@@ -3309,16 +3309,16 @@ cmd.add({"nofog"},{"nofog","Removes all fog from the game"},function()
 	end
 end)
 
-local stationaryRespawn = false
-local needsRespawning = false
-local hasPosition = false
-local spawnPosition = CFrame.new()
+stationaryRespawn = false
+needsRespawning = false
+hasPosition = false
+spawnPosition = CFrame.new()
 
 cmd.add({"setspawn", "spawnpoint", "ss"}, {"setspawn (spawnpoint, ss)", "Sets your spawn point to the current character's position"}, function()
     DoNotif("Spawn has been set")
     stationaryRespawn = true
 
-    local function handleRespawn()
+    function handleRespawn()
         if stationaryRespawn and getChar().Humanoid.Health == 0 then
             if not hasPosition then
                 spawnPosition = getRoot(getChar()).CFrame
