@@ -5497,54 +5497,72 @@ cmd.add({"saw"}, {"saw <challenge>", "shush"}, function(...)
 
     local ScreenGui = createUIElement("ScreenGui", { Name = randomString() }, gethui())
 
+    local background = createUIElement("Frame", {
+        BackgroundColor3 = Color3.fromRGB(0, 0, 0),
+        BackgroundTransparency = 0.5,
+        Size = UDim2.new(1, 0, 1, 0),
+        ZIndex = 0
+    }, ScreenGui)
+
     local imgLabel = createUIElement("ImageLabel", {
         AnchorPoint = Vector2.new(0.5, 0),
-        BackgroundColor3 = Color3.fromRGB(0, 0, 0),
-        BorderSizePixel = 0,
-        Position = UDim2.new(0.5, 0, 0, 0),
+        BackgroundTransparency = 1,
+        Position = UDim2.new(0.5, 0, 0.1, 0),
         Size = UDim2.new(0, 100, 0, 100),
-        Image = "rbxassetid://8747893766"
+        Image = "rbxassetid://8747893766",
+        ImageColor3 = Color3.fromRGB(255, 0, 0)
+    }, ScreenGui)
+
+    local glow = createUIElement("ImageLabel", {
+        AnchorPoint = Vector2.new(0.5, 0),
+        BackgroundTransparency = 1,
+        Position = UDim2.new(0.5, 0, 0.1, 0),
+        Size = UDim2.new(0, 120, 0, 120),
+        Image = "rbxassetid://258128463",
+        ImageColor3 = Color3.fromRGB(255, 0, 0),
+        ZIndex = 1
     }, ScreenGui)
 
     local ttLabelLeft = createUIElement("TextLabel", {
         BackgroundColor3 = Color3.fromRGB(0, 0, 0),
-        BackgroundTransparency = 0.1,
+        BackgroundTransparency = 0.3,
         AnchorPoint = Vector2.new(0, 0.5),
         Position = UDim2.new(0, 10, 0.5, 0),
         Size = UDim2.new(0.3, 0, 0.1, 0),
-        Font = Enum.Font.Arcade,
+        Font = Enum.Font.SciFi,
         Text = "Challenge: " .. challenge,
         TextColor3 = Color3.fromRGB(255, 0, 0),
-        TextSize = 20,
+        TextSize = 24,
         TextWrapped = true,
-        ZIndex = 9999
+        ZIndex = 2
     }, ScreenGui)
 
     local ttLabelRight = createUIElement("TextLabel", {
         BackgroundColor3 = Color3.fromRGB(0, 0, 0),
-        BackgroundTransparency = 0.1,
+        BackgroundTransparency = 0.3,
         AnchorPoint = Vector2.new(1, 0.5),
         Position = UDim2.new(1, -10, 0.5, 0),
         Size = UDim2.new(0.3, 0, 0.1, 0),
-        Font = Enum.Font.Arcade,
+        Font = Enum.Font.SciFi,
         Text = "Time Remaining: 180 seconds",
         TextColor3 = Color3.fromRGB(255, 0, 0),
-        TextSize = 20,
+        TextSize = 24,
         TextWrapped = true,
-        ZIndex = 9999
+        ZIndex = 2
     }, ScreenGui)
 
     local dramaticLabel = createUIElement("TextLabel", {
         BackgroundTransparency = 1,
         AnchorPoint = Vector2.new(0.5, 0.5),
-        Position = UDim2.new(0.5, 0, 0.5, 0),
+        Position = UDim2.new(0.5, 0, 0.7, 0),
         Size = UDim2.new(0.5, 0, 0.2, 0),
-        Font = Enum.Font.Arcade,
+        Font = Enum.Font.SciFi,
         Text = "",
         TextColor3 = Color3.fromRGB(255, 0, 0),
         TextSize = 50,
+        TextStrokeTransparency = 0.5,
         TextWrapped = true,
-        ZIndex = 10000
+        ZIndex = 3
     }, ScreenGui)
 
     local function flickerText()
@@ -5598,7 +5616,7 @@ cmd.add({"saw"}, {"saw <challenge>", "shush"}, function(...)
             local tween = game:GetService("TweenService"):Create(
                 imgLabel,
                 TweenInfo.new(0.1, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut),
-                { Position = UDim2.new(0.5, newX, 0, newY) }
+                { Position = UDim2.new(0.5, newX, 0.1, newY) }
             )
             tween:Play()
             tween.Completed:Wait()
