@@ -3147,7 +3147,19 @@ cmd.add({"triggerbot","tbot"},{"triggerbot (tbot)","Executes a script that autom
 	end
 
 	-- Functions
+	function setMouseToMiddle()
+		local screenWidth = workspace.CurrentCamera.ViewportSize.X
+		local screenHeight = workspace.CurrentCamera.ViewportSize.Y
+		local middleX = screenWidth / 2
+		local middleY = screenHeight / 2
+	
+		local mouse = game.Players.LocalPlayer:GetMouse()
+		mouse.X = middleX
+		mouse.Y = middleY
+	end
+
 	local function Click()
+		setMouseToMiddle()
 		mouse1click()
 	end
 
@@ -3197,8 +3209,8 @@ cmd.add({"triggerbot","tbot"},{"triggerbot (tbot)","Executes a script that autom
 			CastRay(Mode)
 		end
 	end)
-
-	print("Trigger Bot Loaded")
+	gui.draggable(On)
+	DoNotif("Trigger Bot Loaded")
 end)
 
 cmd.add({"nofog"},{"nofog","Removes all fog from the game"},function()
