@@ -5475,77 +5475,77 @@ cmd.add({"saw"}, {"saw <challenge>", "shush"}, function(...)
     local challenge = table.concat({...}, " ")
     _G.SawFinish = false
 
-    local ScreenGui = Instance.new("ScreenGui")
-    local ttLabelLeft = Instance.new("TextLabel")
-    local ttLabelRight = Instance.new("TextLabel")
-    local imgLabel = Instance.new("ImageLabel")
-    local dramaticLabel = Instance.new("TextLabel")
-    local con = nil
-
-    local function doSound(id, vol)
-        id = id or 0
-        vol = vol or 1
+    local function playSound(id, vol)
         local sfx = Instance.new("Sound")
         sfx.Parent = PlrGui
         sfx.SoundId = "rbxassetid://" .. id
-        sfx.Volume = vol
+        sfx.Volume = vol or 1
         sfx:Play()
         sfx.Ended:Connect(function()
             sfx:Destroy()
         end)
     end
 
-    ScreenGui.Name = randomString()
-    ScreenGui.Parent = gethui()
+    local function createUIElement(class, properties, parent)
+        local element = Instance.new(class)
+        for prop, value in pairs(properties) do
+            element[prop] = value
+        end
+        element.Parent = parent
+        return element
+    end
 
-    imgLabel.Parent = ScreenGui
-    imgLabel.AnchorPoint = Vector2.new(0.5, 0)
-    imgLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    imgLabel.BorderSizePixel = 0
-    imgLabel.Position = UDim2.new(0.5, 0, 0, 0)
-    imgLabel.Size = UDim2.new(0, 150, 0, 150)
-    imgLabel.Image = "rbxassetid://8747893766"
+    local ScreenGui = createUIElement("ScreenGui", { Name = randomString() }, gethui())
 
-    ttLabelLeft.Name = randomString()
-    ttLabelLeft.Parent = ScreenGui
-    ttLabelLeft.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    ttLabelLeft.BackgroundTransparency = 0.1
-    ttLabelLeft.AnchorPoint = Vector2.new(0, 0.5)
-    ttLabelLeft.Position = UDim2.new(0, 10, 0.5, 0)
-    ttLabelLeft.Size = UDim2.new(0, 200, 0, 50)
-    ttLabelLeft.Font = Enum.Font.Arcade
-    ttLabelLeft.Text = "Challenge: " .. challenge
-    ttLabelLeft.TextColor3 = Color3.fromRGB(255, 0, 0)
-    ttLabelLeft.TextSize = 20
-    ttLabelLeft.TextWrapped = true
-    ttLabelLeft.ZIndex = 9999
+    local imgLabel = createUIElement("ImageLabel", {
+        AnchorPoint = Vector2.new(0.5, 0),
+        BackgroundColor3 = Color3.fromRGB(0, 0, 0),
+        BorderSizePixel = 0,
+        Position = UDim2.new(0.5, 0, 0, 0),
+        Size = UDim2.new(0, 100, 0, 100),
+        Image = "rbxassetid://8747893766"
+    }, ScreenGui)
 
-    ttLabelRight.Name = randomString()
-    ttLabelRight.Parent = ScreenGui
-    ttLabelRight.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    ttLabelRight.BackgroundTransparency = 0.1
-    ttLabelRight.AnchorPoint = Vector2.new(1, 0.5)
-    ttLabelRight.Position = UDim2.new(1, -10, 0.5, 0)
-    ttLabelRight.Size = UDim2.new(0, 200, 0, 50)
-    ttLabelRight.Font = Enum.Font.Arcade
-    ttLabelRight.Text = "Time Remaining: 180 seconds"
-    ttLabelRight.TextColor3 = Color3.fromRGB(255, 0, 0)
-    ttLabelRight.TextSize = 20
-    ttLabelRight.TextWrapped = true
-    ttLabelRight.ZIndex = 9999
+    local ttLabelLeft = createUIElement("TextLabel", {
+        BackgroundColor3 = Color3.fromRGB(0, 0, 0),
+        BackgroundTransparency = 0.1,
+        AnchorPoint = Vector2.new(0, 0.5),
+        Position = UDim2.new(0, 10, 0.5, 0),
+        Size = UDim2.new(0.3, 0, 0.1, 0),
+        Font = Enum.Font.Arcade,
+        Text = "Challenge: " .. challenge,
+        TextColor3 = Color3.fromRGB(255, 0, 0),
+        TextSize = 20,
+        TextWrapped = true,
+        ZIndex = 9999
+    }, ScreenGui)
 
-    dramaticLabel.Name = randomString()
-    dramaticLabel.Parent = ScreenGui
-    dramaticLabel.BackgroundTransparency = 1
-    dramaticLabel.AnchorPoint = Vector2.new(0.5, 0.5)
-    dramaticLabel.Position = UDim2.new(0.5, 0, 0.5, 0)
-    dramaticLabel.Size = UDim2.new(0, 300, 0, 100)
-    dramaticLabel.Font = Enum.Font.Arcade
-    dramaticLabel.Text = ""
-    dramaticLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
-    dramaticLabel.TextSize = 50
-    dramaticLabel.TextWrapped = true
-    dramaticLabel.ZIndex = 10000
+    local ttLabelRight = createUIElement("TextLabel", {
+        BackgroundColor3 = Color3.fromRGB(0, 0, 0),
+        BackgroundTransparency = 0.1,
+        AnchorPoint = Vector2.new(1, 0.5),
+        Position = UDim2.new(1, -10, 0.5, 0),
+        Size = UDim2.new(0.3, 0, 0.1, 0),
+        Font = Enum.Font.Arcade,
+        Text = "Time Remaining: 180 seconds",
+        TextColor3 = Color3.fromRGB(255, 0, 0),
+        TextSize = 20,
+        TextWrapped = true,
+        ZIndex = 9999
+    }, ScreenGui)
+
+    local dramaticLabel = createUIElement("TextLabel", {
+        BackgroundTransparency = 1,
+        AnchorPoint = Vector2.new(0.5, 0.5),
+        Position = UDim2.new(0.5, 0, 0.5, 0),
+        Size = UDim2.new(0.5, 0, 0.2, 0),
+        Font = Enum.Font.Arcade,
+        Text = "",
+        TextColor3 = Color3.fromRGB(255, 0, 0),
+        TextSize = 50,
+        TextWrapped = true,
+        ZIndex = 10000
+    }, ScreenGui)
 
     local function flickerText()
         while not _G.SawFinish do
@@ -5557,7 +5557,7 @@ cmd.add({"saw"}, {"saw <challenge>", "shush"}, function(...)
 
     local function dramaticCountdown(num)
         dramaticLabel.Text = tostring(num)
-        doSound(138081500, 2)
+        playSound(138081500, 2)
         task.wait(1)
         dramaticLabel.Text = ""
     end
@@ -5568,13 +5568,13 @@ cmd.add({"saw"}, {"saw <challenge>", "shush"}, function(...)
             if not _G.SawFinish then
                 if num > 0 then
                     num = num - 1
-                    doSound(138081500, 1)
+                    playSound(138081500, 1)
                     ttLabelRight.Text = "Time Remaining: " .. num .. " seconds"
                     if num == 30 or num == 20 or num == 10 then
                         dramaticCountdown(num)
                     elseif num <= 10 then
                         dramaticLabel.Text = tostring(num)
-                        doSound(138081500, 2)
+                        playSound(138081500, 2)
                     end
                 else
                     game:GetService("Players").LocalPlayer:Kick("You Failed The Challenge")
@@ -5583,12 +5583,8 @@ cmd.add({"saw"}, {"saw <challenge>", "shush"}, function(...)
                 ttLabelLeft.Text = "You Survived... For Now"
                 ttLabelRight.Text = ""
                 dramaticLabel.Text = ""
-                doSound(9125915751, 5)
+                playSound(9125915751, 5)
                 task.wait(2)
-                if con then
-                    con:Disconnect()
-                    con = nil
-                end
                 ScreenGui:Destroy()
                 break
             end
@@ -5597,18 +5593,20 @@ cmd.add({"saw"}, {"saw <challenge>", "shush"}, function(...)
 
     local function moveImage()
         while not _G.SawFinish do
-            imgLabel.Position = UDim2.new(0.5, math.random(-10, 10), 0, math.random(-10, 10))
-            task.wait(0.1)
+            local newX = math.random(-10, 10)
+            local newY = math.random(-10, 10)
+            local tween = game:GetService("TweenService"):Create(
+                imgLabel,
+                TweenInfo.new(0.1, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut),
+                { Position = UDim2.new(0.5, newX, 0, newY) }
+            )
+            tween:Play()
+            tween.Completed:Wait()
         end
     end
 
     local function startChallenge()
-        doSound(469373418, 5)
-        if con then
-            con:Disconnect()
-            con = nil
-        end
-
+        playSound(469373418, 5)
         coroutine.wrap(count)()
         coroutine.wrap(flickerText)()
         coroutine.wrap(moveImage)()
