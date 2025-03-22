@@ -32,7 +32,7 @@ if not gethui then
 	end
 end
 
-if identifyexecutor()=="Solara" or not fireproximityprompt then -- proximity prompt fix | Credits: Benomat (https://scriptblox.com/u/benomat)
+if (identifyexecutor():lower()=="solara" or identifyexecutor():lower()=="xeno") or not fireproximityprompt then -- proximity prompt fix | Credits: Benomat (https://scriptblox.com/u/benomat)
 	getgenv().fireproximityprompt=function(pp)
 		local oldenabled=pp.Enabled
 		local oldhold=pp.HoldDuration
