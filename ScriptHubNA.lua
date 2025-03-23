@@ -448,7 +448,7 @@ local function search(q)
             discordButton.Name = "DiscordButton"
             discordButton.Size = UDim2.new(0, 100, 0, 30)
             discordButton.Position = UDim2.new(0, 240, 0, 80)
-            discordButton.BackgroundColor3 = Color3.new(11, 114, 224)
+            discordButton.BackgroundColor3 = Color3.fromRGB(11, 114, 224)
             discordButton.BorderSizePixel = 0
             discordButton.Font = Enum.Font.GothamSemibold
             discordButton.Text = "Copy Discord"
