@@ -5476,8 +5476,8 @@ cmd.add({"unhide","show"},{"show <player> (unhide)","places the selected player 
 end,true)
 
 cmd.add({"aimbot","aimbotui","aimbotgui"},{"aimbot (aimbotui,aimbotgui)","aimbot and yeah"},function()
-	--loadstring(game:HttpGet('https://raw.githubusercontent.com/fatesc/fates-esp/main/main.lua'))()
-	loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/uuuuuuu/refs/heads/main/Aimbot.lua",true))()
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/thraxxyz/SkibidiScripts/refs/heads/main/AimbotV1"))()
+	--loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/uuuuuuu/refs/heads/main/Aimbot.lua",true))()
 end)
 
 cmd.add({"loopgrabtools"},{"loopgrabtools","Loop grabs dropped tools"},function()
