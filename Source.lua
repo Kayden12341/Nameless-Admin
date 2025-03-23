@@ -3223,6 +3223,8 @@ cmd.add({"triggerbot", "tbot"}, {"triggerbot (tbot)", "Executes a script that au
     local Player = Players.LocalPlayer
     local Mouse = Player:GetMouse()
     local Toggled = false
+    local Mode = "FFA"
+    local LastMode = nil
 
     local GUI = Instance.new("ScreenGui")
     local On = Instance.new("TextLabel")
@@ -3237,7 +3239,7 @@ cmd.add({"triggerbot", "tbot"}, {"triggerbot (tbot)", "Executes a script that au
     On.Position = UDim2.new(0.88, 0, 0.33, 0)
     On.Size = UDim2.new(0, 160, 0, 20)
     On.Font = Enum.Font.SourceSans
-    On.Text = "TriggerBot On: false"
+    On.Text = "TriggerBot On: false (Key: Q)"
     On.TextColor3 = Color3.new(1, 1, 1)
     On.TextScaled = true
     On.TextSize = 14
@@ -3256,9 +3258,17 @@ cmd.add({"triggerbot", "tbot"}, {"triggerbot (tbot)", "Executes a script that au
         return false
     end
 
+    local function IsEnemy(otherPlayer)
+        if Mode == "FFA" then
+            return true
+        else
+            return otherPlayer.Team ~= nil and Player.Team ~= nil and otherPlayer.Team ~= Player.Team
+        end
+    end
+
     local function GetClosestPlayer()
         for _, otherPlayer in pairs(Players:GetPlayers()) do
-            if otherPlayer ~= Player and otherPlayer.Character then
+            if otherPlayer ~= Player and IsEnemy(otherPlayer) and otherPlayer.Character then
                 for _, part in pairs(otherPlayer.Character:GetChildren()) do
                     if part:IsA("BasePart") and IsInFieldOfView(part) then
                         return otherPlayer
@@ -3273,14 +3283,28 @@ cmd.add({"triggerbot", "tbot"}, {"triggerbot (tbot)", "Executes a script that au
         mouse1click()
     end
 
+    local function CheckMode()
+        if #Players:GetPlayers() > 0 and Players.LocalPlayer.Team == nil then
+            Mode = "FFA"
+        else
+            Mode = "Team"
+        end
+
+        if Mode ~= LastMode then
+            DoNotif("Mode changed to: " .. Mode)
+            LastMode = Mode
+        end
+    end
+
     UIS.InputBegan:Connect(function(input, processed)
         if not processed and input.KeyCode == ToggleKey then
             Toggled = not Toggled
-            On.Text = "TriggerBot On: " .. tostring(Toggled)
+            On.Text = "TriggerBot On: " .. tostring(Toggled) .. " (Key: " .. ToggleKey.Name .. ")"
         end
     end)
 
     RunService.RenderStepped:Connect(function()
+        CheckMode()
         if Toggled then
             local targetPlayer = GetClosestPlayer()
             if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("Humanoid") then
