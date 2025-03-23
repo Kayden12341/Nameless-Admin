@@ -23,7 +23,7 @@ end
 
 
 
-local NAbegin=tick()
+NAbegin=tick()
 
 NACaller(function() getgenv().RealNamelessLoaded=true end)
 NACaller(function() getgenv().NATestingVer=true end)
@@ -48,23 +48,25 @@ if not gethui then
 	end
 end
 
-if (identifyexecutor():lower()=="solara" or identifyexecutor():lower()=="xeno") or not fireproximityprompt then -- proximity prompt fix | Credits: Benomat (https://scriptblox.com/u/benomat)
-	getgenv().fireproximityprompt=function(pp)
-		local oldenabled=pp.Enabled
-		local oldhold=pp.HoldDuration
-		local oldrlos=pp.RequiresLineOfSight
-		pp.Enabled=true
-		pp.HoldDuration=0
-		pp.RequiresLineOfSight=false
-		wait(.23)
-		pp:InputHoldBegin()
-		task.wait()
-		pp:InputHoldEnd()
-		wait(.1)
-		pp.Enabled=pp.Enabled
-		pp.HoldDuration=pp.HoldDuration
-		pp.RequiresLineOfSight=pp.RequiresLineOfSight
-	end
+if (identifyexecutor():lower() == "solara" or identifyexecutor():lower() == "xeno") or not fireproximityprompt then
+    getgenv().fireproximityprompt = function(pp)
+        local originalEnabled = pp.Enabled
+        local originalHoldDuration = pp.HoldDuration
+        local originalRequiresLineOfSight = pp.RequiresLineOfSight
+
+        pp.Enabled = true
+        pp.HoldDuration = 0
+        pp.RequiresLineOfSight = false
+
+        task.wait(0.23)
+        pp:InputHoldBegin()
+        task.wait()
+        pp:InputHoldEnd()
+
+        pp.Enabled = originalEnabled
+        pp.HoldDuration = originalHoldDuration
+        pp.RequiresLineOfSight = originalRequiresLineOfSight
+    end
 end
 
 local GetService=game.GetService
@@ -239,8 +241,6 @@ local Lighting=game:GetService("Lighting");
 local ReplicatedStorage=game:GetService("ReplicatedStorage");
 local GuiService=game:GetService("GuiService");
 local COREGUI=game:GetService("CoreGui");
-local CoreGui=game:GetService("CoreGui");
-local coregui=game:GetService("CoreGui");
 local AvatarEditorService = game:GetService("AvatarEditorService")
 local ChatService = game:GetService("Chat")
 local TextChatService = game:GetService("TextChatService")
@@ -250,26 +250,18 @@ local sethidden=sethiddenproperty or set_hidden_property or set_hidden_prop
 local Player=game:GetService("Players").LocalPlayer;
 local plr=game:GetService("Players").LocalPlayer;
 local PlrGui=Player:FindFirstChild("PlayerGui");
-local speaker=Player
 local IYLOADED=false--This is used for the ;iy command that executes infinite yield commands using this admin command script (BTW)
 local Character=Player.Character;
-local Humanoid=Character and Character:FindFirstChildWhichIsA("Humanoid") or false
-local Clicked=true
+local Humanoid=Character and Character:FindFirstChildWhichIsA("Humanoid") or nil;
 local LegacyChat=TextChatService.ChatVersion==Enum.ChatVersion.LegacyChatService
-_G.Spam=false
---[[ FOR LOOP COMMANDS ]]--
-local view=false
-local control=false
 local FakeLag=false
 local Loopvoid=false
 local loopgrab=false
-local Loopstand=false
-local Looptornado=false
 local Loopmute=false
-local Loopglitch=false
 local OrgDestroyHeight = game:GetService("Workspace").FallenPartsDestroyHeight
 local Watch=false
 local Admin={}
+CoreGui=COREGUI;
 _G.NAadminsLol={
 	530829101;--Viper
 	229501685;--legshot
@@ -292,17 +284,29 @@ end
 
 --[[ Some more variables ]]--
 
-local localPlayer=Player
-local LocalPlayer=Player
+localPlayer=Player
+LocalPlayer=Player
 local character=Player.Character
 local mouse=localPlayer:GetMouse()
 local camera=game:GetService("Workspace").CurrentCamera
 local camtype=camera.CameraType
 local Commands,Aliases={},{}
 local player,plr,lp=game:GetService("Players").LocalPlayer,game:GetService("Players").LocalPlayer,game:GetService("Players").LocalPlayer
-local ctrlModule= nil 
+local ctrlModule = nil
 
-pcall(function() ctrlModule=require(game:GetService("Players").LocalPlayer:FindFirstChildOfClass("PlayerScripts"):WaitForChild('PlayerModule',5):WaitForChild("ControlModule",5)) end)
+pcall(function()
+    local player = game:GetService("Players").LocalPlayer
+    local plrScripts = player:FindFirstChildOfClass("PlayerScripts")
+    if plrScripts then
+        local plrModule = plrScripts:WaitForChild("PlayerModule", 5)
+        if plrModule then
+            local modell = plrModule:WaitForChild("ControlModule", 5)
+            if modell then
+                ctrlModule = require(modell)
+            end
+        end
+    end
+end)
 
 local bringc={}
 
@@ -488,7 +492,7 @@ cmd.run = function(args)
 				if requiresInput then
 					Notify({
 						Title = adminName,
-						Description = "Command [ " .. caller .. " ] doesn't exist\nDid you mean [ " .. closest .. " ]?",
+						Description = "Command [ "..caller.." ] doesn't exist\nDid you mean [ "..closest.." ]?",
 						InputField = true,
 						Buttons = {
 							{
@@ -507,7 +511,7 @@ cmd.run = function(args)
 				else
 					Notify({
 						Title = adminName,
-						Description = "Command [ " .. caller .. " ] doesn't exist\nDid you mean [ " .. closest .. " ]?",
+						Description = "Command [ "..caller.." ] doesn't exist\nDid you mean [ "..closest.." ]?",
 						Buttons = {
 							{
 								Text = "Run Command",
@@ -736,7 +740,7 @@ local getPlr = function(Name)
 		for _, plr in ipairs(Players:GetPlayers()) do
 			if plr.Name:lower():match(Name) then
 				return plr
-			elseif plr.DisplayName:lower():match("^" .. Name) then
+			elseif plr.DisplayName:lower():match("^"..Name) then
 				return plr
 			end
 		end
@@ -745,7 +749,7 @@ end
 
 --[[ MORE VARIABLES ]]--
 local plr=Player
-local speaker=Player
+speaker=Player
 local char=plr.Character
 local JSONEncode,JSONDecode=HttpService.JSONEncode,HttpService.JSONDecode
 local con=game.Loaded.Connect
@@ -794,16 +798,16 @@ end
 function ESP(player)
 	task.spawn(function()
 		for _, child in pairs(COREGUI:GetChildren()) do
-			if child.Name == player.Name .. '_ESP' then
+			if child.Name == player.Name..'_ESP' then
 				child:Destroy()
 			end
 		end
 		task.wait()
 
 		local function createESP()
-			if player.Character and player.Name ~= Players.LocalPlayer.Name and not COREGUI:FindFirstChild(player.Name .. '_ESP') then
+			if player.Character and player.Name ~= Players.LocalPlayer.Name and not COREGUI:FindFirstChild(player.Name..'_ESP') then
 				local espHolder = Instance.new("Folder")
-				espHolder.Name = player.Name .. '_ESP'
+				espHolder.Name = player.Name..'_ESP'
 				espHolder.Parent = COREGUI
 
 				repeat task.wait(1) until player.Character and getRoot(player.Character) and player.Character:FindFirstChildOfClass("Humanoid")
@@ -837,14 +841,14 @@ function ESP(player)
 
 					local espLoop
 					espLoop = RunService.RenderStepped:Connect(function()
-						if COREGUI:FindFirstChild(player.Name .. '_ESP') then
+						if COREGUI:FindFirstChild(player.Name..'_ESP') then
 							if player.Character and getRoot(player.Character) and player.Character:FindFirstChildOfClass("Humanoid") and Players.LocalPlayer.Character and getRoot(Players.LocalPlayer.Character) and Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
 								local distance = math.floor((getRoot(Players.LocalPlayer.Character).Position - getRoot(player.Character).Position).magnitude)
 								local health = math.floor(player.Character:FindFirstChildOfClass("Humanoid").Health)
 								local maxHealth = math.floor(player.Character:FindFirstChildOfClass("Humanoid").MaxHealth)
 								local teamColor = player.Team and player.Team.TeamColor.Color or Color3.fromRGB(255, 255, 255)
 
-								local displayName = player.DisplayName == player.Name and '@' .. player.Name or player.DisplayName .. ' (@' .. player.Name .. ')'
+								local displayName = player.DisplayName == player.Name and '@'..player.Name or player.DisplayName..' (@'..player.Name..')'
 
 								textLabel.Text = string.format("%s | Health: %d/%d | Studs: %d | Team: %s", displayName, health, maxHealth, distance, player.Team and player.Team.Name or "None")
 								textLabel.TextColor3 = distance < 50 and Color3.fromRGB(255, 0, 0) or distance < 100 and Color3.fromRGB(255, 165, 0) or Color3.fromRGB(0, 255, 0)
@@ -869,7 +873,7 @@ function ESP(player)
 			end
 
 			for _, child in pairs(COREGUI:GetChildren()) do
-				if child.Name == player.Name .. '_ESP' then
+				if child.Name == player.Name..'_ESP' then
 					child:Destroy()
 				end
 			end
@@ -1462,10 +1466,22 @@ end)
 
 cmd.add({"discord"},{"discord","Copy an invite link to the official Nameless Admin discord server"},function()
 	if setclipboard then 
-		setclipboard('https://discord.gg/zS7TpV3p64')
-		DoNotif('Copied the discord invite link!',4)
+		Notify({
+			Title = "Discord",
+			Description = "https://discord.gg/zS7TpV3p64",
+			Buttons = {
+				{Text = "Copy Link", Callback = function() setclipboard('https://discord.gg/zS7TpV3p64') end},
+				{Text = "Close", Callback = function() end}
+			}
+		})
 	else
-		DoNotif('Your exploit does not support setclipboard\nRetype the invite link yourself (https://discord.gg/zS7TpV3p64)',10)
+		Notify({
+			Title = "Discord",
+			Description = "Your exploit does not support setclipboard\nRetype the invite link yourself (https://discord.gg/zS7TpV3p64)",
+			Buttons = {
+				{Text = "Close", Callback = function() end}
+			}
+		})
 	end
 end)
 
@@ -3385,7 +3401,7 @@ cmd.add({"triggerbot", "tbot"}, {"triggerbot (tbot)", "Executes a script that au
         end
 
         if Mode ~= LastMode then
-            DoNotif("Mode changed to: " .. Mode)
+            DoNotif("Mode changed to: "..Mode)
             LastMode = Mode
         end
     end
@@ -3393,7 +3409,7 @@ cmd.add({"triggerbot", "tbot"}, {"triggerbot (tbot)", "Executes a script that au
     UIS.InputBegan:Connect(function(input, processed)
         if not processed and input.KeyCode == ToggleKey then
             Toggled = not Toggled
-            On.Text = "TriggerBot On: " .. tostring(Toggled) .. " (Key: " .. ToggleKey.Name .. ")"
+            On.Text = "TriggerBot On: "..tostring(Toggled).." (Key: "..ToggleKey.Name..")"
         end
     end)
 
@@ -3410,7 +3426,7 @@ cmd.add({"triggerbot", "tbot"}, {"triggerbot (tbot)", "Executes a script that au
         end
     end)
 
-	On.Text = "TriggerBot On: " .. tostring(Toggled) .. " (Key: " .. ToggleKey.Name .. ")"
+	On.Text = "TriggerBot On: "..tostring(Toggled).." (Key: "..ToggleKey.Name..")"
 
     DoNotif("Advanced Trigger Bot Loaded")
 end)
@@ -3769,7 +3785,7 @@ cmd.add({"antifling"}, {"antifling", "makes other players non-collidable with yo
 		if af and player.Character then
 			for _, part in pairs(player.Character:GetDescendants()) do
 				if part:IsA("BasePart") then
-					local id = player.UserId .. "_" .. part:GetFullName()
+					local id = player.UserId.."_"..part:GetFullName()
 					if partStates[id] == nil then
 						partStates[id] = part.CanCollide
 					end
@@ -3818,7 +3834,7 @@ cmd.add({"unantifling"}, {"unantifling", "restores collision for other players"}
 		if player ~= game:GetService("Players").LocalPlayer and player.Character then
 			for _, part in pairs(player.Character:GetDescendants()) do
 				if part:IsA("BasePart") then
-					local id = player.UserId .. "_" .. part:GetFullName()
+					local id = player.UserId.."_"..part:GetFullName()
 					if partStates[id] ~= nil then
 						part.CanCollide = partStates[id]
 					end
@@ -3872,7 +3888,7 @@ cmd.add({"vehiclespeed", "vspeed"}, {"vehiclespeed <amount> (vspeed)", "Change t
 		end
 	end)
 
-	DoNotif("Vehicle speed set to " .. intens)
+	DoNotif("Vehicle speed set to "..intens)
 end,true)
 
 cmd.add({"unvehiclespeed", "unvspeed"}, {"unvehiclespeed (unvspeed)", "Stops the vehiclespeed command"}, function()
@@ -4463,6 +4479,8 @@ cmd.add({"unautorejoin","unautorj"},{"unautorejoin (unautorj)","disables auto re
 		DoNotif("Auto Rejoin is already disabled")
 	end
 end)
+
+dadojadoqwdqwd='© 2025 ltseverydayyou'
 
 cmd.add({"functionspy"},{"functionspy","Check console"},function()
 	local toLog={
@@ -5379,19 +5397,25 @@ function getAllTools()
 	return tools
 end
 
-cmd.add({"fakelag","flag"},{"fakelag (flag)","fake lag"},function()
-	FakeLag=true
+cmd.add({"fakelag", "flag"}, {"fakelag (flag)", "fake lag"}, function()
+    if FakeLag then return end
+    FakeLag = true
 
-	repeat wait()
-		getRoot(getChar()).Anchored=true
-		wait(0.05)
-		getRoot(getChar()).Anchored=false
-		wait(0.05)
-	until FakeLag==false
+    while FakeLag do
+        local root = getRoot(getChar())
+        if root then
+            root.Anchored = true
+            wait(0.05)
+            root.Anchored = false
+            wait(0.05)
+        else
+            FakeLag = false
+        end
+    end
 end)
 
-cmd.add({"unfakelag","unflag"},{"unfakelag (unflag)","stops the fake lag command"},function()
-	FakeLag=false
+cmd.add({"unfakelag", "unflag"}, {"unfakelag (unflag)", "stops the fake lag command"}, function()
+    FakeLag = false
 end)
 
 local r=math.rad
@@ -7227,7 +7251,7 @@ cmd.add({"airwalk", "float", "aw"}, {"airwalk (float, aw)", "Press space to go u
 		button.BackgroundTransparency = 0
 		button.Position = position
 		button.Size = UDim2.new(0.05, 0, 0.1, 0)
-		button.Font = Enum.Font.GothamBold
+		button.Font = Enum.Font.SourceSansBold
 		button.Text = text
 		button.TextColor3 = Color3.fromRGB(255, 255, 255)
 		button.TextSize = 18
@@ -7361,6 +7385,38 @@ cmd.add({"mute","muteboombox"},{"mute <player> (muteboombox)","Mutes the players
 		wait();
 
 		DoNotif("Boombox muted. Status: Client Sided")
+		if Username:lower()=="all" or Username:lower()=="others" then
+			local players=game:GetService("Players"):GetPlayers()
+			for _,player in ipairs(players) do
+				for _,object in ipairs(player.Character:GetDescendants()) do
+					if object:IsA("Sound") and object.Playing then
+						object:Stop()
+					end
+				end
+				local backpack=player:FindFirstChildOfClass("Backpack")
+				if backpack then
+					for _,object in ipairs(backpack:GetDescendants()) do
+						if object:IsA("Sound") and object.Playing then
+							object:Stop()
+						end
+					end
+				end
+			end			
+		else
+			local players=getPlr(Username)
+			if players~=nil then
+				for i,x in next,players.Character:GetDescendants() do
+					if x:IsA("Sound") and x.Playing==true then
+						x.Playing=false
+					end
+				end
+				for i,x in next,players:FindFirstChildOfClass("Backpack"):GetDescendants() do
+					if x:IsA("Sound") and x.Playing==true then
+						x.Playing=false
+					end
+				end
+			end 
+		end
 	else
 		wait();
 
@@ -7401,7 +7457,7 @@ cmd.add({"mute","muteboombox"},{"mute <player> (muteboombox)","Mutes the players
 end,true)
 
 TPWalk = false
-local TPWalkingConnection
+local TPWalkingConnection = nil
 
 cmd.add({"tpwalk", "tpwalk"}, {"tpwalk <number>", "More undetectable walkspeed script"}, function(...)
 	if TPWalk then
@@ -7496,12 +7552,7 @@ end,true)
 
 cmd.add({"unloopmute","unloopmuteboombox"},{"unloopmute <player> (unloopmuteboombox)","Unloop mutes the players boombox"},function()
 	Loopmute=false
-	wait()
-
-
-
 	wait();
-
 	DoNotif("Unloopmuted everyone")
 end)
 
@@ -7529,12 +7580,19 @@ cmd.add({"unloopfling"},{"unloopfling","Stops loop flinging a player"},function(
 	Loopvoid=false
 end)
 
-cmd.add({"inspect"},{"examine","checks a user's items"},function(args)
-	for _,v in ipairs(getPlr((args[1] or speaker))) do
-		GuiService:CloseInspectMenu()
-		GuiService:InspectPlayerFromUserId(Players[v].UserId)
-	end
-end,true)
+cmd.add({"inspect"}, {"examine", "checks a user's items"}, function(args)
+    local targetPlayers = getPlr(args[1] or LocalPlayer)
+    
+    for _, playerName in ipairs(targetPlayers) do
+        local player = Players:FindFirstChild(playerName)
+        if player then
+            GuiService:CloseInspectMenu()
+            GuiService:InspectPlayerFromUserId(player.UserId)
+        else
+            warn("Player not found: " .. tostring(playerName))
+        end
+    end
+end, true)
 
 cmd.add({"noprompt","nopurchaseprompts","noprompts"},{"noprompt (nopurchaseprompts,noprompts)","remove the stupid purchase prompt"},function()
 	wait();
@@ -8117,7 +8175,7 @@ local partEspTrigger = nil
 
 function createAdornment(part, color, transparency)
 	local adornment = Instance.new("BoxHandleAdornment")
-	adornment.Name = part.Name:lower() .. "_PESP"
+	adornment.Name = part.Name:lower().."_PESP"
 	adornment.Parent = part
 	adornment.Adornee = part
 	adornment.AlwaysOnTop = true
@@ -9437,114 +9495,87 @@ cmd.add({"toolinvisible", "tinvis"}, {"toolinvisible (tinvis)", "Be invisible wh
     end)
 end)
 
-local invisBtnlol = nil
+invisBtnlol = nil
+invisKeybindConnection = nil
+IsInvis = false
+InvisibleCharacter = nil
+OriginalPosition = nil
 
 cmd.add({"invisible", "invis"}, {"invisible (invis)", "Sets invisibility to scare people or something"}, function()
-    local Keybind = "E"
+    local Keybind = Enum.KeyCode.E
     local UIS = game:GetService("UserInputService")
     local Player = game:GetService("Players").LocalPlayer
-    local Character = Player.Character or Player.CharacterAdded:Wait()
+    local Character = getChar() or Player.CharacterAdded:Wait()
     Character.Archivable = true
-    local InvisibleCharacter = Character:Clone()
-    InvisibleCharacter.Parent = game:GetService("Lighting")
-    local Void = game:GetService("Workspace").FallenPartsDestroyHeight
-    local IsInvis, invisRunning = false, false
-    local OriginalPosition
-
-    local function getRoot(char)
-        return char:FindFirstChild("HumanoidRootPart")
-    end
-
-    local function MoveCharacterToSky()
-        local root = getRoot(Character)
-        if root then
-            OriginalPosition = root.CFrame
-            root.CFrame = CFrame.new(0, 10000, 0)
-        end
-    end
-
-    local function PlaceInvisibleCloneOnGround()
-        local root = getRoot(InvisibleCharacter)
-        if root and OriginalPosition then
-            root.CFrame = OriginalPosition
-        end
-    end
-
-    local function Respawn()
-        invisRunning = false
-        if IsInvis then
-            Player.Character = Character
-            wait()
-            Character.Parent = game:GetService("Workspace")
-            Character:FindFirstChildWhichIsA("Humanoid"):Destroy()
-            IsInvis = false
-            InvisibleCharacter.Parent = nil
-        else
-            Player.Character = Character
-            wait()
-            Character.Parent = game:GetService("Workspace")
-            Character:FindFirstChildWhichIsA("Humanoid"):Destroy()
-        end
-    end
-
-    local invisFix = game:GetService("RunService").Stepped:Connect(function()
-        pcall(function()
-            if getRoot(Character).Position.Y <= Void then
-                Respawn()
-            end
-        end)
-    end)
-
-    for _, v in pairs(InvisibleCharacter:GetDescendants()) do
-        if v:IsA("BasePart") then
-            v.Transparency = v.Name == "HumanoidRootPart" and 1 or 0.5
-        end
-    end
-
-    local invisDied = InvisibleCharacter:FindFirstChildOfClass("Humanoid").Died:Connect(function()
-        Respawn()
-        invisDied:Disconnect()
-    end)
+	OriginalPosition = getRoot(Character).CFrame
 
     local function TurnVisible()
         if not IsInvis then return end
-        invisFix:Disconnect()
-        invisDied:Disconnect()
-        local currentInvisiblePosition = getRoot(InvisibleCharacter).CFrame
-        InvisibleCharacter.Parent = game:GetService("Lighting")
-        Player.Character = Character
-        Character.Parent = game:GetService("Workspace")
-        getRoot(Character).CFrame = currentInvisiblePosition
         IsInvis = false
-        Player.Character.Animate.Disabled = true
-        Player.Character.Animate.Disabled = false
-        invisDied = Character:FindFirstChildOfClass("Humanoid").Died:Connect(function()
-            Respawn()
-            invisDied:Disconnect()
-        end)
-        invisRunning = false
+		OriginalPosition = getRoot(InvisibleCharacter).CFrame
+        if invisKeybindConnection then
+            invisKeybindConnection:Disconnect()
+            invisKeybindConnection = nil
+        end
+        if invisBtnlol then
+            invisBtnlol:Destroy()
+            invisBtnlol = nil
+        end
+        if InvisibleCharacter then
+            InvisibleCharacter:Destroy()
+            InvisibleCharacter = nil
+        end
+        Player.Character = Character
+		getRoot(Player.Character).CFrame=OriginalPosition
+        Character.Parent = game:GetService("Workspace")
+        DoNotif("Invisibility has been turned off.")
+		StarterGui:SetCore("ResetButtonCallback", true)
     end
 
     local function ToggleInvisibility()
         if not IsInvis then
             IsInvis = true
-            MoveCharacterToSky()
+            InvisibleCharacter = Character:Clone()
+            InvisibleCharacter.Parent = game:GetService("Workspace")
+            for _, v in pairs(InvisibleCharacter:GetDescendants()) do
+                if v:IsA("BasePart") then
+                    v.Transparency = v.Name:lower() == "humanoidrootpart" and 1 or 0.5
+                end
+            end
+            local _, root = getRoot(Character)
+            if root then
+                OriginalPosition = root.CFrame
+                root.CFrame = CFrame.new(0, 10000, 0)
+            end
             wait(0.5)
             Character.Parent = game:GetService("Lighting")
-            InvisibleCharacter.Parent = game:GetService("Workspace")
-            PlaceInvisibleCloneOnGround()
+            if OriginalPosition then
+                local _, invisRoot = getRoot(InvisibleCharacter)
+                if invisRoot then
+                    invisRoot.CFrame = OriginalPosition
+                end
+            end
             Player.Character = InvisibleCharacter
             game:GetService("Workspace").CurrentCamera.CameraSubject = InvisibleCharacter:FindFirstChildWhichIsA("Humanoid")
+            DoNotif("You are now invisible.")
+			StarterGui:SetCore("ResetButtonCallback", false)
         else
             TurnVisible()
         end
     end
 
-    UIS.InputBegan:Connect(function(input, gameProcessed)
-        if input.UserInputType == Enum.UserInputType.Keyboard and input.KeyCode == Enum.KeyCode.E and not gameProcessed then
+    invisKeybindConnection = UIS.InputBegan:Connect(function(input, gameProcessed)
+        if input.UserInputType == Enum.UserInputType.Keyboard and input.KeyCode == Keybind and not gameProcessed then
             ToggleInvisibility()
         end
     end)
+
+    local humanoid = Character:FindFirstChild("Humanoid")
+    if humanoid then
+        humanoid.Died:Connect(function()
+            TurnVisible()
+        end)
+    end
 
     if IsOnMobile then
         if invisBtnlol then invisBtnlol:Destroy() invisBtnlol = nil end
@@ -9582,7 +9613,7 @@ cmd.add({"invisible", "invis"}, {"invisible (invis)", "Sets invisibility to scar
     end
 
     wait()
-    DoNotif("Invisible loaded, press " .. Keybind .. " to toggle or use the mobile button.")
+    DoNotif("Invisible loaded, press "..Keybind.Name.." to toggle or use the mobile button.")
 end)
 
 cmd.add({"fireremotes", "fremotes", "frem"},{"fireremotes (fremotes, frem)","Fires every remote"},function()
@@ -10746,6 +10777,7 @@ end)
 
 --[[ COMMAND BAR BUTTON ]]--
 local TextLabel = Instance.new("TextLabel")
+local Info = Instance.new("TextLabel")
 local UICorner = Instance.new("UICorner")
 local ImageButton = Instance.new("ImageButton")
 local UICorner2 = Instance.new("UICorner")
@@ -10778,11 +10810,24 @@ TextLabel.AnchorPoint = Vector2.new(0.5, 0.5)
 TextLabel.Position = UDim2.new(0.5, 0, 0.5, 0)
 TextLabel.Size = UDim2.new(0, 2, 0, 33)
 TextLabel.Font = Enum.Font.GothamBold
-TextLabel.Text = adminName .. " V" .. curVer
+TextLabel.Text = adminName.." V"..curVer
 TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 TextLabel.TextSize = 20
 TextLabel.TextWrapped = true
 TextLabel.ZIndex = 9999
+
+Info.Parent = ScreenGui
+Info.BackgroundTransparency = 1
+Info.AnchorPoint = Vector2.new(0, 1)
+Info.Position = UDim2.new(0, 10, 1, -10)
+Info.Size = UDim2.new(0, 200, 0, 20)
+Info.Font = Enum.Font.Gotham
+Info.Text = adminName.." V"..curVer.."\n"..dadojadoqwdqwd
+Info.TextColor3 = Color3.fromRGB(255, 255, 255)
+Info.TextTransparency = 0.5
+Info.TextSize = 14
+Info.TextXAlignment = Enum.TextXAlignment.Left
+Info.ZIndex = 9999
 
 ImageButton.Parent = ScreenGui
 ImageButton.AnchorPoint = Vector2.new(0.5, 0)
@@ -10806,11 +10851,11 @@ UIGradient.Color = ColorSequence.new{
 }
 
 function Swoosh()
-	ImageButton:TweenPosition(UDim2.new(0.5, 0, 0.1, 0), "Out", "Quint", 1, true)
-	ImageButton:TweenSize(UDim2.new(0, 50, 0, 50), "Out", "Quint", 1, true)
+	ImageButton:TweenPosition(UDim2.new(0.5, 0, 0.05, 0), "Out", "Quint", 2, true)
+	ImageButton:TweenSize(UDim2.new(0, 45, 0, 45), "Out", "Quint", 2, true)
 
 	local tweenService = game:GetService("TweenService")
-	local rotationTween = tweenService:Create(ImageButton, TweenInfo.new(2, Enum.EasingStyle.Quint), {Rotation = 720})
+	local rotationTween = tweenService:Create(ImageButton, TweenInfo.new(3, Enum.EasingStyle.Quint), {Rotation = 720})
 	rotationTween:Play()
 
 	gui.draggable(ImageButton)
@@ -10862,7 +10907,7 @@ if IsOnMobile then
 	end)
 end
 
---@ltseverydayyou (maxype)
+--@ltseverydayyou (null)
 --@Cosmella (Viper)
 
 --original by @qipu | loadstring(game:HttpGet("https://raw.githubusercontent.com/FilteringEnabled/NamelessAdmin/main/Source"))();
