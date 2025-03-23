@@ -177,6 +177,9 @@ local GuiService=game:GetService("GuiService");
 local COREGUI=game:GetService("CoreGui");
 local CoreGui=game:GetService("CoreGui");
 local coregui=game:GetService("CoreGui");
+local AvatarEditorService = game:GetService("AvatarEditorService")
+local ChatService = game:GetService("Chat")
+local TextChatService = game:GetService("TextChatService")
 local IsOnMobile=false--table.find({Enum.Platform.IOS,Enum.Platform.Android},UserInputService:GetPlatform());
 local IsOnPC=false--table.find({Enum.Platform.Windows,Enum.Platform.UWP,Enum.Platform.Linux,Enum.Platform.SteamOS,Enum.Platform.OSX,Enum.Platform.Chromecast,Enum.Platform.WebOS},UserInputService:GetPlatform());
 local sethidden=sethiddenproperty or set_hidden_property or set_hidden_prop
@@ -188,7 +191,7 @@ local IYLOADED=false--This is used for the ;iy command that executes infinite yi
 local Character=Player.Character;
 local Humanoid=Character and Character:FindFirstChildWhichIsA("Humanoid") or false
 local Clicked=true
-local LegacyChat=game:GetService("TextChatService").ChatVersion==Enum.ChatVersion.LegacyChatService
+local LegacyChat=TextChatService.ChatVersion==Enum.ChatVersion.LegacyChatService
 _G.Spam=false
 --[[ FOR LOOP COMMANDS ]]--
 local view=false
@@ -212,6 +215,7 @@ _G.NAadminsLol={
 	2624269701;--Akim
 	2502806181; -- null
 	1594235217; -- Purple
+	1620986547; -- pc alt
 }
 
 if UserInputService.TouchEnabled then
@@ -1105,11 +1109,11 @@ Playerchats={}
 
 lib.LocalPlayerChat=function(...)
 	local args={...} 
-	if game:GetService("TextChatService"):FindFirstChild("TextChannels") then
-		local sendto=game:GetService("TextChatService").TextChannels.RBXGeneral
+	if TextChatService:FindFirstChild("TextChannels") then
+		local sendto=TextChatService.TextChannels.RBXGeneral
 		if args[2]~=nil and  args[2]~="All"  then
 			if not Playerchats[args[2]] then
-				for i,v in pairs(game:GetService("TextChatService").TextChannels:GetChildren()) do
+				for i,v in pairs(TextChatService.TextChannels:GetChildren()) do
 					if string.find(v.Name,"RBXWhisper:") then
 						if v:FindFirstChild(args[2]) and v:FindFirstChild(game:GetService("Players").LocalPlayer.Name) then
 							if v[game:GetService("Players").LocalPlayer.Name].CanSend==false then
@@ -1124,10 +1128,10 @@ lib.LocalPlayerChat=function(...)
 			else
 				sendto=Playerchats[args[2]]
 			end
-			if sendto==game:GetService("TextChatService").TextChannels.RBXGeneral then
+			if sendto==TextChatService.TextChannels.RBXGeneral then
 				chatmsgshooks[args[1]]={args[1],args}
 				task.spawn(function()
-					game:GetService("TextChatService").TextChannels.RBXGeneral:SendAsync("/w @"..args[2])
+					TextChatService.TextChannels.RBXGeneral:SendAsync("/w @"..args[2])
 				end)
 				return "Hooking"
 			end
@@ -1142,8 +1146,8 @@ lib.LocalPlayerChat=function(...)
 	end
 end
 
-if game:GetService("TextChatService"):FindFirstChild("TextChannels") then
-	game:GetService("TextChatService").TextChannels.ChildAdded:Connect(function(v)
+if TextChatService:FindFirstChild("TextChannels") then
+	TextChatService.TextChannels.ChildAdded:Connect(function(v)
 		if string.find(v.Name,"RBXWhisper:") then
 			task.wait(1)
 			for id,va in pairs(chatmsgshooks) do
@@ -4137,6 +4141,38 @@ end)
 cmd.add({"reset","die"},{"reset (die)","Makes your health be 0"},function()
 	Player.Character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
 	Player.Character:FindFirstChildOfClass("Humanoid").Health=0
+end)
+
+cmd.add({"bubblechat","bchat"},{"bubblechat (bchat)","Enables BubbleChat"},function()
+	if LegacyChat then
+		ChatService.BubbleChatEnabled = true
+	else
+		TextChatService.BubbleChatConfiguration.Enabled = true
+	end
+end)
+
+cmd.add({"unbubblechat","unbchat"},{"unbubblechat (unbchat)","Disabled BubbleChat"},function()
+	if LegacyChat then
+		ChatService.BubbleChatEnabled = false
+	else
+		TextChatService.BubbleChatConfiguration.Enabled = false
+	end
+end)
+
+cmd.add({"r6"}, {"r6", "Prompts a message asking to make you R6"}, function()
+    AvatarEditorService:PromptSaveAvatar(LocalPlayer.Character.Humanoid.HumanoidDescription, Enum.HumanoidRigType.R6)
+    local result = avs.PromptSaveAvatarCompleted:Wait()
+    if result == Enum.AvatarPromptResult.Success then
+        respawn()
+    end
+end)
+
+cmd.add({"r15"}, {"r15", "Prompts a message asking to make you R15"}, function()
+    AvatarEditorService:PromptSaveAvatar(LocalPlayer.Character.Humanoid.HumanoidDescription, Enum.HumanoidRigType.R15)
+    local result = avs.PromptSaveAvatarCompleted:Wait()
+    if result == Enum.AvatarPromptResult.Success then
+        respawn()
+    end
 end)
 
 local hastheyfixedit=nil
@@ -8015,7 +8051,7 @@ end)
 local espParts = {}
 local partEspTrigger = nil
 
-local function createAdornment(part, color, transparency)
+function createAdornment(part, color, transparency)
 	local adornment = Instance.new("BoxHandleAdornment")
 	adornment.Name = part.Name:lower() .. "_PESP"
 	adornment.Parent = part
@@ -8028,7 +8064,7 @@ local function createAdornment(part, color, transparency)
 	return adornment
 end
 
-local function partAdded(part)
+function partAdded(part)
 	if #espParts > 0 then
 		if table.find(espParts, part.Name:lower()) then
 			if part:IsA("BasePart") or part:IsA("Model") then
@@ -8081,15 +8117,7 @@ end)
 
 cmd.add({"viewpart","viewp","vpart"},{"viewpart {partname} (viewp,vpart)","Views a part"},function(...)
 	local table={...}
-	local args=''
-	for i,v in pairs(table) do
-		if i~=1 then
-			h=h.." "..v
-			args=h
-		else
-			args=v
-		end
-	end
+	local args=table.concat(table, " ")
 
 	local found = false
 	for _,v in pairs(game:GetService("Workspace"):GetDescendants()) do
@@ -9204,123 +9232,145 @@ cmd.add({"fpscap"},{"fpscap <number>","Sets the fps cap to whatever you want"},f
 	setfpscap(...)
 end,true)
 
-cmd.add({"toolinvisible","tinvis"},{"toolinvisible (tinvis)","Be invisible while still be able to use tools"},function()
-	local offset=1100
-	local invisible=game:GetService("Players").LocalPlayer
-	local grips={}
-	local heldTool
-	local gripChanged
-	local handle
-	local weld
-	function setDisplayDistance(distance)
-		for _,player in pairs(game:GetService("Players"):GetPlayers()) do
-			if player.Character and player.Character:FindFirstChildWhichIsA("Humanoid") then
-				player.Character:FindFirstChildWhichIsA("Humanoid").NameDisplayDistance=distance
-				player.Character:FindFirstChildWhichIsA("Humanoid").HealthDisplayDistance=distance
+cmd.add({"toolinvisible", "tinvis"}, {"toolinvisible (tinvis)", "Be invisible while still being able to use tools"}, function()
+    local offset = 1100
+    invisible = false
+    local grips = {}
+    local heldTool
+    local gripChanged
+    local handle
+    local weld
+	HH = getChar().Humanoid.HipHeight
+
+    local function setDisplayDistance(distance)
+        for _, player in pairs(game:GetService("Players"):GetPlayers()) do
+            if player.Character and player.Character:FindFirstChildWhichIsA("Humanoid") then
+                player.Character:FindFirstChildWhichIsA("Humanoid").NameDisplayDistance = distance
+                player.Character:FindFirstChildWhichIsA("Humanoid").HealthDisplayDistance = distance
+            end
+        end
+    end
+
+    local tool = Instance.new("Tool", game:GetService("Players").LocalPlayer.Backpack)
+    tool.Name = "Turn Invisible"
+    tool.RequiresHandle = false
+    tool.CanBeDropped = false
+
+    tool.Equipped:Connect(function()
+        wait()
+        if not invisible then
+            invisible = true
+            tool.Name = "Visible Enabled"
+
+            if handle then
+                handle:Destroy()
+            end
+            if weld then
+                weld:Destroy()
+            end
+
+            handle = Instance.new("Part", game:GetService("Workspace"))
+            handle.Name = "Handle"
+            handle.Transparency = 1
+            handle.CanCollide = false
+            handle.Size = Vector3.new(2, 1, 1)
+
+            weld = Instance.new("Weld", handle)
+            weld.Part0 = handle
+            weld.Part1 = getRoot(getChar())
+            weld.C0 = CFrame.new(0, offset - 1.5, 0)
+
+            setDisplayDistance(offset + 100)
+            game:GetService("Workspace").CurrentCamera.CameraSubject = handle
+            getRoot(getChar()).CFrame = getRoot(getChar()).CFrame * CFrame.new(0, offset, 0)
+            getChar().Humanoid.HipHeight = offset
+            getChar().Humanoid:ChangeState(11)
+
+            for _, child in pairs(game:GetService("Players").LocalPlayer.Backpack:GetChildren()) do
+                if child:IsA("Tool") and child ~= tool then
+                    grips[child] = child.Grip
+                end
+            end
+			if getHum() then
+				getHum():SetStateEnabled("Seated", false)
+				getHum().Sit = true
 			end
-		end
-	end
-	local tool=Instance.new("Tool",game:GetService("Players").LocalPlayer.Backpack)
-	tool.Name="Turn Invisible"
-	tool.RequiresHandle=false
-	tool.CanBeDropped=false
-	tool.Equipped:Connect(
-		function()
-			wait()
-			if not invisible then
-				invisible=true
-				tool.Name="Visible enabled"
-				if handle then
-					handle:Destroy()
-				end
-				if weld then
-					weld:Destroy()
-				end
-				handle=Instance.new("Part",game:GetService("Workspace"))
-				handle.Name="Handle"
-				handle.Transparency=1
-				handle.CanCollide=false
-				handle.Size=Vector3.new(2,1,1)
-				weld=Instance.new("Weld",handle)
-				weld.Part0=handle
-				weld.Part1=getRoot(getChar())
-				weld.C0=CFrame.new(0,offset-1.5,0)
-				setDisplayDistance(offset+100)
-				game:GetService("Workspace").CurrentCamera.CameraSubject=handle
-				getRoot(getChar()).CFrame=getRoot(getChar()).CFrame*CFrame.new(0,offset,0)
-				getChar().Humanoid.HipHeight=offset
-				getChar().Humanoid:ChangeState(11)
-				for _,child in pairs(game:GetService("Players").LocalPlayer.Backpack:GetChildren()) do
-					if child:IsA("Tool") and child~=tool then
-						grips[child]=child.Grip
-					end
-				end
-			elseif invisible then
-				invisible=false
-				tool.Name="Visible Disabled"
-				if handle then
-					handle:Destroy()
-				end
-				if weld then
-					weld:Destroy()
-				end
-				for _,child in pairs(getChar():GetChildren()) do
-					if child:IsA("Tool") then
-						child.Parent=game:GetService("Players").LocalPlayer.Backpack
-					end
-				end
-				for tool,grip in pairs(grips) do
-					if tool then
-						tool.Grip=grip
-					end
-				end
-				heldTool=nil
-				setDisplayDistance(100)
-				game:GetService("Workspace").CurrentCamera.CameraSubject=getChar().Humanoid
-				getRoot(getChar()).CFrame=getRoot(getChar()).CFrame*CFrame.new(0,-offset,0)
-				getChar().Humanoid.HipHeight=0
+        else
+            invisible = false
+            tool.Name = "Visible Disabled"
+
+            if handle then
+                handle:Destroy()
+            end
+            if weld then
+                weld:Destroy()
+            end
+
+            for _, child in pairs(getChar():GetChildren()) do
+                if child:IsA("Tool") then
+                    child.Parent = game:GetService("Players").LocalPlayer.Backpack
+                end
+            end
+
+            for tool, grip in pairs(grips) do
+                if tool then
+                    tool.Grip = grip
+                end
+            end
+
+            heldTool = nil
+            setDisplayDistance(100)
+            game:GetService("Workspace").CurrentCamera.CameraSubject = getChar().Humanoid
+            getRoot(getChar()).CFrame = getRoot(getChar()).CFrame * CFrame.new(0, -offset, 0)
+            getChar().Humanoid.HipHeight = HH
+
+			if getHum() then
+				getHum():SetStateEnabled("Seated", true)
+				getHum().Sit = false
 			end
-			tool.Parent=game:GetService("Players").LocalPlayer.Backpack
-		end
-	)
-	getChar().ChildAdded:Connect(
-		function(child)
-			wait()
-			if invisible and child:IsA("Tool") and child~=heldTool and child~=tool then
-				heldTool=child
-				local lastGrip=heldTool.Grip
-				if not grips[heldTool] then
-					grips[heldTool]=lastGrip
-				end
-				for _,track in pairs(getChar().Humanoid:GetPlayingAnimationTracks()) do
-					track:Stop()
-				end
-				getChar().Animate.Disabled=true
-				heldTool.Grip=heldTool.Grip*(CFrame.new(0,offset-1.5,1.5)*CFrame.Angles(math.rad(-90),0,0))
-				heldTool.Parent=game:GetService("Players").LocalPlayer.Backpack
-				heldTool.Parent=getChar()
-				if gripChanged then
-					gripChanged:Disconnect()
-				end
-				gripChanged=
-					heldTool:GetPropertyChangedSignal("Grip"):Connect(
-						function()
-							wait()
-							if not invisible then
-								gripChanged:Disconnect()
-							end
-							if heldTool.Grip~=lastGrip then
-								lastGrip=
-								heldTool.Grip*(CFrame.new(0,offset-1.5,1.5)*CFrame.Angles(math.rad(-90),0,0))
-								heldTool.Grip=lastGrip
-								heldTool.Parent=game:GetService("Players").LocalPlayer.Backpack
-								heldTool.Parent=getChar()
-							end
-						end
-					)
-			end
-		end
-	)
+        end
+
+        tool.Parent = game:GetService("Players").LocalPlayer.Backpack
+    end)
+
+    getChar().ChildAdded:Connect(function(child)
+        wait()
+        if invisible and child:IsA("Tool") and child ~= heldTool and child ~= tool then
+            heldTool = child
+            local lastGrip = heldTool.Grip
+
+            if not grips[heldTool] then
+                grips[heldTool] = lastGrip
+            end
+
+            for _, track in pairs(getChar().Humanoid:GetPlayingAnimationTracks()) do
+                track:Stop()
+            end
+
+            getChar().Animate.Disabled = true
+            heldTool.Grip = heldTool.Grip * (CFrame.new(0, offset - 1.5, 1.5) * CFrame.Angles(math.rad(-90), 0, 0))
+            heldTool.Parent = game:GetService("Players").LocalPlayer.Backpack
+            heldTool.Parent = getChar()
+
+            if gripChanged then
+                gripChanged:Disconnect()
+            end
+
+            gripChanged = heldTool:GetPropertyChangedSignal("Grip"):Connect(function()
+                wait()
+                if not invisible then
+                    gripChanged:Disconnect()
+                end
+
+                if heldTool.Grip ~= lastGrip then
+                    lastGrip = heldTool.Grip * (CFrame.new(0, offset - 1.5, 1.5) * CFrame.Angles(math.rad(-90), 0, 0))
+                    heldTool.Grip = lastGrip
+                    heldTool.Parent = game:GetService("Players").LocalPlayer.Backpack
+                    heldTool.Parent = getChar()
+                end
+            end)
+        end
+    end)
 end)
 
 local invisBtnlol = nil
@@ -10636,6 +10686,27 @@ local TextLabel = Instance.new("TextLabel")
 local UICorner = Instance.new("UICorner")
 local ImageButton = Instance.new("ImageButton")
 local UICorner2 = Instance.new("UICorner")
+local UIGradient = Instance.new("UIGradient")
+local Shadow = Instance.new("Frame")
+local Glow = Instance.new("ImageLabel")
+
+Shadow.Parent = ScreenGui
+Shadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+Shadow.BackgroundTransparency = 0.8
+Shadow.AnchorPoint = Vector2.new(0.5, 0.5)
+Shadow.Position = UDim2.new(0.5, 0, 0.5, 5)
+Shadow.Size = UDim2.new(0, 2, 0, 33)
+Shadow.ZIndex = 9998
+
+Glow.Parent = ScreenGui
+Glow.AnchorPoint = Vector2.new(0.5, 0)
+Glow.BackgroundTransparency = 1
+Glow.Position = UDim2.new(0.5, 0, -0.2, 0)
+Glow.Size = UDim2.new(0, 60, 0, 60)
+Glow.Image = "rbxassetid://5028857084"
+Glow.ImageColor3 = Color3.fromRGB(0, 170, 255)
+Glow.ImageTransparency = 0.5
+Glow.ZIndex = 9998
 
 TextLabel.Parent = ScreenGui
 TextLabel.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
@@ -10665,9 +10736,20 @@ UICorner.Parent = ImageButton
 UICorner2.CornerRadius = UDim.new(0.2, 0)
 UICorner2.Parent = TextLabel
 
+UIGradient.Parent = TextLabel
+UIGradient.Color = ColorSequence.new{
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 170, 255)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 255, 170))
+}
+
 function Swoosh()
 	ImageButton:TweenPosition(UDim2.new(0.5, 0, 0.1, 0), "Out", "Quint", 1, true)
 	ImageButton:TweenSize(UDim2.new(0, 50, 0, 50), "Out", "Quint", 1, true)
+
+	local tweenService = game:GetService("TweenService")
+	local rotationTween = tweenService:Create(ImageButton, TweenInfo.new(2, Enum.EasingStyle.Quint), {Rotation = 720})
+	rotationTween:Play()
+
 	gui.draggable(ImageButton)
 end
 
@@ -10680,19 +10762,30 @@ function mainNameless()
 	local newSize = UDim2.new(0, textWidth + 80, 0, 40)
 
 	txtLabel:TweenSize(newSize, "Out", "Quint", 1, true)
+
+	local tweenService = game:GetService("TweenService")
+	tweenService:Create(txtLabel, TweenInfo.new(0.5, Enum.EasingStyle.Sine), {TextTransparency = 0}):Play()
+
 	if IsOnMobile then
 		Swoosh()
 	else
 		ImageButton:Destroy()
+		Glow:Destroy()
 	end
 
 	wait(2)
-	local tweenService = game:GetService("TweenService")
-	tweenService:Create(txtLabel, TweenInfo.new(0.7, Enum.EasingStyle.Sine), {BackgroundTransparency = 1}):Play()
+
 	local fadeOut = tweenService:Create(txtLabel, TweenInfo.new(0.7, Enum.EasingStyle.Sine), {TextTransparency = 1})
+	local shrink = tweenService:Create(txtLabel, TweenInfo.new(0.7, Enum.EasingStyle.Sine), {Size = UDim2.new(0, 0, 0, 0), Position = UDim2.new(0.5, 0, 0.5, 0)})
+	local fadeOutShadow = tweenService:Create(Shadow, TweenInfo.new(0.7, Enum.EasingStyle.Sine), {BackgroundTransparency = 1})
+
 	fadeOut:Play()
+	shrink:Play()
+	fadeOutShadow:Play()
+
 	fadeOut.Completed:Connect(function()
 		txtLabel:Destroy()
+		Shadow:Destroy()
 	end)
 end
 
@@ -10737,7 +10830,7 @@ NACaller(function()
 				{Text = "No", Callback = function() end}
 			}
 		})
-		task.wait(5)
+		task.wait(3)
 		DoNotif("Your Keybind Prefix: "..opt.prefix,10,adminName.." Keybind Prefix")
 		DoNotif('Added "updlog" command (displays any new changes added into '..adminName..')',nil,"Info")
 	end)
