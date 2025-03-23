@@ -3212,7 +3212,7 @@ cmd.add({"harked","comet"},{"harked (comet)","Executes Comet which is like harke
 end)
 
 cmd.add({"triggerbot", "tbot"}, {"triggerbot (tbot)", "Executes a script that automatically clicks the mouse when the mouse is on a player"}, function()
-    local ToggleKey = Enum.KeyCode.Q
+    local ToggleKey = Enum.KeyCode.Z
     local FieldOfView = 10
 
     local Players = game:GetService("Players")
@@ -3315,6 +3315,8 @@ cmd.add({"triggerbot", "tbot"}, {"triggerbot (tbot)", "Executes a script that au
             end
         end
     end)
+
+	On.Text = "TriggerBot On: " .. tostring(Toggled) .. " (Key: " .. ToggleKey.Name .. ")"
 
     DoNotif("Advanced Trigger Bot Loaded")
 end)
