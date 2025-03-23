@@ -778,7 +778,7 @@ function ESP(player)
 
 								local displayName = player.DisplayName == player.Name and '@' .. player.Name or player.DisplayName .. ' (@' .. player.Name .. ')'
 
-								textLabel.Text = string.format("%s\nHealth: %d/%d\nStuds: %d\nTeam: %s", displayName, health, maxHealth, distance, player.Team and player.Team.Name or "None")
+								textLabel.Text = string.format("%s | Health: %d/%d | Studs: %d | Team: %s", displayName, health, maxHealth, distance, player.Team and player.Team.Name or "None")
 								textLabel.TextColor3 = distance < 50 and Color3.fromRGB(255, 0, 0) or distance < 100 and Color3.fromRGB(255, 165, 0) or Color3.fromRGB(0, 255, 0)
 
 								highlight.FillColor = teamColor
@@ -9323,237 +9323,153 @@ cmd.add({"toolinvisible","tinvis"},{"toolinvisible (tinvis)","Be invisible while
 	)
 end)
 
-local invisBtnlol=nil
+local invisBtnlol = nil
 
-cmd.add({"invisible","invis"},{"invisible (invis)","Sets invisibility to scare people or something"},function()
-	Keybind="E"
+cmd.add({"invisible", "invis"}, {"invisible (invis)", "Sets invisibility to scare people or something"}, function()
+    local Keybind = "E"
+    local UIS = game:GetService("UserInputService")
+    local Player = game:GetService("Players").LocalPlayer
+    local Character = Player.Character or Player.CharacterAdded:Wait()
+    Character.Archivable = true
+    local InvisibleCharacter = Character:Clone()
+    InvisibleCharacter.Parent = game:GetService("Lighting")
+    local Void = game:GetService("Workspace").FallenPartsDestroyHeight
+    local IsInvis, invisRunning = false, false
+    local OriginalPosition
 
-	local CS=game:GetService("CollectionService")
-	local UIS=game:GetService("UserInputService")
+    local function getRoot(char)
+        return char:FindFirstChild("HumanoidRootPart")
+    end
 
-	if invisRunning then return end
-	invisRunning=true
-	--Full credit to AmokahFox @V3rmillion
-	local Player=game:GetService("Players").LocalPlayer
-	repeat wait(.1) until getChar()
-	local Character=getChar()
-	Character.Archivable=true
-	local IsInvis=false
-	local IsRunning=true
-	local InvisibleCharacter=Character:Clone()
-	InvisibleCharacter.Parent=game:GetService("Lighting")
-	local Void=game:GetService("Workspace").FallenPartsDestroyHeight
-	InvisibleCharacter.Name=""
-	local CF
+    local function MoveCharacterToSky()
+        local root = getRoot(Character)
+        if root then
+            OriginalPosition = root.CFrame
+            root.CFrame = CFrame.new(0, 10000, 0)
+        end
+    end
 
-	local invisFix=game:GetService("RunService").Stepped:Connect(function()
-		pcall(function()
-			local IsInteger
-			if tostring(Void):find'-' then
-				IsInteger=true
-			else
-				IsInteger=false
-			end
-			local Pos=getRoot(getChar()).Position
-			local Pos_String=tostring(Pos)
-			local Pos_Seperate=Pos_String:split(',')
-			local X=tonumber(Pos_Seperate[1])
-			local Y=tonumber(Pos_Seperate[2])
-			local Z=tonumber(Pos_Seperate[3])
-			if IsInteger==true then
-				if Y <=Void then
-					Respawn()
-				end
-			elseif IsInteger==false then
-				if Y >=Void then
-					Respawn()
-				end
-			end
-		end)
-	end)
+    local function PlaceInvisibleCloneOnGround()
+        local root = getRoot(InvisibleCharacter)
+        if root and OriginalPosition then
+            root.CFrame = OriginalPosition
+        end
+    end
 
-	for i,v in pairs(InvisibleCharacter:GetDescendants())do
-		if v:IsA("BasePart") then
-			if v.Name=="HumanoidRootPart" then
-				v.Transparency=1
-			else
-				v.Transparency=.5
-			end
-		end
-	end
+    local function Respawn()
+        invisRunning = false
+        if IsInvis then
+            Player.Character = Character
+            wait()
+            Character.Parent = game:GetService("Workspace")
+            Character:FindFirstChildWhichIsA("Humanoid"):Destroy()
+            IsInvis = false
+            InvisibleCharacter.Parent = nil
+        else
+            Player.Character = Character
+            wait()
+            Character.Parent = game:GetService("Workspace")
+            Character:FindFirstChildWhichIsA("Humanoid"):Destroy()
+        end
+    end
 
-	function Respawn()
-		IsRunning=false
-		if IsInvis==true then
-			pcall(function()
-				Player.Character=Character
-				wait()
-				Character.Parent=game:GetService("Workspace")
-				Character:FindFirstChildWhichIsA'Humanoid':Destroy()
-				IsInvis=false
-				InvisibleCharacter.Parent=nil
-				invisRunning=false
-			end)
-		elseif IsInvis==false then
-			pcall(function()
-				Player.Character=Character
-				wait()
-				Character.Parent=game:GetService("Workspace")
-				Character:FindFirstChildWhichIsA'Humanoid':Destroy()
-				TurnVisible()
-			end)
-		end
-	end
+    local invisFix = game:GetService("RunService").Stepped:Connect(function()
+        pcall(function()
+            if getRoot(Character).Position.Y <= Void then
+                Respawn()
+            end
+        end)
+    end)
 
-	local invisDied
-	invisDied=InvisibleCharacter:FindFirstChildOfClass'Humanoid'.Died:Connect(function()
-		Respawn()
-		invisDied:Disconnect()
-	end)
+    for _, v in pairs(InvisibleCharacter:GetDescendants()) do
+        if v:IsA("BasePart") then
+            v.Transparency = v.Name == "HumanoidRootPart" and 1 or 0.5
+        end
+    end
 
-	function TurnVisible()
-		if IsInvis==false then return end
-		invisFix:Disconnect()
-		invisDied:Disconnect()
-		CF=game:GetService("Workspace").CurrentCamera.CFrame
-		Character=Character
-		local CF_1=getRoot(Player.Character).CFrame
-		getRoot(character).CFrame=CF_1
-		InvisibleCharacter.Parent=game:GetService("Lighting")
-		Player.Character=Character
-		Character.Parent=game:GetService("Workspace")
-		IsInvis=false
-		Player.Character.Animate.Disabled=true
-		Player.Character.Animate.Disabled=false
-		invisDied=Character:FindFirstChildOfClass'Humanoid'.Died:Connect(function()
-			Respawn()
-			invisDied:Disconnect()
-		end)
-		invisRunning=false
-	end
+    local invisDied = InvisibleCharacter:FindFirstChildOfClass("Humanoid").Died:Connect(function()
+        Respawn()
+        invisDied:Disconnect()
+    end)
 
+    local function TurnVisible()
+        if not IsInvis then return end
+        invisFix:Disconnect()
+        invisDied:Disconnect()
+        local currentInvisiblePosition = getRoot(InvisibleCharacter).CFrame
+        InvisibleCharacter.Parent = game:GetService("Lighting")
+        Player.Character = Character
+        Character.Parent = game:GetService("Workspace")
+        getRoot(Character).CFrame = currentInvisiblePosition
+        IsInvis = false
+        Player.Character.Animate.Disabled = true
+        Player.Character.Animate.Disabled = false
+        invisDied = Character:FindFirstChildOfClass("Humanoid").Died:Connect(function()
+            Respawn()
+            invisDied:Disconnect()
+        end)
+        invisRunning = false
+    end
 
+    local function ToggleInvisibility()
+        if not IsInvis then
+            IsInvis = true
+            MoveCharacterToSky()
+            wait(0.5)
+            Character.Parent = game:GetService("Lighting")
+            InvisibleCharacter.Parent = game:GetService("Workspace")
+            PlaceInvisibleCloneOnGround()
+            Player.Character = InvisibleCharacter
+            game:GetService("Workspace").CurrentCamera.CameraSubject = InvisibleCharacter:FindFirstChildWhichIsA("Humanoid")
+        else
+            TurnVisible()
+        end
+    end
 
-	local CS=game:GetService("CollectionService")
-	local UIS=game:GetService("UserInputService")
+    UIS.InputBegan:Connect(function(input, gameProcessed)
+        if input.UserInputType == Enum.UserInputType.Keyboard and input.KeyCode == Enum.KeyCode.E and not gameProcessed then
+            ToggleInvisibility()
+        end
+    end)
 
-	UIS.InputBegan:Connect(function(input,gameProcessed)
-		if input.UserInputType==Enum.UserInputType.Keyboard then
-			if input.KeyCode==Enum.KeyCode.E and not gameProcessed then
-				if IsInvis==false then
-					IsInvis=true
-					CF=game:GetService("Workspace").CurrentCamera.CFrame
-					local CF_1=getRoot(getChar()).CFrame
-					Character:MoveTo(Vector3.new(0,math.pi*1000000,0))
-					game:GetService("Workspace").CurrentCamera.CameraType=Enum.CameraType.Scriptable
-					wait(.1)
-					game:GetService("Workspace").CurrentCamera.CameraType=Enum.CameraType.Custom
-					InvisibleCharacter=InvisibleCharacter
-					Character.Parent=game:GetService("Lighting")
-					InvisibleCharacter.Parent=game:GetService("Workspace")
-					InvisiblegetRoot(character).CFrame=CF_1
-					game:GetService("Players").LocalPlayer.Character=InvisibleCharacter
-					local workspace=game:GetService("Workspace")
-					Players=game:GetService("Players")
-					local speaker=game:GetService("Players").LocalPlayer
-					game:GetService("Workspace").CurrentCamera:remove()
-					wait(.1)
-					game:GetService("Workspace").CurrentCamera.CameraSubject=speaker.Character:FindFirstChildWhichIsA('Humanoid')
-					game:GetService("Workspace").CurrentCamera.CameraType="Custom"
-					game:GetService("Players").LocalPlayer.CameraMinZoomDistance=0.5
-					game:GetService("Players").LocalPlayer.CameraMaxZoomDistance=400
-					game:GetService("Players").LocalPlayer.CameraMode="Classic"
-					getChar():FindFirstChild("Head").Anchored=false
-					getChar().Animate.Disabled=true
-					getChar().Animate.Disabled=false
-				elseif IsInvis==true then
-					TurnVisible()
-					IsInvis=false
-				end
-			end
-		end
-	end)
+    if IsOnMobile then
+        if invisBtnlol then invisBtnlol:Destroy() invisBtnlol = nil end
+        invisBtnlol = Instance.new("ScreenGui")
+        local TextButton = Instance.new("TextButton")
+        local UICorner = Instance.new("UICorner")
+        local UIAspectRatioConstraint = Instance.new("UIAspectRatioConstraint")
 
-	wait();
+        invisBtnlol.Parent = game:GetService("CoreGui")
+        invisBtnlol.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+        invisBtnlol.ResetOnSpawn = false
 
-	DoNotif("Invisible loaded,press "..Keybind.." to toggle")
-	if IsOnMobile then 
-		wait();
+        TextButton.Parent = invisBtnlol
+        TextButton.BackgroundColor3 = Color3.fromRGB(12, 4, 20)
+        TextButton.BackgroundTransparency = 0.14
+        TextButton.Position = UDim2.new(0.9, 0, 0.8, 0)
+        TextButton.Size = UDim2.new(0.1, 0, 0.1, 0)
+        TextButton.Font = Enum.Font.SourceSansBold
+        TextButton.Text = "Invisible"
+        TextButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+        TextButton.TextSize = 15
+        TextButton.TextWrapped = true
+        TextButton.Active = true
+        TextButton.TextScaled = true
 
-		DoNotif(adminName.." has detected you using mobile you now have a invisible button click it to enable / disable invisibility")
+        UICorner.Parent = TextButton
+        UIAspectRatioConstraint.Parent = TextButton
+        UIAspectRatioConstraint.AspectRatio = 1.0
 
-		if invisBtnlol then invisBtnlol:Destroy() invisBtnlol=nil end
-		invisBtnlol=Instance.new("ScreenGui")
-		local TextButton=Instance.new("TextButton")
-		local UICorner=Instance.new("UICorner")
-		local UIAspectRatioConstraint=Instance.new("UIAspectRatioConstraint")
+        gui.draggable(TextButton)
 
-		--Properties:
-		invisBtnlol.Parent=COREGUI
-		invisBtnlol.ZIndexBehavior=Enum.ZIndexBehavior.Sibling
-		invisBtnlol.ResetOnSpawn=false
+        TextButton.MouseButton1Click:Connect(function()
+            ToggleInvisibility()
+            TextButton.Text = IsInvis and "Visible" or "Invisible"
+        end)
+    end
 
-		TextButton.Parent=invisBtnlol
-		TextButton.BackgroundColor3=Color3.fromRGB(12,4,20)
-		TextButton.BackgroundTransparency=0.140
-		TextButton.Position=UDim2.new(0.933,0,0.621,0)
-		TextButton.Size=UDim2.new(0.043,0,0.083,0)
-		TextButton.Font=Enum.Font.SourceSansBold
-		TextButton.Text="Invisible"
-		TextButton.TextColor3=Color3.fromRGB(255,255,255)
-		TextButton.TextSize=15.000
-		TextButton.TextWrapped=true
-		TextButton.Active=true
-		TextButton.Draggable=true
-		TextButton.TextScaled=true
-
-		UICorner.Parent=TextButton
-
-		UIAspectRatioConstraint.Parent=TextButton
-		UIAspectRatioConstraint.AspectRatio=1.060
-
-		--Scripts:
-
-		function FEPVI_fake_script()
-			IsInvis=false
-			TextButton.MouseButton1Click:Connect(function()
-				if IsInvis==false then
-					IsInvis=true
-					CF=game:GetService("Workspace").CurrentCamera.CFrame
-					local CF_1=getRoot(getChar()).CFrame
-					Character:MoveTo(Vector3.new(0,math.pi*1000000,0))
-					game:GetService("Workspace").CurrentCamera.CameraType=Enum.CameraType.Scriptable
-					wait(.1)
-					game:GetService("Workspace").CurrentCamera.CameraType=Enum.CameraType.Custom
-					InvisibleCharacter=InvisibleCharacter
-					Character.Parent=game:GetService("Lighting")
-					InvisibleCharacter.Parent=game:GetService("Workspace")
-					InvisiblegetRoot(character).CFrame=CF_1
-					Player.Character=InvisibleCharacter
-					local workspace=game:GetService("Workspace")
-					Players=game:GetService("Players")
-					local speaker=game:GetService("Players").LocalPlayer
-					game:GetService("Workspace").CurrentCamera:remove()
-					wait(.1)
-					game:GetService("Workspace").CurrentCamera.CameraSubject=speaker.Character:FindFirstChildWhichIsA('Humanoid')
-					game:GetService("Workspace").CurrentCamera.CameraType="Custom"
-					game:GetService("Players").LocalPlayer.CameraMinZoomDistance=0.5
-					game:GetService("Players").LocalPlayer.CameraMaxZoomDistance=400
-					game:GetService("Players").LocalPlayer.CameraMode="Classic"
-					getChar():FindFirstChild("Head").Anchored=false
-					getChar().Animate.Disabled=true
-					getChar().Animate.Disabled=false
-					TextButton.Text="Visible"
-				elseif IsInvis==true then
-					TurnVisible()
-					IsInvis=false
-					TextButton.Text="Invisible"
-				end
-			end)
-		end
-		coroutine.wrap(FEPVI_fake_script)()
-	else
-	end
+    wait()
+    DoNotif("Invisible loaded, press " .. Keybind .. " to toggle or use the mobile button.")
 end)
 
 cmd.add({"fireremotes", "fremotes", "frem"},{"fireremotes (fremotes, frem)","Fires every remote"},function()
