@@ -3746,17 +3746,6 @@ cmd.add({"synapsedex","sdex"},{"synapsedex (sdex)","Loads SynapseX's dex explore
 	Load(Dex)
 end)
 
-cmd.add({"unantikill"},{"unantikill","Makes exploiters to be able to kill you"},function()
-	Player.Character.Humanoid:SetStateEnabled("Seated",true)
-	Player.Character.Humanoid.Sit=false
-
-
-
-	wait();
-
-	DoNotif("Anti kill disabled")
-end)
-
 local af = false
 local afc = {}
 local partStates = {}
