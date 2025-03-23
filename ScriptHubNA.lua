@@ -2,6 +2,7 @@ local r = request or http_request or (syn and syn.request) or function() end
 local ts = game:GetService("TweenService")
 local uis = game:GetService("UserInputService")
 local http = game:GetService("HttpService")
+local engine = "ScriptBlox" -- current ones (RScripts, ScriptBlox)
 
 local c = {
     bg = Color3.fromRGB(30, 30, 35),
@@ -16,7 +17,7 @@ local c = {
 
 local sg = Instance.new("ScreenGui")
 sg.Name = "SBHub"
-sg.Parent = (game:GetService("CoreGui") or game:GetService("Players").LocalPlayer:FindFirstChild("PlayerGui"))
+sg.Parent = gethui and gethui() or (game:GetService("CoreGui") or game:GetService("Players").LocalPlayer:FindFirstChild("PlayerGui"))
 sg.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
 local m = Instance.new("Frame")
@@ -73,11 +74,27 @@ t.Size = UDim2.new(1, -120, 1, 0)
 t.Position = UDim2.new(0, 15, 0, 0)
 t.BackgroundTransparency = 1
 t.Font = Enum.Font.GothamBold
-t.Text = "Nameless Admin Script Hub - By ltseverydayyou"
+t.Text = "Script Hub - By @ltseverydayyou"
 t.TextColor3 = c.tx
 t.TextSize = 18
 t.TextXAlignment = Enum.TextXAlignment.Left
 t.Parent = tb
+
+local dd = Instance.new("TextButton")
+dd.Name = "DD"
+dd.Size = UDim2.new(0, 120, 0, 27)
+dd.Position = UDim2.new(1, -185, 0, 8)
+dd.BackgroundColor3 = c.sc
+dd.BorderSizePixel = 0
+dd.Font = Enum.Font.GothamSemibold
+dd.Text = "Engine: ScriptBlox"
+dd.TextColor3 = c.tx
+dd.TextScaled = true
+dd.Parent = tb
+
+local ddc = Instance.new("UICorner")
+ddc.CornerRadius = UDim.new(0, 6)
+ddc.Parent = dd
 
 local cb = Instance.new("ImageButton")
 cb.Name = "CB"
@@ -217,8 +234,20 @@ cb.MouseButton1Click:Connect(function()
     sg:Destroy()
 end)
 
+dd.MouseButton1Click:Connect(function()
+    if engine == "ScriptBlox" then
+        engine = "RScripts"
+        dd.Text = "Engine: RScripts"
+        stb.PlaceholderText = "Search for scripts (powered by rscripts.net)"
+    else
+        engine = "ScriptBlox"
+        dd.Text = "Engine: ScriptBlox"
+        stb.PlaceholderText = "Search for scripts (powered by scriptblox.com)"
+    end
+end)
+
 local function search(q)
-    local url = "https://www.scriptblox.com/api/script/search?q=" .. q
+    local url = engine == "ScriptBlox" and "https://www.scriptblox.com/api/script/search?q="..q or "https://rscripts.net/api/v2/scripts?page=1&orderBy=date&sort=desc&q="..q
     
     local success, response = pcall(function()
         return r({
@@ -237,7 +266,7 @@ local function search(q)
         el.BackgroundTransparency = 0.8
         el.BorderSizePixel = 0
         el.Font = Enum.Font.Gotham
-        el.Text = "Error making request: " .. tostring(response)
+        el.Text = "Error making request: "..tostring(response)
         el.TextColor3 = c.tx
         el.TextSize = 14
         el.Parent = sf
@@ -255,7 +284,7 @@ local function search(q)
         el.BackgroundTransparency = 0.8
         el.BorderSizePixel = 0
         el.Font = Enum.Font.Gotham
-        el.Text = "No response received from ScriptBlox"
+        el.Text = "No response received from "..engine
         el.TextColor3 = c.tx
         el.TextSize = 14
         el.Parent = sf
@@ -288,7 +317,8 @@ local function search(q)
         return
     end
     
-    if not decoded.result or not decoded.result.scripts or #decoded.result.scripts == 0 then
+    local scripts = engine == "ScriptBlox" and decoded.result.scripts or decoded.scripts
+    if not scripts or #scripts == 0 then
         local el = Instance.new("TextLabel")
         el.Size = UDim2.new(1, 0, 0, 30)
         el.BackgroundColor3 = c.wa
@@ -306,42 +336,15 @@ local function search(q)
         return
     end
     
-    local scripts = {}
-    for _, script in ipairs(decoded.result.scripts) do
-        if script.script and script.title then
-            table.insert(scripts, {
-                rawLink = script.script,
-                title = script.title,
-                key = script.key or false,
-                isUniversal = script.isUniversal or false,
-                isPatched = script.isPatched or false,
-                views = script.views or 0
-            })
-        end
-    end
-    
-    if #scripts == 0 then
-        local el = Instance.new("TextLabel")
-        el.Size = UDim2.new(1, 0, 0, 30)
-        el.BackgroundColor3 = c.wa
-        el.BackgroundTransparency = 0.8
-        el.BorderSizePixel = 0
-        el.Font = Enum.Font.Gotham
-        el.Text = "No valid scripts found"
-        el.TextColor3 = c.tx
-        el.TextSize = 14
-        el.Parent = sf
-        
-        local elc = Instance.new("UICorner")
-        elc.CornerRadius = UDim.new(0, 6)
-        elc.Parent = el
-        return
-    end
-    
     local totalHeight = 0
     for i, script in ipairs(scripts) do
+        local title = engine == "ScriptBlox" and script.title or script.title
+        local raw = engine == "ScriptBlox" and script.script or script.rawScript
+        local views = engine == "ScriptBlox" and script.views or script.views
+        local key = engine == "ScriptBlox" and script.key or script.keySystem
+
         local card = Instance.new("Frame")
-        card.Name = "Card" .. i
+        card.Name = "Card"..i
         card.Size = UDim2.new(1, 0, 0, 120)
         card.Position = UDim2.new(0, 0, 0, totalHeight)
         card.BackgroundColor3 = c.bg
@@ -352,24 +355,30 @@ local function search(q)
         cardc.CornerRadius = UDim.new(0, 6)
         cardc.Parent = card
         
-        local title = Instance.new("TextLabel")
-        title.Size = UDim2.new(1, -20, 0, 30)
-        title.Position = UDim2.new(0, 10, 0, 5)
-        title.BackgroundTransparency = 1
-        title.Font = Enum.Font.GothamBold
-        title.Text = script.title
-        title.TextColor3 = c.tx
-        title.TextSize = 14
-        title.TextXAlignment = Enum.TextXAlignment.Left
-        title.TextWrapped = true
-        title.Parent = card
+        local titleLabel = Instance.new("TextLabel")
+        titleLabel.Size = UDim2.new(1, -20, 0, 30)
+        titleLabel.Position = UDim2.new(0, 10, 0, 5)
+        titleLabel.BackgroundTransparency = 1
+        titleLabel.Font = Enum.Font.GothamBold
+        titleLabel.Text = title
+        titleLabel.TextColor3 = c.tx
+        titleLabel.TextSize = 14
+        titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+        titleLabel.TextWrapped = true
+        titleLabel.Parent = card
         
         local info = Instance.new("TextLabel")
         info.Size = UDim2.new(1, -20, 0, 40)
         info.Position = UDim2.new(0, 10, 0, 35)
         info.BackgroundTransparency = 1
         info.Font = Enum.Font.Gotham
-        info.Text = "Universal: " .. (script.isUniversal and "Yes" or "No") .. " | Key: " .. (script.key and "Yes" or "No") .. "\nPatched: " .. (script.isPatched and "Yes" or "No") .. " | Views: " .. script.views
+        if engine == "ScriptBlox" then
+            info.Text = "Universal: "..(script.isUniversal and "Yes" or "No").." | Key: "..(script.key and "Yes" or "No").."\nPatched: "..(script.isPatched and "Yes" or "No").." | Views: "..script.views
+        else
+            local discord = script.discord or "N/A"
+            info.Text = "Key: "..(key and "Yes" or "No").." | Views: "..views.."\nDiscord: "..discord.." | Mobile Compatible: "..(script.mobileReady and "Yes" or "No")
+        end
+        --info.Text = "Key: "..(key and "Yes" or "No").." | Views: "..views
         info.TextColor3 = c.td
         info.TextSize = 12
         info.TextXAlignment = Enum.TextXAlignment.Left
@@ -391,6 +400,7 @@ local function search(q)
         ebc.CornerRadius = UDim.new(0, 6)
         ebc.Parent = eb
         
+    if setclipboard then
         local cpb = Instance.new("TextButton")
         cpb.Name = "CPB"
         cpb.Size = UDim2.new(0, 100, 0, 30)
@@ -406,21 +416,59 @@ local function search(q)
         local cpbc = Instance.new("UICorner")
         cpbc.CornerRadius = UDim.new(0, 6)
         cpbc.Parent = cpb
-        
-        eb.MouseButton1Click:Connect(function()
-            pcall(function()
-                loadstring(script.rawLink)()
-            end)
-        end)
-        
+
         cpb.MouseButton1Click:Connect(function()
             pcall(function()
-                setclipboard(script.rawLink)
+                task.spawn(function()
+                    if engine == "ScriptBlox" then
+                        setclipboard(raw)
+                    else
+                        setclipboard(game:HttpGet(raw))();
+                    end
+                end)
                 cpb.Text = "Copied!"
                 wait(1)
                 cpb.Text = "Copy"
             end)
         end)
+    end
+        
+        eb.MouseButton1Click:Connect(function()
+            pcall(function()
+                if engine == "ScriptBlox" then
+                    loadstring(raw)()
+                else
+                    loadstring(game:HttpGet(raw))();
+                end
+            end)
+        end)
+
+        if script.discord and setclipboard then
+            local discordButton = Instance.new("TextButton")
+            discordButton.Name = "DiscordButton"
+            discordButton.Size = UDim2.new(0, 100, 0, 30)
+            discordButton.Position = UDim2.new(0, 240, 0, 80)
+            discordButton.BackgroundColor3 = Color3.new(11, 114, 224)
+            discordButton.BorderSizePixel = 0
+            discordButton.Font = Enum.Font.GothamSemibold
+            discordButton.Text = "Copy Discord"
+            discordButton.TextColor3 = c.tx
+            discordButton.TextSize = 14
+            discordButton.Parent = card
+        
+            local discordButtonCorner = Instance.new("UICorner")
+            discordButtonCorner.CornerRadius = UDim.new(0, 6)
+            discordButtonCorner.Parent = discordButton
+        
+            discordButton.MouseButton1Click:Connect(function()
+                pcall(function()
+                    setclipboard(script.discord)
+                    discordButton.Text = "Copied!"
+                    wait(1)
+                    discordButton.Text = "Copy Discord"
+                end)
+            end)
+        end
         
         totalHeight = totalHeight + 130
     end
@@ -448,11 +496,5 @@ sb.MouseButton1Click:Connect(function()
         local elc = Instance.new("UICorner")
         elc.CornerRadius = UDim.new(0, 6)
         elc.Parent = el
-    end
-end)
-
-stb.FocusLost:Connect(function(enterPressed)
-    if enterPressed then
-        sb.MouseButton1Click:Fire()
     end
 end)
