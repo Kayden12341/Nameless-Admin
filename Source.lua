@@ -136,9 +136,73 @@ local opt={
 }
 
 --[[ Update Logs ]]--
-local updLogs={}
+local updLogs = {
+    log1 = [[bubblechat (bchat) Command
+- Fixed after what felt like a whole decade :skull:
+- Added alias `unbubblechat (unbchat)` to disable it]],
 
-local updDate="3/10/2025" --month,day,year
+    log2 = [[r6/r15 Command
+- Reintroduced due to popular demand]],
+
+    log3 = [[toolinvisible (tinvis) Command
+- Fixed a bug that caused instant death upon equipping
+- Improved checks for better functionality]],
+
+    log4 = [[invisible (invis) Command
+- Fixed errors
+- Enhanced overall functionality]],
+
+    log5 = [[walkfling Command
+- Added checks to ensure walkfling is re-enabled when respawning
+- Improved checks to prevent breaking]],
+
+    log6 = [[fly/vFly Command
+- Added mobile support for vFly
+- The "fly" command no longer uses vFly (for PC users)]],
+
+    log7 = [[Added "usetools" Command
+- Equips and uses all of your tools at once
+- Checks for what tool you had equipped so it doesn't unequip it after running the command]],
+
+    log8 = [[antivoid Command
+- Improved checks]],
+
+    log9 = [[triggerbot Command
+- Fixed errors and issues
+- WIP mobile support]],
+
+    log10 = [[setspawn Command
+- Fixed errors
+- Added "disablespawn" (unsetspawn, ds) command to disable spawn point]],
+
+    log11 = [[loopfov Command
+- Improved the code to (NOW) force the FOV to the number you've entered]],
+
+    log12 = [[loopwalkspeed/loopjumppower Command
+- Improved the code to (NOW) force the speed/jumppower to the number you've entered]],
+
+    log13 = [[antifling Command
+- Improved to not force your character collision to false (making you noclip)]],
+
+    log14 = [[vehiclespeed Command
+- Fixed errors (honestly, I don't know what it's even useful for)]],
+
+    log15 = [[headsit Command
+- New way of headsit (a bit buggy but it's still WIP)
+- Making it 100% replicate to other clients since it used to make you get flung from other people's POV]],
+
+    log16 = [[WORK IN PROGRESS COMMAND EXECUTION ON TYPO
+- Includes a yes or no option to execute the command that you're suggested if you misspelled it]],
+
+    log17 = [[partname (partpath, partgrabber) Command
+- Reworked UI
+- More options]],
+
+    log18 = [[notepad Command
+- Reworked UI]]
+}
+
+local updDate="3/23/2025" --month,day,year
 
 --[[ VARIABLES ]]--
 
