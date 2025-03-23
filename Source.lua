@@ -9539,7 +9539,6 @@ cmd.add({"invisible", "invis"}, {"invisible (invis)", "Sets invisibility to scar
 
         invisBtnlol.Parent = game:GetService("CoreGui")
         invisBtnlol.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-        invisBtnlol.ResetOnSpawn = false
 
         TextButton.Parent = invisBtnlol
         TextButton.BackgroundColor3 = Color3.fromRGB(12, 4, 20)
