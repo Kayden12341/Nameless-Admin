@@ -10950,7 +10950,6 @@ local ImageButton = Instance.new("ImageButton")
 local UICorner2 = Instance.new("UICorner")
 local UIGradient = Instance.new("UIGradient")
 local Shadow = Instance.new("Frame")
-local Glow = Instance.new("ImageLabel")
 
 Shadow.Parent = ScreenGui
 Shadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
@@ -10959,16 +10958,6 @@ Shadow.AnchorPoint = Vector2.new(0.5, 0.5)
 Shadow.Position = UDim2.new(0.5, 0, 0.5, 5)
 Shadow.Size = UDim2.new(0, 2, 0, 33)
 Shadow.ZIndex = 9998
-
-Glow.Parent = ScreenGui
-Glow.AnchorPoint = Vector2.new(0.5, 0)
-Glow.BackgroundTransparency = 1
-Glow.Position = UDim2.new(0.5, 0, -0.2, 0)
-Glow.Size = UDim2.new(0, 60, 0, 60)
-Glow.Image = "rbxassetid://5028857084"
-Glow.ImageColor3 = Color3.fromRGB(0, 170, 255)
-Glow.ImageTransparency = 0.5
-Glow.ZIndex = 9998
 
 TextLabel.Parent = ScreenGui
 TextLabel.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
@@ -11048,7 +11037,6 @@ function mainNameless()
 		Swoosh()
 	else
 		ImageButton:Destroy()
-		Glow:Destroy()
 	end
 
 	wait(2)
