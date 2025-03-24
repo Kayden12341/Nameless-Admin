@@ -1,5 +1,7 @@
 if getgenv().RealNamelessLoaded then return end
 
+local req = request or http_request or (syn and syn.request) or function() end
+
 function NACaller(pp)--helps me log better
 	local s,err=pcall(pp)
 	if not s then print("NA script err: "..err) end
@@ -55,7 +57,9 @@ end
 
 local GetService=game.GetService
 local iamcore=gethui()
+
 NA_storage=Instance.new("ScreenGui")--Stupid Ahh script removing folders
+
 if not game:IsLoaded() then
 	local waiting=Instance.new("Message")
 	waiting.Parent=iamcore
@@ -63,13 +67,19 @@ if not game:IsLoaded() then
 	game.Loaded:Wait()
 	waiting:Destroy()
 end
+
+local githubUrl = ''
 local loader=''
 local NAimageButton=nil
+
 if getgenv().NATestingVer then
 	loader=[[loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/Nameless-Admin/main/NA%20testing.lua"))();]]
+	githubUrl="https://api.github.com/repos/ltseverydayyou/Nameless-Admin/commits?path=NA%20testing.lua"
 else
 	loader=[[loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/Nameless-Admin/main/Source.lua"))();]]
+	githubUrl="https://api.github.com/repos/ltseverydayyou/Nameless-Admin/commits?path=Source.lua"
 end
+
 local queueteleport=(syn and syn.queue_on_teleport) or queue_on_teleport or (fluxus and fluxus.queue_on_teleport) or function() end
 
 --Notification library
@@ -156,72 +166,31 @@ local opt={
 
 --[[ Update Logs ]]--
 local updLogs = {
-    log1 = [[bubblechat (bchat) Command
-- Fixed after what felt like a whole decade :skull:
-- Added alias `unbubblechat (unbchat)` to disable it]],
+    log1 = [[Fixed `bubblechat (bchat)` after what felt like a whole decade 💀
+- Added alias `unbubblechat (unbchat)` to disable it]];
 
-    log2 = [[r6/r15 Command
-- Reintroduced due to popular demand]],
+    log2 = [[Added the command `guiscale (guisize, gsize, gscale)` to scale the NA button (and it saves the size upon loading the script again)
+	- it's for mobile users ONLY]];
 
-    log3 = [[toolinvisible (tinvis) Command
-- Fixed a bug that caused instant death upon equipping
-- Improved checks for better functionality]],
-
-    log4 = [[invisible (invis) Command
-- Fixed errors
-- Enhanced overall functionality]],
-
-    log5 = [[walkfling Command
-- Added checks to ensure walkfling is re-enabled when respawning
-- Improved checks to prevent breaking]],
-
-    log6 = [[fly/vFly Command
-- Added mobile support for vFly
-- The "fly" command no longer uses vFly (for PC users)]],
-
-    log7 = [[Added "usetools" Command
-- Equips and uses all of your tools at once
-- Checks for what tool you had equipped so it doesn't unequip it after running the command]],
-
-    log8 = [[antivoid Command
-- Improved checks]],
-
-    log9 = [[triggerbot Command
-- Fixed errors and issues
-- WIP mobile support]],
-
-    log10 = [[setspawn Command
-- Fixed errors
-- Added "disablespawn" (unsetspawn, ds) command to disable spawn point]],
-
-    log11 = [[loopfov Command
-- Improved the code to (NOW) force the FOV to the number you've entered]],
-
-    log12 = [[loopwalkspeed/loopjumppower Command
-- Improved the code to (NOW) force the speed/jumppower to the number you've entered]],
-
-    log13 = [[antifling Command
-- Improved to not force your character collision to false (making you noclip)]],
-
-    log14 = [[vehiclespeed Command
-- Fixed errors (honestly, I don't know what it's even useful for)]],
-
-    log15 = [[headsit Command
-- New way of headsit (a bit buggy but it's still WIP)
-- Making it 100% replicate to other clients since it used to make you get flung from other people's POV]],
-
-    log16 = [[WORK IN PROGRESS COMMAND EXECUTION ON TYPO
-- Includes a yes or no option to execute the command that you're suggested if you misspelled it]],
-
-    log17 = [[partname (partpath, partgrabber) Command
-- Reworked UI
-- More options]],
-
-    log18 = [[notepad Command
-- Reworked UI]]
+	log3 = [[Fixed issues with `invisible` command being visible to others]];
 }
 
-local updDate="3/23/2025" --month,day,year
+local updDate="unknown" --month,day,year
+
+pcall(function()
+	local response = req({
+		Url = githubUrl,
+		Method = "GET"
+	})
+
+	if response and response.StatusCode == 200 then
+		local json = game:GetService("HttpService"):JSONDecode(response.Body)
+		if json and json[1] and json[1].commit and json[1].commit.author and json[1].commit.author.date then
+			local year, month, day = json[1].commit.author.date:match("(%d+)-(%d+)-(%d+)")
+			updDate = month .. "/" .. day .. "/" .. year
+		end
+	end
+end)
 
 --[[ VARIABLES ]]--
 
@@ -328,40 +297,6 @@ local msg={
 	"G'day";
 	"Bonjour";
 	"Ciao";
-}
-
---[[ Goofy Text ]]--
-local Goofer={
-	"Egg";
-	"i am a goofy goober";
-	"mmmm lasagna";
-	"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-	"i am wondering if i even have a life";
-	"[REDACTED]";
-	"hey guys welcome to another video";
-	"⚠️⚠️⚠️";
-	":-(";
-	"(╯°□°)╯︵ ┻━┻";
-	"freaky";
-	"unreal";
-	"💀💀💀";
-	"X_X";
-	"not bothered to add a message here";
-	"bruh moment";
-	"yeet";
-	"no cap fr fr";
-	"sus";
-	"vibing in the ritz car";
-	"keyboard go brrrrr";
-	"404: brain not found";
-	"loading personality.exe";
-	"oof size large";
-	"this ain't it chief";
-	"weird flex but ok";
-	"poggers";
-	"sheeeesh";
-	"i forgor 💀";
-	"touch grass";
 }
 
 --[[ Prediction ]]--
@@ -615,10 +550,6 @@ end
 
 function rngMsg()
 	return msg[math.random(1,#msg)]
-end
-
-function goof()
-	return Goofer[math.random(1,#Goofer)]
 end
 
 function getRoot(char)
@@ -11087,7 +11018,6 @@ NACaller(function()
 		else
 			DoNotif("Welcome to "..adminName.." V"..curVer.."\nUpdated On: "..updDate.."\nTime Taken To Load: "..loadedResults(NAresult),6,rngMsg().." "..hh)
 		end
-		--DoNotif(goof(),4,"Random Goofy Message")
 		Notify({
 			Title = "Would you like to enabled QueueOnTeleport?",
 			Description = "With QueueOnTeleport "..adminName.." will automatically execute itself upon teleporting to a game or place.",
