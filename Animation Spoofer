@@ -219,23 +219,33 @@ local function createAnimationButton(id)
     return button
 end
 
-local function setupDragging()
-    local dragging = false
+NAdrag=function(ui, dragui)
+    if not dragui then dragui = ui end
+    local UserInputService = game:GetService("UserInputService")
+
+    local dragging
     local dragInput
     local dragStart
     local startPos
-    
-    local function updateDrag(input)
+
+    local function update(input)
         local delta = input.Position - dragStart
-        mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-    end
+        local newXOffset = startPos.X.Offset + delta.X
+        local newYOffset = startPos.Y.Offset + delta.Y
+        
+        local screenSize = ui.Parent.AbsoluteSize
+        local newXScale = startPos.X.Scale + (newXOffset / screenSize.X)
+        local newYScale = startPos.Y.Scale + (newYOffset / screenSize.Y)
     
-    topbar.InputBegan:Connect(function(input)
+        ui.Position = UDim2.new(newXScale, 0, newYScale, 0)
+    end
+
+    dragui.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             dragging = true
             dragStart = input.Position
-            startPos = mainFrame.Position
-            
+            startPos = ui.Position
+
             input.Changed:Connect(function()
                 if input.UserInputState == Enum.UserInputState.End then
                     dragging = false
@@ -243,18 +253,19 @@ local function setupDragging()
             end)
         end
     end)
-    
-    topbar.InputChanged:Connect(function(input)
+
+    dragui.InputChanged:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
             dragInput = input
         end
     end)
-    
+
     UserInputService.InputChanged:Connect(function(input)
         if input == dragInput and dragging then
-            updateDrag(input)
+            update(input)
         end
     end)
+    ui.Active=true
 end
 
 local function setupButtonEffects()
@@ -326,7 +337,7 @@ exitButton.MouseButton1Click:Connect(function()
     screenGui:Destroy()
 end)
 
-setupDragging()
+NAdrag(mainFrame)
 setupButtonEffects()
 setupSearchBar()
 setupMinimizeButton()
