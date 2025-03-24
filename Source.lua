@@ -264,12 +264,12 @@ local Watch=false
 local Admin={}
 CoreGui=COREGUI;
 _G.NAadminsLol={
-	530829101;--Viper
-	229501685;--legshot
-	817571515;--Aimlock
-	144324719;--Cosmic
-	1844177730;--glexinator
-	2624269701;--Akim
+	530829101; --Viper
+	229501685; --legshot
+	817571515; --Aimlock
+	144324719; --Cosmic
+	1844177730; --glexinator
+	2624269701; --Akim
 	2502806181; -- null
 	1594235217; -- Purple
 	1620986547; -- pc alt
@@ -1398,7 +1398,7 @@ end)
 
 if IsOnMobile then
 	local scaleFrame = nil
-	cmd.add({"guiscale", "guisize", "gsize", "gscale"}, {"guiscale (guisize, gsize, gscale)", "Adjust the scale of the NAimageButton"}, function()
+	cmd.add({"guiscale", "guisize", "gsize", "gscale"}, {"guiscale (guisize, gsize, gscale)", "Adjust the scale of the "..adminName.." button"}, function()
 		if scaleFrame then scaleFrame:Destroy() scaleFrame=nil end
 		scaleFrame = Instance.new("ScreenGui")
 		local frame = Instance.new("Frame")
@@ -1421,7 +1421,6 @@ if IsOnMobile then
 		frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 		frame.Size = UDim2.new(0, 400, 0, 120)
 		frame.Position = UDim2.new(0.5,-283/2+5,0.5,-260/2+5)
-		frame.AnchorPoint = Vector2.new(0.5, 0.5)
 		frame.BorderSizePixel = 0
 		frame.BackgroundTransparency = 0.05
 	
@@ -10380,7 +10379,14 @@ gui.draggable=function(ui, dragui)
 
 	local function update(input)
 		local delta = input.Position - dragStart
-		ui.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+		local newXOffset = startPos.X.Offset + delta.X
+		local newYOffset = startPos.Y.Offset + delta.Y
+		
+		local screenSize = ui.Parent.AbsoluteSize
+		local newXScale = startPos.X.Scale + (newXOffset / screenSize.X)
+		local newYScale = startPos.Y.Scale + (newYOffset / screenSize.Y)
+	
+		ui.Position = UDim2.new(newXScale, 0, newYScale, 0)
 	end
 
 	dragui.InputBegan:Connect(function(input)
@@ -10984,9 +10990,10 @@ Info.AnchorPoint = Vector2.new(0, 1)
 Info.Position = UDim2.new(0, 10, 1, -10)
 Info.Size = UDim2.new(0, 200, 0, 20)
 Info.Font = Enum.Font.Gotham
-Info.Text = adminName.." V"..curVer.."\n"..dadojadoqwdqwd
+Info.Text = adminName.." V"..curVer.."\n"..dadojadoqwdqwd.."\ndiscord.gg/zS7TpV3p64"
 Info.TextColor3 = Color3.fromRGB(255, 255, 255)
 Info.TextTransparency = 0.5
+Info.RichText = true
 Info.TextSize = 14
 Info.TextXAlignment = Enum.TextXAlignment.Left
 Info.ZIndex = 9999
