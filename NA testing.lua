@@ -1429,7 +1429,7 @@ if IsOnMobile then
 		local closeButton = Instance.new("TextButton")
 		local closeCorner = Instance.new("UICorner")
 	
-		local sizeRange = {0.5, 3}
+		local sizeRange = {0, 3}
 		local minSize, maxSize = sizeRange[1], sizeRange[2]
 	
 		scaleFrame.Parent = CoreGui
@@ -1506,12 +1506,17 @@ if IsOnMobile then
 		update(NAScale)
 	
 		local dragging = false
+		local dragInput
+		local sliderStart, sliderWidth
+	
 		local UserInputService = game:GetService("UserInputService")
 		local RunService = game:GetService("RunService")
 	
 		knob.InputBegan:Connect(function(input)
 			if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
 				dragging = true
+				sliderStart = slider.AbsolutePosition.X
+				sliderWidth = slider.AbsoluteSize.X
 			end
 		end)
 	
@@ -1524,11 +1529,9 @@ if IsOnMobile then
 			end
 		end)
 	
-		RunService.RenderStepped:Connect(function()
-			if dragging then
-				local mouseX = UserInputService:GetMouseLocation().X
-				local sliderStart = slider.AbsolutePosition.X
-				local sliderWidth = slider.AbsoluteSize.X
+		UserInputService.InputChanged:Connect(function(input)
+			if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+				local mouseX = input.Position.X
 				local newScale = math.clamp((mouseX - sliderStart) / sliderWidth, 0, 1) * (maxSize - minSize) + minSize
 				NAScale = newScale
 				update(NAScale)
@@ -1539,7 +1542,38 @@ if IsOnMobile then
 			scaleFrame:Destroy()
 		end)
 	
-		gui.draggable(frame)
+		local function draggable(ui)
+			local dragging, dragInput, dragStart, startPos
+			local function update(input)
+				local delta = input.Position - dragStart
+				ui.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+			end
+			ui.InputBegan:Connect(function(input)
+				if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+					dragging = true
+					dragStart = input.Position
+					startPos = ui.Position
+					input.Changed:Connect(function()
+						if input.UserInputState == Enum.UserInputState.End then
+							dragging = false
+						end
+					end)
+				end
+			end)
+			ui.InputChanged:Connect(function(input)
+				if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+					dragInput = input
+				end
+			end)
+			UserInputService.InputChanged:Connect(function(input)
+				if input == dragInput and dragging then
+					update(input)
+				end
+			end)
+			ui.Active = true
+		end
+	
+		draggable(frame)
 	end)
 end
 
