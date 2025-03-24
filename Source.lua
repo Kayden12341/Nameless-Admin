@@ -64,6 +64,7 @@ if not game:IsLoaded() then
 	waiting:Destroy()
 end
 local loader=''
+local NAimageButton=nil
 if getgenv().NATestingVer then
 	loader=[[loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/Nameless-Admin/main/NA%20testing.lua"))();]]
 else
@@ -107,27 +108,43 @@ local FileSupport=isfile and isfolder and writefile and readfile and makefolder;
 
 --Creates folder & files for Prefix & Plugins
 if FileSupport then
-	if not isfolder('Nameless-Admin') then
-		makefolder('Nameless-Admin')
-	else
-	end
+    if not isfolder("Nameless-Admin") then
+        makefolder("Nameless-Admin")
+    end
 
-	if not isfile("Nameless-Admin/Prefix.txt") then
-		writefile("Nameless-Admin/Prefix.txt",';')
-	else
-	end
+    if not isfile("Nameless-Admin/Prefix.txt") then
+        writefile("Nameless-Admin/Prefix.txt", ";")
+    end
+
+    if not isfile("Nameless-Admin/ImageButtonSize.txt") then
+        writefile("Nameless-Admin/ImageButtonSize.txt", "1")
+    end
 end
-local prefixCheck=";"
+
+local prefixCheck = ";"
+local NAScale = 1
+
 if FileSupport then
-	prefixCheck=readfile("Nameless-Admin/Prefix.txt",';')
-	if prefixCheck:match("[a-zA-Z0-9]") then
-		prefixCheck=";"
-		writefile("Nameless-Admin/Prefix.txt",';')
-		DoNotif("Your prefix has been reset to the default (;) because it contained letters or numbers")
-	end
+    prefixCheck = readfile("Nameless-Admin/Prefix.txt")
+    NAsavedScale = tonumber(readfile("Nameless-Admin/ImageButtonSize.txt"))
+
+    if prefixCheck:match("[a-zA-Z0-9]") then
+        prefixCheck = ";"
+        writefile("Nameless-Admin/Prefix.txt", ";")
+        DoNotif("Your prefix has been reset to the default (;) because it contained letters or numbers")
+    end
+
+    if NAsavedScale and NAsavedScale > 0 then
+        NAScale = NAsavedScale
+    else
+        NAScale = 1
+        writefile("Nameless-Admin/ImageButtonSize.txt", "1")
+        DoNotif("ImageButton size has been reset to default due to invalid data.")
+    end
 else
-	prefixCheck=";"
-	DoNotif("Your exploit does not support read/write file")
+    prefixCheck = ";"
+    NAScale = 1
+    DoNotif("Your exploit does not support read/write file")
 end
 --[[ PREFIX AND OTHER STUFF. ]]--
 local opt={
@@ -482,8 +499,14 @@ cmd.run = function(args)
 							{
 								Text = "Submit",
 								Callback = function(input)
-									local parsedArguments = ParseArguments(input)
-									commandFunc(unpack(parsedArguments))
+									task.spawn(function()
+										local parsedArguments = ParseArguments(input)
+										if parsedArguments then
+											commandFunc(unpack(parsedArguments))
+										else
+											commandFunc()
+										end
+									end)
 								end
 							},
 							{
@@ -1372,6 +1395,171 @@ end,true)
 cmd.add({"executor","exec"},{"executor (exec)","Very simple executor"},function()
 	loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/Nameless-Admin/main/NAexecutor.lua"))()
 end)
+
+if IsOnMobile then
+	local scaleFrame = nil
+	cmd.add({"guiscale", "guisize", "gsize", "gscale"}, {"guiscale (guisize, gsize, gscale)", "Adjust the scale of the NAimageButton"}, function()
+		if scaleFrame then scaleFrame:Destroy() scaleFrame=nil end
+		scaleFrame = Instance.new("ScreenGui")
+		local frame = Instance.new("Frame")
+		local frameCorner = Instance.new("UICorner")
+		local slider = Instance.new("Frame")
+		local sliderCorner = Instance.new("UICorner")
+		local progress = Instance.new("Frame")
+		local progressCorner = Instance.new("UICorner")
+		local knob = Instance.new("TextButton")
+		local knobCorner = Instance.new("UICorner")
+		local label = Instance.new("TextLabel")
+		local closeButton = Instance.new("TextButton")
+		local closeCorner = Instance.new("UICorner")
+	
+		local sizeRange = {0.5, 3}
+		local minSize, maxSize = sizeRange[1], sizeRange[2]
+	
+		scaleFrame.Parent = CoreGui
+		frame.Parent = scaleFrame
+		frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+		frame.Size = UDim2.new(0, 400, 0, 120)
+		frame.Position = UDim2.new(0.5,-283/2+5,0.5,-260/2+5)
+		frame.AnchorPoint = Vector2.new(0.5, 0.5)
+		frame.BorderSizePixel = 0
+		frame.BackgroundTransparency = 0.05
+	
+		frameCorner.CornerRadius = UDim.new(0.1, 0)
+		frameCorner.Parent = frame
+	
+		slider.Parent = frame
+		slider.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+		slider.Size = UDim2.new(0.8, 0, 0.2, 0)
+		slider.Position = UDim2.new(0.1, 0, 0.5, 0)
+		slider.AnchorPoint = Vector2.new(0, 0.5)
+		slider.BorderSizePixel = 0
+	
+		sliderCorner.CornerRadius = UDim.new(0.5, 0)
+		sliderCorner.Parent = slider
+	
+		progress.Parent = slider
+		progress.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+		progress.Size = UDim2.new((NAScale - minSize) / (maxSize - minSize), 0, 1, 0)
+		progress.BorderSizePixel = 0
+	
+		progressCorner.CornerRadius = UDim.new(0.5, 0)
+		progressCorner.Parent = progress
+	
+		knob.Parent = slider
+		knob.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		knob.Size = UDim2.new(0, 25, 1.5, 0)
+		knob.Position = UDim2.new((NAScale - minSize) / (maxSize - minSize), 0, -0.25, 0)
+		knob.Text = ""
+		knob.BorderSizePixel = 0
+		knob.AutoButtonColor = false
+	
+		knobCorner.CornerRadius = UDim.new(1, 0)
+		knobCorner.Parent = knob
+	
+		label.Parent = frame
+		label.BackgroundTransparency = 1
+		label.Size = UDim2.new(1, 0, 0.3, 0)
+		label.Position = UDim2.new(0, 0, 0.1, 0)
+		label.Text = "Scale: " .. string.format("%.2f", NAScale)
+		label.TextColor3 = Color3.fromRGB(255, 255, 255)
+		label.Font = Enum.Font.Gotham
+		label.TextSize = 18
+		label.TextXAlignment = Enum.TextXAlignment.Center
+	
+		closeButton.Parent = frame
+		closeButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+		closeButton.Size = UDim2.new(0, 30, 0, 30)
+		closeButton.Position = UDim2.new(1, -40, 0, 10)
+		closeButton.Text = "X"
+		closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+		closeButton.Font = Enum.Font.Gotham
+		closeButton.TextSize = 14
+		closeButton.BorderSizePixel = 0
+	
+		closeCorner.CornerRadius = UDim.new(0.5, 0)
+		closeCorner.Parent = closeButton
+	
+		local function update(scale)
+			NAimageButton.Size = UDim2.new(0, 32 * scale, 0, 33 * scale)
+			progress.Size = UDim2.new((scale - minSize) / (maxSize - minSize) + 0.05, 0, 1, 0)
+			knob.Position = UDim2.new((scale - minSize) / (maxSize - minSize), 0, -0.25, 0)
+			label.Text = "Scale: " .. string.format("%.2f", scale)
+		end
+	
+		update(NAScale)
+	
+		local dragging = false
+		local dragInput
+		local sliderStart, sliderWidth
+	
+		local UserInputService = game:GetService("UserInputService")
+		local RunService = game:GetService("RunService")
+	
+		knob.InputBegan:Connect(function(input)
+			if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+				dragging = true
+				sliderStart = slider.AbsolutePosition.X
+				sliderWidth = slider.AbsoluteSize.X
+				input.Changed:Connect(function()
+					if input.UserInputState == Enum.UserInputState.End then
+						dragging = false
+						if FileSupport then
+							writefile("Nameless-Admin/ImageButtonSize.txt", tostring(NAScale))
+						end
+					end
+				end)
+			end
+		end)
+		
+		UserInputService.InputChanged:Connect(function(input)
+			if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+				local mouseX = input.Position.X
+				local relativePosition = (mouseX - sliderStart) / sliderWidth
+				local newScale = math.clamp(relativePosition, 0, 1) * (maxSize - minSize) + minSize
+				NAScale = math.clamp(newScale, minSize, maxSize)
+				update(NAScale)
+			end
+		end)
+	
+		closeButton.MouseButton1Click:Connect(function()
+			scaleFrame:Destroy()
+		end)
+	
+		local function draggable(ui)
+			local dragging, dragInput, dragStart, startPos
+			local function update(input)
+				local delta = input.Position - dragStart
+				ui.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+			end
+			ui.InputBegan:Connect(function(input)
+				if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+					dragging = true
+					dragStart = input.Position
+					startPos = ui.Position
+					input.Changed:Connect(function()
+						if input.UserInputState == Enum.UserInputState.End then
+							dragging = false
+						end
+					end)
+				end
+			end)
+			ui.InputChanged:Connect(function(input)
+				if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+					dragInput = input
+				end
+			end)
+			UserInputService.InputChanged:Connect(function(input)
+				if input == dragInput and dragging then
+					update(input)
+				end
+			end)
+			ui.Active = true
+		end
+	
+		draggable(frame)
+	end)
+end
 
 cmd.add({"scripthub","hub"},{"scripthub (hub)","Thanks to scriptblox api"},function()
 	loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/Nameless-Admin/main/ScriptHubNA.lua"))()
@@ -9478,7 +9666,7 @@ cmd.add({"invisible", "invis"}, {"invisible (invis)", "Sets invisibility to scar
     local Keybind = Enum.KeyCode.E
     local UIS = game:GetService("UserInputService")
     local Player = game:GetService("Players").LocalPlayer
-    local Character = getChar() or Player.CharacterAdded:Wait()
+    local Character = Player.Character or Player.CharacterAdded:Wait()
     Character.Archivable = true
 	OriginalPosition = getRoot(Character).CFrame
 
@@ -9515,15 +9703,16 @@ cmd.add({"invisible", "invis"}, {"invisible (invis)", "Sets invisibility to scar
                     v.Transparency = v.Name:lower() == "humanoidrootpart" and 1 or 0.5
                 end
             end
-            local _, root = getRoot(Character)
+            local root = getRoot(Character)
             if root then
+				print("found root")
                 OriginalPosition = root.CFrame
                 root.CFrame = CFrame.new(0, 10000, 0)
             end
             wait(0.5)
             Character.Parent = game:GetService("Lighting")
             if OriginalPosition then
-                local _, invisRoot = getRoot(InvisibleCharacter)
+                local invisRoot = getRoot(InvisibleCharacter)
                 if invisRoot then
                     invisRoot.CFrame = OriginalPosition
                 end
@@ -10807,9 +10996,11 @@ ImageButton.AnchorPoint = Vector2.new(0.5, 0)
 ImageButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 ImageButton.BorderSizePixel = 0
 ImageButton.Position = UDim2.new(0.5, 0, -0.2, 0)
-ImageButton.Size = UDim2.new(0, 40, 0, 40)
+ImageButton.Size = UDim2.new(0, 32 * NAScale, 0, 33 * NAScale)
 ImageButton.Image = "rbxassetid://18567102564"
 ImageButton.ZIndex = 9999
+
+NAimageButton=ImageButton
 
 UICorner.CornerRadius = UDim.new(0.5, 0)
 UICorner.Parent = ImageButton
@@ -10824,8 +11015,8 @@ UIGradient.Color = ColorSequence.new{
 }
 
 function Swoosh()
-	ImageButton:TweenPosition(UDim2.new(0.5, 0, 0.05, 0), "Out", "Quint", 2, true)
-	ImageButton:TweenSize(UDim2.new(0, 45, 0, 45), "Out", "Quint", 2, true)
+	ImageButton:TweenPosition(UDim2.new(0.5, 0, 0, 0), "Out", "Quint", 2, true)
+	ImageButton:TweenSize(UDim2.new(0, 32 * NAScale, 0, 33 * NAScale), "Out", "Quint", 2, true)
 
 	local tweenService = game:GetService("TweenService")
 	local rotationTween = tweenService:Create(ImageButton, TweenInfo.new(3, Enum.EasingStyle.Quint), {Rotation = 720})

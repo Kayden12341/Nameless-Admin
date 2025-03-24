@@ -1429,7 +1429,7 @@ if IsOnMobile then
 		local closeButton = Instance.new("TextButton")
 		local closeCorner = Instance.new("UICorner")
 	
-		local sizeRange = {0, 3}
+		local sizeRange = {0.5, 3}
 		local minSize, maxSize = sizeRange[1], sizeRange[2]
 	
 		scaleFrame.Parent = CoreGui
@@ -1533,7 +1533,7 @@ if IsOnMobile then
 				local mouseX = input.Position.X
 				local relativePosition = (mouseX - sliderStart) / sliderWidth
 				local newScale = math.clamp(relativePosition, 0, 1) * (maxSize - minSize) + minSize
-				NAScale = math.clamp(newScale, minSize, maxSize) -- Ensure NAScale stays within the range
+				NAScale = math.clamp(newScale, minSize, maxSize)
 				update(NAScale)
 			end
 		end)
@@ -9682,7 +9682,7 @@ cmd.add({"invisible", "invis"}, {"invisible (invis)", "Sets invisibility to scar
     local Keybind = Enum.KeyCode.E
     local UIS = game:GetService("UserInputService")
     local Player = game:GetService("Players").LocalPlayer
-    local Character = getChar() or Player.CharacterAdded:Wait()
+    local Character = Player.Character or Player.CharacterAdded:Wait()
     Character.Archivable = true
 	OriginalPosition = getRoot(Character).CFrame
 
@@ -9719,15 +9719,16 @@ cmd.add({"invisible", "invis"}, {"invisible (invis)", "Sets invisibility to scar
                     v.Transparency = v.Name:lower() == "humanoidrootpart" and 1 or 0.5
                 end
             end
-            local _, root = getRoot(Character)
+            local root = getRoot(Character)
             if root then
+				print("found root")
                 OriginalPosition = root.CFrame
                 root.CFrame = CFrame.new(0, 10000, 0)
             end
             wait(0.5)
             Character.Parent = game:GetService("Lighting")
             if OriginalPosition then
-                local _, invisRoot = getRoot(InvisibleCharacter)
+                local invisRoot = getRoot(InvisibleCharacter)
                 if invisRoot then
                     invisRoot.CFrame = OriginalPosition
                 end
