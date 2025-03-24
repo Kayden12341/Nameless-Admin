@@ -32,6 +32,7 @@ else
     NotifGui.Name = "EnhancedNotif"
     NotifGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     NotifGui.Parent = search
+    NotifGui.DisplayOrder = 9999
     
     Container = Instance.new("Frame")
     Container.Name = "Container"
