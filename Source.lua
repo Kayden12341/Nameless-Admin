@@ -9704,7 +9704,6 @@ cmd.add({"invisible", "invis"}, {"invisible (invis)", "Sets invisibility to scar
             end
             local root = getRoot(Character)
             if root then
-				print("found root")
                 OriginalPosition = root.CFrame
                 root.CFrame = CFrame.new(0, 10000, 0)
             end
