@@ -1520,20 +1520,28 @@ if IsOnMobile then
 			end
 		end)
 	
-		knob.InputEnded:Connect(function(input)
+		knob.InputBegan:Connect(function(input)
 			if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-				dragging = false
-				if FileSupport then
-					writefile("Nameless-Admin/ImageButtonSize.txt", tostring(NAScale))
-				end
+				dragging = true
+				sliderStart = slider.AbsolutePosition.X
+				sliderWidth = slider.AbsoluteSize.X
+				input.Changed:Connect(function()
+					if input.UserInputState == Enum.UserInputState.End then
+						dragging = false
+						if FileSupport then
+							writefile("Nameless-Admin/ImageButtonSize.txt", tostring(NAScale))
+						end
+					end
+				end)
 			end
 		end)
-	
+		
 		UserInputService.InputChanged:Connect(function(input)
 			if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
 				local mouseX = input.Position.X
-				local newScale = math.clamp((mouseX - sliderStart) / sliderWidth, 0, 1) * (maxSize - minSize) + minSize
-				NAScale = newScale
+				local relativePosition = (mouseX - sliderStart) / sliderWidth
+				local newScale = math.clamp(relativePosition, 0, 1) * (maxSize - minSize) + minSize
+				NAScale = math.clamp(newScale, minSize, maxSize) -- Ensure NAScale stays within the range
 				update(NAScale)
 			end
 		end)
