@@ -6599,7 +6599,7 @@ cmd.add({"loopfling"},{"loopfling <player>","Loop voids a player"},function(plr)
 					getgenv().OldPos=RootPart.CFrame
 				end
 				if THumanoid and THumanoid.Sit and not AllBool then
-					return DoNotif("Targeting is sitting",5,"Error Occurred")
+					return
 				end
 				if THead then
 					game:GetService("Workspace").CurrentCamera.CameraSubject=THead
@@ -6706,7 +6706,7 @@ cmd.add({"loopfling"},{"loopfling <player>","Loop voids a player"},function(plr)
 				elseif not TRootPart and not THead and Accessory and Handle then
 					SFBasePart(Handle)
 				else
-					return DoNotif("Target is missing everything",5,"Error Occurred")
+					return
 				end
 
 				BV:Destroy()
@@ -6726,7 +6726,7 @@ cmd.add({"loopfling"},{"loopfling <player>","Loop voids a player"},function(plr)
 				until (RootPart.Position-getgenv().OldPos.p).Magnitude<25
 				game:GetService("Workspace").FallenPartsDestroyHeight=getgenv().FPDH
 			else
-				return DoNotif("Random error",5,"Error Occurred")
+				return
 			end
 		end
 
@@ -6747,12 +6747,8 @@ cmd.add({"loopfling"},{"loopfling <player>","Loop voids a player"},function(plr)
 					if TPlayer then
 						SkidFling(TPlayer)
 					end
-				else
-					DoNotif("This user is whitelisted! (Owner)",5,"Error Occurred")
 				end
-			elseif not GetPlayer(x) and not AllBool then
-				DoNotif("Username Invalid",5,"Error Occurred")
-			end
+			elseif not GetPlayer(x) and not AllBool then end
 		end
 	until Loopvoid==false
 end,true)
