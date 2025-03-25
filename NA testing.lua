@@ -2042,14 +2042,36 @@ cmd.add({"commandcount","cc"},{"commandcount (cc)","Counds how many commands NA 
 	DoNotif(adminName.." currently has ".. commandcount.." commands")
 end)
 
+cmd.add({"flyfling"}, {"flyfling", "makes you fly and fling"}, function()
+    cmd.run({'unwalkfling'})
+    if IsOnMobile then
+        unmobilefly()
+    elseif IsOnPC then
+        cmd.run({'unvfly'})
+    end
+
+    cmd.run({'walkfling'})
+    if IsOnMobile then
+        mobilefly(50, true)
+    elseif IsOnPC then
+        cmd.run({'vfly'})
+    end
+end)
+
+cmd.add({"unflyfling"}, {"unflyfling", "stops fly and fling"}, function()
+    cmd.run({'unwalkfling'})
+    if IsOnMobile then
+        unmobilefly()
+    elseif IsOnPC then
+        cmd.run({'unvfly'})
+    end
+end)
+
 hiddenfling = false
 flingConnection = nil
 
 cmd.add({"walkfling", "wfling"}, {"walkfling (wfling) [THANKS TO X]", "probably the best fling lol"}, function()
-	if hiddenfling then
-		DoNotif("Walkfling is already enabled!")
-		return
-	end
+	if hiddenfling then return end
 
 	DoNotif("Walkfling enabled")
 	hiddenfling = true
@@ -2098,10 +2120,7 @@ cmd.add({"walkfling", "wfling"}, {"walkfling (wfling) [THANKS TO X]", "probably 
 end)
 
 cmd.add({"unwalkfling", "unwfling"}, {"unwalkfling (unwfling)", "stop the walkfling command"}, function()
-	if not hiddenfling then
-		DoNotif("Walkfling is already disabled!")
-		return
-	end
+	if not hiddenfling then return end
 
 	DoNotif("Walkfling disabled")
 	hiddenfling = false
