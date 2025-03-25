@@ -214,6 +214,7 @@ local COREGUI=game:GetService("CoreGui");
 local AvatarEditorService = game:GetService("AvatarEditorService")
 local ChatService = game:GetService("Chat")
 local TextChatService = game:GetService("TextChatService")
+local CaptureService = game:GetService("CaptureService")
 local IsOnMobile=false--table.find({Enum.Platform.IOS,Enum.Platform.Android},UserInputService:GetPlatform());
 local IsOnPC=false--table.find({Enum.Platform.Windows,Enum.Platform.UWP,Enum.Platform.Linux,Enum.Platform.SteamOS,Enum.Platform.OSX,Enum.Platform.Chromecast,Enum.Platform.WebOS},UserInputService:GetPlatform());
 local sethidden=sethiddenproperty or set_hidden_property or set_hidden_prop
@@ -11035,6 +11036,24 @@ NACaller(function()
 	end)
 
 	cmdInput.PlaceholderText=adminName.." V"..curVer
+end)
+
+CaptureService.CaptureBegan:Connect(function()
+    if NAimageButton then
+		NAimageButton.Visible=false
+	elseif Info then
+		Info.Visible=false
+	end
+end)
+
+CaptureService.CaptureEnded:Connect(function()
+    task.delay(0.1, function()
+		if NAimageButton then
+			NAimageButton.Visible=true
+		elseif Info then
+			Info.Visible=true
+		end
+    end)
 end)
 
 print([[
