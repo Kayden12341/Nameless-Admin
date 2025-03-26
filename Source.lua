@@ -187,7 +187,7 @@ pcall(function()
 		local json = game:GetService("HttpService"):JSONDecode(response.Body)
 		if json and json[1] and json[1].commit and json[1].commit.author and json[1].commit.author.date then
 			local year, month, day = json[1].commit.author.date:match("(%d+)-(%d+)-(%d+)")
-			updDate = month .. "/" .. day .. "/" .. year
+			updDate = month.."/"..day.."/"..year
 		end
 	end
 end)
@@ -400,6 +400,7 @@ end
 --[[ COMMAND FUNCTIONS ]]--
 local commandcount=0
 cmd={}
+Loops = {}
 cmd.add = function(aliases, info, func, requiresArguments)
 	requiresArguments = requiresArguments or false
 	for i, cmdName in pairs(aliases) do
@@ -473,6 +474,93 @@ cmd.run = function(args)
 		end
 	end)
 	if not success then end
+end
+
+cmd.loop = function(commandName, args)
+    local command = Commands[commandName:lower()] or Aliases[commandName:lower()]
+    if not command then
+        DoNotif("Command '"..commandName.."' does not exist.", 3)
+        return
+    end
+
+    local loopKey = commandName:lower()
+
+    if Loops[loopKey] then
+        DoNotif("A loop for command '"..commandName.."' is already running.", 3)
+        return
+    end
+
+    Notify({
+        Title = "Set Loop Delay",
+        Description = "Enter the delay (in seconds) for the loop of command: "..commandName,
+        InputField = true,
+        Buttons = {
+            {
+                Text = "Submit",
+                Callback = function(input)
+                    local interval = tonumber(input) or 0
+                    if not interval or interval < 0 then
+                        DoNotif("Invalid delay. Loop not started.", 3)
+                        return
+                    end
+
+                    Loops[loopKey] = {
+                        command = command[1],
+                        interval = interval,
+                        args = args or {},
+                        running = true
+                    }
+
+                    task.spawn(function()
+                        while Loops[loopKey] and Loops[loopKey].running do
+                            Loops[loopKey].command(unpack(Loops[loopKey].args))
+                            task.wait(Loops[loopKey].interval)
+                        end
+                    end)
+
+                    DoNotif("Loop started for command: '"..commandName.."' with delay: "..interval.." seconds.", 3)
+                end
+            },
+            {
+                Text = "Cancel",
+                Callback = function()
+                    DoNotif("Loop creation canceled.", 2)
+                end
+            }
+        }
+    })
+end
+
+cmd.stopLoop = function()
+    if next(Loops) == nil then
+        DoNotif("No active loops to stop.", 2)
+        return
+    end
+
+    local buttons = {}
+    for loopKey, loopData in pairs(Loops) do
+        table.insert(buttons, {
+            Text = "Stop '"..loopKey.."'",
+            Callback = function()
+                Loops[loopKey].running = false
+                Loops[loopKey] = nil
+                DoNotif("Loop '"..loopKey.."' has been stopped.", 3)
+            end
+        })
+    end
+
+    table.insert(buttons, {
+        Text = "Cancel",
+        Callback = function()
+            DoNotif("No loops were stopped.", 2)
+        end
+    })
+
+    Notify({
+        Title = "Stop a Loop",
+        Description = "Select a loop to stop:",
+        Buttons = buttons
+    })
 end
 
 function ParseArguments(input)
@@ -825,116 +913,102 @@ end
 
 
 
-local Signal1,Signal2=nil,nil
-local flyMobile=nil
-local MobileWeld=nil
+local Signal1, Signal2 = nil, nil
+local flyMobile, MobileWeld = nil, nil
 
-function mobilefly(speed,vfly)
-	local character=getChar() or LocalPlayer.CharacterAdded:Wait()
-	if flyMobile then flyMobile:Destroy() end
-	flyMobile=Instance.new("Part",game:GetService("Workspace"))
-	flyMobile.Name=randomString()
-	flyMobile.Size, flyMobile.CanCollide = Vector3.new(0.05, 0.05, 0.05), false
-	if MobileWeld then MobileWeld:Destroy() end
-	MobileWeld=Instance.new("Weld",flyMobile)
-	MobileWeld.Name=randomString()
-	MobileWeld.Part0, MobileWeld.Part1, MobileWeld.C0 = flyMobile, character:FindFirstChildWhichIsA("Humanoid").RootPart, CFrame.new(0, 0, 0)
+function mobilefly(speed, vfly)
+    local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+    if flyMobile then flyMobile:Destroy() end
+    flyMobile = Instance.new("Part", game:GetService("Workspace").CurrentCamera)
+    flyMobile.Name = randomString()
+    flyMobile.Size, flyMobile.CanCollide = Vector3.new(0.05, 0.05, 0.05), false
+    if MobileWeld then MobileWeld:Destroy() end
+    MobileWeld = Instance.new("Weld", flyMobile)
+    MobileWeld.Name = randomString()
+    MobileWeld.Part0, MobileWeld.Part1, MobileWeld.C0 = flyMobile, character:FindFirstChildWhichIsA("Humanoid").RootPart, CFrame.new(0, 0, 0)
 
-	local existingBV=flyMobile:FindFirstChildWhichIsA("BodyVelocity")
-	local existingBG=flyMobile:FindFirstChildWhichIsA("BodyGyro")
+    if not flyMobile:FindFirstChildWhichIsA("BodyVelocity") then
+        local bv = Instance.new("BodyVelocity", flyMobile)
+        bv.Name = randomString()
+        bv.MaxForce = Vector3.new(0, 0, 0)
+        bv.Velocity = Vector3.new(0, 0, 0)
+    end
 
-	if not existingBV then
-		local bv=Instance.new("BodyVelocity")
-		bv.Name=randomString()
-		bv.MaxForce=Vector3.new(0,0,0)
-		bv.Velocity=Vector3.new(0,0,0)
-		bv.Parent=flyMobile
-	end
+    if not flyMobile:FindFirstChildWhichIsA("BodyGyro") then
+        local bg = Instance.new("BodyGyro", flyMobile)
+        bg.Name = randomString()
+        bg.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
+        bg.P = 1000
+        bg.D = 50
+    end
 
-	if not existingBG then
-		local bg=Instance.new("BodyGyro")
-		bg.Name=randomString()
-		bg.MaxTorque=Vector3.new(9e9,9e9,9e9)
-		bg.P=1000
-		bg.D=50
-		bg.Parent=flyMobile
-	end
+    Signal1 = LocalPlayer.CharacterAdded:Connect(function(newChar)
+        if not flyMobile:FindFirstChildWhichIsA("BodyVelocity") then
+            local bv = Instance.new("BodyVelocity", flyMobile)
+            bv.Name = randomString()
+            bv.MaxForce = Vector3.new(0, 0, 0)
+            bv.Velocity = Vector3.new(0, 0, 0)
+        end
 
-	Signal1=LocalPlayer.CharacterAdded:Connect(function(newChar)
+        if not flyMobile:FindFirstChildWhichIsA("BodyGyro") then
+            local bg = Instance.new("BodyGyro", flyMobile)
+            bg.Name = randomString()
+            bg.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
+            bg.P = 1000
+            bg.D = 50
+        end
 
-		local newBV=flyMobile:FindFirstChildWhichIsA("BodyVelocity")
-		local newBG=flyMobile:FindFirstChildWhichIsA("BodyGyro")
-		local newWeld=flyMobile:FindFirstChildWhichIsA("Weld")
+        if not flyMobile:FindFirstChildWhichIsA("Weld") then
+            MobileWeld = Instance.new("Weld", flyMobile)
+            MobileWeld.Name = randomString()
+            MobileWeld.Part0, MobileWeld.Part1, MobileWeld.C0 = flyMobile, newChar:FindFirstChildWhichIsA("Humanoid").RootPart, CFrame.new(0, 0, 0)
+        else
+            MobileWeld.Part0, MobileWeld.Part1, MobileWeld.C0 = flyMobile, newChar:FindFirstChildWhichIsA("Humanoid").RootPart, CFrame.new(0, 0, 0)
+        end
+    end)
 
-		if not newBV then
-			local bv=Instance.new("BodyVelocity")
-			bv.Name=randomString()
-			bv.MaxForce=Vector3.new(0,0,0)
-			bv.Velocity=Vector3.new(0,0,0)
-			bv.Parent=flyMobile
-		end
+    local camera = game:GetService("Workspace").CurrentCamera
 
-		if not newBG then
-			local bg=Instance.new("BodyGyro")
-			bg.Name=randomString()
-			bg.MaxTorque=Vector3.new(9e9,9e9,9e9)
-			bg.P=1000
-			bg.D=50
-			bg.Parent=flyMobile
-		end
+    Signal2 = RunService.RenderStepped:Connect(function()
+        local character = getChar()
+        local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+        local bv = flyMobile and flyMobile:FindFirstChildWhichIsA("BodyVelocity")
+        local bg = flyMobile and flyMobile:FindFirstChildWhichIsA("BodyGyro")
 
-		if not newWeld then
-			MobileWeld=Instance.new("Weld",flyMobile)
-			MobileWeld.Name=randomString()
-			MobileWeld.Part0, MobileWeld.Part1, MobileWeld.C0 = flyMobile, newChar:FindFirstChildWhichIsA("Humanoid").RootPart, CFrame.new(0, 0, 0)
-		else
-			MobileWeld.Part0, MobileWeld.Part1, MobileWeld.C0 = flyMobile, newChar:FindFirstChildWhichIsA("Humanoid").RootPart, CFrame.new(0, 0, 0)
-		end
+        if character and humanoid and flyMobile and MobileWeld and bv and bg then
+            bv.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+            bg.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
+            if not vfly then
+                humanoid.PlatformStand = true
+            end
 
-	end)
+            bg.CFrame = camera.CFrame
+            local direction = ctrlModule:GetMoveVector()
+            local newVelocity = Vector3.new()
 
-	local camera=game:GetService("Workspace").CurrentCamera
+            if direction.X ~= 0 then
+                newVelocity = newVelocity + camera.CFrame.RightVector * (direction.X * speed)
+            end
+            if direction.Z ~= 0 then
+                newVelocity = newVelocity - camera.CFrame.LookVector * (direction.Z * speed)
+            end
 
-	Signal2=RunService.RenderStepped:Connect(function()
-		local character=getChar()
-		local humanoid=character and character:FindFirstChildOfClass("Humanoid")
-		local bv=flyMobile and flyMobile:FindFirstChildWhichIsA("BodyVelocity")
-		local bg=flyMobile and flyMobile:FindFirstChildWhichIsA("BodyGyro")
-
-		if character and humanoid and flyMobile and MobileWeld and bv and bg then
-			bv.MaxForce=Vector3.new(9e9,9e9,9e9)
-			bg.MaxTorque=Vector3.new(9e9,9e9,9e9)
-			if not vfly then
-				humanoid.PlatformStand=true
-			end
-
-			bg.CFrame=camera.CFrame
-			local direction=ctrlModule:GetMoveVector()
-			local newVelocity=Vector3.new()
-
-			if direction.X~=0 then
-				newVelocity=newVelocity+camera.CFrame.RightVector*(direction.X*speed)
-			end
-			if direction.Z~=0 then
-				newVelocity=newVelocity-camera.CFrame.LookVector*(direction.Z*speed)
-			end
-
-			bv.Velocity=newVelocity
-		end
-	end)
+            bv.Velocity = newVelocity
+        end
+    end)
 end
 
 function unmobilefly()
-	local char=getChar()
-	if char and flyMobile then
-		local humanoid=char:FindFirstChildOfClass("Humanoid")
-		if humanoid then
-			humanoid.PlatformStand=false
-		end
-		if flyMobile then flyMobile:Destroy() end
-	end
-	if Signal1 then Signal1:Disconnect() end
-	if Signal2 then Signal2:Disconnect() end
+    local char = getChar()
+    if char and flyMobile then
+        local humanoid = char:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid.PlatformStand = false
+        end
+        flyMobile:Destroy()
+    end
+    if Signal1 then Signal1:Disconnect() end
+    if Signal2 then Signal2:Disconnect() end
 end
 
 
@@ -967,7 +1041,7 @@ function sFLY(vfly)
 
 	if goofyFLY then goofyFLY:Destroy() end
 
-	goofyFLY = Instance.new("Part", game:GetService("Workspace"))
+	goofyFLY = Instance.new("Part",game:GetService("Workspace").CurrentCamera)
 	goofyFLY.Name = randomString()
 	goofyFLY.Size = Vector3.new(0.05, 0.05, 0.05)
 	goofyFLY.CanCollide = false
@@ -1328,6 +1402,23 @@ cmd.add({"executor","exec"},{"executor (exec)","Very simple executor"},function(
 	loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/Nameless-Admin/main/NAexecutor.lua"))()
 end)
 
+cmd.add({"commandloop", "cmdloop"}, {"commandloop <command> {arguments} (cmdloop)", "Run a command on loop"}, function(...)
+    local args = {...}
+    local commandName = args[1]
+    table.remove(args, 1)
+
+    if not commandName then
+        DoNotif("Command name is required.",3)
+        return
+    end
+
+    cmd.loop(commandName, args)
+end)
+
+cmd.add({"stoploop"}, {"stoploop", "Stop a running loop"}, function()
+    cmd.stopLoop()
+end)
+
 if IsOnMobile then
 	local scaleFrame = nil
 	cmd.add({"guiscale", "guisize", "gsize", "gscale"}, {"guiscale (guisize, gsize, gscale)", "Adjust the scale of the "..adminName.." button"}, function()
@@ -1392,7 +1483,7 @@ if IsOnMobile then
 		label.BackgroundTransparency = 1
 		label.Size = UDim2.new(1, 0, 0.3, 0)
 		label.Position = UDim2.new(0, 0, 0.1, 0)
-		label.Text = "Scale: " .. string.format("%.2f", NAScale)
+		label.Text = "Scale: "..string.format("%.2f", NAScale)
 		label.TextColor3 = Color3.fromRGB(255, 255, 255)
 		label.Font = Enum.Font.Gotham
 		label.TextSize = 18
@@ -1415,7 +1506,7 @@ if IsOnMobile then
 			NAimageButton.Size = UDim2.new(0, 32 * scale, 0, 33 * scale)
 			progress.Size = UDim2.new((scale - minSize) / (maxSize - minSize) + 0.05, 0, 1, 0)
 			knob.Position = UDim2.new((scale - minSize) / (maxSize - minSize), 0, -0.25, 0)
-			label.Text = "Scale: " .. string.format("%.2f", scale)
+			label.Text = "Scale: "..string.format("%.2f", scale)
 		end
 	
 		update(NAScale)
@@ -2381,106 +2472,137 @@ cmd.add({"punch"},{"punch","punch tool that flings"},function()
 	loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/Nameless-Admin/main/punch",true))()
 end)
 
-local vOn=false
-local vRAHH=nil
+vOn = false
+vRAHH = nil
+vFlyEnabled = false
+vToggleKey = "v"
+vFlySpeed = 1
+vKeybindConn = nil
 
-cmd.add({"vfly","vehiclefly"},{"vehiclefly (vfly)","be able to fly vehicles"},function(...)
-	speed=(...)
+function toggleVFly()
+    if vFlyEnabled then
+        FLYING = false
+        if IsOnMobile then
+            unmobilefly()
+        else
+            cmdlp.Character.Humanoid.PlatformStand = false
+            if goofyFLY then goofyFLY:Destroy() end
+        end
+        vFlyEnabled = false
+    else
+        FLYING = true
+        if IsOnMobile then
+            mobilefly(vFlySpeed, true)
+        else
+            sFLY(true)
+        end
+        vFlyEnabled = true
+    end
+end
 
-	if speed==nil then
-		speed=50
-	else
-	end
-	if IsOnMobile then 
-		wait()
-		DoNotif(adminName.." has detected you using mobile. You now have a vFly button. Click it to enable/disable mobile flying (for easier use).")
+function connectVFlyKey()
+    if vKeybindConn then
+        vKeybindConn:Disconnect()
+    end
+    vKeybindConn = cmdm.KeyDown:Connect(function(KEY)
+        if KEY:lower() == vToggleKey then
+            toggleVFly()
+        end
+    end)
+end
 
-		if vRAHH then
-			vRAHH:Destroy()
-			vRAHH = nil
-		end
+cmd.add({"vfly", "vehiclefly"}, {"vehiclefly (vfly)", "be able to fly vehicles"}, function(...)
+    local vFlySpeed = IsOnMobile and ((...) or 50) or ((...) or 1)
+    connectVFlyKey()
+	vFlyEnabled = true
 
-		vRAHH = Instance.new("ScreenGui")
-		local TextButton = Instance.new("TextButton")
-		local UICorner = Instance.new("UICorner")
-		local UIAspectRatioConstraint = Instance.new("UIAspectRatioConstraint")
+    if IsOnMobile then
+        wait()
+        DoNotif(adminName.." detected mobile. vFly button added for easier use.")
 
-		vRAHH.Parent = COREGUI
-		vRAHH.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-		vRAHH.ResetOnSpawn = false
+        if vRAHH then
+            vRAHH:Destroy()
+            vRAHH = nil
+        end
 
-		TextButton.Parent = vRAHH
-		TextButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-		TextButton.BackgroundTransparency = 0.1
-		TextButton.Position = UDim2.new(0.9, 0, 0.6, 0)
-		TextButton.Size = UDim2.new(0.05, 0, 0.1, 0)
-		TextButton.Font = Enum.Font.GothamBold
-		TextButton.Text = "vFly"
-		TextButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-		TextButton.TextSize = 18
-		TextButton.TextWrapped = true
-		TextButton.Active = true
-		TextButton.TextScaled = true
+        vRAHH = Instance.new("ScreenGui")
+        local btn = Instance.new("TextButton")
+        local corner = Instance.new("UICorner")
+        local aspect = Instance.new("UIAspectRatioConstraint")
 
-		UICorner.CornerRadius = UDim.new(0.2, 0)
-		UICorner.Parent = TextButton
+        vRAHH.Parent = COREGUI
+        vRAHH.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+        vRAHH.ResetOnSpawn = false
 
-		UIAspectRatioConstraint.Parent = TextButton
-		UIAspectRatioConstraint.AspectRatio = 1.0
+        btn.Parent = vRAHH
+        btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+        btn.BackgroundTransparency = 0.1
+        btn.Position = UDim2.new(0.9, 0, 0.6, 0)
+        btn.Size = UDim2.new(0.05, 0, 0.1, 0)
+        btn.Font = Enum.Font.GothamBold
+        btn.Text = "vFly"
+        btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        btn.TextSize = 18
+        btn.TextWrapped = true
+        btn.Active = true
+        btn.TextScaled = true
 
-		function FEPVI_fake_script()
-			TextButton.MouseButton1Click:Connect(function()
-				if vOn == false then
-					vOn = true
-					TextButton.Text = "UnvFly"
-					TextButton.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
-					mobilefly(speed,true)
-					cmdlp.Character.Humanoid.PlatformStand=false
-				elseif vOn == true then
-					vOn = false
-					TextButton.Text = "vFly"
-					TextButton.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
-					unmobilefly()
-				end
-			end)
-		end
-		coroutine.wrap(FEPVI_fake_script)()
+        corner.CornerRadius = UDim.new(0.2, 0)
+        corner.Parent = btn
 
-		gui.draggable(TextButton)
-	else
-		FLYING=false
-		cmdlp.Character.Humanoid.PlatformStand=false
-		wait()
+        aspect.Parent = btn
+        aspect.AspectRatio = 1.0
 
+        coroutine.wrap(function()
+            btn.MouseButton1Click:Connect(function()
+                if not vOn then
+                    vOn = true
+                    btn.Text = "UnvFly"
+                    btn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+                    mobilefly(vFlySpeed, true)
+                    cmdlp.Character.Humanoid.PlatformStand = false
+                else
+                    vOn = false
+                    btn.Text = "vFly"
+                    btn.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
+                    unmobilefly()
+                end
+            end)
+        end)()
 
+        gui.draggable(btn)
+    else
+        FLYING = false
+        cmdlp.Character.Humanoid.PlatformStand = false
+        wait()
 
-		wait();
+        DoNotif("Vehicle fly enabled. Press '"..vToggleKey:upper().."' to toggle vehicle flying.")
+        sFLY(true)
+        speedofthevfly = vFlySpeed
+        speedofthefly = vFlySpeed
+    end
+end, true)
 
-		DoNotif("Vehicle fly enabled")
-		sFLY(true)
-		speedofthevfly=(...)
-		speedofthefly=(...)
-		if (...)==nil then
-			speedofthevfly=2
-			speedofthefly=2
-		end
-	end
-end,true)
-
-cmd.add({"unvfly","unvehiclefly"},{"unvehiclefly (unvfly)","disable vehicle fly"},function()
-
-	wait();
-	if IsOnMobile then
-		DoNotif("Mobile vFly Disabled")
-	else
-		DoNotif("Not flying anymore")
-		FLYING=false
-		cmdlp.Character.Humanoid.PlatformStand=false
-		if goofyFLY then goofyFLY:Destroy() end
-	end
-	unmobilefly()
-	vOn=false
-	if vRAHH then vRAHH:Destroy() vRAHH=nil end
+cmd.add({"unvfly", "unvehiclefly"}, {"unvehiclefly (unvfly)", "disable vehicle fly"}, function()
+    wait()
+    if IsOnMobile then
+        DoNotif("Mobile vFly Disabled.")
+        unmobilefly()
+    else
+        DoNotif("Not flying anymore")
+        FLYING = false
+        cmdlp.Character.Humanoid.PlatformStand = false
+        if goofyFLY then goofyFLY:Destroy() end
+    end
+    vOn = false
+    if vRAHH then
+        vRAHH:Destroy()
+        vRAHH = nil
+    end
+    if vKeybindConn then
+        vKeybindConn:Disconnect()
+        vKeybindConn = nil
+    end
 end)
 
 cmd.add({"equiptools","equipall"},{"equiptools","Equip all of your tools"},function()
@@ -4218,6 +4340,7 @@ cmd.add({"enable"}, {"enable", "Enables a specific CoreGui"}, function()
 		--Duration = 3,
 		Buttons = {
 			{Text = "Reset Button", Callback = function() StarterGui:SetCore("ResetButtonCallback", true) end};
+			{Text = "Shiftlock", Callback = function() LocalPlayer.DevEnableMouseLock = true end};
 			{Text = "Backpack", Callback = function() StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, true) end};
 			{Text = "Chat", Callback = function() StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Chat, true) loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/uuuuuuu/refs/heads/main/EnableChat.lua"))() end};
 			{Text = "Health", Callback = function() StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Health, true) end};
@@ -4236,6 +4359,7 @@ cmd.add({"disable"}, {"disable", "Disables a specific CoreGui"}, function()
 		--Duration = 3,
 		Buttons = {
 			{Text = "Reset Button", Callback = function() StarterGui:SetCore("ResetButtonCallback", false) end};
+			{Text = "Shiftlock", Callback = function() LocalPlayer.DevEnableMouseLock = false end};
 			{Text = "Backpack", Callback = function() StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false) end};
 			{Text = "Chat", Callback = function() StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Chat, false) end};
 			{Text = "Health", Callback = function() StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Health, false) end};
@@ -4245,6 +4369,28 @@ cmd.add({"disable"}, {"disable", "Disables a specific CoreGui"}, function()
 			{Text = "Cancel", Callback = function() end};
 		}
 	})
+end)
+
+cmd.add({"reverb", "reverbcontrol"}, {"reverb (reverbcontrol)", "Manage sound reverb settings"}, function()
+    local reverbButtons = {}
+    for _, reverbType in ipairs(Enum.ReverbType:GetEnumItems()) do
+        table.insert(reverbButtons, {
+            Text = reverbType.Name,
+            Callback = function()
+                SoundService.AmbientReverb = reverbType
+            end
+        })
+    end
+
+    table.insert(reverbButtons, {
+        Text = "Cancel",
+        Callback = function() end
+    })
+
+    Notify({
+        Title = "Sound Reverb Options",
+        Buttons = reverbButtons
+    })
 end)
 
 cmd.add({"esp"}, {"esp", "locate where the players are"}, function()
@@ -5096,210 +5242,230 @@ cmd.add({"functionspy"},{"functionspy","Check console"},function()
 	coroutine.wrap(PRML_fake_script)()
 end)
 
-local mOn=false
-local mFlyBruh=nil
+mOn = false
+mFlyBruh = nil
+flyEnabled = false
+toggleKey = "f"
+flySpeed = 1
+keybindConn = nil
 
-cmd.add({"fly"},{"fly [speed]","Enable flight"},function(...)
-	speed=(...)
+function toggleFly()
+    if flyEnabled then
+        FLYING = false
+        if IsOnMobile then
+            unmobilefly()
+        else
+            cmdlp.Character.Humanoid.PlatformStand = false
+            if goofyFLY then goofyFLY:Destroy() end
+        end
+        flyEnabled = false
+    else
+        FLYING = true
+        if IsOnMobile then
+            mobilefly(flySpeed)
+        else
+            sFLY()
+        end
+        flyEnabled = true
+    end
+end
 
-	if speed==nil then
-		speed=50
-	else
-	end
-	if IsOnMobile then 
-		wait()
-		DoNotif(adminName.." has detected you using mobile. You now have a Fly button. Click it to enable/disable mobile flying (for easier use).")
+function connectFlyKey()
+    if keybindConn then
+        keybindConn:Disconnect()
+    end
+    keybindConn = cmdm.KeyDown:Connect(function(KEY)
+        if KEY:lower() == toggleKey then
+            toggleFly()
+        end
+    end)
+end
 
-		if mFlyBruh then
-			mFlyBruh:Destroy()
-			mFlyBruh = nil
-		end
+cmd.add({"fly"}, {"fly [speed]", "Enable flight"}, function(...)
+    local flySpeed = IsOnMobile and ((...) or 50) or ((...) or 1)
+    connectFlyKey()
+	flyEnabled=true
 
-		mFlyBruh = Instance.new("ScreenGui")
-		local TextButton = Instance.new("TextButton")
-		local UICorner = Instance.new("UICorner")
-		local UIAspectRatioConstraint = Instance.new("UIAspectRatioConstraint")
+    if IsOnMobile then
+        wait()
+        DoNotif(adminName.." detected mobile. Fly button added for easier use.")
 
-		mFlyBruh.Parent = COREGUI
-		mFlyBruh.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-		mFlyBruh.ResetOnSpawn = false
+        if mFlyBruh then
+            mFlyBruh:Destroy()
+            mFlyBruh = nil
+        end
 
-		TextButton.Parent = mFlyBruh
-		TextButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-		TextButton.BackgroundTransparency = 0.1
-		TextButton.Position = UDim2.new(0.9, 0, 0.6, 0)
-		TextButton.Size = UDim2.new(0.05, 0, 0.1, 0)
-		TextButton.Font = Enum.Font.GothamBold
-		TextButton.Text = "Fly"
-		TextButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-		TextButton.TextSize = 18
-		TextButton.TextWrapped = true
-		TextButton.Active = true
-		TextButton.TextScaled = true
+        mFlyBruh = Instance.new("ScreenGui")
+        local btn = Instance.new("TextButton")
+        local corner = Instance.new("UICorner")
+        local aspect = Instance.new("UIAspectRatioConstraint")
 
-		UICorner.CornerRadius = UDim.new(0.2, 0)
-		UICorner.Parent = TextButton
+        mFlyBruh.Parent = COREGUI
+        mFlyBruh.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+        mFlyBruh.ResetOnSpawn = false
 
-		UIAspectRatioConstraint.Parent = TextButton
-		UIAspectRatioConstraint.AspectRatio = 1.0
+        btn.Parent = mFlyBruh
+        btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+        btn.BackgroundTransparency = 0.1
+        btn.Position = UDim2.new(0.9, 0, 0.6, 0)
+        btn.Size = UDim2.new(0.05, 0, 0.1, 0)
+        btn.Font = Enum.Font.GothamBold
+        btn.Text = "Fly"
+        btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        btn.TextSize = 18
+        btn.TextWrapped = true
+        btn.Active = true
+        btn.TextScaled = true
 
-		function FEPVI_fake_script()
-			TextButton.MouseButton1Click:Connect(function()
-				if mOn == false then
-					mOn = true
-					TextButton.Text = "Unfly"
-					TextButton.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
-					mobilefly(speed)
-				elseif mOn == true then
-					mOn = false
-					TextButton.Text = "Fly"
-					TextButton.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
-					unmobilefly()
-				end
-			end)
-		end
-		coroutine.wrap(FEPVI_fake_script)()
+        corner.CornerRadius = UDim.new(0.2, 0)
+        corner.Parent = btn
 
-		gui.draggable(TextButton)
-	else
-		FLYING=false
-		cmdlp.Character.Humanoid.PlatformStand=false
-		wait();
+        aspect.Parent = btn
+        aspect.AspectRatio = 1.0
 
-		DoNotif("Fly enabled")
-		sFLY()
-		speedofthevfly=(...)
-		speedofthefly=(...)
-		if (...)==nil then
-			speedofthevfly=2
-			speedofthefly=2
-		end
-	end
-end,true)
+        coroutine.wrap(function()
+            btn.MouseButton1Click:Connect(function()
+                if not mOn then
+                    mOn = true
+                    btn.Text = "Unfly"
+                    btn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+                    mobilefly(flySpeed)
+                else
+                    mOn = false
+                    btn.Text = "Fly"
+                    btn.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
+                    unmobilefly()
+                end
+            end)
+        end)()
+
+        gui.draggable(btn)
+    else
+        FLYING = false
+        cmdlp.Character.Humanoid.PlatformStand = false
+        wait()
+
+        DoNotif("Fly enabled. Press '"..toggleKey:upper().."' to toggle flying.")
+        sFLY()
+        speedofthevfly = flySpeed
+        speedofthefly = flySpeed
+    end
+end, true)
+
+cmd.add({"unfly"}, {"unfly", "Disable flight"}, function()
+    wait()
+    if IsOnMobile then
+        DoNotif("Mobile Fly Disabled.")
+        unmobilefly()
+    else
+        DoNotif("Not flying anymore")
+        FLYING = false
+        cmdlp.Character.Humanoid.PlatformStand = false
+        if goofyFLY then goofyFLY:Destroy() end
+    end
+    mOn = false
+    if mFlyBruh then
+        mFlyBruh:Destroy()
+        mFlyBruh = nil
+    end
+    if keybindConn then
+        keybindConn:Disconnect()
+        keybindConn = nil
+    end
+end)
 
 TFlyEnabled = false
 tflyCORE = nil
 
-cmd.add({"tfly", "tweenfly"},{"tfly [speed] (tweenfly)","Basically smooth flying"},function(...)
-	TFlyEnabled = true
-	local speed=(...)
-	if speed==nil then
-		speed=2
-	end
-	local e1, e2
-	local Hum, mouse = LocalPlayer.Character:FindFirstChildOfClass("Humanoid"), LocalPlayer:GetMouse()
-	tflyCORE = Instance.new("Part",game:GetService("Workspace"))
-	tflyCORE:SetAttribute("tflyPart",true)
-	tflyCORE.Size, tflyCORE.CanCollide = Vector3.new(0.05, 0.05, 0.05), false
-	local Trs = tflyCORE
+cmd.add({"tfly", "tweenfly"}, {"tfly [speed] (tweenfly)", "Enables smooth flying"}, function(...)
+    TFlyEnabled = true
+    local speed = (...) or 2
+    local e1, e2
+    local Humanoid = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+    local mouse = LocalPlayer:GetMouse()
 
-	local keys = { a = false, d = false, w = false, s = false }
-	if IsOnPC then
-		e1 = mouse.KeyDown:Connect(function(key)
-			if not Trs or not Trs.Parent then
-				e1:Disconnect()
-				e2:Disconnect()
-				return
-			end
-			if key == "w" then
-				keys.w = true
-			elseif key == "s" then
-				keys.s = true
-			elseif key == "a" then
-				keys.a = true
-			elseif key == "d" then
-				keys.d = true
-			end
-		end)
-		e2 = mouse.KeyUp:Connect(function(key)
-			if key == "w" then
-				keys.w = false
-			elseif key == "s" then
-				keys.s = false
-			elseif key == "a" then
-				keys.a = false
-			elseif key == "d" then
-				keys.d = false
-			end
-		end)
-	end
+    tflyCORE = Instance.new("Part", game:GetService("Workspace").CurrentCamera)
+    tflyCORE:SetAttribute("tflyPart", true)
+    tflyCORE.Size = Vector3.new(0.05, 0.05, 0.05)
+    tflyCORE.CanCollide = false
 
-	local Weld = Instance.new("Weld", tflyCORE)
-	Weld.Part0, Weld.Part1, Weld.C0 = tflyCORE, Hum.RootPart, CFrame.new(0, 0, 0)
+    local keys = { w = false, a = false, s = false, d = false }
 
-	local pos, gyro = Instance.new("BodyPosition", Trs), Instance.new("BodyGyro", Trs)
-	pos.maxForce, pos.position = Vector3.new(math.huge, math.huge, math.huge), Trs.Position
-	gyro.maxTorque, gyro.cframe = Vector3.new(9e9, 9e9, 9e9), Trs.CFrame
+    if IsOnPC then
+        e1 = mouse.KeyDown:Connect(function(key)
+            if not tflyCORE or not tflyCORE.Parent then
+                e1:Disconnect()
+                e2:Disconnect()
+                return
+            end
+            if keys[key] ~= nil then
+                keys[key] = true
+            end
+        end)
 
-	repeat
-		wait()
-		Hum.PlatformStand = true
-		local new = gyro.cframe - gyro.cframe.p + pos.position
+        e2 = mouse.KeyUp:Connect(function(key)
+            if keys[key] ~= nil then
+                keys[key] = false
+            end
+        end)
+    end
 
-		if IsOnPC then
-			if keys.w then
-				new = new + game:GetService("Workspace").CurrentCamera.CoordinateFrame.lookVector * speed
-			end
-			if keys.s then
-				new = new - game:GetService("Workspace").CurrentCamera.CoordinateFrame.lookVector * speed
-			end
-			if keys.d then
-				new = new * CFrame.new(speed, 0, 0)
-			end
-			if keys.a then
-				new = new * CFrame.new(-speed, 0, 0)
-			end
-		elseif IsOnMobile then
-			local direction = ctrlModule:GetMoveVector()
-			if direction.Magnitude > 0 then
-				new = new + (direction.X * game:GetService("Workspace").CurrentCamera.CFrame.RightVector * speed)
-				new = new - (direction.Z * game:GetService("Workspace").CurrentCamera.CFrame.LookVector * speed)
-			end
-		end
+    local Weld = Instance.new("Weld", tflyCORE)
+    Weld.Part0 = tflyCORE
+    Weld.Part1 = Humanoid.RootPart
+    Weld.C0 = CFrame.new(0, 0, 0)
 
-		pos.position = new.p
-		if keys.w then
-			gyro.cframe = game:GetService("Workspace").CurrentCamera.CoordinateFrame
-		elseif keys.s then
-			gyro.cframe = game:GetService("Workspace").CurrentCamera.CoordinateFrame
-		else
-			gyro.cframe = game:GetService("Workspace").CurrentCamera.CoordinateFrame
-		end
-	until TFlyEnabled == false
-	if gyro then
-		gyro:Destroy()
-	end
-	if pos then
-		pos:Destroy()
-	end
-	Hum.PlatformStand = false
-	speed = 10
-end,true)
+    local pos = Instance.new("BodyPosition", tflyCORE)
+    local gyro = Instance.new("BodyGyro", tflyCORE)
+    pos.maxForce = Vector3.new(math.huge, math.huge, math.huge)
+    pos.position = tflyCORE.Position
+    gyro.maxTorque = Vector3.new(9e9, 9e9, 9e9)
+    gyro.cframe = tflyCORE.CFrame
 
-cmd.add({"untfly","untweenfly"},{"untfly (untweenfly)","Disables tween fly"},function()
-	TFlyEnabled = false
-	for i, v in pairs(game:GetService("Workspace"):GetDescendants()) do
-		if v:GetAttribute("tflyPart") then
-			v:Destroy()
-		end
-	end
-	--if tflyCORE then tflyCORE:Destroy() end
-end)
+    repeat
+        wait()
+        Humanoid.PlatformStand = true
+        local newPosition = gyro.cframe - gyro.cframe.p + pos.position
 
-cmd.add({"unfly"},{"unfly","Disable flight"},function()
+        if IsOnPC then
+            local camera = game:GetService("Workspace").CurrentCamera
+            if keys.w then
+                newPosition = newPosition + camera.CoordinateFrame.LookVector * speed
+            end
+            if keys.s then
+                newPosition = newPosition - camera.CoordinateFrame.LookVector * speed
+            end
+            if keys.d then
+                newPosition = newPosition * CFrame.new(speed, 0, 0)
+            end
+            if keys.a then
+                newPosition = newPosition * CFrame.new(-speed, 0, 0)
+            end
+        elseif IsOnMobile then
+            local direction = ctrlModule:GetMoveVector()
+            if direction.Magnitude > 0 then
+                local camera = game:GetService("Workspace").CurrentCamera
+                newPosition = newPosition + (direction.X * camera.CFrame.RightVector * speed)
+                newPosition = newPosition - (direction.Z * camera.CFrame.LookVector * speed)
+            end
+        end
 
-	wait();
-	if IsOnMobile then
-		DoNotif("Mobile Fly Disabled")
-	else
-		DoNotif("Not flying anymore")
-		FLYING=false
-		cmdlp.Character.Humanoid.PlatformStand=false
-		if goofyFLY then goofyFLY:Destroy() end
-	end
-	unmobilefly()
-	mOn=false
-	if mFlyBruh then mFlyBruh:Destroy() mFlyBruh=nil end
+        pos.position = newPosition.p
+        gyro.cframe = game:GetService("Workspace").CurrentCamera.CoordinateFrame
+    until not TFlyEnabled
+
+    if gyro then gyro:Destroy() end
+    if pos then pos:Destroy() end
+    Humanoid.PlatformStand = false
+end, true)
+
+cmd.add({"untfly", "untweenfly"}, {"untfly (untweenfly)", "Disables tween flying"}, function()
+    TFlyEnabled = false
+    for _, v in pairs(game:GetService("Workspace"):GetDescendants()) do
+        if v:GetAttribute("tflyPart") then
+            v:Destroy()
+        end
+    end
 end)
 
 cmd.add({"noclip","nclip","nc"},{"noclip","Disable your player's collision"},function()
@@ -7703,7 +7869,7 @@ cmd.add({"inspect"}, {"examine", "checks a user's items"}, function(args)
             GuiService:CloseInspectMenu()
             GuiService:InspectPlayerFromUserId(player.UserId)
         else
-            warn("Player not found: " .. tostring(playerName))
+            warn("Player not found: "..tostring(playerName))
         end
     end
 end, true)
@@ -7916,6 +8082,28 @@ cmd.add({"unlight", "nolight"}, {"unlight (nolight)", "Removes dynamic light fro
 			descendant:Destroy()
 		end
 	end
+end)
+
+cmd.add({"lighting", "lightingcontrol"}, {"lighting (lightingcontrol)", "Manage lighting technology settings"}, function()
+	local lightingButtons = {}
+        for _, lightingType in ipairs(Enum.Technology:GetEnumItems()) do
+            table.insert(lightingButtons, {
+                Text = lightingType.Name,
+                Callback = function()
+                    game:GetService("Lighting").Technology = lightingType
+                end
+            })
+        end
+
+		table.insert(lightingButtons, {
+			Text = "Cancel",
+			Callback = function() end
+		})
+
+        Notify({
+            Title = "Lighting Technology Options",
+            Buttons = lightingButtons
+        })
 end)
 
 cmd.add({"tweengotocampos","tweentocampos","tweentcp"},{"tweengotocampos (tweentcp)","Another version of goto camera position but bypassing more anti-cheats"},function()

@@ -1429,11 +1429,11 @@ cmd.add({"commandloop", "cmdloop"}, {"commandloop <command> {arguments} (cmdloop
     end
 
     cmd.loop(commandName, args)
-end, true)
+end)
 
 cmd.add({"stoploop"}, {"stoploop", "Stop a running loop"}, function()
     cmd.stopLoop()
-end, true)
+end)
 
 if IsOnMobile then
 	local scaleFrame = nil
