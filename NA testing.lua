@@ -1,17 +1,20 @@
 --[[
 
- ________  ________   ______  ________        _______   __    __  ______  __        _______  
-|        \|        \ /      \|        \      |       \ |  \  |  \|      \|  \      |       \ 
- \$$$$$$$$| $$$$$$$$|  $$$$$$\\$$$$$$$$      | $$$$$$$\| $$  | $$ \$$$$$$| $$      | $$$$$$$\
-   | $$   | $$__    | $$___\$$  | $$         | $$__/ $$| $$  | $$  | $$  | $$      | $$  | $$
-   | $$   | $$  \    \$$    \   | $$         | $$    $$| $$  | $$  | $$  | $$      | $$  | $$
-   | $$   | $$$$$    _\$$$$$$\  | $$         | $$$$$$$\| $$  | $$  | $$  | $$      | $$  | $$
-   | $$   | $$_____ |  \__| $$  | $$         | $$__/ $$| $$__/ $$ _| $$_ | $$_____ | $$__/ $$
-   | $$   | $$     \ \$$    $$  | $$         | $$    $$ \$$    $$|   $$ \| $$     \| $$    $$
-    \$$    \$$$$$$$$  \$$$$$$    \$$          \$$$$$$$   \$$$$$$  \$$$$$$ \$$$$$$$$ \$$$$$$$ 
-                                                                                             
-                                                                                             
-                                                                                             
+
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+─██████████████─██████████████─██████████████─██████████████────██████████████───██████──██████─██████████─██████─────────████████████───
+─██░░░░░░░░░░██─██░░░░░░░░░░██─██░░░░░░░░░░██─██░░░░░░░░░░██────██░░░░░░░░░░██───██░░██──██░░██─██░░░░░░██─██░░██─────────██░░░░░░░░████─
+─██████░░██████─██░░██████████─██░░██████████─██████░░██████────██░░██████░░██───██░░██──██░░██─████░░████─██░░██─────────██░░████░░░░██─
+─────██░░██─────██░░██─────────██░░██─────────────██░░██────────██░░██──██░░██───██░░██──██░░██───██░░██───██░░██─────────██░░██──██░░██─
+─────██░░██─────██░░██████████─██░░██████████─────██░░██────────██░░██████░░████─██░░██──██░░██───██░░██───██░░██─────────██░░██──██░░██─
+─────██░░██─────██░░░░░░░░░░██─██░░░░░░░░░░██─────██░░██────────██░░░░░░░░░░░░██─██░░██──██░░██───██░░██───██░░██─────────██░░██──██░░██─
+─────██░░██─────██░░██████████─██████████░░██─────██░░██────────██░░████████░░██─██░░██──██░░██───██░░██───██░░██─────────██░░██──██░░██─
+─────██░░██─────██░░██─────────────────██░░██─────██░░██────────██░░██────██░░██─██░░██──██░░██───██░░██───██░░██─────────██░░██──██░░██─
+─────██░░██─────██░░██████████─██████████░░██─────██░░██────────██░░████████░░██─██░░██████░░██─████░░████─██░░██████████─██░░████░░░░██─
+─────██░░██─────██░░░░░░░░░░██─██░░░░░░░░░░██─────██░░██────────██░░░░░░░░░░░░██─██░░░░░░░░░░██─██░░░░░░██─██░░░░░░░░░░██─██░░░░░░░░████─
+─────██████─────██████████████─██████████████─────██████────────████████████████─██████████████─██████████─██████████████─████████████───
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
 
 ]]
 if getgenv().RealNamelessLoaded then return end
@@ -182,13 +185,20 @@ local opt={
 
 --[[ Update Logs ]]--
 local updLogs = {
-    log1 = [[Fixed `bubblechat (bchat)` after what felt like a whole decade 💀
-- Added alias `unbubblechat (unbchat)` to disable it]];
-
-    log2 = [[Added the command `guiscale (guisize, gsize, gscale)` to scale the NA button (and it saves the size upon loading the script again)
-	- it's for mobile users ONLY]];
-
-	log3 = [[Fixed issues with `invisible` command being visible to others]];
+	log1 = "Improved functionality of the fly/vFly command";
+	log2 = [[Added a keybind to toggle flying (FOR PC USERS)
+	- Keybinds: "F" for the fly command and "V" for the vFly command]];
+	log3 = 'Added Shiftlock option to the enable/disable command that will enable/disable shiftlock in the Roblox settings';
+	log4 = [[added reverb (reverbcontrol) Command
+	- Changes the sound reverb]];
+	log5 = [[added lighting (lightingcontrol) Command
+	- Changes the lighting technology]];
+	log6 = [[added commandloop (cmdloop) Command
+	- Run any command on Nameless Admin in a loop
+	- Command to stop the loop: stoploop]];
+	log7 = 'To run the loop, you must input the command and arguments.';
+	log8 = "Example of usage: (cmdloop chat text) or (cmdloop jump) (arguments are not really required on commands that don't use them)";
+	log9 = 'A notification will appear to set a loop delay before running (empty = 0 sec "spam")';
 }
 
 local updDate="unknown" --month,day,year
@@ -659,40 +669,33 @@ function rngMsg()
 end
 
 function getRoot(char)
-	return char:FindFirstChild('HumanoidRootPart') or char:FindFirstChild('Torso') or char:FindFirstChild('UpperTorso') or nil
+	return char:FindFirstChild("HumanoidRootPart") or 
+	       char:FindFirstChild("Torso") or 
+	       char:FindFirstChild("UpperTorso")
 end
 
 function getChar()
-	return game:GetService("Players").LocalPlayer.Character
+	local player = game:GetService("Players").LocalPlayer
+	return player.Character or player.CharacterAdded:Wait()
 end
 
 function getPlrChar(plr)
-	local isChar=game:GetService("Players")[plr].Character
-	if isChar then
-		return isChar
-	else
-		return false
-	end
+	return plr and plr.Character or nil
 end
 
 function getBp()
-	return game:GetService("Players").LocalPlayer:FindFirstChildOfClass("Backpack")
+	local player = game:GetService("Players").LocalPlayer
+	return player:FindFirstChildWhichIsA("Backpack")
 end
 
 function getHum()
-	if game:GetService("Players").LocalPlayer and getChar() and getChar():FindFirstChildOfClass("Humanoid") then
-		return getChar():FindFirstChildOfClass("Humanoid")
-	else
-		return false
-	end
+	local char = getChar()
+	return char and char:FindFirstChildWhichIsA("Humanoid") or nil
 end
 
 function getPlrHum(plr)
-	if plr and plr.Character and plr.Character:FindFirstChildOfClass("Humanoid") then
-		return plr.Character:FindFirstChildOfClass("Humanoid")
-	else
-		return false
-	end
+	local char = getPlrChar(plr)
+	return char and char:FindFirstChildWhichIsA("Humanoid") or nil
 end
 
 function isNumber(str)
@@ -716,6 +719,30 @@ function GetInTable(Table,Name)
 		end
 	end
 	return false
+end
+
+function MouseButtonFix(button, clickCallback)
+    local isHolding = false
+    local holdThreshold = 0.2
+    local mouseDownTime = 0
+
+    button.MouseButton1Down:Connect(function()
+        isHolding = false
+        mouseDownTime = tick()
+    end)
+
+    button.MouseButton1Up:Connect(function()
+        local holdDuration = tick() - mouseDownTime
+        if holdDuration < holdThreshold and not isHolding then
+            clickCallback()
+        end
+    end)
+
+    UserInputService.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement and input.UserInputState == Enum.UserInputState.Change then
+            isHolding = true
+        end
+    end)
 end
 
 --[[ FUNCTION TO GET A PLAYER ]]--
@@ -1349,42 +1376,46 @@ local tan=m.tan
 local cos=m.cos
 
 --[[ PLAYER FUNCTIONS ]]--
-local argument={}
-argument.getPlayers=function(str)
-	local playerNames,players=lib.parseText(str,opt.tupleSeparator),{}
-	for _,arg in pairs(playerNames or {"me"}) do
-		arg=arg:lower()
-		local playerList=Players:GetPlayers()
-		if arg=="me" or arg==nil then
-			table.insert(players,localPlayer)
+local argument = {}
+argument.getPlayers = function(str)
+	local playerNames, players = lib.parseText(str, opt.tupleSeparator), {}
+	for _, arg in pairs(playerNames or {"me"}) do
+		arg = arg:lower()
+		local playerList = Players:GetPlayers()
+		if arg == "me" or arg == nil then
+			table.insert(players, localPlayer)
 
-		elseif arg=="all" then
-			for _,plr in pairs(playerList) do
-				table.insert(players,plr)
+		elseif arg == "all" then
+			for _, plr in pairs(playerList) do
+				table.insert(players, plr)
 			end
 
-		elseif arg=="others" then
-			for _,plr in pairs(playerList) do
-				if plr~=localPlayer then
-					table.insert(players,plr)
+		elseif arg == "others" then
+			for _, plr in pairs(playerList) do
+				if plr ~= localPlayer then
+					table.insert(players, plr)
 				end
 			end
 
-		elseif arg=="random" then
-			table.insert(players,playerList[math.random(1,#playerList)])
+		elseif arg == "random" then
+			if #playerList > 0 then
+				table.insert(players, playerList[math.random(1, #playerList)])
+			end
 
-		elseif arg:find("%%")==1 then
-			local teamName=arg:sub(2)
-			for _,plr in pairs(playerList) do
-				if tostring(plr.Team):lower():find(teamName)==1 then
-					table.insert(players,plr)
+		elseif arg:sub(1, 1) == "%" then
+			local teamName = arg:sub(2)
+			for _, plr in pairs(playerList) do
+				if plr.Team and tostring(plr.Team):lower():find(teamName) == 1 then
+					table.insert(players, plr)
 				end
 			end
 
 		else
-			for _,plr in pairs(playerList) do
-				if plr.Name:lower():find(arg)==1 or (plr.DisplayName and plr.DisplayName:lower():find(arg)==1) or (tostring(plr.UserId):lower():find(arg)==1) then
-					table.insert(players,plr)
+			for _, plr in pairs(playerList) do
+				if plr.Name:lower():find(arg) == 1 or 
+				   (plr.DisplayName and plr.DisplayName:lower():find(arg) == 1) or 
+				   (tostring(plr.UserId):lower():find(arg) == 1) then
+					table.insert(players, plr)
 				end
 			end
 		end
@@ -1561,42 +1592,11 @@ if IsOnMobile then
 			end
 		end)
 	
-		closeButton.MouseButton1Click:Connect(function()
+		MouseButtonFix(closeButton,function()
 			scaleFrame:Destroy()
 		end)
 	
-		local function draggable(ui)
-			local dragging, dragInput, dragStart, startPos
-			local function update(input)
-				local delta = input.Position - dragStart
-				ui.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-			end
-			ui.InputBegan:Connect(function(input)
-				if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-					dragging = true
-					dragStart = input.Position
-					startPos = ui.Position
-					input.Changed:Connect(function()
-						if input.UserInputState == Enum.UserInputState.End then
-							dragging = false
-						end
-					end)
-				end
-			end)
-			ui.InputChanged:Connect(function(input)
-				if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-					dragInput = input
-				end
-			end)
-			UserInputService.InputChanged:Connect(function(input)
-				if input == dragInput and dragging then
-					update(input)
-				end
-			end)
-			ui.Active = true
-		end
-	
-		draggable(frame)
+		gui.draggable(frame)
 	end)
 end
 
@@ -1675,25 +1675,27 @@ cmd.add({"updatelog","updlog","updates"},{"updatelog (updlog,updates)","show the
 	gui.updateLogs()
 end)
 
-cmd.add({"discord"},{"discord","Copy an invite link to the official Nameless Admin discord server"},function()
-	if setclipboard then 
-		Notify({
-			Title = "Discord",
-			Description = "https://discord.gg/zS7TpV3p64",
-			Buttons = {
-				{Text = "Copy Link", Callback = function() setclipboard('https://discord.gg/zS7TpV3p64') end},
-				{Text = "Close", Callback = function() end}
-			}
-		})
-	else
-		Notify({
-			Title = "Discord",
-			Description = "Your exploit does not support setclipboard\nRetype the invite link yourself (https://discord.gg/zS7TpV3p64)",
-			Buttons = {
-				{Text = "Close", Callback = function() end}
-			}
-		})
-	end
+cmd.add({"discord"}, {"discord", "Copy an invite link to the official Nameless Admin Discord server"}, function()
+    local inviteLink = "https://discord.gg/zS7TpV3p64"
+    
+    if setclipboard then
+        Notify({
+            Title = "Discord",
+            Description = inviteLink,
+            Buttons = {
+                {Text = "Copy Link", Callback = function() setclipboard(inviteLink) end},
+                {Text = "Close", Callback = function() end}
+            }
+        })
+    else
+        Notify({
+            Title = "Discord",
+            Description = "Your exploit does not support setclipboard.\nPlease manually type the invite link: "..inviteLink,
+            Buttons = {
+                {Text = "Close", Callback = function() end}
+            }
+        })
+    end
 end)
 
 cmd.add({"clickfling","mousefling"},{"mousefling (clickfling)","Fling a player by clicking them"},function()
@@ -1979,7 +1981,7 @@ cmd.add({"ping"},{"ping","Shows your ping"},function()
 	UIAspectRatioConstraint.Parent=Pingtext
 	UIAspectRatioConstraint.AspectRatio=5.743
 
-	CloseButton.MouseButton1Click:Connect(function()
+	MouseButtonFix(CloseButton,function()
 		Ping:Destroy()
 	end)
 
@@ -2061,7 +2063,7 @@ cmd.add({"fps"},{"fps","Shows your fps"},function()
 	UIAspectRatioConstraint.Parent=Fpstext
 	UIAspectRatioConstraint.AspectRatio=5.743
 
-	CloseButton.MouseButton1Click:Connect(function()
+	MouseButtonFix(CloseButton,function()
 		Fps:Destroy()
 	end)
 
@@ -2162,7 +2164,7 @@ end)
 hiddenfling = false
 flingConnection = nil
 
-cmd.add({"walkfling", "wfling"}, {"walkfling (wfling) [THANKS TO X]", "probably the best fling lol"}, function()
+cmd.add({"walkfling", "wfling"}, {"walkfling (wfling)", "probably the best fling lol"}, function()
 	if hiddenfling then return end
 
 	DoNotif("Walkfling enabled")
@@ -2271,7 +2273,7 @@ cmd.add({"rjre", "rejoinrefresh"}, {"rjre (rejoinrefresh)", "Rejoins and telepor
 			local LocalPlayer = Players.LocalPlayer
 
 			pcall(function()
-				DoNotif("Teleporting back to same server...",5,"Rejoining")
+				DoNotif("Rejoining back to the saved position...")
 			end)
 
 			local success = pcall(function()
@@ -2298,7 +2300,7 @@ cmd.add({"rejoin","rj"},{"rejoin (rj)","Rejoin the game"},function()
 	local localPlayer = players.LocalPlayer
 
 	function onTeleportError(errorMessage)
-		DoNotif("Teleport failed: "..errorMessage, 5)
+		DoNotif("Teleport failed: "..errorMessage)
 	end
 
 	teleportService.TeleportInitFailed:Connect(onTeleportError)
@@ -2324,7 +2326,7 @@ cmd.add({"rejoin","rj"},{"rejoin (rj)","Rejoin the game"},function()
 	end
 
 	wait()
-	DoNotif("Rejoining...", 5)
+	DoNotif("Rejoining...")
 end)
 
 cmd.add({"teleporttoplace","toplace","ttp"},{"teleporttoplace (PlaceId) (toplace,ttp)","Teleports you using PlaceId"},function(...)
@@ -2571,7 +2573,7 @@ cmd.add({"vfly", "vehiclefly"}, {"vehiclefly (vfly)", "be able to fly vehicles"}
         aspect.AspectRatio = 1.0
 
         coroutine.wrap(function()
-            btn.MouseButton1Click:Connect(function()
+            MouseButtonFix(btn,function()
                 if not vOn then
                     vOn = true
                     btn.Text = "UnvFly"
@@ -3143,22 +3145,11 @@ cmd.add({"copytools","ctools"},{"copytools <player> (ctools)","Copies the tools 
 	end
 end,true)
 
-cmd.add({"localtime","yourtime"},{"localtime (yourtime)","Shows your current time"},function()
-	local hour=os.date("*t")['hour']
-	if hour<10 then
-		hour="0"..hour
-	end
-	local min=os.date("*t")['min']
-	if min<10 then
-		min="0"..min
-	end
-	local sec=os.date("*t")['sec']
-	if sec<10 then
-		sec="0"..sec
-	end
-	local clock=hour..":"..min..":"..sec
+cmd.add({"localtime", "yourtime"}, {"localtime (yourtime)", "Shows your current time"}, function()
+    local time = os.date("*t")
+    local clock = string.format("%02d:%02d:%02d", time.hour, time.min, time.sec)
 
-	DoNotif("Your Local Time Is: "..clock)
+    DoNotif("Your Local Time Is: "..clock)
 end)
 
 cmd.add({"cartornado", "ctornado"}, {"cartornado (ctornado)", "Tornados a car just sit in the car"}, function()
@@ -3481,13 +3472,13 @@ end)
 
 cmd.add({"trip"},{"trip","get up NOW"},function()
 	getChar():FindFirstChildOfClass("Humanoid"):ChangeState(0)
-	getChar():FindFirstChild("HumanoidRootPart").Velocity=getChar():FindFirstChild("HumanoidRootPart").CFrame.LookVector*25
+	getRoot(getChar()).Velocity=getRoot(getChar()).CFrame.LookVector*25
 end)
 
 noTripCon = nil
 
 cmd.add({"antitrip"}, {"antitrip", "no tripping today bruh"}, function()
-	function antiTrip(char)
+	local function antiTrip(char)
 		local hum = getHum()
 		local root = getRoot(char)
 
@@ -4977,19 +4968,19 @@ cmd.add({"functionspy"},{"functionspy","Check console"},function()
 			btn.Name=name
 			btn.name.Text=name
 			btn.Visible=true
-			table.insert(connections,btn.MouseButton1Click:Connect(function()
+			table.insert(connections,MouseButtonFix(btn,function()
 				Main.RightPanel.output.Text=text
 				currentInfo=text
 			end))
 		end
 
-		Main.RightPanel.copy.MouseButton1Click:Connect(function()
+		MouseButtonFix(Main.RightPanel.copy,function()
 			if currentInfo~=nil then
 				setclipboard(tostring(currentInfo))
 			end
 		end)
 
-		Main.RightPanel.clear.MouseButton1Click:Connect(function()
+		MouseButtonFix(Main.RightPanel.clear,function()
 			for i,v in pairs(connections) do
 				v:Disconnect()
 			end
@@ -5237,7 +5228,7 @@ cmd.add({"functionspy"},{"functionspy","Check console"},function()
 			end
 		end))
 
-		table.insert(_G.functionspy.connections,FakeTitle.MouseButton1Click:Connect(function()
+		table.insert(_G.functionspy.connections,MouseButtonFix(FakeTitle,function()
 			_G.functionspy.logging=not _G.functionspy.logging
 			if _G.functionspy.logging==true then
 				game:GetService("TweenService"):Create(FakeTitle.Parent.Title,TweenInfo.new(0.3),{TextColor3=Color3.new(0,1,0)}):Play()
@@ -5252,7 +5243,7 @@ cmd.add({"functionspy"},{"functionspy","Check console"},function()
 	end
 	coroutine.wrap(BIPVKVC_fake_script)()
 	function PRML_fake_script()
-		clear.MouseButton1Click:Connect(function()
+		MouseButtonFix(clear,function()
 			_G.functionspy.shutdown()
 		end)
 	end
@@ -5341,7 +5332,7 @@ cmd.add({"fly"}, {"fly [speed]", "Enable flight"}, function(...)
         aspect.AspectRatio = 1.0
 
         coroutine.wrap(function()
-            btn.MouseButton1Click:Connect(function()
+            MouseButtonFix(btn,function()
                 if not mOn then
                     mOn = true
                     btn.Text = "Unfly"
@@ -5501,7 +5492,7 @@ cmd.add({"clip","c"},{"clip","Enable your player's collision"},function()
 	lib.disconnect("noclip")
 end)
 
-cmd.add({"orbit"}, {"orbit <player> <distance>", "Orbit around a player"}, function(p,d)
+cmd.add({"orbit"}, {"orbit <player> <distance>", "Orbit around a player"}, function(p, d)
 	lib.disconnect("orbit")
 	local players = argument.getPlayers(p)
 	local target = players[1]
@@ -5513,21 +5504,21 @@ cmd.add({"orbit"}, {"orbit <player> <distance>", "Orbit around a player"}, funct
 	local dist = tonumber(d) or 4
 
 	if tchar and char and thrp and hrp then
-		local sineX, sineZ = 0, math.pi/2
+		local sineX, sineZ = 0, math.pi / 2
 		lib.connect("orbit", RunService.Stepped:Connect(function()
 			sineX, sineZ = sineX + 0.05, sineZ + 0.05
 			local sinX, sinZ = math.sin(sineX), math.sin(sineZ)
 			if thrp.Parent and hrp.Parent then
-				hrp.Velocity = Vector3.new(0, 0, 0)
+				hrp.Velocity = Vector3.zero
 				hrp.CFrame = CFrame.new(sinX * dist, 0, sinZ * dist) *
 					(hrp.CFrame - hrp.CFrame.p) +
 					thrp.CFrame.p
 			end
 		end))
 	end
-end,true)
+end, true)
 
-cmd.add({"uporbit"}, {"uporbit <player> <distance>", "Orbit around a player on the Y axis"}, function(p,d)
+cmd.add({"uporbit"}, {"uporbit <player> <distance>", "Orbit around a player on the Y axis"}, function(p, d)
 	lib.disconnect("orbit")
 	local players = argument.getPlayers(p)
 	local target = players[1]
@@ -5539,19 +5530,23 @@ cmd.add({"uporbit"}, {"uporbit <player> <distance>", "Orbit around a player on t
 	local dist = tonumber(d) or 4
 
 	if tchar and char and thrp and hrp then
-		local sineX, sineY = 0, math.pi/2
+		local sineX, sineY = 0, math.pi / 2
 		lib.connect("orbit", RunService.Stepped:Connect(function()
 			sineX, sineY = sineX + 0.05, sineY + 0.05
 			local sinX, sinY = math.sin(sineX), math.sin(sineY)
 			if thrp.Parent and hrp.Parent then
-				hrp.Velocity = Vector3.new(0, 0, 0)
+				hrp.Velocity = Vector3.zero
 				hrp.CFrame = CFrame.new(sinX * dist, sinY * dist, 0) *
 					(hrp.CFrame - hrp.CFrame.p) +
 					thrp.CFrame.p
 			end
 		end))
 	end
-end,true)
+end, true)
+
+cmd.add({"unorbit"}, {"unorbit", "Stop orbiting"}, function()
+	lib.disconnect("orbit")
+end)
 
 cmd.add({"freezewalk"},{"freezewalk","Freezes your character on the server but lets you walk on the client"},function()
 	local Character=getChar()
@@ -6597,7 +6592,8 @@ local function createGui()
 	if not specGui then
 		specGui = Instance.new("ScreenGui")
 		specGui.Name = "SpectateGui"
-		specGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+		specGui.Parent = gethui and gethui() or (CoreGui or PlrGui)
+		specGui.ResetOnSpawn = false
 
 		local frame = Instance.new("Frame")
 		frame.Size = UDim2.new(0, 350, 0, 120)
@@ -6680,7 +6676,7 @@ local function createGui()
 			spectatePlayer(currentPlayer)
 		end
 
-		backButton.MouseButton1Click:Connect(function()
+		MouseButtonFix(backButton,function()
 			if #playerButtons == 0 then return end
 			currentPlayerIndex = currentPlayerIndex - 1
 			if currentPlayerIndex < 1 then
@@ -6689,7 +6685,7 @@ local function createGui()
 			updateSpectating()
 		end)
 
-		forwardButton.MouseButton1Click:Connect(function()
+		MouseButtonFix(forwardButton,function()
 			if #playerButtons == 0 then return end
 			currentPlayerIndex = currentPlayerIndex + 1
 			if currentPlayerIndex > #playerButtons then
@@ -8019,7 +8015,7 @@ cmd.add({"unloopfling"},{"unloopfling","Stops loop flinging a player"},function(
 	Loopvoid=false
 end)
 
-cmd.add({"inspect"}, {"examine", "checks a user's items"}, function(args)
+cmd.add({"inspect"}, {"inspect", "checks a user's items"}, function(args)
     local targetPlayers = getPlr(args[1] or LocalPlayer)
     
     for _, playerName in ipairs(targetPlayers) do
@@ -10067,7 +10063,7 @@ cmd.add({"invisible", "invis"}, {"invisible (invis)", "Sets invisibility to scar
 
         gui.draggable(TextButton)
 
-        TextButton.MouseButton1Click:Connect(function()
+        MouseButtonFix(TextButton,function()
             ToggleInvisibility()
             TextButton.Text = IsInvis and "Visible" or "Invisible"
         end)
@@ -10736,7 +10732,7 @@ gui.menuify=function(menu)
 	local minimized=false
 	local isAnimating = false
 	local sizeX,sizeY=Instance.new("IntValue",menu),Instance.new("IntValue",menu)
-	mini.MouseButton1Click:Connect(function()
+	MouseButtonFix(mini,function()
 		if isAnimating then return end
 
 		minimized = not minimized
@@ -10754,7 +10750,7 @@ gui.menuify=function(menu)
 			end)
 		end
 	end)
-	exit.MouseButton1Click:Connect(function()
+	MouseButtonFix(exit,function()
 		menu.Visible=false
 	end)
 	gui.draggable(menu,menu.Topbar)
@@ -10767,7 +10763,7 @@ gui.menuifyv2=function(menu)
 	local minimized=false
 	local isAnimating = false
 	local sizeX,sizeY=Instance.new("IntValue",menu),Instance.new("IntValue",menu)
-	mini.MouseButton1Click:Connect(function()
+	MouseButtonFix(mini,function()
 		if isAnimating then return end
 
 		minimized = not minimized
@@ -10785,11 +10781,11 @@ gui.menuifyv2=function(menu)
 			end)
 		end
 	end)
-	exit.MouseButton1Click:Connect(function()
+	MouseButtonFix(exit,function()
 		menu.Visible=false
 	end)
 	if clear then 
-		clear.MouseButton1Click:Connect(function()
+		MouseButtonFix(clear,function()
 			local t=menu:FindFirstChild("Container",true):FindFirstChildOfClass("ScrollingFrame"):FindFirstChildOfClass("UIListLayout",true)
 			for _,v in ipairs(t.Parent:GetChildren()) do
 				if v:IsA("TextLabel") then
@@ -10831,7 +10827,7 @@ gui.shiftlock=function(sLock,lockImg)
 		end
 	end
 
-	sLock.MouseButton1Click:Connect(function()
+	MouseButtonFix(sLock,function()
 		V=not V
 		lockImg.ImageColor3=V and Color3.fromRGB(0,170,255) or Color3.fromRGB(255,255,255)
 		if V then
@@ -11254,6 +11250,7 @@ end)
 --[[ COMMAND BAR BUTTON ]]--
 local TextLabel = Instance.new("TextLabel")
 local Info = Instance.new("TextLabel")
+local Info2 = Instance.new("TextLabel")
 local UICorner = Instance.new("UICorner")
 local ImageButton = Instance.new("ImageButton")
 local UICorner2 = Instance.new("UICorner")
@@ -11269,6 +11266,7 @@ Shadow.Size = UDim2.new(0, 2, 0, 33)
 Shadow.ZIndex = 9998
 
 TextLabel.Parent = ScreenGui
+TextLabel.Name = randomString()
 TextLabel.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 TextLabel.BackgroundTransparency = 0.2
 TextLabel.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -11282,12 +11280,13 @@ TextLabel.TextWrapped = true
 TextLabel.ZIndex = 9999
 
 Info.Parent = ScreenGui
+Info.Name = randomString()
 Info.BackgroundTransparency = 1
 Info.AnchorPoint = Vector2.new(0, 1)
 Info.Position = UDim2.new(0, 10, 1, -10)
 Info.Size = UDim2.new(0, 200, 0, 20)
 Info.Font = Enum.Font.Gotham
-Info.Text = adminName.." V"..curVer.."\n"..dadojadoqwdqwd.."\ndiscord.gg/zS7TpV3p64"
+Info.Text = adminName.." V"..curVer.."\n"..dadojadoqwdqwd
 Info.TextColor3 = Color3.fromRGB(255, 255, 255)
 Info.TextTransparency = 0.5
 Info.RichText = true
@@ -11295,7 +11294,23 @@ Info.TextSize = 14
 Info.TextXAlignment = Enum.TextXAlignment.Left
 Info.ZIndex = 9999
 
+Info2.Parent = ScreenGui
+Info2.Name = randomString()
+Info2.BackgroundTransparency = 1
+Info2.AnchorPoint = Vector2.new(1, 1)
+Info2.Position = UDim2.new(1, -10, 1, -10)
+Info2.Size = UDim2.new(0, 200, 0, 20)
+Info2.Font = Enum.Font.Gotham
+Info2.Text = "Updated On: "..updDate.."\ndiscord.gg/zS7TpV3p64"
+Info2.TextColor3 = Color3.fromRGB(255, 255, 255)
+Info2.TextTransparency = 0.5
+Info2.RichText = true
+Info2.TextSize = 14
+Info2.TextXAlignment = Enum.TextXAlignment.Right
+Info2.ZIndex = 9999
+
 ImageButton.Parent = ScreenGui
+ImageButton.Name = randomString()
 ImageButton.AnchorPoint = Vector2.new(0.5, 0)
 ImageButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 ImageButton.BorderSizePixel = 0
@@ -11323,7 +11338,7 @@ function Swoosh()
 	ImageButton:TweenSize(UDim2.new(0, 32 * NAScale, 0, 33 * NAScale), "Out", "Quint", 2, true)
 
 	local tweenService = game:GetService("TweenService")
-	local rotationTween = tweenService:Create(ImageButton, TweenInfo.new(3, Enum.EasingStyle.Quint), {Rotation = 720})
+	local rotationTween = tweenService:Create(ImageButton, TweenInfo.new(2, Enum.EasingStyle.Quint), {Rotation = 720})
 	rotationTween:Play()
 
 	gui.draggable(ImageButton)
@@ -11367,7 +11382,7 @@ end
 coroutine.wrap(mainNameless)()
 
 if IsOnMobile then
-	ImageButton.MouseButton1Click:Connect(function()
+	MouseButtonFix(ImageButton,function()
 		gui.barSelect()
 		cmdInput.Text=''
 		cmdInput:CaptureFocus()
@@ -11417,6 +11432,8 @@ CaptureService.CaptureBegan:Connect(function()
 		NAimageButton.Visible=false
 	elseif Info then
 		Info.Visible=false
+	elseif Info2 then
+		Info2.Visible=false
 	end
 end)
 
@@ -11426,18 +11443,28 @@ CaptureService.CaptureEnded:Connect(function()
 			NAimageButton.Visible=true
 		elseif Info then
 			Info.Visible=true
+		elseif Info2 then
+			Info2.Visible=true
 		end
     end)
 end)
 
 print([[
-	╭━╮ ╭╮        ╭╮          ╭━━━╮ ╭╮
-	┃┃╰╮┃┃        ┃┃          ┃╭━╮┃ ┃┃
-	┃╭╮╰╯┣━━┳╮╭┳━━┫┃╭━━┳━━┳━━╮┃┃ ┃┣━╯┣╮╭┳┳━╮
-	┃┃╰╮┃┃╭╮┃╰╯┃┃━┫┃┃┃━┫━━┫━━┫┃╰━╯┃╭╮┃╰╯┣┫╭╮╮
-	┃┃ ┃┃┃╭╮┃┃┃┃┃━┫╰┫┃━╋━━┣━━┃┃╭━╮┃╰╯┃┃┃┃┃┃┃┃
-	╰╯ ╰━┻╯╰┻┻┻┻━━┻━┻━━┻━━┻━━╯╰╯ ╰┻━━┻┻┻┻┻╯╰╯
-	]])
+	
+███╗░░██╗░█████╗░███╗░░░███╗███████╗██╗░░░░░███████╗░██████╗░██████╗
+████╗░██║██╔══██╗████╗░████║██╔════╝██║░░░░░██╔════╝██╔════╝██╔════╝
+██╔██╗██║███████║██╔████╔██║█████╗░░██║░░░░░█████╗░░╚█████╗░╚█████╗░
+██║╚████║██╔══██║██║╚██╔╝██║██╔══╝░░██║░░░░░██╔══╝░░░╚═══██╗░╚═══██╗
+██║░╚███║██║░░██║██║░╚═╝░██║███████╗███████╗███████╗██████╔╝██████╔╝
+╚═╝░░╚══╝╚═╝░░╚═╝╚═╝░░░░░╚═╝╚══════╝╚══════╝╚══════╝╚═════╝░╚═════╝░
+
+░█████╗░██████╗░███╗░░░███╗██╗███╗░░██╗
+██╔══██╗██╔══██╗████╗░████║██║████╗░██║
+███████║██║░░██║██╔████╔██║██║██╔██╗██║
+██╔══██║██║░░██║██║╚██╔╝██║██║██║╚████║
+██║░░██║██████╔╝██║░╚═╝░██║██║██║░╚███║
+╚═╝░░╚═╝╚═════╝░╚═╝░░░░░╚═╝╚═╝╚═╝░░╚══╝
+]])
 
 task.spawn(function()
 	while task.wait() do
@@ -11446,6 +11473,17 @@ task.spawn(function()
 			break
 		end
 	end
+end)
+
+task.spawn(function()
+	while task.wait(1) do
+		local currentTime = os.date("%H:%M:%S")
+        Info2.Text = "Updated On: "..updDate.."\nCurrent Time: "..currentTime.."\ndiscord.gg/zS7TpV3p64"
+	end
+end)
+
+task.spawn(function()
+	Info.Text = adminName.." V"..curVer.."\n"..dadojadoqwdqwd.."\nPlace: "..placeName()
 end)
 
 task.spawn(function()
