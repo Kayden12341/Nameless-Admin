@@ -248,6 +248,7 @@ local Loopmute=false
 local OrgDestroyHeight = game:GetService("Workspace").FallenPartsDestroyHeight
 local Watch=false
 local Admin={}
+local playerButtons={}
 CoreGui=COREGUI;
 _G.NAadminsLol={
 	530829101; --Viper
@@ -6517,7 +6518,7 @@ cmd.add({"unlookat", "unstare"}, {"unstare (unlookat)", "Stops staring"}, functi
 end)
 
 local conn, loop, plrLeftCon = nil, nil, nil
-local specGui, playerButtons, currentPlayerIndex = nil, {}, 1
+local specGui, currentPlayerIndex = nil, 1
 
 function cleanup()
 	if conn then
@@ -6660,11 +6661,6 @@ local function createGui()
 		local forwardCorner = Instance.new("UICorner")
 		forwardCorner.CornerRadius = UDim.new(0, 10)
 		forwardCorner.Parent = forwardButton
-
-		playerButtons = {}
-		for _, player in pairs(game:GetService("Players"):GetPlayers()) do
-			table.insert(playerButtons, player)
-		end
 
 		local function updateSpectating()
 			if #playerButtons == 0 then
@@ -10313,14 +10309,22 @@ end
 
 Players.PlayerAdded:Connect(function(plr)
 	CheckPermissions(plr)
-end)
-Players.PlayerAdded:Connect(function(plr)
+	table.insert(playerButtons, plr)
 	if ESPenabled then
 		repeat wait(1) until plr.Character
 		ESP(plr)
 	end
 end)
+Players.PlayerRemoving:Connect(function(plr)
+	for i, p in ipairs(playerButtons) do
+		if p == plr then
+			table.remove(playerButtons, i)
+			break
+		end
+	end
+end)
 for i,v in pairs(Players:GetPlayers()) do
+	table.insert(playerButtons, v)
 	if v~=LocalPlayer then
 		CheckPermissions(v)
 	end
