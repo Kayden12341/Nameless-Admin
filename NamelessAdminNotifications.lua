@@ -351,11 +351,21 @@ _G.EnhancedNotifs = {
         end
 
         if ButtonCount > 0 then
+            local ScrollingFrame = Instance.new("ScrollingFrame")
+            ScrollingFrame.Size = UDim2.new(1, -30, 0, 100)
+            ScrollingFrame.Position = UDim2.new(0, 15, 0, YPosition)
+            ScrollingFrame.BackgroundTransparency = 1
+            ScrollingFrame.BorderSizePixel = 0
+            ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+            ScrollingFrame.ScrollBarThickness = 6
+            ScrollingFrame.ScrollBarImageColor3 = Color3.fromRGB(100, 100, 100)
+            ScrollingFrame.Parent = NewNotif
+
             local buttonsPerRow = ButtonCount <= 3 and ButtonCount or (ButtonCount <= 6 and 3 or 3)
             local rows = math.ceil(ButtonCount / buttonsPerRow)
 
-            Y += rows * 35 + (rows - 1) * 5 + 5
-            NewNotif.Size = UDim2.new(0, 300, 0, Y)
+            local totalHeight = rows * 35 + (rows - 1) * 5 + 5
+            ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, totalHeight)
 
             for row = 1, rows do
                 local buttonsInThisRow = math.min(buttonsPerRow, ButtonCount - (row - 1) * buttonsPerRow)
@@ -366,14 +376,14 @@ _G.EnhancedNotifs = {
                     local ButtonInfo = Buttons[buttonIndex]
 
                     if ButtonInfo then
-                        local xPos = 15 + (col - 1) * (buttonWidth + 10)
-                        local yPos = YPosition + (row - 1) * 40
+                        local xPos = (col - 1) * (buttonWidth + 10)
+                        local yPos = (row - 1) * 40
 
                         local Button = CreateSquircleButton(
                             ButtonInfo.Text,
                             buttonWidth,
                             30,
-                            NewNotif,
+                            ScrollingFrame,
                             UDim2.new(0, xPos, 0, yPos)
                         )
 
@@ -390,6 +400,9 @@ _G.EnhancedNotifs = {
                     end
                 end
             end
+
+            Y += 100
+            NewNotif.Size = UDim2.new(0, 300, 0, Y)
         else
             local CloseBtn = CreateCloseButton(NewNotif)
             CloseBtn.MouseButton1Click:Connect(function()
