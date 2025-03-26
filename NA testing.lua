@@ -237,10 +237,10 @@ local Lighting=game:GetService("Lighting");
 local ReplicatedStorage=game:GetService("ReplicatedStorage");
 local GuiService=game:GetService("GuiService");
 local COREGUI=game:GetService("CoreGui");
-local AvatarEditorService = game:GetService("AvatarEditorService")
-local ChatService = game:GetService("Chat")
-local TextChatService = game:GetService("TextChatService")
-local CaptureService = game:GetService("CaptureService")
+local AvatarEditorService = game:GetService("AvatarEditorService");
+local ChatService = game:GetService("Chat");
+local TextChatService = game:GetService("TextChatService");
+local CaptureService = game:GetService("CaptureService");
 local IsOnMobile=false--table.find({Enum.Platform.IOS,Enum.Platform.Android},UserInputService:GetPlatform());
 local IsOnPC=false--table.find({Enum.Platform.Windows,Enum.Platform.UWP,Enum.Platform.Linux,Enum.Platform.SteamOS,Enum.Platform.OSX,Enum.Platform.Chromecast,Enum.Platform.WebOS},UserInputService:GetPlatform());
 local sethidden=sethiddenproperty or set_hidden_property or set_hidden_prop
@@ -723,7 +723,7 @@ end
 
 function MouseButtonFix(button, clickCallback)
     local isHolding = false
-    local holdThreshold = 0.2
+    local holdThreshold = 0.5
     local mouseDownTime = 0
 
     button.MouseButton1Down:Connect(function()
@@ -4398,6 +4398,28 @@ cmd.add({"reverb", "reverbcontrol"}, {"reverb (reverbcontrol)", "Manage sound re
     Notify({
         Title = "Sound Reverb Options",
         Buttons = reverbButtons
+    })
+end)
+
+cmd.add({"cam", "camera", "cameratype"}, {"cam (camera, cameratype)", "Manage camera type settings"}, function()
+    local cameraTypeButtons = {}
+    for _, cameraType in ipairs(Enum.CameraType:GetEnumItems()) do
+        table.insert(cameraTypeButtons, {
+            Text = cameraType.Name,
+            Callback = function()
+                game:GetService("Workspace").CurrentCamera.CameraType = cameraType
+            end
+        })
+    end
+
+    table.insert(cameraTypeButtons, {
+        Text = "Cancel",
+        Callback = function() end
+    })
+
+    Notify({
+        Title = "Camera Type Options",
+        Buttons = cameraTypeButtons
     })
 end)
 
@@ -11478,7 +11500,7 @@ end)
 task.spawn(function()
 	while task.wait(1) do
 		local currentTime = os.date("%H:%M:%S")
-        Info2.Text = "Updated On: "..updDate.."\nCurrent Time: "..currentTime.."\ndiscord.gg/zS7TpV3p64"
+        Info2.Text = "Updated On: "..updDate.."\nCurrent Time: "..currentTime
 	end
 end)
 
