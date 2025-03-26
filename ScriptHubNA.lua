@@ -477,7 +477,7 @@ local function search(q)
 end
 
 sb.MouseButton1Click:Connect(function()
-    local q = stb.Text
+    local q = stb.Text:gsub(" ", "-")
     if q ~= "" then
         search(q)
     else
