@@ -6517,8 +6517,9 @@ cmd.add({"unlookat", "unstare"}, {"unstare (unlookat)", "Stops staring"}, functi
 end)
 
 local conn, loop, plrLeftCon = nil, nil, nil
+local specGui, playerButtons, currentPlayerIndex = nil, {}, 1
 
-local function cleanup()
+function cleanup()
 	if conn then
 		conn:Disconnect()
 		conn = nil
@@ -6531,14 +6532,28 @@ local function cleanup()
 		plrLeftCon:Disconnect()
 		plrLeftCon = nil
 	end
+	if specGui then
+		specGui:Destroy()
+		specGui=nil
+	end
 	game:GetService("Workspace").CurrentCamera.CameraSubject = getHum()
 end
 
-cmd.add({"watch", "view", "spectate"}, {"view <p>", "Spectate player"}, function(...)
-	cleanup()
-
-	local targetPlayer = getPlr((...))
+function spectatePlayer(targetPlayer)
 	if not targetPlayer then return end
+
+	if conn then
+		conn:Disconnect()
+		conn = nil
+	end
+	if loop then
+		coroutine.close(loop)
+		loop = nil
+	end
+	if plrLeftCon then
+		plrLeftCon:Disconnect()
+		plrLeftCon = nil
+	end
 
 	conn = targetPlayer.CharacterAdded:Connect(function(character)
 		repeat wait() until character:FindFirstChildWhichIsA("Humanoid")
@@ -6562,9 +6577,141 @@ cmd.add({"watch", "view", "spectate"}, {"view <p>", "Spectate player"}, function
 	end)
 
 	coroutine.resume(loop)
+end
+
+cmd.add({"watch", "view", "spectate"}, {"watch <Player> (view, spectate)", "Spectate player"}, function(...)
+	cleanup()
+
+	local targetPlayer = getPlr((...))
+	if not targetPlayer then return print'oh no' end
+
+	spectatePlayer(targetPlayer)
 end, true)
 
-cmd.add({"unwatch", "unview"}, {"unview", "Stop spectating"}, function()
+cmd.add({"unwatch", "unview"}, {"unwatch (unview)", "Stop spectating"}, function()
+	cleanup()
+end)
+
+local function createGui()
+	if not specGui then
+		specGui = Instance.new("ScreenGui")
+		specGui.Name = "SpectateGui"
+		specGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+		local frame = Instance.new("Frame")
+		frame.Size = UDim2.new(0, 350, 0, 120)
+		frame.Position = UDim2.new(0.5, -175, 1, -160)
+		frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+		frame.BackgroundTransparency = 0
+		frame.BorderSizePixel = 0
+		frame.Parent = specGui
+
+		local corner = Instance.new("UICorner")
+		corner.CornerRadius = UDim.new(0, 20)
+		corner.Parent = frame
+
+		local shadow = Instance.new("ImageLabel")
+		shadow.Size = UDim2.new(1, 20, 1, 20)
+		shadow.Position = UDim2.new(0, -10, 0, -10)
+		shadow.BackgroundTransparency = 1
+		shadow.Image = "rbxassetid://1316045217"
+		shadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
+		shadow.ImageTransparency = 0.7
+		shadow.ScaleType = Enum.ScaleType.Slice
+		shadow.SliceCenter = Rect.new(10, 10, 118, 118)
+		shadow.Parent = frame
+
+		gui.draggable(frame)
+
+		local playerNameLabel = Instance.new("TextLabel")
+		playerNameLabel.Size = UDim2.new(1, 0, 0.4, 0)
+		playerNameLabel.Position = UDim2.new(0, 0, 0, 10)
+		playerNameLabel.Text = "Spectating: None"
+		playerNameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+		playerNameLabel.BackgroundTransparency = 1
+		playerNameLabel.Font = Enum.Font.GothamBold
+		playerNameLabel.TextScaled = true
+		playerNameLabel.Parent = frame
+
+		local backButton = Instance.new("TextButton")
+		backButton.Size = UDim2.new(0.3, 0, 0.4, 0)
+		backButton.Position = UDim2.new(0.05, 0, 0.55, 0)
+		backButton.Text = "<"
+		backButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+		backButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+		backButton.Font = Enum.Font.GothamBold
+		backButton.TextSize = 24
+		backButton.Parent = frame
+
+		local backCorner = Instance.new("UICorner")
+		backCorner.CornerRadius = UDim.new(0, 10)
+		backCorner.Parent = backButton
+
+		local forwardButton = Instance.new("TextButton")
+		forwardButton.Size = UDim2.new(0.3, 0, 0.4, 0)
+		forwardButton.Position = UDim2.new(0.65, 0, 0.55, 0)
+		forwardButton.Text = ">"
+		forwardButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+		forwardButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+		forwardButton.Font = Enum.Font.GothamBold
+		forwardButton.TextSize = 24
+		forwardButton.Parent = frame
+
+		local forwardCorner = Instance.new("UICorner")
+		forwardCorner.CornerRadius = UDim.new(0, 10)
+		forwardCorner.Parent = forwardButton
+
+		playerButtons = {}
+		for _, player in pairs(game:GetService("Players"):GetPlayers()) do
+			table.insert(playerButtons, player)
+		end
+
+		local function updateSpectating()
+			if #playerButtons == 0 then
+				playerNameLabel.Text = "Spectating: None"
+				return
+			end
+			local currentPlayer = playerButtons[currentPlayerIndex]
+			local display=currentPlayer.DisplayName
+			local name=currentPlayer.Name
+			local hh=nil
+			if display:lower()==name:lower() then
+				hh="@"..name..""
+			else
+				hh=display.." (@"..name..")"
+			end
+			playerNameLabel.Text = "Spectating: "..hh
+			spectatePlayer(currentPlayer)
+		end
+
+		backButton.MouseButton1Click:Connect(function()
+			if #playerButtons == 0 then return end
+			currentPlayerIndex = currentPlayerIndex - 1
+			if currentPlayerIndex < 1 then
+				currentPlayerIndex = #playerButtons
+			end
+			updateSpectating()
+		end)
+
+		forwardButton.MouseButton1Click:Connect(function()
+			if #playerButtons == 0 then return end
+			currentPlayerIndex = currentPlayerIndex + 1
+			if currentPlayerIndex > #playerButtons then
+				currentPlayerIndex = 1
+			end
+			updateSpectating()
+		end)
+
+		updateSpectating()
+	end
+end
+
+cmd.add({"watch2", "view2", "spectate2"}, {"watch2 <Player> (view2, spectate2)", "Spectate player with GUI"}, function()
+	cleanup()
+	createGui()
+end, true)
+
+cmd.add({"unwatch2", "unview2"}, {"unwatch2 (unview2)", "Stop spectating with GUI"}, function()
 	cleanup()
 end)
 
