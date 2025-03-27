@@ -2345,65 +2345,61 @@ end,true)
 --made by the_king.78
 cmd.add({"adonisbypass","bypassadonis","badonis","adonisb"},{"adonisbypass (bypassadonis,badonis,adonisb)","bypasses adonis admin detection"},function()
 	local DebugFunc = getinfo or debug.getinfo
-	local IsDebug = false
-	local hooks = {}
+local IsDebug = false
+local hooks = {}
 
-	local DetectedMeth, KillMeth
+local DetectedMeth, KillMeth
 
-	setthreadidentity(2)
+for index, value in getgc(true) do
+    if typeof(value) == "table" then
+        local detected = rawget(value, "Detected")
+        local kill = rawget(value, "Kill")
 
-	for index, value in getgc(true) do
-		if typeof(value) == "table" then
-			local detected = rawget(value, "Detected")
-			local kill = rawget(value, "Kill")
+        if typeof(detected) == "function" and not DetectedMeth then
+            DetectedMeth = detected
 
-			if typeof(detected) == "function" and not DetectedMeth then
-				DetectedMeth = detected
+            local hook
+            hook = hookfunction(DetectedMeth, function(methodName, methodFunc, methodInfo)
+                if methodName ~= "_" then
+                    if IsDebug then
+                        DoNotif("Adonis Detected\nMethod: " .. tostring(methodName) .. "\nInfo: " .. tostring(methodFunc))
+                    end
+                end
 
-				local hook
-				hook = hookfunction(DetectedMeth, function(methodName, methodFunc, methodInfo)
-					if methodName ~= "_" then
-						if IsDebug then
-							DoNotif("Adonis Detected\nMethod: "..tostring(methodName).."\nInfo: "..tostring(methodFunc))
-						end
-					end
+                return true
+            end)
 
-					return true
-				end)
+            table.insert(hooks, DetectedMeth)
+        end
 
-				table.insert(hooks, DetectedMeth)
-			end
+        if rawget(value, "Variables") and rawget(value, "Process") and typeof(kill) == "function" and not KillMeth then
+            KillMeth = kill
+            local hook
+            hook = hookfunction(KillMeth, function(killFunc)
+                if IsDebug then
+                    DoNotif("Adonis tried to detect: " .. tostring(killFunc))
+                end
+            end)
 
-			if rawget(value, "Variables") and rawget(value, "Process") and typeof(kill) == "function" and not KillMeth then
-				KillMeth = kill
-				local hook
-				hook = hookfunction(KillMeth, function(killFunc)
-					if IsDebug then
-						DoNotif("Adonis tried to detect: "..tostring(killFunc))
-					end
-				end)
+            table.insert(hooks, KillMeth)
+        end
+    end
+end
 
-				table.insert(hooks, KillMeth)
-			end
-		end
-	end
+local hook
+hook = hookfunction(getrenv().debug.info, newcclosure(function(...)
+    local functionName, functionDetails = ...
 
-	local hook
-	hook = hookfunction(getrenv().debug.info, newcclosure(function(...)
-		local functionName, functionDetails = ...
+    if DetectedMeth and functionName == DetectedMeth then
+        if IsDebug or not IsDebug then
+            DoNotif("Adonis was bypassed by the_king.78")
+        end
 
-		if DetectedMeth and functionName == DetectedMeth then
-			if IsDebug or not IsDebug then
-				DoNotif("Adonis was bypassed by the_king.78")
-			end
+        return coroutine.yield(coroutine.running())
+    end
 
-			return coroutine.yield(coroutine.running())
-		end
-
-		return hook(...)
-	end))
-
-	setthreadidentity(7)
+    return hook(...)
+end))
 end)
 
 --[ LOCALPLAYER ]--
