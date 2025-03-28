@@ -246,8 +246,12 @@ dd.MouseButton1Click:Connect(function()
     end
 end)
 
-local function search(q)
+local function search(q,doEmpty)
     local url = engine == "ScriptBlox" and "https://www.scriptblox.com/api/script/search?q="..q or "https://rscripts.net/api/v2/scripts?page=1&orderBy=date&sort=desc&q="..q
+
+    if doEmpty and engine == "ScriptBlox" then
+        url='https://www.scriptblox.com/api/script/fetch'
+    end
     
     local success, response = pcall(function()
         return r({
@@ -481,6 +485,9 @@ sb.MouseButton1Click:Connect(function()
     if q ~= "" then
         search(q)
     else
+        if engine == "ScriptBlox" then
+            search(q,true)
+        else
         sf:ClearAllChildren()
         local el = Instance.new("TextLabel")
         el.Size = UDim2.new(1, 0, 0, 30)
@@ -496,5 +503,6 @@ sb.MouseButton1Click:Connect(function()
         local elc = Instance.new("UICorner")
         elc.CornerRadius = UDim.new(0, 6)
         elc.Parent = el
+        end
     end
 end)
