@@ -9357,6 +9357,10 @@ cmd.add({"fireproximityprompts","fpp","firepp"},{"fireproximityprompts (fpp,fire
 	DoNotif("Fired "..fppamount.." of proximity prompts")
 end,true)
 
+cmd.add({"unsuspendvc", "fixvc", "rejoinvc", "restorevc"},{"unsuspendvc (fixvc, rejoinvc, restorevc)","allows you to use Voice Chat again"},function(...)
+	SafeGetService("VoiceChatService"):joinVoice()
+end)
+
 cmd.add({"iy"},{"iy {command}","Executes infinite yield scripts"},function(...)
 	if IYLOADED==false then
 		function copytable(tbl) local copy={} for i,v in pairs(tbl) do copy[i]=v end return copy end
