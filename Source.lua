@@ -11,14 +11,14 @@ end
 
 NAbegin=tick()
 
-local function blankfunction(...)
+function blankfunction(...)
     return ...
 end
 
 local cloneref = cloneref or blankfunction
 
-local function SafeGetService(service)
-    return cloneref(game:GetService(service))
+function SafeGetService(service)
+    return cloneref(game:GetService(service)) or game:GetService(service)
 end
 
 NACaller(function() getgenv().RealNamelessLoaded=true end)
@@ -2343,7 +2343,7 @@ for index, value in getgc(true) do
             hook = hookfunction(DetectedMeth, function(methodName, methodFunc, methodInfo)
                 if methodName ~= "_" then
                     if IsDebug then
-                        DoNotif("Adonis Detected\nMethod: " .. tostring(methodName) .. "\nInfo: " .. tostring(methodFunc))
+                        DoNotif("Adonis Detected\nMethod: "..tostring(methodName).."\nInfo: "..tostring(methodFunc))
                     end
                 end
 
@@ -2358,7 +2358,7 @@ for index, value in getgc(true) do
             local hook
             hook = hookfunction(KillMeth, function(killFunc)
                 if IsDebug then
-                    DoNotif("Adonis tried to detect: " .. tostring(killFunc))
+                    DoNotif("Adonis tried to detect: "..tostring(killFunc))
                 end
             end)
 
@@ -3462,7 +3462,7 @@ end)
 noTripCon = nil
 
 cmd.add({"antitrip"}, {"antitrip", "no tripping today bruh"}, function()
-	local function antiTrip(char)
+	function antiTrip(char)
 		local hum = getHum()
 		local root = getRoot(char)
 
@@ -4710,50 +4710,52 @@ cmd.add({"pingserverhop","pshop"},{"pingserverhop (pshop)","serverhop to a serve
 	end
 end)
 
-local autorjthingy=nil
+local autorjthingy = nil
 
-cmd.add({"autorejoin","autorj"},{"autorejoin","Rejoins the server if you get kicked / disconnected"},function()
+cmd.add({"autorejoin", "autorj"}, {"autorejoin", "Rejoins the server if you get kicked / disconnected"}, function()
+    if autorjthingy then
+        autorjthingy:Disconnect()
+        autorjthingy = nil
+    end
 
-	if autorjthingy then autorjthingy:Disconnect() autorjthingy=nil end
+    function handleRejoin()
+        if #Players:GetPlayers() <= 1 then
+            Players.LocalPlayer:Kick("Rejoining...")
+            wait()
+            TeleportService:Teleport(PlaceId, Players.LocalPlayer)
+        else
+            TeleportService:TeleportToPlaceInstance(PlaceId, JobId, Players.LocalPlayer)
+        end
+    end
 
-	autorjthingy=COREGUI:FindFirstChild("RobloxPromptGui"):FindFirstChild("promptOverlay").DescendantAdded:Connect(function(Err)
-		if Err.Name=="ErrorTitle" then
-			if Err.Text:sub(0,12)=="Disconnected" then
-				if #Players:GetPlayers() <=1 then
-					Players.LocalPlayer:Kick("Rejoining...")
-					wait()
-					TeleportService:Teleport(PlaceId,Players.LocalPlayer)
-				else
-					TeleportService:TeleportToPlaceInstance(PlaceId,JobId,Players.LocalPlayer)
-				end
-			end
-			Err:GetPropertyChangedSignal("Text"):Connect(function()
-				if Err.Text:sub(0,12)=="Disconnected" then
-					if #Players:GetPlayers() <=1 then
-						Players.LocalPlayer:Kick("Rejoining...")
-						wait()
-						TeleportService:Teleport(PlaceId,Players.LocalPlayer)
-					else
-						TeleportService:TeleportToPlaceInstance(PlaceId,JobId,Players.LocalPlayer)
-					end
-				end
-			end)
-		end
-	end)
+    local promptOverlay = COREGUI:FindFirstChild("RobloxPromptGui"):FindFirstChild("promptOverlay")
+    if not promptOverlay then
+        DoNotif("Error: Could not find promptOverlay!")
+        return
+    end
 
-	DoNotif("Auto Rejoin is now on!")
+    autorjthingy = promptOverlay.DescendantAdded:Connect(function(descendant)
+        if descendant.Name == "ErrorTitle" and descendant.Text:sub(1, 12) == "Disconnected" then
+            handleRejoin()
+            descendant:GetPropertyChangedSignal("Text"):Connect(function()
+                if descendant.Text:sub(1, 12) == "Disconnected" then
+                    handleRejoin()
+                end
+            end)
+        end
+    end)
+
+    DoNotif("Auto Rejoin is now enabled!")
 end)
 
-cmd.add({"unautorejoin","unautorj"},{"unautorejoin (unautorj)","disables auto rejoin command"},function()
-
-	if autorjthingy then
-		autorjthingy:Disconnect()
-		autorjthingy=nil 
-
-		DoNotif("Auto Rejoin is now disabled!")
-	else
-		DoNotif("Auto Rejoin is already disabled")
-	end
+cmd.add({"unautorejoin", "unautorj"}, {"unautorejoin (unautorj)", "Disables auto rejoin command"}, function()
+    if autorjthingy then
+        autorjthingy:Disconnect()
+        autorjthingy = nil
+        DoNotif("Auto Rejoin is now disabled!")
+    else
+        DoNotif("Auto Rejoin is already disabled!")
+    end
 end)
 
 dadojadoqwdqwd='© 2025 ltseverydayyou'
@@ -7267,7 +7269,9 @@ cmd.add({"loopwalkspeed", "loopws", "lws"}, {"loopwalkspeed <number> (loopws,lws
 	if getHum() then
 		wsSignal = getHum():GetPropertyChangedSignal("WalkSpeed"):Connect(function()
 			if loopws then
-				getHum().WalkSpeed = getgenv().NamelessWs
+				if getHum().WalkSpeed ~= getgenv().NamelessWs then
+					getHum().WalkSpeed = getgenv().NamelessWs
+				end
 			end
 		end)
 	end
@@ -7301,12 +7305,16 @@ cmd.add({"loopjumppower", "loopjp", "ljp"}, {"loopjumppower <number> (loopjp,ljp
 	if getHum() then
 		jpSignalPower = getHum():GetPropertyChangedSignal("JumpPower"):Connect(function()
 			if loopjp and getHum().UseJumpPower then
-				getHum().JumpPower = getgenv().NamelessJP
+				if getHum().JumpPower ~= getgenv().NamelessJP then
+					getHum().JumpPower = getgenv().NamelessJP
+				end
 			end
 		end)
 		jpSignalHeight = getHum():GetPropertyChangedSignal("JumpHeight"):Connect(function()
 			if loopjp and not getHum().UseJumpPower then
-				getHum().JumpHeight = getgenv().NamelessJP
+				if getHum().JumpHeight ~= getgenv().NamelessJP then
+					getHum().JumpHeight = getgenv().NamelessJP
+				end
 			end
 		end)
 	end
@@ -7686,7 +7694,7 @@ cmd.add({"airwalk", "float", "aw"}, {"airwalk (float, aw)", "Press space to go u
 	if Airwalker then Airwalker:Disconnect() Airwalker = nil end
 	if awPart then awPart:Destroy() awPart = nil end
 
-	local function createButton(parent, text, position, callbackDown, callbackUp)
+	function createButton(parent, text, position, callbackDown, callbackUp)
 		local button = Instance.new("TextButton")
 		button.Parent = parent
 		button.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
@@ -9144,7 +9152,9 @@ cmd.add({"loopday","lday"},{"loopday (lday)","Sunshiiiine!"},function()
 	Lighting.ClockTime = 14
 
 	dayCon=Lighting:GetPropertyChangedSignal("ClockTime"):Connect(function()
-		Lighting.ClockTime=14
+		if Lighting.ClockTime ~= 14 then
+			Lighting.ClockTime = 14
+		end
 	end)
 end)
 
@@ -9154,125 +9164,103 @@ cmd.add({"unloopday","unlday"},{"unloopday (unlday)","No more sunshine"},functio
 	end
 end)
 
-fbCon,fbCon1,fbCon2,fbCon3,fbCon4=nil,nil,nil,nil,nil
+fbCon, fbCon1, fbCon2, fbCon3, fbCon4 = nil, nil, nil, nil, nil
+nightCon, nightCon1, nightCon2, nightCon3, nightCon4 = nil, nil, nil, nil, nil
 
-cmd.add({"loopfullbright","loopfb","lfb"},{"loopfullbright (loopfb,lfb)","Sunshiiiine!"},function()
-	if fbCon then
-		fbCon:Disconnect()
-	end
-	if fbCon1 then
-		fbCon1:Disconnect()
-	end
-	if fbCon2 then
-		fbCon2:Disconnect()
-	end
-	if fbCon3 then
-		fbCon3:Disconnect()
-	end
-	if fbCon4 then
-		fbCon4:Disconnect()
-	end
+cmd.add({"loopfullbright", "loopfb", "lfb"}, {"loopfullbright (loopfb,lfb)", "Sunshiiiine!"}, function()
+    if fbCon then fbCon:Disconnect() end
+    if fbCon1 then fbCon1:Disconnect() end
+    if fbCon2 then fbCon2:Disconnect() end
+    if fbCon3 then fbCon3:Disconnect() end
+    if fbCon4 then fbCon4:Disconnect() end
 
-	Lighting.Brightness=1
-	Lighting.ClockTime=12
-	Lighting.FogEnd=786543
-	Lighting.GlobalShadows=false
-	Lighting.Ambient=Color3.fromRGB(178,178,178)
+    Lighting.Brightness = 1
+    Lighting.ClockTime = 12
+    Lighting.FogEnd = 786543
+    Lighting.GlobalShadows = false
+    Lighting.Ambient = Color3.fromRGB(178, 178, 178)
 
-	fbCon=Lighting:GetPropertyChangedSignal("Brightness"):Connect(function()
-		Lighting.Brightness=1
-	end)
-	fbCon1=Lighting:GetPropertyChangedSignal("ClockTime"):Connect(function()
-		Lighting.ClockTime=12
-	end)
-	fbCon2=Lighting:GetPropertyChangedSignal("FogEnd"):Connect(function()
-		Lighting.FogEnd=786543
-	end)
-	fbCon3=Lighting:GetPropertyChangedSignal("GlobalShadows"):Connect(function()
-		Lighting.GlobalShadows=false
-	end)
-	fbCon4=Lighting:GetPropertyChangedSignal("Ambient"):Connect(function()
-		Lighting.Ambient=Color3.fromRGB(178,178,178)
-	end)
+    fbCon = Lighting:GetPropertyChangedSignal("Brightness"):Connect(function()
+        if Lighting.Brightness ~= 1 then
+            Lighting.Brightness = 1
+        end
+    end)
+    fbCon1 = Lighting:GetPropertyChangedSignal("ClockTime"):Connect(function()
+        if Lighting.ClockTime ~= 12 then
+            Lighting.ClockTime = 12
+        end
+    end)
+    fbCon2 = Lighting:GetPropertyChangedSignal("FogEnd"):Connect(function()
+        if Lighting.FogEnd ~= 786543 then
+            Lighting.FogEnd = 786543
+        end
+    end)
+    fbCon3 = Lighting:GetPropertyChangedSignal("GlobalShadows"):Connect(function()
+        if Lighting.GlobalShadows ~= false then
+            Lighting.GlobalShadows = false
+        end
+    end)
+    fbCon4 = Lighting:GetPropertyChangedSignal("Ambient"):Connect(function()
+        if Lighting.Ambient ~= Color3.fromRGB(178, 178, 178) then
+            Lighting.Ambient = Color3.fromRGB(178, 178, 178)
+        end
+    end)
 end)
 
-cmd.add({"unloopfullbright","unloopfb","unlfb"},{"unloopfullbright (unloopfb,unlfb)","No more sunshine"},function()
-	if fbCon then
-		fbCon:Disconnect()
-	end
-	if fbCon1 then
-		fbCon1:Disconnect()
-	end
-	if fbCon2 then
-		fbCon2:Disconnect()
-	end
-	if fbCon3 then
-		fbCon3:Disconnect()
-	end
-	if fbCon4 then
-		fbCon4:Disconnect()
-	end
+cmd.add({"unloopfullbright", "unloopfb", "unlfb"}, {"unloopfullbright (unloopfb,unlfb)", "No more sunshine"}, function()
+    if fbCon then fbCon:Disconnect() end
+    if fbCon1 then fbCon1:Disconnect() end
+    if fbCon2 then fbCon2:Disconnect() end
+    if fbCon3 then fbCon3:Disconnect() end
+    if fbCon4 then fbCon4:Disconnect() end
 end)
 
+cmd.add({"loopnight", "loopn", "ln"}, {"loopnight (loopn,ln)", "Moonlight."}, function()
+    if nightCon then nightCon:Disconnect() end
+    if nightCon1 then nightCon1:Disconnect() end
+    if nightCon2 then nightCon2:Disconnect() end
+    if nightCon3 then nightCon3:Disconnect() end
+    if nightCon4 then nightCon4:Disconnect() end
 
-nightCon,nightCon1,nightCon2,nightCon3,nightCon4=nil,nil,nil,nil,nil
+    Lighting.Brightness = 1
+    Lighting.ClockTime = 0
+    Lighting.FogEnd = 786543
+    Lighting.GlobalShadows = false
+    Lighting.Ambient = Color3.fromRGB(178, 178, 178)
 
-cmd.add({"loopnight","loopn","ln"},{"loopnight (loopn,ln)","Moonlight."},function()
-	if nightCon then
-		nightCon:Disconnect()
-	end
-	if nightCon1 then
-		nightCon1:Disconnect()
-	end
-	if nightCon2 then
-		nightCon2:Disconnect()
-	end
-	if nightCon3 then
-		nightCon3:Disconnect()
-	end
-	if nightCon4 then
-		nightCon4:Disconnect()
-	end
-
-	Lighting.Brightness=1
-	Lighting.ClockTime=0
-	Lighting.FogEnd=786543
-	Lighting.GlobalShadows=false
-	Lighting.Ambient=Color3.fromRGB(178,178,178)
-
-	nightCon=Lighting:GetPropertyChangedSignal("Brightness"):Connect(function()
-		Lighting.Brightness=1
-	end)
-	nightCon1=Lighting:GetPropertyChangedSignal("ClockTime"):Connect(function()
-		Lighting.ClockTime=0
-	end)
-	nightCon2=Lighting:GetPropertyChangedSignal("FogEnd"):Connect(function()
-		Lighting.FogEnd=786543
-	end)
-	nightCon3=Lighting:GetPropertyChangedSignal("GlobalShadows"):Connect(function()
-		Lighting.GlobalShadows=false
-	end)
-	nightCon4=Lighting:GetPropertyChangedSignal("Ambient"):Connect(function()
-		Lighting.Ambient=Color3.fromRGB(178,178,178)
-	end)
+    nightCon = Lighting:GetPropertyChangedSignal("Brightness"):Connect(function()
+        if Lighting.Brightness ~= 1 then
+            Lighting.Brightness = 1
+        end
+    end)
+    nightCon1 = Lighting:GetPropertyChangedSignal("ClockTime"):Connect(function()
+        if Lighting.ClockTime ~= 0 then
+            Lighting.ClockTime = 0
+        end
+    end)
+    nightCon2 = Lighting:GetPropertyChangedSignal("FogEnd"):Connect(function()
+        if Lighting.FogEnd ~= 786543 then
+            Lighting.FogEnd = 786543
+        end
+    end)
+    nightCon3 = Lighting:GetPropertyChangedSignal("GlobalShadows"):Connect(function()
+        if Lighting.GlobalShadows ~= false then
+            Lighting.GlobalShadows = false
+        end
+    end)
+    nightCon4 = Lighting:GetPropertyChangedSignal("Ambient"):Connect(function()
+        if Lighting.Ambient ~= Color3.fromRGB(178, 178, 178) then
+            Lighting.Ambient = Color3.fromRGB(178, 178, 178)
+        end
+    end)
 end)
 
-cmd.add({"unloopnight","unloopn","unln"},{"unloopnight (unloopn,unln)","No more moonlight."},function()
-	if nightCon then
-		nightCon:Disconnect()
-	end
-	if nightCon1 then
-		nightCon1:Disconnect()
-	end
-	if nightCon2 then
-		nightCon2:Disconnect()
-	end
-	if nightCon3 then
-		nightCon3:Disconnect()
-	end
-	if nightCon4 then
-		nightCon4:Disconnect()
-	end
+cmd.add({"unloopnight", "unloopn", "unln"}, {"unloopnight (unloopn,unln)", "No more moonlight."}, function()
+    if nightCon then nightCon:Disconnect() end
+    if nightCon1 then nightCon1:Disconnect() end
+    if nightCon2 then nightCon2:Disconnect() end
+    if nightCon3 then nightCon3:Disconnect() end
+    if nightCon4 then nightCon4:Disconnect() end
 end)
 
 fogLoop=nil
@@ -9295,7 +9283,9 @@ cmd.add({"loopnofog","lnofog","lnf", "loopnf"},{"loopnofog (lnofog,lnf,loopnf)",
 		end
 	end
 	fogCon=Lighting:GetPropertyChangedSignal("FogEnd"):Connect(function()
-		Lighting.FogEnd=786543
+		if Lighting.FogEnd~=786543 then
+			Lighting.FogEnd=786543
+		end
 	end)
 
 	fogLoop = RunService.RenderStepped:Connect(fogFunc)
@@ -9828,7 +9818,7 @@ cmd.add({"toolinvisible", "tinvis"}, {"toolinvisible (tinvis)", "Be invisible wh
     local weld
 	HH = getChar().Humanoid.HipHeight
 
-    local function setDisplayDistance(distance)
+    function setDisplayDistance(distance)
         for _, player in pairs(Players:GetPlayers()) do
             if player.Character and player.Character:FindFirstChildWhichIsA("Humanoid") then
                 player.Character:FindFirstChildWhichIsA("Humanoid").NameDisplayDistance = distance
