@@ -831,19 +831,35 @@ function round(num,numDecimalPlaces)
 end
 
 function placeName()
-	local page=SafeGetService("AssetService"):GetGamePlacesAsync()
-	while true do
-		for _,place in ipairs(page:GetCurrentPage()) do
-			if place.PlaceId==PlaceId then
-				return place.Name
-			end
-		end
-		if page.IsFinished then
-			break
-		end
-		page:AdvanceToNextPageAsync()
-	end
-	return "unknown"
+    while true do
+        local success, page = pcall(function()
+            return game:GetService("AssetService"):GetGamePlacesAsync()
+        end)
+
+        if success then
+            while true do
+                for _, place in ipairs(page:GetCurrentPage()) do
+                    if place.PlaceId == PlaceId then
+                        return place.Name
+                    end
+                end
+
+                if page.IsFinished then
+                    break
+                end
+
+                local successAdvance = pcall(function()
+                    page:AdvanceToNextPageAsync()
+                end)
+
+                if not successAdvance then
+                    break
+                end
+            end
+        end
+
+        task.wait(2)
+    end
 end
 
 function removeESP()
