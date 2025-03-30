@@ -5774,6 +5774,25 @@ cmd.add({"undance"},{"undance","Stops the dance command"},function()
 	theanim:Destroy()
 end)
 
+cmd.add({"antichatlogs","antichatlogger"},{"antichatlogs (antichatlogger)","Prevents you from getting banning when typing unspeakable messages (game needs legacy chat service)"},function()
+	if not LegacyChat then
+		return DoNotif("Game doesn't use Legacy Chat Service",3,"antichatlogs")
+	end
+	local MsgPost, _ = pcall(function()
+		rawset(require(LocalPlayer:FindFirstChild("PlayerScripts"):FindFirstChild("ChatScript").ChatMain),"MessagePosted", {
+			["fire"] = function(msg)
+				return msg
+			end,
+			["wait"] = function()
+				return
+			end,
+			["connect"] = function()
+				return
+			end
+		})
+	end)
+	DoNotif(MsgPost and "Enabled" or "Failed to enable antichatlogs",3,"antichatlogs")
+end)
 
 cmd.add({"animspoofer","animationspoofer","spoofanim","animspoof"},{"animationspoofer (animspoof,spoofanim)","Loads up an animation spoofer,spoofs animations that use rbxassetid"},function()
 	loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/Nameless-Admin/main/Animation%20Spoofer"))()
