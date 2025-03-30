@@ -239,7 +239,7 @@ local sethidden=sethiddenproperty or set_hidden_property or set_hidden_prop
 local Player=Players.LocalPlayer;
 local plr=Players.LocalPlayer;
 local PlrGui=Player:FindFirstChild("PlayerGui");
-local IYLOADED=false--This is used for the ;iy command that executes infinite yield commands using this admin command script (BTW)
+--local IYLOADED=false--This is used for the ;iy command that executes infinite yield commands using this admin command script (BTW)
 local Character=Player.Character;
 local Humanoid=Character and Character:FindFirstChildWhichIsA("Humanoid") or nil;
 local LegacyChat=TextChatService.ChatVersion==Enum.ChatVersion.LegacyChatService
@@ -279,7 +279,6 @@ LocalPlayer=Player
 local character=Player.Character
 local mouse=localPlayer:GetMouse()
 local camera=SafeGetService("Workspace").CurrentCamera
-local camtype=camera.CameraType
 local Commands,Aliases={},{}
 local player,plr,lp=Players.LocalPlayer,Players.LocalPlayer,Players.LocalPlayer
 local ctrlModule = nil
@@ -738,7 +737,7 @@ function MouseButtonFix(button,clickCallback)
 end
 
 --[[ FUNCTION TO GET A PLAYER ]]--
-local getPlr = function(Name)
+getPlr = function(Name)
 	local Players = Players
 	local LocalPlayer = Players.LocalPlayer
 
@@ -2240,7 +2239,7 @@ cmd.add({"rejoin", "rj"}, {"rejoin (rj)", "Rejoin the game"}, function()
     local tp = TeleportService
     local lp = plrs.LocalPlayer
 
-    local function tpError(err)
+    function tpError(err)
         DoNotif("Teleport failed: "..err)
     end
 
@@ -5794,26 +5793,6 @@ cmd.add({"undance"},{"undance","Stops the dance command"},function()
 	theanim:Destroy()
 end)
 
-cmd.add({"antichatlogs","antichatlogger"},{"antichatlogs (antichatlogger)","Prevents you from getting banning when typing unspeakable messages (game needs legacy chat service)"},function()
-	if not LegacyChat then
-		return DoNotif("Game doesn't use Legacy Chat Service",3,"antichatlogs")
-	end
-	local MsgPost, _ = pcall(function()
-		rawset(require(LocalPlayer:FindFirstChild("PlayerScripts"):FindFirstChild("ChatScript").ChatMain),"MessagePosted", {
-			["fire"] = function(msg)
-				return msg
-			end,
-			["wait"] = function()
-				return
-			end,
-			["connect"] = function()
-				return
-			end
-		})
-	end)
-	DoNotif(MsgPost and "Enabled" or "Failed to enable antichatlogs",3,"antichatlogs")
-end)
-
 
 cmd.add({"animspoofer","animationspoofer","spoofanim","animspoof"},{"animationspoofer (animspoof,spoofanim)","Loads up an animation spoofer,spoofs animations that use rbxassetid"},function()
 	loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/Nameless-Admin/main/Animation%20Spoofer"))()
@@ -5875,7 +5854,7 @@ cmd.add({"placename","pname"},{"placename (pname)","Copies the game's place name
 	DoNotif("Copied the game's place name: "..placeNaem)
 end)
 
-local function getTgt(user)
+function getTgt(user)
     if user == nil then
         user = plr.Name
     end
@@ -8108,29 +8087,19 @@ cmd.add({"gravity","grav"},{"gravity <amount> (grav)","sets game gravity to what
 	SafeGetService("Workspace").Gravity=(...)
 end,true)
 
-cmd.add({"fireclickdetectors","fcd","firecd"},{"fireclickdetectors (fcd,firecd)","Fires every click detector that's in workspace"},function(...)
+cmd.add({"fireclickdetectors","fcd","firecd"},{"fireclickdetectors (fcd,firecd)","Fires every click detector that's in workspace"},function()
 	local ccamount=0
-	local pro=(...)
-	if pro then
-		for _,j in pairs(SafeGetService("Workspace"):GetDescendants()) do
-			if j:IsA("ClickDetector") and j.Name:lower()==pro:lower() or j:IsA("ClickDetector") and j.Parent.Name:lower()==pro:lower() then
-				ccamount=ccamount+1
-				fireclickdetector(j)
-			end
-		end
-	else
-		for _,v in pairs(SafeGetService("Workspace"):GetDescendants()) do
-			if v:IsA("ClickDetector") then
-				ccamount=ccamount+1
-				fireclickdetector(v)
-			end
+	for _,v in pairs(SafeGetService("Workspace"):GetDescendants()) do
+		if v:IsA("ClickDetector") then
+			ccamount=ccamount+1
+			fireclickdetector(v)
 		end
 	end
 
 	wait();
 
 	DoNotif("Fired "..ccamount.." amount of click detectors")
-end,true)
+end)
 
 cmd.add({"noclickdetectorlimits","nocdlimits","removecdlimits"},{"noclickdetectorlimits <limit> (nocdlimits,removecdlimits)","Sets all click detectors MaxActivationDistance to math.huge"},function(...)
 	for i,v in ipairs(SafeGetService("Workspace"):GetDescendants()) do
@@ -8501,8 +8470,8 @@ cmd.add({"gotomodel", "tomodel"}, {"gotomodel {modelname} (tomodel)", "Teleports
     end
 end, true)
 
-local function setHumanoidStates(humanoid, stateEnabled)
-    local states = {
+function setHumanoidStates(humanoid, stateEnabled)
+    states = {
         Enum.HumanoidStateType.Climbing,
         Enum.HumanoidStateType.FallingDown,
         Enum.HumanoidStateType.Flying,
@@ -8526,26 +8495,24 @@ local function setHumanoidStates(humanoid, stateEnabled)
 end
 
 cmd.add({"swim"}, {"swim {speed}", "Swim in the air"}, function(speed)
-    local speaker = Players.LocalPlayer
+    speaker = Players.LocalPlayer
     SafeGetService("Workspace").Gravity = 0
 
-    local humanoid = getHum()
-    if humanoid then
-        setHumanoidStates(humanoid, false)
-        humanoid:ChangeState(Enum.HumanoidStateType.Swimming)
-        humanoid.WalkSpeed = speed or 16
+    if getHum() then
+        setHumanoidStates(getHum(), false)
+        getHum():ChangeState(Enum.HumanoidStateType.Swimming)
+        getHum().WalkSpeed = speed or 16
     end
 end, true)
 
 cmd.add({"unswim"}, {"unswim", "Stops the swim script"}, function()
-    local speaker = Players.LocalPlayer
+    speaker = Players.LocalPlayer
     SafeGetService("Workspace").Gravity = 168
 
-    local humanoid = getHum()
-    if humanoid then
-        setHumanoidStates(humanoid, true)
-        humanoid:ChangeState(Enum.HumanoidStateType.RunningNoPhysics)
-        humanoid.WalkSpeed = 16
+    if getHum() then
+        setHumanoidStates(getHum(), true)
+        getHum():ChangeState(Enum.HumanoidStateType.RunningNoPhysics)
+        getHum().WalkSpeed = 16
     end
 end)
 
@@ -8864,7 +8831,7 @@ cmd.add({"breakcars", "bcars"}, {"breakcars (bcars)", "Breaks any car"}, functio
 end)
 
 cmd.add({"firetouchinterests", "fti"}, {"firetouchinterests (fti)", "Fires every Touch Interest that's in workspace"}, function()
-    local touchInterestCount = 0
+    touchInterestCount = 0
 
     for _, descendant in ipairs(SafeGetService("Workspace"):GetDescendants()) do
         if descendant:IsA("TouchTransmitter") then
@@ -8908,10 +8875,9 @@ cmd.add({"infjump","infinitejump"},{"infjump (infinitejump)","Makes you be able 
 	function fix()
 		if infJump then infJump:Disconnect() infJump = nil end
 
-		local humanoid = getHum()
-		if not humanoid then
+		if not getHum() then
 			local char = plr.Character or plr.CharacterAdded:Wait()
-			humanoid = char:WaitForChild("Humanoid")
+			getHum() = char:WaitForChild("Humanoid")
 		end
 
 		infJump = humanoid:GetPropertyChangedSignal("Jump"):Connect(function()
@@ -9266,23 +9232,12 @@ cmd.add({"unglobalshadows","nogshadows","ungshadows","noglobalshadows"},{"unglob
 	Lighting.GlobalShadows=false
 end)
 
-cmd.add({"fireproximityprompts","fpp","firepp"},{"fireproximityprompts (fpp,firepp)","Fires every Proximity Prompt that's in workspace"},function(...)
+cmd.add({"fireproximityprompts","fpp","firepp"},{"fireproximityprompts (fpp,firepp)","Fires every Proximity Prompt that's in workspace"},function()
 	fppamount=0
-	local fppname=(...)
-	if fppname then
-		local name=fppname
-		for _,firedapp in ipairs(SafeGetService("Workspace"):GetDescendants()) do
-			if firedapp:IsA("ProximityPrompt") and firedapp.Name:lower()==name:lower() or firedapp:IsA("ProximityPrompt") and descandant.Parent.Name:lower()==name:lower() then
-				fppamount=fppamount+1
-				fireproximityprompt(firedapp,1)
-			end
-		end
-	else
-		for i,v in pairs(SafeGetService("Workspace"):GetDescendants()) do
-			if v:IsA("ProximityPrompt") then
-				fppamount=fppamount+1
-				fireproximityprompt(v,1)
-			end
+	for i,v in pairs(SafeGetService("Workspace"):GetDescendants()) do
+		if v:IsA("ProximityPrompt") then
+			fppamount=fppamount+1
+			fireproximityprompt(v,1)
 		end
 	end
 
@@ -9290,13 +9245,13 @@ cmd.add({"fireproximityprompts","fpp","firepp"},{"fireproximityprompts (fpp,fire
 	wait();
 
 	DoNotif("Fired "..fppamount.." of proximity prompts")
-end,true)
+end)
 
 cmd.add({"unsuspendvc", "fixvc", "rejoinvc", "restorevc"},{"unsuspendvc (fixvc, rejoinvc, restorevc)","allows you to use Voice Chat again"},function(...)
 	SafeGetService("VoiceChatService"):joinVoice()
 end)
 
-cmd.add({"iy"},{"iy {command}","Executes infinite yield scripts"},function(...)
+--[[cmd.add({"iy"},{"iy {command}","Executes infinite yield scripts"},function(...)
 	if IYLOADED==false then
 		function copytable(tbl) local copy={} for i,v in pairs(tbl) do copy[i]=v end return copy end
 		local sandbox_env=copytable(getfenv())
@@ -9323,7 +9278,7 @@ cmd.add({"iy"},{"iy {command}","Executes infinite yield scripts"},function(...)
 		IYLOADED=true
 	end
 	execCmd((...))
-end,true)
+end,true)]]
 
 -- this seriously looks ridiculous
 --[[cmd.add({"bhop"},{"bhop","bhop bhop bhop bhop bhop bhop bhop bla bla bla idk what im saying"},function()
@@ -10029,7 +9984,7 @@ cmd.add({"invisible", "invis"}, {"invisible (invis)", "Sets invisibility to scar
 end)
 
 cmd.add({"fireremotes", "fremotes", "frem"}, {"fireremotes (fremotes, frem)", "Fires every remote"}, function()
-    local remoteCount = 0
+    remoteCount = 0
 
     for _, descendant in ipairs(game:GetDescendants()) do
         if not descendant:IsDescendantOf(COREGUI) then
