@@ -2210,60 +2210,60 @@ cmd.add({"rjre", "rejoinrefresh"}, {"rjre (rejoinrefresh)", "Rejoins and telepor
 			local LocalPlayer = Players.LocalPlayer
 
 			pcall(function()
-				DoNotif("Rejoining back to the saved position...")
+				DoNotif("Rejoining back to the same position...")
 			end)
 
 			local success = pcall(function()
 				if #Players:GetPlayers() <= 1 then
 					LocalPlayer:Kick("\nRejoining...")
 					task.wait(0.5)
-					TeleportService:Teleport(game.PlaceId, LocalPlayer)
+					TeleportService:Teleport(PlaceId, LocalPlayer)
 				else
-					TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPlayer)
+					TeleportService:TeleportToPlaceInstance(PlaceId, JobId, LocalPlayer)
 				end
 			end)
 
 			if not success then
 				task.wait(1)
-				TeleportService:Teleport(game.PlaceId, LocalPlayer)
+				TeleportService:Teleport(PlaceId, LocalPlayer)
 			end
 		end)
 	end
 end)
 
-cmd.add({"rejoin","rj"},{"rejoin (rj)","Rejoin the game"},function()
-	local players = Players
-	local teleportService = TeleportService
-	local localPlayer = players.LocalPlayer
+cmd.add({"rejoin", "rj"}, {"rejoin (rj)", "Rejoin the game"}, function()
+    local plrs = Players
+    local tp = TeleportService
+    local lp = plrs.LocalPlayer
 
-	function onTeleportError(errorMessage)
-		DoNotif("Teleport failed: "..errorMessage)
-	end
+    local function tpError(err)
+        DoNotif("Teleport failed: "..err)
+    end
 
-	teleportService.TeleportInitFailed:Connect(onTeleportError)
+    tp.TeleportInitFailed:Connect(tpError)
 
-	if #players:GetPlayers() <= 1 then
-		localPlayer:Kick("Rejoining...")
-		wait()
-		teleportService:TeleportCancel()
-		local success, errorMessage = pcall(function()
-			teleportService:Teleport(PlaceId)
-		end)
-		if not success then
-			onTeleportError(errorMessage)
-		end
-	else
-		teleportService:TeleportCancel()
-		local success, errorMessage = pcall(function()
-			teleportService:TeleportToPlaceInstance(PlaceId, JobId, localPlayer)
-		end)
-		if not success then
-			onTeleportError(errorMessage)
-		end
-	end
+    if #plrs:GetPlayers() <= 1 then
+        lp:Kick("Rejoining...")
+        wait()
+        tp:TeleportCancel()
+        local success, err = pcall(function()
+            tp:Teleport(PlaceId)
+        end)
+        if not success then
+            tpError(err)
+        end
+    else
+        tp:TeleportCancel()
+        local success, err = pcall(function()
+            tp:TeleportToPlaceInstance(PlaceId, JobId, lp)
+        end)
+        if not success then
+            tpError(err)
+        end
+    end
 
-	wait()
-	DoNotif("Rejoining...")
+    wait()
+    DoNotif("Rejoining...")
 end)
 
 cmd.add({"teleporttoplace","toplace","ttp"},{"teleporttoplace (PlaceId) (toplace,ttp)","Teleports you using PlaceId"},function(...)
@@ -2334,17 +2334,13 @@ end)
 
 --[ LOCALPLAYER ]--
 function respawn()
-	cf=getRoot(getChar()).CFrame
-	getChar().Humanoid.Health=0
-	player.CharacterAdded:wait(1); wait(0.2);
-	character:WaitForChild("HumanoidRootPart").CFrame=cf
-end
-
-function refresh()
-	cf=getRoot(getChar()).CFrame
-	getChar().Humanoid.Health=0
-	player.CharacterAdded:wait(1); wait(0.2);
-	character:WaitForChild("HumanoidRootPart").CFrame=cf
+    local characterFrame = getRoot(getChar()).CFrame
+    local character = getChar()
+    character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
+	character:FindFirstChildOfClass("Humanoid").Health=0
+    player.CharacterAdded:Wait()
+    wait(0.2)
+    getRoot(character).CFrame = characterFrame
 end
 
 abort=0
@@ -3208,12 +3204,8 @@ cmd.add({"vulnerabilitytest","vulntest"},{"vulnerabilitytest (vulntest)","Test i
 	loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/uuuuuuu/main/VulnTest.lua"))()
 end)
 
-cmd.add({"respawn","re"},{"respawn","Respawn your character"},function()
-	old=getRoot(getChar()).CFrame
-	respawn()
-	wait()
-	plr.CharacterAdded:Wait()
-	getChar():WaitForChild("HumanoidRootPart").CFrame=old
+cmd.add({"respawn", "re"}, {"respawn", "Respawn your character"}, function()
+    respawn()
 end)
 
 cmd.add({"antisit"},{"antisit","Prevents the player from sitting"},function()
@@ -3879,7 +3871,7 @@ cmd.add({"Decompiler"},{"Decompiler","Allows you to decompile LocalScript/Module
 			if time_elapsed <= .5 then
 				task.wait(.5 - time_elapsed)
 			end
-			local httpResult = request({
+			local httpResult = req({
 				Url = API..konstantType,
 				Body = bytecode,
 				Method = "POST",
@@ -4441,7 +4433,7 @@ cmd.add({"crash"},{"crash","crashes ur client lol"},function()
 	while true do end
 end)
 
-cmd.add({"creep","ctp","scare"},{"ctp <player> (creep,scare)","Teleports from a player behind them and under the floor to the top"},function(...)
+cmd.add({"creep","scare"},{"creep <player> (scare)","Teleports from a player behind them and under the floor to the top"},function(...)
 	Players=Players
 	HRP=getRoot(getChar()).Anchored
 
@@ -5871,55 +5863,47 @@ cmd.add({"gameid","universeid","gid"},{"gameid (universeid,gid)","Copies the Gam
 end)
 
 cmd.add({"placename","pname"},{"placename (pname)","Copies the game's place name to your clipboard"},function()
-	setclipboard(placeName())
+	placeNaem = placeName()
+	setclipboard(placeNaem)
 
 	wait();
 
-	DoNotif("Copied the game's place name: "..placeName())
+	DoNotif("Copied the game's place name: "..placeNaem)
 end)
 
-cmd.add({"copyname","cname"},{"copyname <player> (cname)","Copies the username of the target"},function(...)
-	Username=(...)
-	if (...)==nil then
-		Username=plr.Name
-	end
-	target=getPlr(Username)
+local function getTgt(user)
+    if user == nil then
+        user = plr.Name
+    end
+    return getPlr(user)
+end
 
-	setclipboard(tostring(target.Name))
+cmd.add({"copyname", "cname"}, {"copyname <player> (cname)", "Copies the username of the target"}, function(...)
+    local usr = ...
+    local tgt = getTgt(usr)
 
-	wait();
+    setclipboard(tostring(tgt.Name))
+    wait()
+    DoNotif("Copied the username of "..tgt.DisplayName)
+end, true)
 
-	DoNotif("Copied the username of "..target.DisplayName)
-end,true)
+cmd.add({"copydisplay", "cdisplay"}, {"copydisplay <player> (cdisplay)", "Copies the display name of the target"}, function(...)
+    local usr = ...
+    local tgt = getTgt(usr)
 
-cmd.add({"copydisplay","cdisplay"},{"copydisplay <player> (cdisplay)","Copies the display name of the target"},function(...)
-	Username=(...)
-	if (...)==nil then
-		Username=plr.Name
-	end
-	target=getPlr(Username)
+    setclipboard(tostring(tgt.DisplayName))
+    wait()
+    DoNotif("Copied the display name of "..tgt.Name)
+end, true)
 
-	setclipboard(tostring(target.DisplayName))
+cmd.add({"copyid", "id"}, {"copyid <player> (id)", "Copies the UserId of the target"}, function(...)
+    local usr = ...
+    local tgt = getTgt(usr)
 
-	wait();
-
-	DoNotif("Copied the display name of "..target.Name)
-end,true)
-
-cmd.add({"copyid","id"},{"copyid <player> (id)","Copies the UserId of the target"},function(...)
-	Username=(...)
-
-	if (...)==nil then
-		Username=plr.Name
-	end
-	target=getPlr(Username)
-
-	setclipboard(tostring(target.UserId))
-
-	wait();
-
-	DoNotif("Copied the UserId of "..target.name)
-end,true)
+    setclipboard(tostring(tgt.UserId))
+    wait()
+    DoNotif("Copied the UserId of "..tgt.Name)
+end, true)
 
 --[ PLAYER ]--
 function toggleKB(enable)
@@ -5962,19 +5946,11 @@ cmd.add({"night"},{"night","Makes it night"},function()
 	Lighting.ClockTime=0
 end)
 
-cmd.add({"chat","message"},{"chat <text> (message)","Chats you,useful if youre muted"},function(...)
-	local A_1=""
-	local table={...}
-	for i,v in pairs(table) do
-		if i~=1 then
-			A_1=A_1.." "..tostring(v)
-		else
-			A_1=tostring(v)
-		end
-	end
-	local A_2="All"
-	lib.LocalPlayerChat(A_1,A_2)
-end,true)
+cmd.add({"chat", "message"}, {"chat <text> (message)", "Chats for you, useful if you're muted"}, function(...)
+    local chatMessage = table.concat({...}, " ")
+    local chatTarget = "All"
+    lib.LocalPlayerChat(chatMessage, chatTarget)
+end, true)
 
 cmd.add({"privatemessage", "pm"}, {"privatemessage <player> <text> (pm)", "Sends a private message to a player"}, function(...)
 	local args = {...}
@@ -7122,7 +7098,7 @@ cmd.add({"headsit"}, {"headsit <player>", "Head sit."}, function(p)
 	alignOri.Responsiveness = 200
 
 	headSit = RunService.Heartbeat:Connect(function()
-		if not game.Players:FindFirstChild(plr.Name) or not plr.Character or not plr.Character:FindFirstChild("HumanoidRootPart") or hum.Sit == false then
+		if not SafeGetService("Players"):FindFirstChild(plr.Name) or not plr.Character or not plr.Character:FindFirstChild("HumanoidRootPart") or hum.Sit == false then
 			alignPos:Destroy()
 			alignOri:Destroy()
 			headSit:Disconnect()
@@ -8521,341 +8497,396 @@ cmd.add({"gotomodel", "tomodel"}, {"gotomodel {modelname} (tomodel)", "Teleports
     end
 end, true)
 
-cmd.add({"swim"},{"swim {speed}","Swim in the air"},function(...)
-	speaker=Players.LocalPlayer
-	SafeGetService("Workspace").Gravity=0
-	if getHum() then 
-		getHum():SetStateEnabled(Enum.HumanoidStateType.Climbing,false)
-		getHum():SetStateEnabled(Enum.HumanoidStateType.FallingDown,false)
-		getHum():SetStateEnabled(Enum.HumanoidStateType.Flying,false)
-		getHum():SetStateEnabled(Enum.HumanoidStateType.Freefall,false)
-		getHum():SetStateEnabled(Enum.HumanoidStateType.GettingUp,false)
-		getHum():SetStateEnabled(Enum.HumanoidStateType.Jumping,false)
-		getHum():SetStateEnabled(Enum.HumanoidStateType.Landed,false)
-		getHum():SetStateEnabled(Enum.HumanoidStateType.Physics,false)
-		getHum():SetStateEnabled(Enum.HumanoidStateType.PlatformStanding,false)
-		getHum():SetStateEnabled(Enum.HumanoidStateType.Ragdoll,false)
-		getHum():SetStateEnabled(Enum.HumanoidStateType.Running,false)
-		getHum():SetStateEnabled(Enum.HumanoidStateType.RunningNoPhysics,false)
-		getHum():SetStateEnabled(Enum.HumanoidStateType.Seated,false)
-		getHum():SetStateEnabled(Enum.HumanoidStateType.StrafingNoPhysics,false)
-		getHum():SetStateEnabled(Enum.HumanoidStateType.Swimming,false)
-		getHum():ChangeState(Enum.HumanoidStateType.Swimming)
-		getHum().WalkSpeed=(...) 
-	end
-	if (...)==nil then
-		if getHum() then getHum().WalkSpeed=16 end
-	end
-end,true)
+local function setHumanoidStates(humanoid, stateEnabled)
+    local states = {
+        Enum.HumanoidStateType.Climbing,
+        Enum.HumanoidStateType.FallingDown,
+        Enum.HumanoidStateType.Flying,
+        Enum.HumanoidStateType.Freefall,
+        Enum.HumanoidStateType.GettingUp,
+        Enum.HumanoidStateType.Jumping,
+        Enum.HumanoidStateType.Landed,
+        Enum.HumanoidStateType.Physics,
+        Enum.HumanoidStateType.PlatformStanding,
+        Enum.HumanoidStateType.Ragdoll,
+        Enum.HumanoidStateType.Running,
+        Enum.HumanoidStateType.RunningNoPhysics,
+        Enum.HumanoidStateType.Seated,
+        Enum.HumanoidStateType.StrafingNoPhysics,
+        Enum.HumanoidStateType.Swimming
+    }
 
-cmd.add({"unswim"},{"unswim","Stops the swim script"},function()
-	speaker=Player
-	SafeGetService("Workspace").Gravity=168
-	if getHum() then 
-		getHum():SetStateEnabled(Enum.HumanoidStateType.Climbing,true)
-		getHum():SetStateEnabled(Enum.HumanoidStateType.FallingDown,true)
-		getHum():SetStateEnabled(Enum.HumanoidStateType.Flying,true)
-		getHum():SetStateEnabled(Enum.HumanoidStateType.Freefall,true)
-		getHum():SetStateEnabled(Enum.HumanoidStateType.GettingUp,true)
-		getHum():SetStateEnabled(Enum.HumanoidStateType.Jumping,true)
-		getHum():SetStateEnabled(Enum.HumanoidStateType.Landed,true)
-		getHum():SetStateEnabled(Enum.HumanoidStateType.Physics,true)
-		getHum():SetStateEnabled(Enum.HumanoidStateType.PlatformStanding,true)
-		getHum():SetStateEnabled(Enum.HumanoidStateType.Ragdoll,true)
-		getHum():SetStateEnabled(Enum.HumanoidStateType.Running,true)
-		getHum():SetStateEnabled(Enum.HumanoidStateType.RunningNoPhysics,true)
-		getHum():SetStateEnabled(Enum.HumanoidStateType.Seated,true)
-		getHum():SetStateEnabled(Enum.HumanoidStateType.StrafingNoPhysics,true)
-		getHum():SetStateEnabled(Enum.HumanoidStateType.Swimming,true)
-		getHum():ChangeState(Enum.HumanoidStateType.RunningNoPhysics)
-		getHum().WalkSpeed=16 
-	end
-end)
-
-local espParts = {}
-local partEspTrigger = nil
-
-function createAdornment(part, color, transparency)
-	local adornment = Instance.new("BoxHandleAdornment")
-	adornment.Name = part.Name:lower().."_PESP"
-	adornment.Parent = part
-	adornment.Adornee = part
-	adornment.AlwaysOnTop = true
-	adornment.ZIndex = 0
-	adornment.Size = part:IsA("BasePart") and part.Size or Vector3.new(4, 4, 4)
-	adornment.Transparency = transparency or 0.45
-	adornment.Color = BrickColor.new(color or "Lime green")
-	return adornment
+    for _, state in ipairs(states) do
+        humanoid:SetStateEnabled(state, stateEnabled)
+    end
 end
 
-function partAdded(part)
-	if #espParts > 0 then
-		if table.find(espParts, part.Name:lower()) then
+cmd.add({"swim"}, {"swim {speed}", "Swim in the air"}, function(speed)
+    local speaker = Players.LocalPlayer
+    SafeGetService("Workspace").Gravity = 0
+
+    local humanoid = getHum()
+    if humanoid then
+        setHumanoidStates(humanoid, false)
+        humanoid:ChangeState(Enum.HumanoidStateType.Swimming)
+        humanoid.WalkSpeed = speed or 16
+    end
+end, true)
+
+cmd.add({"unswim"}, {"unswim", "Stops the swim script"}, function()
+    local speaker = Players.LocalPlayer
+    SafeGetService("Workspace").Gravity = 168
+
+    local humanoid = getHum()
+    if humanoid then
+        setHumanoidStates(humanoid, true)
+        humanoid:ChangeState(Enum.HumanoidStateType.RunningNoPhysics)
+        humanoid.WalkSpeed = 16
+    end
+end)
+
+local espList = {}
+local partTrigger = nil
+local espTriggers = {}
+
+function createBox(part, color, transparency)
+	local box = Instance.new("BoxHandleAdornment")
+	box.Name = part.Name:lower().."_ESP"
+	box.Parent = part
+	box.Adornee = part
+	box.AlwaysOnTop = true
+	box.ZIndex = 0
+	box.Size = part:IsA("BasePart") and part.Size or Vector3.new(4, 4, 4)
+	box.Transparency = transparency or 0.45
+	box.Color3 = color
+	return box
+end
+
+function onPartAdded(part)
+	if #espList > 0 then
+		if table.find(espList, part.Name:lower()) then
 			if part:IsA("BasePart") or part:IsA("Model") then
-				createAdornment(part, "Lime green", 0.45)
+				createBox(part, Color3.fromRGB(50, 205, 50), 0.45)
 			end
 		end
 	else
-		if partEspTrigger then
-			partEspTrigger:Disconnect()
-			partEspTrigger = nil
+		if partTrigger then
+			partTrigger:Disconnect()
+			partTrigger = nil
 		end
 	end
 end
 
-cmd.add({"esppart", "partesp", "pesp"}, {"esppart {partname} (partesp, pesp)", "Makes you able to see any part"}, function(...)
+function enableEsp(objType, color)
+	for _, obj in pairs(SafeGetService("Workspace"):GetDescendants()) do
+		if obj:IsA(objType) then
+			local parent = obj.Parent
+			if parent and parent:IsA("BasePart") then
+				createBox(parent, color, 0.45)
+			end
+		end
+	end
+
+	if not espTriggers[objType] then
+		espTriggers[objType] = SafeGetService("Workspace").DescendantAdded:Connect(function(obj)
+			if obj:IsA(objType) then
+				local parent = obj.Parent
+				if parent and parent:IsA("BasePart") then
+					createBox(parent, color, 0.45)
+				end
+			end
+		end)
+	end
+end
+
+function disableEsp(objType)
+	if espTriggers[objType] then
+		espTriggers[objType]:Disconnect()
+		espTriggers[objType] = nil
+	end
+
+	for _, obj in pairs(SafeGetService("Workspace"):GetDescendants()) do
+		if obj:IsA("BoxHandleAdornment") and obj.Name:sub(-4) == "_ESP" then
+			local adornee = obj.Adornee
+			if adornee and adornee:FindFirstChildOfClass(objType) then
+				obj:Destroy()
+			end
+		end
+	end
+end
+
+cmd.add({"pesp", "esppart", "partesp"}, {"pesp {partname} (esppart, partesp)", "Highlights specific parts by name"}, function(...)
 	local args = {...}
 	local partName = table.concat(args, " "):lower()
 
-	if not table.find(espParts, partName) then
-		table.insert(espParts, partName)
+	if not table.find(espList, partName) then
+		table.insert(espList, partName)
 
-		for _, descendant in pairs(SafeGetService("Workspace"):GetDescendants()) do
-			if descendant.Name:lower() == partName then
-				if descendant:IsA("BasePart") or descendant:IsA("Model") then
-					createAdornment(descendant, "Lime green", 0.45)
+		for _, obj in pairs(SafeGetService("Workspace"):GetDescendants()) do
+			if obj.Name:lower() == partName then
+				if obj:IsA("BasePart") or obj:IsA("Model") then
+					createBox(obj, Color3.fromRGB(50, 205, 50), 0.45)
 				end
 			end
 		end
 	end
 
-	if not partEspTrigger then
-		partEspTrigger = SafeGetService("Workspace").DescendantAdded:Connect(partAdded)
+	if not partTrigger then
+		partTrigger = SafeGetService("Workspace").DescendantAdded:Connect(onPartAdded)
 	end
 end, true)
 
-cmd.add({"unesppart", "unpartesp", "unpesp"}, {"unesppart (unpartesp, unpesp)", "Removes the ESP from the parts"}, function()
-	if partEspTrigger then
-		partEspTrigger:Disconnect()
-		partEspTrigger = nil
-	end
-
-	espParts = {}
-
-	for _, descendant in pairs(SafeGetService("Workspace"):GetDescendants()) do
-		if descendant:IsA("BoxHandleAdornment") and descendant.Name:sub(-5) == "_PESP" then
-			descendant:Destroy()
-		end
-	end
-end)
-
-cmd.add({"viewpart","viewp","vpart"},{"viewpart {partname} (viewp,vpart)","Views a part"},function(...)
-	local table={...}
-	local args=table.concat(table, " ")
-
-	local found = false
-	for _,v in pairs(SafeGetService("Workspace"):GetDescendants()) do
-		local lwr=v.Name:lower()
-		if lwr==args:lower() and not found then
-			if v:IsA("BasePart") then
-				SafeGetService("Workspace").CurrentCamera.CameraSubject=v
-				found = true
-				break
-			elseif v:IsA("Model") or v:IsA("Folder") then
-				for _,j in ipairs(v:GetDescendants()) do
-					if j:IsA("BasePart") then
-						SafeGetService("Workspace").CurrentCamera.CameraSubject=j
-						found = true
-						break
-					end
-				end
-				if found then break end
+cmd.add({"unpesp", "unesppart", "unpartesp"}, {"unpesp (unesppart, unpartesp)", "Removes ESP from specific parts added by pesp"}, function()
+	for _, obj in pairs(SafeGetService("Workspace"):GetDescendants()) do
+		if obj:IsA("BoxHandleAdornment") and obj.Name:sub(-4) == "_ESP" then
+			local adornee = obj.Adornee
+			if adornee and table.find(espList, adornee.Name:lower()) then
+				obj:Destroy()
 			end
 		end
 	end
-end,true)
 
-cmd.add({"unviewpart","unviewp"},{"unviewpart (unviewp)","Unviews the part"},function()
-	SafeGetService("Workspace").CurrentCamera.CameraSubject = getHum()
+	espList = {}
+
+	if partTrigger then
+		partTrigger:Disconnect()
+		partTrigger = nil
+	end
+end)
+
+cmd.add({"touchesp", "tesp"}, {"touchesp (tesp)", "Highlights parts with TouchTransmitter"}, function()
+	enableEsp("TouchTransmitter", Color3.fromRGB(255, 0, 0))
+end)
+
+cmd.add({"untouchesp", "untesp"}, {"untouchesp (untesp)", "Removes ESP from parts with TouchTransmitter"}, function()
+	disableEsp("TouchTransmitter")
+end)
+
+cmd.add({"proximityesp", "prxesp", "proxiesp"}, {"proximityesp (prxesp, proxiesp)", "Highlights parts with ProximityPrompt"}, function()
+	enableEsp("ProximityPrompt", Color3.fromRGB(0, 0, 255))
+end)
+
+cmd.add({"unproximityesp", "unprxesp", "unproxiesp"}, {"unproximityesp (unprxesp, unproxiesp)", "Removes ESP from parts with ProximityPrompt"}, function()
+	disableEsp("ProximityPrompt")
+end)
+
+cmd.add({"clickesp", "cesp"}, {"clickesp (cesp)", "Highlights parts with ClickDetector"}, function()
+	enableEsp("ClickDetector", Color3.fromRGB(255, 165, 0))
+end)
+
+cmd.add({"unclickesp", "uncesp"}, {"unclickesp (uncesp)", "Removes ESP from parts with ClickDetector"}, function()
+	disableEsp("ClickDetector")
+end)
+
+cmd.add({"viewpart", "viewp", "vpart"}, {"viewpart {partname} (viewp, vpart)", "Views a part"}, function(...)
+    local args = table.concat({...}, " "):lower()
+    local camera = SafeGetService("Workspace").CurrentCamera
+
+    for _, descendant in ipairs(SafeGetService("Workspace"):GetDescendants()) do
+        if descendant.Name:lower() == args then
+            if descendant:IsA("BasePart") then
+                camera.CameraSubject = descendant
+                return
+            elseif descendant:IsA("Model") or descendant:IsA("Folder") then
+                for _, child in ipairs(descendant:GetDescendants()) do
+                    if child:IsA("BasePart") then
+                        camera.CameraSubject = child
+                        return
+                    end
+                end
+            end
+        end
+    end
+end, true)
+
+cmd.add({"unviewpart", "unviewp"}, {"unviewpart (unviewp)", "Unviews the part"}, function()
+    SafeGetService("Workspace").CurrentCamera.CameraSubject = getHum()
 end)
 
 cmd.add({"console"},{"console","Opens developer console"},function()
 	StarterGui:SetCore("DevConsoleVisible",true)
 end)
 
-local loophitbox=false
+local isHitboxActive = false
 
-cmd.add({"hitbox","hbox"},{"hitbox {amount}","Makes everyones hitbox as much as you want"},function(h,d)
+cmd.add({"hitbox", "hbox"}, {"hitbox {amount}", "Modifies everyone's hitbox to the specified size"}, function(playerName, size)
+    if isHitboxActive then
+        isHitboxActive = false
+    end
 
-	if loophitbox==true then
-		loophitbox=false
-	end
-	Username=h
-	Plr=getPlr(h)
+    local targetPlayer = getPlr(playerName)
+    _G.HeadSize = size or 10
+    _G.Disabled = true
+    isHitboxActive = true
 
-	wait();
+    local function modifyHitbox(character)
+        local rootPart = getRoot(character)
+        rootPart.Size = Vector3.new(_G.HeadSize, _G.HeadSize, _G.HeadSize)
+        rootPart.Transparency = 0.9
+        rootPart.BrickColor = BrickColor.new("Really black")
+        rootPart.Material = "Neon"
+        rootPart.CanCollide = false
+    end
 
-	DoNotif("Hitbox changed")
-	_G.HeadSize=d
-	_G.Disabled=true
+    RunService.Stepped:Connect(function()
+        if isHitboxActive then
+            if playerName == "all" or playerName == "others" then
+                for _, player in ipairs(SafeGetService('Players'):GetPlayers()) do
+                    if player.Name ~= SafeGetService('Players').LocalPlayer.Name then
+                        modifyHitbox(player.Character)
+                    end
+                end
+            else
+                modifyHitbox(targetPlayer.Character)
+            end
+        end
+    end)
+end, true)
 
-	if _G.HeadSize==nil then
-		_G.HeadSize=10
-	end
+cmd.add({"unhitbox", "unhbox"}, {"unhitbox", "Disables hitbox modifications"}, function(playerName)
+    local targetPlayer = getPlr(playerName)
+    _G.HeadSize = 5
+    _G.Disabled = false
+    isHitboxActive = false
 
-	loophitbox=true
+    local function resetHitbox(character)
+        local rootPart = getRoot(character)
+        rootPart.Size = Vector3.new(_G.HeadSize, _G.HeadSize, _G.HeadSize)
+        rootPart.Transparency = 1
+        rootPart.BrickColor = BrickColor.new("Really black")
+        rootPart.Material = "Neon"
+        rootPart.CanCollide = false
+    end
 
-	if Username=="all" or Username=="others" then
-		RunService.Stepped:Connect(function()
-			if loophitbox then
-				for i,v in next,SafeGetService('Players'):GetPlayers() do
-					if v.Name~=SafeGetService('Players').LocalPlayer.Name then
-						getRoot(v.Character).Size=Vector3.new(_G.HeadSize,_G.HeadSize,_G.HeadSize)
-						getRoot(v.Character).Transparency=0.9
-						getRoot(v.Character).BrickColor=BrickColor.new("Really black")
-						getRoot(v.Character).Material="Neon"
-						getRoot(v.Character).CanCollide=false
-					end
-				end
-			end
-		end)
-	else
-		RunService.Stepped:Connect(function()
-			if loophitbox then
-				getRoot(Plr.Character).Size=Vector3.new(_G.HeadSize,_G.HeadSize,_G.HeadSize)
-				getRoot(Plr.Character).Transparency=0.7
-				getRoot(Plr.Character).BrickColor=BrickColor.new("Really black")
-				getRoot(Plr.Character).Material="Neon"
-				getRoot(Plr.Character).CanCollide=false
-
-			end
-		end)
-	end
-end,true)
-
-
-cmd.add({"unhitbox","unhbox"},{"unhitbox","Disables hitbox"},function(h)
-	Username=h
-	Plr=getPlr(h)
-
-	_G.HeadSize=5
-	_G.Disabled=false
-
-	loophitbox=false
-
-	if Username=="all" or Username=="others" then
-		for i,v in next,SafeGetService('Players'):GetPlayers() do
-			if v.Name~=SafeGetService('Players').LocalPlayer.Name then
-				getRoot(v.Character).Size=Vector3.new(_G.HeadSize,_G.HeadSize,_G.HeadSize)
-				getRoot(v.Character).Transparency=1
-				getRoot(v.Character).BrickColor=BrickColor.new("Really black")
-				getRoot(v.Character).Material="Neon"
-				getRoot(v.Character).CanCollide=false
-			end
-		end
-	else
-		getRoot(Plr.Character).Size=Vector3.new(_G.HeadSize,_G.HeadSize,_G.HeadSize)
-		getRoot(Plr.Character).Transparency=1
-		getRoot(Plr.Character).BrickColor=BrickColor.new("Really black")
-		getRoot(Plr.Character).Material="Neon"
-		getRoot(Plr.Character).CanCollide=false
-	end
+    if playerName == "all" or playerName == "others" then
+        for _, player in ipairs(SafeGetService('Players'):GetPlayers()) do
+            if player.Name ~= SafeGetService('Players').LocalPlayer.Name then
+                resetHitbox(player.Character)
+            end
+        end
+    else
+        resetHitbox(targetPlayer.Character)
+    end
 end)
 
-cmd.add({"breakcars","bcars"},{"breakcars (bcars)","Breaks any car"},function()
+cmd.add({"breakcars", "bcars"}, {"breakcars (bcars)", "Breaks any car"}, function()
+    DoNotif("Car breaker loaded, sit on a vehicle and be the driver")
 
+    local UserInputService = UserInputService
+    local Mouse = Players.LocalPlayer:GetMouse()
+    local Workspace = SafeGetService("Workspace")
+    local Folder = Instance.new("Folder", Workspace)
+    local Part = Instance.new("Part", Folder)
+    local Attachment1 = Instance.new("Attachment", Part)
 
+    Part.Anchored = true
+    Part.CanCollide = false
+    Part.Transparency = 1
 
-	wait();
+    local UpdatedPosition = Mouse.Hit + Vector3.new(0, 5, 0)
 
-	DoNotif("Car breaker loaded,sit on a vehicle need to be the driver")
-	local UserInputService=UserInputService
-	local Mouse=Players.LocalPlayer:GetMouse()
-	local Folder=Instance.new("Folder",SafeGetService("Workspace"))
-	local Part=Instance.new("Part",Folder)
-	local Attachment1=Instance.new("Attachment",Part)
-	Part.Anchored=true
-	Part.CanCollide=false
-	Part.Transparency=1
-	local Updated=Mouse.Hit+Vector3.new(0,5,0)
-	local NetworkAccess=coroutine.create(function()
-		settings().Physics.AllowSleep=false
-		while RunService.RenderStepped:Wait() do
-			for _,Players in next,Players:GetPlayers() do
-				if Players~=Players.LocalPlayer then
-					Players.MaximumSimulationRadius=0 
-					sethiddenproperty(Players,"SimulationRadius",0) 
-				end 
-			end
-			Players.LocalPlayer.MaximumSimulationRadius=math.pow(math.huge,math.huge)
-			setsimulationradius(math.huge) 
-		end 
-	end) 
-	coroutine.resume(NetworkAccess)
-	function ForcePart(v)
-		if v:IsA("Part") and v.Anchored==false and v.Parent:FindFirstChild("Humanoid")==nil and v.Parent:FindFirstChild("Head")==nil and v.Name~="Handle" then
-			Mouse.TargetFilter=v
-			for _,x in next,v:GetChildren() do
-				if x:IsA("BodyAngularVelocity") or x:IsA("BodyForce") or x:IsA("BodyGyro") or x:IsA("BodyPosition") or x:IsA("BodyThrust") or x:IsA("BodyVelocity") or x:IsA("RocketPropulsion") then
-					x:Destroy()
-				end
-			end
-			if v:FindFirstChild("Attachment") then
-				v:FindFirstChild("Attachment"):Destroy()
-			end
-			if v:FindFirstChild("AlignPosition") then
-				v:FindFirstChild("AlignPosition"):Destroy()
-			end
-			if v:FindFirstChild("Torque") then
-				v:FindFirstChild("Torque"):Destroy()
-			end
-			v.CanCollide=false
-			local Torque=Instance.new("Torque",v)
-			Torque.Torque=Vector3.new(100000,100000,100000)
-			local AlignPosition=Instance.new("AlignPosition",v)
-			local Attachment2=Instance.new("Attachment",v)
-			Torque.Attachment0=Attachment2
-			AlignPosition.MaxForce=9999999999999999
-			AlignPosition.MaxVelocity=math.huge
-			AlignPosition.Responsiveness=200
-			AlignPosition.Attachment0=Attachment2 
-			AlignPosition.Attachment1=Attachment1
-		end
-	end
-	for _,v in next,SafeGetService("Workspace"):GetDescendants() do
-		ForcePart(v)
-	end
-	SafeGetService("Workspace").DescendantAdded:Connect(function(v)
-		ForcePart(v)
-	end)
-	UserInputService.InputBegan:Connect(function(Key,Chat)
-		if Key.KeyCode==Enum.KeyCode.E and not Chat then
-			Updated=Mouse.Hit+Vector3.new(0,5,0)
-		end
-	end)
-	spawn(function()
-		while RunService.RenderStepped:Wait() do
-			Attachment1.WorldCFrame=Updated
-		end
-	end)
+    local function setupNetworkAccess()
+        settings().Physics.AllowSleep = false
+        while RunService.RenderStepped:Wait() do
+            for _, player in ipairs(Players:GetPlayers()) do
+                if player ~= Players.LocalPlayer then
+                    player.MaximumSimulationRadius = 0
+                    sethiddenproperty(player, "SimulationRadius", 0)
+                end
+            end
+            Players.LocalPlayer.MaximumSimulationRadius = math.pow(math.huge, math.huge)
+            setsimulationradius(math.huge)
+        end
+    end
+
+    coroutine.wrap(setupNetworkAccess)()
+
+    local function applyForceToPart(part)
+        if part:IsA("Part") and not part.Anchored and not part.Parent:FindFirstChild("Humanoid") and not part.Parent:FindFirstChild("Head") and part.Name ~= "Handle" then
+            Mouse.TargetFilter = part
+
+            for _, child in ipairs(part:GetChildren()) do
+                if child:IsA("BodyAngularVelocity") or child:IsA("BodyForce") or child:IsA("BodyGyro") or child:IsA("BodyPosition") or child:IsA("BodyThrust") or child:IsA("BodyVelocity") or child:IsA("RocketPropulsion") then
+                    child:Destroy()
+                end
+            end
+
+            if part:FindFirstChild("Attachment") then
+                part:FindFirstChild("Attachment"):Destroy()
+            end
+            if part:FindFirstChild("AlignPosition") then
+                part:FindFirstChild("AlignPosition"):Destroy()
+            end
+            if part:FindFirstChild("Torque") then
+                part:FindFirstChild("Torque"):Destroy()
+            end
+
+            part.CanCollide = false
+
+            local torque = Instance.new("Torque", part)
+            torque.Torque = Vector3.new(100000, 100000, 100000)
+
+            local alignPosition = Instance.new("AlignPosition", part)
+            local attachment2 = Instance.new("Attachment", part)
+
+            torque.Attachment0 = attachment2
+            alignPosition.MaxForce = math.huge
+            alignPosition.MaxVelocity = math.huge
+            alignPosition.Responsiveness = 200
+            alignPosition.Attachment0 = attachment2
+            alignPosition.Attachment1 = Attachment1
+        end
+    end
+
+    for _, descendant in ipairs(Workspace:GetDescendants()) do
+        applyForceToPart(descendant)
+    end
+
+    Workspace.DescendantAdded:Connect(function(descendant)
+        applyForceToPart(descendant)
+    end)
+
+    UserInputService.InputBegan:Connect(function(input, isChatting)
+        if input.KeyCode == Enum.KeyCode.E and not isChatting then
+            UpdatedPosition = Mouse.Hit + Vector3.new(0, 5, 0)
+        end
+    end)
+
+    spawn(function()
+        while RunService.RenderStepped:Wait() do
+            Attachment1.WorldCFrame = UpdatedPosition
+        end
+    end)
 end)
 
 cmd.add({"firetouchinterests", "fti"}, {"firetouchinterests (fti)", "Fires every Touch Interest that's in workspace"}, function()
-	local ftiamount = 0
+    local touchInterestCount = 0
 
-	for _, v in pairs(SafeGetService("Workspace"):GetDescendants()) do
-		if v:IsA("TouchTransmitter") then
-			ftiamount = ftiamount + 1
-			task.spawn(function()
-				firetouchinterest(getRoot(getChar()), v.Parent, 0)  -- 0 is touch
-				task.wait()
-				firetouchinterest(getRoot(getChar()), v.Parent, 1)  -- 1 is untouch
-			end)
-			local part = v:FindFirstAncestorWhichIsA("BasePart")
-			if part then
-				task.wait()
-				local ogFrame = part.CFrame
-				part.CFrame = getRoot(getChar()).CFrame
-				task.delay(0.1, function()
-					part.CFrame = ogFrame
-				end)
-			end
-		end
-	end
+    for _, descendant in ipairs(SafeGetService("Workspace"):GetDescendants()) do
+        if descendant:IsA("TouchTransmitter") then
+            touchInterestCount = touchInterestCount + 1
 
-	wait()
+            task.spawn(function()
+                firetouchinterest(getRoot(getChar()), descendant.Parent, 0) -- 0 is touch
+                task.wait()
+                firetouchinterest(getRoot(getChar()), descendant.Parent, 1) -- 1 is untouch
+            end)
 
-	DoNotif("Fired "..ftiamount.." amount of touch interests")
+            local part = descendant:FindFirstAncestorWhichIsA("BasePart")
+            if part then
+                task.wait()
+                local originalCFrame = part.CFrame
+                part.CFrame = getRoot(getChar()).CFrame
+                task.delay(0.1, function()
+                    part.CFrame = originalCFrame
+                end)
+            end
+        end
+    end
+
+    wait()
+
+    DoNotif("Fired "..touchInterestCount.." touch interests")
 end)
 
 local infJump=nil
@@ -8928,31 +8959,20 @@ cmd.add({"unflyjump","noflyjump"},{"unflyjump (noflyjump)","Disables flyjump"},f
 end)
 
 cmd.add({"xray","xrayon"},{"xray (xrayon)","Makes you be able to see through walls"},function()
-
-
-
 	wait();
 
 	DoNotif("Xray enabled")
-	transparent=true
-	x(transparent)
+	x(true)
 end)
 
 cmd.add({"unxray","xrayoff"},{"unxray (xrayoff)","Makes you not be able to see through walls"},function()
-
-
-
 	wait();
 
 	DoNotif("Xray disabled")
-	transparent=false
-	x(transparent)
+	x(false)
 end)
 
 cmd.add({"pastebinscraper","pastebinscrape"},{"pastebinscraper (pastebinscrape)","Scrapes paste bin posts"},function()
-
-
-
 	wait();
 
 	loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/Nameless-Admin/main/trash(paste)bin%20scrapper"))()
@@ -10004,26 +10024,33 @@ cmd.add({"invisible", "invis"}, {"invisible (invis)", "Sets invisibility to scar
     DoNotif("Invisible loaded, press "..Keybind.Name.." to toggle or use the mobile button.")
 end)
 
-cmd.add({"fireremotes", "fremotes", "frem"},{"fireremotes (fremotes, frem)","Fires every remote"},function()
-	local rem = 0
-	for _, v in ipairs(game:GetDescendants()) do
-		if not v:IsDescendantOf(COREGUI) then
-			NACaller(function()
-				if v:IsA("RemoteEvent") then
-					v:FireServer()
-					rem = rem + 1
-				elseif v:IsA("BindableEvent") then
-					v:Fire()
-					rem = rem + 1
-				elseif v:IsA("RemoteFunction") then
-					v:InvokeServer()
-					rem = rem + 1
-				end
-			end)
-		end
-	end
+cmd.add({"fireremotes", "fremotes", "frem"}, {"fireremotes (fremotes, frem)", "Fires every remote"}, function()
+    local remoteCount = 0
 
-	DoNotif("Fired "..rem.." remotes")
+    for _, descendant in ipairs(game:GetDescendants()) do
+        if not descendant:IsDescendantOf(COREGUI) then
+            NACaller(function()
+                if descendant:IsA("RemoteEvent") then
+                    pcall(function()
+                        descendant:FireServer("")
+                    end)
+                    remoteCount = remoteCount + 1
+                elseif descendant:IsA("BindableEvent") then
+                    pcall(function()
+                        descendant:Fire("")
+                    end)
+                    remoteCount = remoteCount + 1
+                elseif descendant:IsA("RemoteFunction") then
+                    pcall(function()
+                        descendant:InvokeServer("")
+                    end)
+                    remoteCount = remoteCount + 1
+                end
+            end)
+        end
+    end
+
+    DoNotif("Fired "..remoteCount.." remotes")
 end)
 
 local fovcon = nil
@@ -10165,50 +10192,6 @@ cmd.add({"keystroke"},{"keystroke","Executes a keystroke ui script"},function()
 	loadstring(game:HttpGet("https://system-exodus.com/scripts/misc-releases/Keystrokes.lua",true))()
 end)
 
-cmd.add({"ownerid"},{"ownerid","Changes the client id to the owner's. Can give special things"},function()
-	ownId="unknown"
-	ownUser="unknown"
-	NACaller(function()
-		if game.CreatorType==Enum.CreatorType.User then
-			Player.UserId=game.CreatorId
-			Player.Name=game.CreatorName
-			ownId=game.CreatorId
-			ownUser=game.CreatorName
-		end
-	end)
-	NACaller(function()
-		if game.CreatorType==Enum.CreatorType.Group then
-			groupId=game.CreatorId
-			groupInfo=SafeGetService("GroupService"):GetGroupInfoAsync(groupId)
-			owner=groupInfo.Owner
-			Player.Name=owner.Name
-			Player.UserId=owner.Id
-			ownId=owner.Id
-			ownUser=owner.Name
-		end
-	end)
-	NACaller(function()
-		StarterGui:SetCoreGuiEnabled(0,false)
-		wait(3);
-		StarterGui:SetCoreGuiEnabled(0,true)
-	end)
-
-	DoNotif("UserId set to: "..ownId.."\nUsername set to: "..ownUser)
-	print'set'
-end)
-
-cmd.add({"setname"},{"setname","set your Name to anything"},function(...)
-	Player.Name=(...)
-end,true)
-
-cmd.add({"setid"},{"setid","set your UserId to anything"},function(...)
-	Player.UserId=tonumber(...)
-end,true)
-
-cmd.add({"setdisplay"},{"setdisplay","set your DisplayName to anything"},function(...)
-	Player.DisplayName=(...)
-end,true)
-
 cmd.add({"errorchat"},{"errorchat","Makes the chat error appear when roblox chat is slow"},function()
 	for i=1,3 do 
 		lib.LocalPlayerChat("\0","All")
@@ -10232,29 +10215,6 @@ function CheckPermissions(Player)
 	Player.Chatted:Connect(function(Message)
 		IsAdminAndRun(Message,Player)
 	end)
-end
-
-Players.PlayerAdded:Connect(function(plr)
-	CheckPermissions(plr)
-	table.insert(playerButtons, plr)
-	if ESPenabled then
-		repeat wait(1) until plr.Character
-		ESP(plr)
-	end
-end)
-Players.PlayerRemoving:Connect(function(plr)
-	for i, p in ipairs(playerButtons) do
-		if p == plr then
-			table.remove(playerButtons, i)
-			break
-		end
-	end
-end)
-for i,v in pairs(Players:GetPlayers()) do
-	table.insert(playerButtons, v)
-	if v~=LocalPlayer then
-		CheckPermissions(v)
-	end
 end
 
 function Getmodel(id)
@@ -10330,6 +10290,7 @@ elseif COREGUI then
 else
 	warn'no guis?'
 end
+
 if ScreenGui then ScreenGui.DisplayOrder=9999 ScreenGui.ResetOnSpawn=false end
 local description=ScreenGui:FindFirstChild("Description");
 local cmdBar=ScreenGui:FindFirstChild("CmdBar");
@@ -10369,8 +10330,6 @@ chatExample.Parent=nil
 commandExample.Parent=nil
 UpdLogsLabel.Parent=nil
 resizeFrame.Parent=nil
-
-pcall(function() if ScreenGui:FindFirstChild("UniverseViewer") then ScreenGui:FindFirstChild("UniverseViewer"):Destroy() end end)
 
 	--[[pcall(function()
 		for i,v in pairs(ScreenGui:GetDescendants()) do
@@ -11139,14 +11098,34 @@ function bindToChat(plr, msg)
 end
 
 for i,plr in pairs(Players:GetPlayers()) do
+	table.insert(playerButtons, plr)
+	if plr~=LocalPlayer then
+		CheckPermissions(plr)
+	end
 	plr.Chatted:Connect(function(msg)
 		bindToChat(plr,msg)
 	end)
 end
+
 Players.PlayerAdded:Connect(function(plr)
+	CheckPermissions(plr)
+	table.insert(playerButtons, plr)
+	if ESPenabled then
+		repeat wait(1) until plr.Character
+		ESP(plr)
+	end
 	plr.Chatted:Connect(function(msg)
 		bindToChat(plr,msg)
 	end)
+end)
+
+Players.PlayerRemoving:Connect(function(plr)
+	for i, p in ipairs(playerButtons) do
+		if p == plr then
+			table.remove(playerButtons, i)
+			break
+		end
+	end
 end)
 
 mouse.Move:Connect(function()
