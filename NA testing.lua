@@ -4074,6 +4074,20 @@ cmd.add({"antifling"}, {"antifling", "makes other players non-collidable with yo
 		end
 	end
 
+	function restoreCollision(player)
+		if player.Character then
+			for _, part in pairs(player.Character:GetDescendants()) do
+				if part:IsA("BasePart") then
+					local id = player.UserId.."_"..part:GetFullName()
+					if partStates[id] ~= nil then
+						part.CanCollide = partStates[id]
+						partStates[id] = nil
+					end
+				end
+			end
+		end
+	end
+
 	for _, connection in pairs(afc or {}) do
 		if connection then connection:Disconnect() end
 	end
@@ -4082,6 +4096,7 @@ cmd.add({"antifling"}, {"antifling", "makes other players non-collidable with yo
 	for _, player in pairs(Players:GetPlayers()) do
 		if player ~= Players.LocalPlayer then
 			local connection = player.CharacterAdded:Connect(function(character)
+				restoreCollision(player)
 				handleCollision(player)
 			end)
 			table.insert(afc, connection)
@@ -4095,6 +4110,7 @@ cmd.add({"antifling"}, {"antifling", "makes other players non-collidable with yo
 	local playerAddedConnection = Players.PlayerAdded:Connect(function(player)
 		if player ~= Players.LocalPlayer then
 			local connection = player.CharacterAdded:Connect(function(character)
+				restoreCollision(player)
 				handleCollision(player)
 			end)
 			table.insert(afc, connection)
@@ -4118,15 +4134,8 @@ cmd.add({"unantifling"}, {"unantifling", "restores collision for other players"}
 	afc = {}
 
 	for _, player in pairs(Players:GetPlayers()) do
-		if player ~= Players.LocalPlayer and player.Character then
-			for _, part in pairs(player.Character:GetDescendants()) do
-				if part:IsA("BasePart") then
-					local id = player.UserId.."_"..part:GetFullName()
-					if partStates[id] ~= nil then
-						part.CanCollide = partStates[id]
-					end
-				end
-			end
+		if player ~= Players.LocalPlayer then
+			restoreCollision(player)
 		end
 	end
 
