@@ -47,9 +47,55 @@ NACaller(function() getgenv().NATestingVer=true end)
 local curVer=2.3
 
 --[[ Brand ]]--
-local mainName='Nameless Admin'
-local testingName='NA Testing'
-local adminName='NA'
+local mainName = 'Nameless Admin'
+local testingName = 'NA Testing'
+local adminName = 'NA'
+
+local function getSeasonEmoji()
+    local date = os.date("*t")
+    local month = date.month
+    local day = date.day
+
+    if month == 1 and day == 1 then
+        return '🎉' -- New Year's Day
+    elseif month == 2 and day >= 1 and day <= 21 then
+        return '🧧' -- Chinese New Year
+    elseif month == 2 and day == 14 then
+        return '❤️' -- Valentine's Day
+    elseif month == 3 and day == 17 then
+        return '☘️' -- St. Patrick's Day
+    elseif month == 4 and day >= 1 and day <= 15 then
+        return '🐣' -- Easter
+    elseif month == 5 then
+        return '💐' -- Mother's Day
+    elseif month == 6 then
+        return '👔' -- Father's Day
+    elseif month == 6 and day == 21 then
+        return '☀️' -- Summer Solstice
+    elseif month == 9 and day == 22 then
+        return '🍂' -- Autumn Equinox
+    elseif month == 10 and day == 31 then
+        return '🎃' -- Halloween
+    elseif month == 11 and day >= 22 and day <= 30 then
+        return '🦃' -- Thanksgiving
+    elseif month == 12 and day == 25 then
+        return '🎄' -- Christmas
+    elseif month == 12 and day == 31 then
+        return '🎆' -- New Year's Eve
+	elseif month == 12 or month == 1 or month == 2 then
+        return '❄️' -- Winter
+    elseif month == 3 or month == 4 or month == 5 then
+        return '🌸' -- Spring
+    elseif month == 6 or month == 7 or month == 8 then
+        return '☀️' -- Summer
+    elseif month == 9 or month == 10 or month == 11 then
+        return '🍂' -- Autumn
+    end
+
+    return ''
+end
+
+
 if getgenv().NATestingVer then
 	adminName=testingName
 else
@@ -373,45 +419,47 @@ function isRelAdmin(Player)
 end
 
 function loadedResults(res)
-	if res == nil or type(res) ~= "number" then 
-		res = 0 
-	end
+    if res == nil or type(res) ~= "number" then 
+        res = 0 
+    end
 
-	local sec = tonumber(res)
-	local isNegative = sec < 0
+    local sec = tonumber(res)
+    local isNegative = sec < 0
 
-	if isNegative then
-		sec = math.abs(sec)
-	end
+    if isNegative then
+        sec = math.abs(sec)
+    end
 
-	local days = math.floor(sec / 86400)
-	local hr = math.floor((sec % 86400) / 3600)
-	local min = math.floor((sec % 3600) / 60)
-	local remain = sec % 60
-	local ms = math.floor((remain % 1) * 1000)
-	remain = math.floor(remain)
+    local days = math.floor(sec / 86400)
+    local hr = math.floor((sec % 86400) / 3600)
+    local min = math.floor((sec % 3600) / 60)
+    local remain = sec % 60
+    local ms = math.floor((remain % 1) * 1000)
+    remain = math.floor(remain)
 
-	local format = ''
+    local function formatTime(days, hr, min, remain, ms)
+        if days > 0 then
+            return string.format("%d:%02d:%02d:%02d.%03d | Days,Hours,Minutes,Seconds.Milliseconds", 
+                days, hr, min, remain, ms)
+        elseif hr > 0 then
+            return string.format("%d:%02d:%02d.%03d | Hours,Minutes,Seconds.Milliseconds", 
+                hr, min, remain, ms)
+        elseif min > 0 then
+            return string.format("%d:%02d.%03d | Minutes,Seconds.Milliseconds", 
+                min, remain, ms)
+        else
+            return string.format("%d.%03d | Seconds.Milliseconds", 
+                remain, ms)
+        end
+    end
 
-	if days > 0 then
-		format = string.format("%d:%02d:%02d:%02d.%03d | Days,Hours,Minutes,Seconds.Milliseconds", 
-			days, hr, min, remain, ms)
-	elseif hr > 0 then
-		format = string.format("%d:%02d:%02d.%03d | Hours,Minutes,Seconds.Milliseconds", 
-			hr, min, remain, ms)
-	elseif min > 0 then
-		format = string.format("%d:%02d.%03d | Minutes,Seconds.Milliseconds", 
-			min, remain, ms)
-	else
-		format = string.format("%d.%03d | Seconds.Milliseconds", 
-			remain, ms)
-	end
+    local formattedTime = formatTime(days, hr, min, remain, ms)
 
-	if isNegative then
-		format = "-"..format
-	end
+    if isNegative then
+        formattedTime = "-" .. formattedTime
+    end
 
-	return format
+    return formattedTime
 end
 
 
@@ -2973,7 +3021,7 @@ end)
 
 cmd.add({"replicationlag","backtrack"},{"replicationlag (backtrack)","Set IncomingReplicationLag"},function(...)
 	local t={...}
-	local args=t[1]
+	local args=t[1] or 0
 
 	if tonumber(args) then
 		settings():GetService("NetworkSettings").IncomingReplicationLag=args
@@ -3403,15 +3451,18 @@ cmd.add({"trip"},{"trip","get up NOW"},function()
 	getRoot(getChar()).Velocity=getRoot(getChar()).CFrame.LookVector*25
 end)
 
-noTripCon = nil
+local noTripCon = nil
 
 cmd.add({"antitrip"}, {"antitrip", "no tripping today bruh"}, function()
 	function antiTrip(char)
-		local hum = getHum()
+		local hum = char:FindFirstChildOfClass("Humanoid")
 		local root = getRoot(char)
 
 		if hum and root then
-			if noTripCon then noTripCon:Disconnect() noTripCon = nil end
+			if noTripCon then 
+				noTripCon:Disconnect() 
+				noTripCon = nil 
+			end
 			noTripCon = hum.FallingDown:Connect(function()
 				root.Velocity = Vector3.new(0, 0, 0)
 				hum:ChangeState(Enum.HumanoidStateType.GettingUp)
@@ -3419,8 +3470,12 @@ cmd.add({"antitrip"}, {"antitrip", "no tripping today bruh"}, function()
 		end
 	end
 
-	if p.Character then antiTrip(p.Character) end
-	p.CharacterAdded:Connect(antiTrip)
+	if LocalPlayer.Character then 
+		antiTrip(LocalPlayer.Character) 
+	end
+	LocalPlayer.CharacterAdded:Connect(function(char)
+		antiTrip(char)
+	end)
 end)
 
 cmd.add({"unantitrip"}, {"unantitrip", "tripping allowed now"}, function()
@@ -3444,23 +3499,6 @@ cmd.add({"sit"},{"sit","Sit your player"},function()
 		hum.Sit=true
 	end
 end)
-
-cmd.add({"spin"},{"spin","Spin yourself at the speed you want"},function(d)
-	local spinSpeed=tonumber(d)
-	if d and isNumber(d) then
-		spinSpeed=(d)
-	end
-	for i,v in pairs(getRoot(getChar()):GetChildren()) do
-		if v.Name=="Spinning" then
-			v:Destroy()
-		end
-	end
-	local Spin=Instance.new("BodyAngularVelocity")
-	Spin.Name="Spinning"
-	Spin.Parent=getRoot(speaker.Character)
-	Spin.MaxTorque=Vector3.new(0,math.huge,0)
-	Spin.AngularVelocity=Vector3.new(0,spinSpeed,0)
-end,true)
 
 cmd.add({"oldroblox"},{"oldroblox","Old skybox and studs"},function()
 	for i,v in pairs(SafeGetService("Workspace"):GetDescendants()) do
@@ -3807,21 +3845,42 @@ cmd.add({"clicktp", "tptool"}, {"clicktp (tptool)", "Teleport where your mouse i
 	local clickTpEnabled = false
 	local tweenTpEnabled = false
 
-	MouseButtonFix(clickTpButton,function()
+	MouseButtonFix(clickTpButton, function()
 		clickTpEnabled = not clickTpEnabled
 		tweenTpEnabled = false
 		tweenTpButton.Text = "Enable Tween TP"
 		clickTpButton.Text = clickTpEnabled and "Disable Click TP" or "Enable Click TP"
 	end)
 
-	MouseButtonFix(tweenTpButton,function()
+	MouseButtonFix(tweenTpButton, function()
 		tweenTpEnabled = not tweenTpEnabled
 		clickTpEnabled = false
 		clickTpButton.Text = "Enable Click TP"
 		tweenTpButton.Text = tweenTpEnabled and "Disable Tween TP" or "Enable Tween TP"
 	end)
 
-	mouse.Button1Down:Connect(function()
+	local function CustomClick(onClick)
+		local initialMousePosition = nil
+		local dragThreshold = 10
+
+		mouse.Button1Down:Connect(function()
+			initialMousePosition = Vector2.new(mouse.X, mouse.Y)
+		end)
+
+		mouse.Button1Up:Connect(function()
+			if initialMousePosition then
+				local currentMousePosition = Vector2.new(mouse.X, mouse.Y)
+				local distance = (currentMousePosition - initialMousePosition).Magnitude
+
+				if distance <= dragThreshold then
+					onClick(mouse)
+				end
+			end
+			initialMousePosition = nil
+		end)
+	end
+
+	CustomClick(function(mouse)
 		if clickTpEnabled then
 			local pos = mouse.Hit + Vector3.new(0, 2.5, 0)
 			local targetCFrame = CFrame.new(pos.X, pos.Y, pos.Z)
@@ -4022,19 +4081,27 @@ cmd.add({"antifling"}, {"antifling", "makes other players non-collidable with yo
 
 	for _, player in pairs(Players:GetPlayers()) do
 		if player ~= Players.LocalPlayer then
-			local connection = RunService.Stepped:Connect(function()
+			local connection = player.CharacterAdded:Connect(function(character)
 				handleCollision(player)
 			end)
 			table.insert(afc, connection)
+
+			if player.Character then
+				handleCollision(player)
+			end
 		end
 	end
 
 	local playerAddedConnection = Players.PlayerAdded:Connect(function(player)
 		if player ~= Players.LocalPlayer then
-			local connection = RunService.Stepped:Connect(function()
+			local connection = player.CharacterAdded:Connect(function(character)
 				handleCollision(player)
 			end)
 			table.insert(afc, connection)
+
+			if player.Character then
+				handleCollision(player)
+			end
 		end
 	end)
 	table.insert(afc, playerAddedConnection)
@@ -4121,150 +4188,15 @@ cmd.add({"unvehiclespeed", "unvspeed"}, {"unvehiclespeed (unvspeed)", "Stops the
 	end
 end)
 
-cmd.add({"controlnpcs","cnpcs"},{"controlnpcs (cnpcs)","Mobile: Touch and hold on an NPC, PC: CTRL+LEFTCLICK"},function()
-	wait()
-
-	local UserInputService = UserInputService
-	local isMobile = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
-
-	if isMobile then
-		DoNotif("ControlNPCs executed. Touch and hold on an NPC to control it")
-	else
-		DoNotif("ControlNPCs executed. CTRL+Click on an NPC to control it")
-	end
-
-	local player = Players.LocalPlayer
-	local mouse = player:GetMouse()
-
-	function controlNPC(npc)
-		if not npc then return end
-
-		local character = getChar()
-		if not character then
-			DoNotif("Character not found!")
-			return
-		end
-
-		local npcRootPart = getRoot(npc)
-		local PlayerRootPart = getRoot(character)
-
-		if not npcRootPart or not PlayerRootPart then
-			DoNotif("Required parts not found!")
-			return
-		end
-
-		local A0 = Instance.new("Attachment")
-		local AP = Instance.new("AlignPosition")
-		local AO = Instance.new("AlignOrientation")
-		local A1 = Instance.new("Attachment")
-
-		for _, v in pairs(npc:GetDescendants()) do
-			if v:IsA("BasePart") then
-				RunService.Stepped:Connect(function()
-					v.CanCollide = false
-				end)
-			end
-		end
-
-		pcall(function()
-			PlayerRootPart:BreakJoints()
-
-			for _, v in pairs(character:GetDescendants()) do
-				if v:IsA("BasePart") then
-					if v.Name == "HumanoidRootPart" or v.Name == "UpperTorso" or v.Name == "Head" then
-					else
-						v:Destroy()
-					end
-				end
-			end
-
-			PlayerRootPart.Position = PlayerRootPart.Position + Vector3.new(5, 0, 0)
-
-			if character:FindFirstChild("Head") then
-				character.Head.Anchored = true
-			end
-
-			if character:FindFirstChild("UpperTorso") then
-				character.UpperTorso.Anchored = true
-			elseif character:FindFirstChild("Torso") then
-				character.Torso.Anchored = true
-			end
-
-			A0.Parent = npcRootPart
-			AP.Parent = npcRootPart
-			AO.Parent = npcRootPart
-			AP.Responsiveness = 200
-			AP.MaxForce = math.huge
-			AO.MaxTorque = math.huge
-			AO.Responsiveness = 200
-			AP.Attachment0 = A0
-			AP.Attachment1 = A1
-			AO.Attachment1 = A1
-			AO.Attachment0 = A0
-			A1.Parent = PlayerRootPart
-
-			DoNotif("Now controlling NPC")
-		end)
-	end
-
-	mouse.Button1Down:Connect(function()
-		if not isMobile and mouse.Target and UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then
-			local npc = mouse.Target.Parent
-			controlNPC(npc)
-		end
-	end)
-
-	if isMobile then
-		local touchStartTime = 0
-		local touchTarget = nil
-		local HOLD_DURATION = 1
-
-		UserInputService.TouchStarted:Connect(function(touch, gameProcessed)
-			touchStartTime = tick()
-			touchTarget = nil
-
-			local ray = SafeGetService("Workspace").CurrentCamera:ScreenPointToRay(touch.Position.X, touch.Position.Y)
-			local raycastParams = RaycastParams.new()
-			raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
-			raycastParams.FilterDescendantsInstances = {character}
-
-			local raycastResult = SafeGetService("Workspace"):Raycast(ray.Origin, ray.Direction * 100, raycastParams)
-			if raycastResult and raycastResult.Instance then
-				touchTarget = raycastResult.Instance.Parent
-			end
-		end)
-
-		UserInputService.TouchEnded:Connect(function(touch, gameProcessed)
-			local touchDuration = tick() - touchStartTime
-
-			if touchDuration >= HOLD_DURATION and touchTarget then
-				controlNPC(touchTarget)
-			end
-
-			touchTarget = nil
-		end)
-	end
-end)
-
 local active=false
-local MobileCameraFramework={}
 local players=Players
-local runservice=RunService
-local CAS=SafeGetService("ContextActionService")
 local camera=SafeGetService("Workspace").CurrentCamera
 
 local uis=UserInputService
-local ismobile=uis.TouchEnabled
 
-local MAX_LENGTH=900000
 local active=false
-local ENABLED_OFFSET=CFrame.new(1.7,0,0)
-local DISABLED_OFFSET=CFrame.new(-1.7,0,0)
 function UpdateAutoRotate(BOOL)
 	humanoid.AutoRotate=BOOL
-end
-function GetUpdatedCameraCFrame(ROOT,CAMERA)
-	return CFrame.new(root.Position,Vector3.new(CAMERA.CFrame.LookVector.X*MAX_LENGTH,root.Position.Y,CAMERA.CFrame.LookVector.Z*MAX_LENGTH))
 end
 
 local NA=false
@@ -5795,7 +5727,7 @@ end)
 
 cmd.add({"antichatlogs","antichatlogger"},{"antichatlogs (antichatlogger)","Prevents you from getting banning when typing unspeakable messages (game needs legacy chat service)"},function()
 	if not LegacyChat then
-		return DoNotif("Game doesn't use Legacy Chat Service",3,"antichatlogs")
+		return DoNotif("Game doesn't use Legacy Chat Service")
 	end
 	local MsgPost, _ = pcall(function()
 		rawset(require(LocalPlayer:FindFirstChild("PlayerScripts"):FindFirstChild("ChatScript").ChatMain),"MessagePosted", {
@@ -5810,7 +5742,7 @@ cmd.add({"antichatlogs","antichatlogger"},{"antichatlogs (antichatlogger)","Prev
 			end
 		})
 	end)
-	DoNotif(MsgPost and "Enabled" or "Failed to enable antichatlogs",3,"antichatlogs")
+	DoNotif(MsgPost and "Enabled" or "Failed to enable antichatlogs")
 end)
 
 cmd.add({"animspoofer","animationspoofer","spoofanim","animspoof"},{"animationspoofer (animspoof,spoofanim)","Loads up an animation spoofer,spoofs animations that use rbxassetid"},function()
@@ -7310,29 +7242,20 @@ cmd.add({"unloopwaveat","unloopwat"},{"unloopwaveat <player> (unloopwat)","Stops
 	loopwave=false
 end)
 
-cmd.add({"tools","gears"},{"tools <player> (gears)","Copies tools from ReplicatedStorage and Lighting"},function()
-	function copy(instance)
-		for i,c in pairs(instance:GetDescendants()) do
-			if c:IsA('Tool') or c:IsA('HopperBin') then
-				c:Clone().Parent=speaker:FindFirstChildOfClass("Backpack")
-			end
-			copy(c)
-		end
-	end
-	copy(Lighting)
-	function copy(instance)
-		for i,c in pairs(instance:GetDescendants()) do
-			if c:IsA('Tool') or c:IsA('HopperBin') then
-				c:Clone().Parent=speaker:FindFirstChildOfClass("Backpack")
-			end
-			copy(c)
-		end
-	end
-	copy(ReplicatedStorage)
+cmd.add({"tools", "gears"}, {"tools <player> (gears)", "Copies tools from ReplicatedStorage and Lighting"}, function()
+    function copyTools(source)
+        for _, item in pairs(source:GetDescendants()) do
+            if item:IsA('Tool') or item:IsA('HopperBin') then
+                item:Clone().Parent = getBp()
+            end
+        end
+    end
 
-	wait();
+    copyTools(Lighting)
+    copyTools(ReplicatedStorage)
 
-	DoNotif("Copied tools from ReplicatedStorage and Lighting",3)
+    wait()
+    DoNotif("Copied tools from ReplicatedStorage and Lighting", 3)
 end)
 
 cmd.add({"waveat","wat"},{"waveat <player> (wat)","Wave to a player"},function(...)
@@ -7995,52 +7918,82 @@ cmd.add({"wallwalk"},{"wallwalk","Makes you walk on walls"},function()
 	loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/uuuuuuu/main/WallWalk.lua"))() -- backup cause i don't trust pastebin
 end)
 
-local hiddenGUIS={}
-cmd.add({"hideguis"},{"hideguis","Hides guis"},function()
-	for i,v in pairs(PlrGui:GetDescendants()) do
-		if (v:IsA("Frame") or v:IsA("ImageLabel") or v:IsA("ScrollingFrame")) and v.Visible then
-			v.Visible=false
-			if not FindInTable(hiddenGUIS,v) then
-				table.insert(hiddenGUIS,v)
-			end
-		end
-	end
+local hiddenGUIS = {}
+
+cmd.add({"hideguis"}, {"hideguis", "Hides GUIs"}, function()
+    for _, guiElement in pairs(PlrGui:GetDescendants()) do
+        if (guiElement:IsA("Frame") or guiElement:IsA("ImageLabel") or guiElement:IsA("ScrollingFrame")) and guiElement.Visible then
+            guiElement.Visible = false
+            if not table.find(hiddenGUIS, guiElement) then
+                table.insert(hiddenGUIS, guiElement)
+            end
+        end
+    end
 end)
 
-cmd.add({"showguis"},{"showguis","Show guis that were hidden using hideguis"},function()
-	for i,v in pairs(hiddenGUIS) do
-		v.Visible=true
-	end
-	hiddenGUIS={}
+cmd.add({"showguis"}, {"showguis", "Shows GUIs that were hidden using hideguis"}, function()
+    for _, guiElement in pairs(hiddenGUIS) do
+        guiElement.Visible = true
+    end
+    hiddenGUIS = {}
 end)
 
-local spinThingy=nil
+local spinThingy = nil
+local spinPart = nil
 
-cmd.add({"spin"},{"spin {amount}","Makes your character spin as fast as you want"},function(...)
-	wait();
+cmd.add({"spin"}, {"spin {amount}", "Makes your character spin as fast as you want"}, function(...)
+    wait()
 
-	local spinSpeed=(...)
-	if not spinSpeed then spinSpeed=20 end
-	if spinThingy then spinThingy:Destroy() spinThingy=nil end
-	spinThingy=Instance.new("BodyAngularVelocity")
-	spinThingy.Name="NamelessSpinner"
-	spinThingy.Parent=getRoot(LocalPlayer.Character)
-	spinThingy.MaxTorque=Vector3.new(0,math.huge,0)
-	spinThingy.AngularVelocity=Vector3.new(0,spinSpeed,0)
+    local spinSpeed = (...)
+    if not spinSpeed then spinSpeed = 20 end
 
-	DoNotif("Spinning...")
-end,true)
+    if spinThingy then
+        spinThingy:Destroy()
+        spinThingy = nil
+    end
 
-cmd.add({"unspin"},{"unspin","Makes your character unspin"},function()
-	wait();
+    if spinPart then
+        spinPart:Destroy()
+        spinPart = nil
+    end
 
-	if spinThingy then 
-		spinThingy:Destroy() 
-		spinThingy=nil
-		DoNotif("Spin Disabled",3)
-	else
-		DoNotif("You are not even spinning brother",3)
-	end
+    spinPart = Instance.new("Part")
+    spinPart.Name = "SpinPart"
+    spinPart.Anchored = false
+    spinPart.CanCollide = false
+    spinPart.Transparency = 1
+    spinPart.Size = Vector3.new(1, 1, 1)
+    spinPart.Parent = workspace.CurrentCamera
+    spinPart.CFrame = getRoot(LocalPlayer.Character).CFrame
+
+    spinThingy = Instance.new("BodyAngularVelocity")
+    spinThingy.Name = "NamelessSpinner"
+    spinThingy.Parent = spinPart
+    spinThingy.MaxTorque = Vector3.new(0, math.huge, 0)
+    spinThingy.AngularVelocity = Vector3.new(0, spinSpeed, 0)
+
+    local weld = Instance.new("WeldConstraint")
+    weld.Part0 = spinPart
+    weld.Part1 = getRoot(LocalPlayer.Character)
+    weld.Parent = spinPart
+
+    DoNotif("Spinning...")
+end, true)
+
+cmd.add({"unspin"}, {"unspin", "Makes your character unspin"}, function()
+    wait()
+
+    if spinThingy then
+        spinThingy:Destroy()
+        spinThingy = nil
+    end
+
+    if spinPart then
+        spinPart:Destroy()
+        spinPart = nil
+    end
+
+    DoNotif("Spin Disabled", 3)
 end)
 
 cmd.add({"notepad"},{"notepad","notepad for making scripts / etc"},function()
@@ -8053,21 +8006,6 @@ end)
 
 cmd.add({"scriptviewer","viewscripts"},{"scriptviewer (viewscripts)","Can view scripts made by 0866"},function()
 	loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/uuuuuuu/main/scriptviewer",true))()
-end)
-
-cmd.add({"hidename","hname"},{"hidename","Hides your name only works on billboard uis"},function()
-	for _,item in pairs(workspace[Players.LocalPlayer.Name]:FindFirstChild("Head"):GetChildren()) do
-		if item:IsA('BillboardGui') then
-			item:Remove()
-		end
-	end
-	wait(0.2)
-
-
-
-	wait();
-
-	DoNotif("Name has been hidden,this only works on billboard guis / custom name fonts",3)
 end)
 
 cmd.add({"hydroxide","hydro"},{"hydroxide (hydro)","executes hydroxide"},function()
@@ -11157,7 +11095,7 @@ TextLabel.AnchorPoint = Vector2.new(0.5, 0.5)
 TextLabel.Position = UDim2.new(0.5, 0, 0.5, 0)
 TextLabel.Size = UDim2.new(0, 2, 0, 33)
 TextLabel.Font = Enum.Font.GothamBold
-TextLabel.Text = adminName.." V"..curVer
+TextLabel.Text = getSeasonEmoji()..' '..adminName.." V"..curVer..' '..getSeasonEmoji()
 TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 TextLabel.TextSize = 20
 TextLabel.TextWrapped = true
@@ -11170,7 +11108,7 @@ Info.AnchorPoint = Vector2.new(0, 1)
 Info.Position = UDim2.new(0, 10, 1, -10)
 Info.Size = UDim2.new(0, 200, 0, 20)
 Info.Font = Enum.Font.Gotham
-Info.Text = adminName.." V"..curVer.."\n"..dadojadoqwdqwd
+Info.Text = getSeasonEmoji()..' '..adminName.." V"..curVer..' '..getSeasonEmoji().."\n"..dadojadoqwdqwd
 Info.TextColor3 = Color3.fromRGB(255, 255, 255)
 Info.TextTransparency = 0.5
 Info.RichText = true
@@ -11308,7 +11246,7 @@ NACaller(function()
 		DoNotif('Added "updlog" command (displays any new changes added into '..adminName..')',nil,"Info")
 	end)
 
-	cmdInput.PlaceholderText=adminName.." V"..curVer
+	cmdInput.PlaceholderText=getSeasonEmoji()..' '..adminName.." V"..curVer..' '..getSeasonEmoji()
 end)
 
 CaptureService.CaptureBegan:Connect(function()
@@ -11367,7 +11305,7 @@ task.spawn(function()
 end)
 
 task.spawn(function()
-	Info.Text = adminName.." V"..curVer.."\n"..dadojadoqwdqwd.."\nPlace: "..placeName()
+	Info.Text = getSeasonEmoji()..' '..adminName.." V"..curVer..' '..getSeasonEmoji().."\n"..dadojadoqwdqwd.."\nPlace: "..placeName()
 end)
 
 task.spawn(function()
