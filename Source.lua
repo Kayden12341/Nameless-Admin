@@ -176,20 +176,26 @@ local opt={
 
 --[[ Update Logs ]]--
 local updLogs = {
-	log1 = "Improved functionality of the fly/vFly command";
-	log2 = [[Added a keybind to toggle flying (FOR PC USERS)
-	- Keybinds: "F" for the fly command and "V" for the vFly command]];
-	log3 = 'Added Shiftlock option to the enable/disable command that will enable/disable shiftlock in the Roblox settings';
-	log4 = [[added reverb (reverbcontrol) Command
-	- Changes the sound reverb]];
-	log5 = [[added lighting (lightingcontrol) Command
-	- Changes the lighting technology]];
-	log6 = [[added commandloop (cmdloop) Command
-	- Run any command on Nameless Admin in a loop
-	- Command to stop the loop: stoploop]];
-	log7 = 'To run the loop, you must input the command and arguments.';
-	log8 = "Example of usage: (cmdloop chat text) or (cmdloop jump) (arguments are not really required on commands that don't use them)";
-	log9 = 'A notification will appear to set a loop delay before running (empty = 0 sec "spam")';
+	log1 = "clicktp (tptool) Command";
+	log2 = [[Replaced the tools with buttons (since most games disable the use of backpack)
+	Added command | unclicktp (untptool) to remove the buttons]];
+	log3 = "orbit/uporbit Commands";
+	log4 = [[Should be functional now without issues]];
+	log5 = "touchesp (tesp) Command";
+	log6 = [[Highlights parts with TouchTransmitter
+	Alias to disable | untouchesp (untesp)]];
+	log7 = "proximityesp (prxesp, proxiesp) Command";
+	log8 = [[Highlights parts with ProximityPrompt
+	Alias to disable | unproximityesp (unprxesp, unproxiesp)]];
+	log9 = "clickesp (cesp) Command";
+	log10 = [[Highlights parts with ClickDetector
+	Alias to disable | unclickesp (uncesp)]];
+	log11 = "viewpart (viewp, vpart) Command";
+	log12 = "Improved functionality";
+	log13 = "breakcars (bcars) Command";
+	log14 = "Improved functionality";
+	log15 = "fireremotes (fremotes, frem) Command";
+	log16 = "Fixed issues with it breaking when it encounters errors";
 }
 
 local updDate="unknown" --month,day,year
