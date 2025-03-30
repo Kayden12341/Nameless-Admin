@@ -8875,9 +8875,10 @@ cmd.add({"infjump","infinitejump"},{"infjump (infinitejump)","Makes you be able 
 	function fix()
 		if infJump then infJump:Disconnect() infJump = nil end
 
-		if not getHum() then
+		hum = getHum()
+		if not hum then
 			local char = plr.Character or plr.CharacterAdded:Wait()
-			getHum() = char:WaitForChild("Humanoid")
+			hum = char:WaitForChild("Humanoid")
 		end
 
 		infJump = humanoid:GetPropertyChangedSignal("Jump"):Connect(function()
