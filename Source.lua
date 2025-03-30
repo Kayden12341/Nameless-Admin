@@ -9973,17 +9973,12 @@ cmd.add({"fireremotes", "fremotes", "frem"}, {"fireremotes (fremotes, frem)", "F
             NACaller(function()
                 if descendant:IsA("RemoteEvent") then
                     pcall(function()
-                        descendant:FireServer("")
-                    end)
-                    remoteCount = remoteCount + 1
-                elseif descendant:IsA("BindableEvent") then
-                    pcall(function()
-                        descendant:Fire("")
+                        descendant:FireServer()
                     end)
                     remoteCount = remoteCount + 1
                 elseif descendant:IsA("RemoteFunction") then
                     pcall(function()
-                        descendant:InvokeServer("")
+                        descendant:InvokeServer()
                     end)
                     remoteCount = remoteCount + 1
                 end
