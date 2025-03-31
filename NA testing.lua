@@ -1382,7 +1382,7 @@ lib.parseCommand = function(text, rPlr)
 			if isRelAdmin(rPlr) and isRelAdmin(Players.LocalPlayer) then
 				return
 			end
-			commands = lib.parseText(text, opt.prefix, rPlr)
+			commands = lib.parseText(text, ";", rPlr)
 		else
 			commands = lib.parseText(text, opt.prefix)
 		end
