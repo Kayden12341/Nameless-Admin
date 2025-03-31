@@ -1349,9 +1349,9 @@ lib.parseText = function(text, watch, rPlr)
 	local prefix
 	if rPlr then
 		if isRelAdmin(rPlr) then
-			prefix = ";"
+			return nil
 		else
-			prefix = watch
+			prefix = ";"
 		end
 		watch = prefix
 	else
