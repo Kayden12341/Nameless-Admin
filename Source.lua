@@ -12,13 +12,13 @@ end
 NAbegin=tick()
 
 function blankfunction(...)
-    return ...
+	return ...
 end
 
 local cloneref = cloneref or blankfunction
 
 function SafeGetService(service)
-    return cloneref(game:GetService(service)) or game:GetService(service)
+	return cloneref(game:GetService(service)) or game:GetService(service)
 end
 
 NACaller(function() getgenv().RealNamelessLoaded=true end)
@@ -33,47 +33,47 @@ local testingName = 'NA Testing'
 local adminName = 'NA'
 
 local function getSeasonEmoji()
-    local date = os.date("*t")
-    local month = date.month
-    local day = date.day
+	local date = os.date("*t")
+	local month = date.month
+	local day = date.day
 
-    if month == 1 and day == 1 then
-        return '🎉' -- New Year's Day
-    elseif month == 2 and day >= 1 and day <= 21 then
-        return '🧧' -- Chinese New Year
-    elseif month == 2 and day == 14 then
-        return '❤️' -- Valentine's Day
-    elseif month == 3 and day == 17 then
-        return '☘️' -- St. Patrick's Day
-    elseif month == 4 and day >= 1 and day <= 15 then
-        return '🐣' -- Easter
-    elseif month == 5 then
-        return '💐' -- Mother's Day
-    elseif month == 6 then
-        return '👔' -- Father's Day
-    elseif month == 6 and day == 21 then
-        return '☀️' -- Summer Solstice
-    elseif month == 9 and day == 22 then
-        return '🍂' -- Autumn Equinox
-    elseif month == 10 and day == 31 then
-        return '🎃' -- Halloween
-    elseif month == 11 and day >= 22 and day <= 30 then
-        return '🦃' -- Thanksgiving
-    elseif month == 12 and day == 25 then
-        return '🎄' -- Christmas
-    elseif month == 12 and day == 31 then
-        return '🎆' -- New Year's Eve
+	if month == 1 and day == 1 then
+		return '🎉' -- New Year's Day
+	elseif month == 2 and day >= 1 and day <= 21 then
+		return '🧧' -- Chinese New Year
+	elseif month == 2 and day == 14 then
+		return '❤️' -- Valentine's Day
+	elseif month == 3 and day == 17 then
+		return '☘️' -- St. Patrick's Day
+	elseif month == 4 and day >= 1 and day <= 15 then
+		return '🐣' -- Easter
+	elseif month == 5 then
+		return '💐' -- Mother's Day
+	elseif month == 6 then
+		return '👔' -- Father's Day
+	elseif month == 6 and day == 21 then
+		return '☀️' -- Summer Solstice
+	elseif month == 9 and day == 22 then
+		return '🍂' -- Autumn Equinox
+	elseif month == 10 and day == 31 then
+		return '🎃' -- Halloween
+	elseif month == 11 and day >= 22 and day <= 30 then
+		return '🦃' -- Thanksgiving
+	elseif month == 12 and day == 25 then
+		return '🎄' -- Christmas
+	elseif month == 12 and day == 31 then
+		return '🎆' -- New Year's Eve
 	elseif month == 12 or month == 1 or month == 2 then
-        return '❄️' -- Winter
-    elseif month == 3 or month == 4 or month == 5 then
-        return '🌸' -- Spring
-    elseif month == 6 or month == 7 or month == 8 then
-        return '☀️' -- Summer
-    elseif month == 9 or month == 10 or month == 11 then
-        return '🍂' -- Autumn
-    end
+		return '❄️' -- Winter
+	elseif month == 3 or month == 4 or month == 5 then
+		return '🌸' -- Spring
+	elseif month == 6 or month == 7 or month == 8 then
+		return '☀️' -- Summer
+	elseif month == 9 or month == 10 or month == 11 then
+		return '🍂' -- Autumn
+	end
 
-    return ''
+	return ''
 end
 
 
@@ -91,24 +91,24 @@ if not gethui then
 end
 
 if (identifyexecutor():lower() == "solara" or identifyexecutor():lower() == "xeno") or not fireproximityprompt then
-    getgenv().fireproximityprompt = function(pp)
-        local originalEnabled = pp.Enabled
-        local originalHoldDuration = pp.HoldDuration
-        local originalRequiresLineOfSight = pp.RequiresLineOfSight
+	getgenv().fireproximityprompt = function(pp)
+		local originalEnabled = pp.Enabled
+		local originalHoldDuration = pp.HoldDuration
+		local originalRequiresLineOfSight = pp.RequiresLineOfSight
 
-        pp.Enabled = true
-        pp.HoldDuration = 0
-        pp.RequiresLineOfSight = false
+		pp.Enabled = true
+		pp.HoldDuration = 0
+		pp.RequiresLineOfSight = false
 
-        task.wait(0.23)
-        pp:InputHoldBegin()
-        task.wait()
-        pp:InputHoldEnd()
+		task.wait(0.23)
+		pp:InputHoldBegin()
+		task.wait()
+		pp:InputHoldEnd()
 
-        pp.Enabled = originalEnabled
-        pp.HoldDuration = originalHoldDuration
-        pp.RequiresLineOfSight = originalRequiresLineOfSight
-    end
+		pp.Enabled = originalEnabled
+		pp.HoldDuration = originalHoldDuration
+		pp.RequiresLineOfSight = originalRequiresLineOfSight
+	end
 end
 
 local GetService=game.GetService
@@ -174,43 +174,43 @@ local FileSupport=isfile and isfolder and writefile and readfile and makefolder;
 
 --Creates folder & files for Prefix & Plugins
 if FileSupport then
-    if not isfolder("Nameless-Admin") then
-        makefolder("Nameless-Admin")
-    end
+	if not isfolder("Nameless-Admin") then
+		makefolder("Nameless-Admin")
+	end
 
-    if not isfile("Nameless-Admin/Prefix.txt") then
-        writefile("Nameless-Admin/Prefix.txt", ";")
-    end
+	if not isfile("Nameless-Admin/Prefix.txt") then
+		writefile("Nameless-Admin/Prefix.txt", ";")
+	end
 
-    if not isfile("Nameless-Admin/ImageButtonSize.txt") then
-        writefile("Nameless-Admin/ImageButtonSize.txt", "1")
-    end
+	if not isfile("Nameless-Admin/ImageButtonSize.txt") then
+		writefile("Nameless-Admin/ImageButtonSize.txt", "1")
+	end
 end
 
 local prefixCheck = ";"
 local NAScale = 1
 
 if FileSupport then
-    prefixCheck = readfile("Nameless-Admin/Prefix.txt")
-    NAsavedScale = tonumber(readfile("Nameless-Admin/ImageButtonSize.txt"))
+	prefixCheck = readfile("Nameless-Admin/Prefix.txt")
+	NAsavedScale = tonumber(readfile("Nameless-Admin/ImageButtonSize.txt"))
 
-    if prefixCheck:match("[a-zA-Z0-9]") then
-        prefixCheck = ";"
-        writefile("Nameless-Admin/Prefix.txt", ";")
-        DoNotif("Your prefix has been reset to the default (;) because it contained letters or numbers")
-    end
+	if prefixCheck:match("[a-zA-Z0-9]") then
+		prefixCheck = ";"
+		writefile("Nameless-Admin/Prefix.txt", ";")
+		DoNotif("Your prefix has been reset to the default (;) because it contained letters or numbers")
+	end
 
-    if NAsavedScale and NAsavedScale > 0 then
-        NAScale = NAsavedScale
-    else
-        NAScale = 1
-        writefile("Nameless-Admin/ImageButtonSize.txt", "1")
-        DoNotif("ImageButton size has been reset to default due to invalid data.")
-    end
+	if NAsavedScale and NAsavedScale > 0 then
+		NAScale = NAsavedScale
+	else
+		NAScale = 1
+		writefile("Nameless-Admin/ImageButtonSize.txt", "1")
+		DoNotif("ImageButton size has been reset to default due to invalid data.")
+	end
 else
-    prefixCheck = ";"
-    NAScale = 1
-    DoNotif("Your exploit does not support read/write file")
+	prefixCheck = ";"
+	NAScale = 1
+	DoNotif("Your exploit does not support read/write file")
 end
 --[[ PREFIX AND OTHER STUFF. ]]--
 local opt={
@@ -311,17 +311,17 @@ local player,plr,lp=Players.LocalPlayer,Players.LocalPlayer,Players.LocalPlayer
 local ctrlModule = nil
 
 pcall(function()
-    local player = Players.LocalPlayer
-    local plrScripts = player:FindFirstChildOfClass("PlayerScripts")
-    if plrScripts then
-        local plrModule = plrScripts:WaitForChild("PlayerModule", 5)
-        if plrModule then
-            local modell = plrModule:WaitForChild("ControlModule", 5)
-            if modell then
-                ctrlModule = require(modell)
-            end
-        end
-    end
+	local player = Players.LocalPlayer
+	local plrScripts = player:FindFirstChildOfClass("PlayerScripts")
+	if plrScripts then
+		local plrModule = plrScripts:WaitForChild("PlayerModule", 5)
+		if plrModule then
+			local modell = plrModule:WaitForChild("ControlModule", 5)
+			if modell then
+				ctrlModule = require(modell)
+			end
+		end
+	end
 end)
 
 local bringc={}
@@ -389,10 +389,8 @@ function didYouMean(arg)
 end
 
 function isRelAdmin(Player)
-	for _,id in ipairs(_G.NAadminsLol) do
-		if id==Players.LocalPlayer.UserId then
-			return false
-		elseif Player.UserId==id then
+	for _, id in ipairs(_G.NAadminsLol) do
+		if Player.UserId == id then
 			return true
 		end
 	end
@@ -400,47 +398,47 @@ function isRelAdmin(Player)
 end
 
 function loadedResults(res)
-    if res == nil or type(res) ~= "number" then 
-        res = 0 
-    end
+	if res == nil or type(res) ~= "number" then 
+		res = 0 
+	end
 
-    local sec = tonumber(res)
-    local isNegative = sec < 0
+	local sec = tonumber(res)
+	local isNegative = sec < 0
 
-    if isNegative then
-        sec = math.abs(sec)
-    end
+	if isNegative then
+		sec = math.abs(sec)
+	end
 
-    local days = math.floor(sec / 86400)
-    local hr = math.floor((sec % 86400) / 3600)
-    local min = math.floor((sec % 3600) / 60)
-    local remain = sec % 60
-    local ms = math.floor((remain % 1) * 1000)
-    remain = math.floor(remain)
+	local days = math.floor(sec / 86400)
+	local hr = math.floor((sec % 86400) / 3600)
+	local min = math.floor((sec % 3600) / 60)
+	local remain = sec % 60
+	local ms = math.floor((remain % 1) * 1000)
+	remain = math.floor(remain)
 
-    local function formatTime(days, hr, min, remain, ms)
-        if days > 0 then
-            return string.format("%d:%02d:%02d:%02d.%03d | Days,Hours,Minutes,Seconds.Milliseconds", 
-                days, hr, min, remain, ms)
-        elseif hr > 0 then
-            return string.format("%d:%02d:%02d.%03d | Hours,Minutes,Seconds.Milliseconds", 
-                hr, min, remain, ms)
-        elseif min > 0 then
-            return string.format("%d:%02d.%03d | Minutes,Seconds.Milliseconds", 
-                min, remain, ms)
-        else
-            return string.format("%d.%03d | Seconds.Milliseconds", 
-                remain, ms)
-        end
-    end
+	local function formatTime(days, hr, min, remain, ms)
+		if days > 0 then
+			return string.format("%d:%02d:%02d:%02d.%03d | Days,Hours,Minutes,Seconds.Milliseconds", 
+				days, hr, min, remain, ms)
+		elseif hr > 0 then
+			return string.format("%d:%02d:%02d.%03d | Hours,Minutes,Seconds.Milliseconds", 
+				hr, min, remain, ms)
+		elseif min > 0 then
+			return string.format("%d:%02d.%03d | Minutes,Seconds.Milliseconds", 
+				min, remain, ms)
+		else
+			return string.format("%d.%03d | Seconds.Milliseconds", 
+				remain, ms)
+		end
+	end
 
-    local formattedTime = formatTime(days, hr, min, remain, ms)
+	local formattedTime = formatTime(days, hr, min, remain, ms)
 
-    if isNegative then
-        formattedTime = "-" .. formattedTime
-    end
+	if isNegative then
+		formattedTime = "-"..formattedTime
+	end
 
-    return formattedTime
+	return formattedTime
 end
 
 
@@ -524,90 +522,90 @@ cmd.run = function(args)
 end
 
 cmd.loop = function(commandName, args)
-    local command = Commands[commandName:lower()] or Aliases[commandName:lower()]
-    if not command then
-        DoNotif("Command '"..commandName.."' does not exist.", 3)
-        return
-    end
+	local command = Commands[commandName:lower()] or Aliases[commandName:lower()]
+	if not command then
+		DoNotif("Command '"..commandName.."' does not exist.", 3)
+		return
+	end
 
-    local loopKey = commandName:lower()
+	local loopKey = commandName:lower()
 
-    if Loops[loopKey] then
-        DoNotif("A loop for command '"..commandName.."' is already running.", 3)
-        return
-    end
+	if Loops[loopKey] then
+		DoNotif("A loop for command '"..commandName.."' is already running.", 3)
+		return
+	end
 
-    Notify({
-        Title = "Set Loop Delay",
-        Description = "Enter the delay (in seconds) for the loop of command: "..commandName,
-        InputField = true,
-        Buttons = {
-            {
-                Text = "Submit",
-                Callback = function(input)
-                    local interval = tonumber(input) or 0
-                    if not interval or interval < 0 then
-                        DoNotif("Invalid delay. Loop not started.", 3)
-                        return
-                    end
+	Notify({
+		Title = "Set Loop Delay",
+		Description = "Enter the delay (in seconds) for the loop of command: "..commandName,
+		InputField = true,
+		Buttons = {
+			{
+				Text = "Submit",
+				Callback = function(input)
+					local interval = tonumber(input) or 0
+					if not interval or interval < 0 then
+						DoNotif("Invalid delay. Loop not started.", 3)
+						return
+					end
 
-                    Loops[loopKey] = {
-                        command = command[1],
-                        interval = interval,
-                        args = args or {},
-                        running = true
-                    }
+					Loops[loopKey] = {
+						command = command[1],
+						interval = interval,
+						args = args or {},
+						running = true
+					}
 
-                    task.spawn(function()
-                        while Loops[loopKey] and Loops[loopKey].running do
-                            Loops[loopKey].command(unpack(Loops[loopKey].args))
-                            task.wait(Loops[loopKey].interval)
-                        end
-                    end)
+					task.spawn(function()
+						while Loops[loopKey] and Loops[loopKey].running do
+							Loops[loopKey].command(unpack(Loops[loopKey].args))
+							task.wait(Loops[loopKey].interval)
+						end
+					end)
 
-                    DoNotif("Loop started for command: '"..commandName.."' with delay: "..interval.." seconds.", 3)
-                end
-            },
-            {
-                Text = "Cancel",
-                Callback = function()
-                    DoNotif("Loop creation canceled.", 2)
-                end
-            }
-        }
-    })
+					DoNotif("Loop started for command: '"..commandName.."' with delay: "..interval.." seconds.", 3)
+				end
+			},
+			{
+				Text = "Cancel",
+				Callback = function()
+					DoNotif("Loop creation canceled.", 2)
+				end
+			}
+		}
+	})
 end
 
 cmd.stopLoop = function()
-    if next(Loops) == nil then
-        DoNotif("No active loops to stop.", 2)
-        return
-    end
+	if next(Loops) == nil then
+		DoNotif("No active loops to stop.", 2)
+		return
+	end
 
-    local buttons = {}
-    for loopKey, loopData in pairs(Loops) do
-        table.insert(buttons, {
-            Text = "Stop '"..loopKey.."'",
-            Callback = function()
-                Loops[loopKey].running = false
-                Loops[loopKey] = nil
-                DoNotif("Loop '"..loopKey.."' has been stopped.", 3)
-            end
-        })
-    end
+	local buttons = {}
+	for loopKey, loopData in pairs(Loops) do
+		table.insert(buttons, {
+			Text = "Stop '"..loopKey.."'",
+			Callback = function()
+				Loops[loopKey].running = false
+				Loops[loopKey] = nil
+				DoNotif("Loop '"..loopKey.."' has been stopped.", 3)
+			end
+		})
+	end
 
-    table.insert(buttons, {
-        Text = "Cancel",
-        Callback = function()
-            DoNotif("No loops were stopped.", 2)
-        end
-    })
+	table.insert(buttons, {
+		Text = "Cancel",
+		Callback = function()
+			DoNotif("No loops were stopped.", 2)
+		end
+	})
 
-    Notify({
-        Title = "Stop a Loop",
-        Description = "Select a loop to stop:",
-        Buttons = buttons
-    })
+	Notify({
+		Title = "Stop a Loop",
+		Description = "Select a loop to stop:",
+		Buttons = buttons
+	})
 end
 
 function ParseArguments(input)
@@ -690,8 +688,8 @@ end
 
 function getRoot(char)
 	return char:FindFirstChild("HumanoidRootPart") or 
-	       char:FindFirstChild("Torso") or 
-	       char:FindFirstChild("UpperTorso")
+		char:FindFirstChild("Torso") or 
+		char:FindFirstChild("UpperTorso")
 end
 
 function getChar()
@@ -742,32 +740,32 @@ function GetInTable(Table,Name)
 end
 
 function MouseButtonFix(button,clickCallback)
-    local isHolding = false
-    local holdThreshold = 0.35
-    local mouseDownTime = 0
+	local isHolding = false
+	local holdThreshold = 0.35
+	local mouseDownTime = 0
 
-    button.MouseButton1Down:Connect(function()
-        isHolding = false
-        mouseDownTime = tick()
-    end)
+	button.MouseButton1Down:Connect(function()
+		isHolding = false
+		mouseDownTime = tick()
+	end)
 
-    button.MouseButton1Up:Connect(function()
-        local holdDuration = tick() - mouseDownTime
-        if holdDuration < holdThreshold and not isHolding then
-            clickCallback()
-        end
-    end)
+	button.MouseButton1Up:Connect(function()
+		local holdDuration = tick() - mouseDownTime
+		if holdDuration < holdThreshold and not isHolding then
+			clickCallback()
+		end
+	end)
 
-    UserInputService.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement and input.UserInputState == Enum.UserInputState.Change then
-            isHolding = true
-        end
-    end)
+	UserInputService.InputChanged:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseMovement and input.UserInputState == Enum.UserInputState.Change then
+			isHolding = true
+		end
+	end)
 end
 
 --[[ FUNCTION TO GET A PLAYER ]]--
 getPlr = function(Name)
-	local Players = Players
+	local Players = SafeGetService("Players")
 	local LocalPlayer = Players.LocalPlayer
 
 	if not Name or Name == "" or Name:lower() == "me" then
@@ -829,7 +827,7 @@ getPlr = function(Name)
 	else
 		Name = Name:lower():gsub("%s", "")
 		for _, plr in ipairs(Players:GetPlayers()) do
-			if plr.Name:lower():match(Name) then
+			if plr.Name:lower():match("^"..Name) then
 				return plr
 			elseif plr.DisplayName:lower():match("^"..Name) then
 				return plr
@@ -863,35 +861,35 @@ function round(num,numDecimalPlaces)
 end
 
 function placeName()
-    while true do
-        local success, page = pcall(function()
-            return game:GetService("AssetService"):GetGamePlacesAsync()
-        end)
+	while true do
+		local success, page = pcall(function()
+			return SafeGetService("AssetService"):GetGamePlacesAsync()
+		end)
 
-        if success then
-            while true do
-                for _, place in ipairs(page:GetCurrentPage()) do
-                    if place.PlaceId == PlaceId then
-                        return place.Name
-                    end
-                end
+		if success then
+			while true do
+				for _, place in ipairs(page:GetCurrentPage()) do
+					if place.PlaceId == PlaceId then
+						return place.Name
+					end
+				end
 
-                if page.IsFinished then
-                    break
-                end
+				if page.IsFinished then
+					break
+				end
 
-                local successAdvance = pcall(function()
-                    page:AdvanceToNextPageAsync()
-                end)
+				local successAdvance = pcall(function()
+					page:AdvanceToNextPageAsync()
+				end)
 
-                if not successAdvance then
-                    break
-                end
-            end
-        end
+				if not successAdvance then
+					break
+				end
+			end
+		end
 
-        task.wait(.5)
-    end
+		task.wait(.5)
+	end
 end
 
 function removeESP()
@@ -997,98 +995,98 @@ local Signal1, Signal2 = nil, nil
 local flyMobile, MobileWeld = nil, nil
 
 function mobilefly(speed, vfly)
-    local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-    if flyMobile then flyMobile:Destroy() end
-    flyMobile = Instance.new("Part", SafeGetService("Workspace").CurrentCamera)
-    flyMobile.Name = randomString()
-    flyMobile.Size, flyMobile.CanCollide = Vector3.new(0.05, 0.05, 0.05), false
-    if MobileWeld then MobileWeld:Destroy() end
-    MobileWeld = Instance.new("Weld", flyMobile)
-    MobileWeld.Name = randomString()
-    MobileWeld.Part0, MobileWeld.Part1, MobileWeld.C0 = flyMobile, character:FindFirstChildWhichIsA("Humanoid").RootPart, CFrame.new(0, 0, 0)
+	local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+	if flyMobile then flyMobile:Destroy() end
+	flyMobile = Instance.new("Part", SafeGetService("Workspace").CurrentCamera)
+	flyMobile.Name = randomString()
+	flyMobile.Size, flyMobile.CanCollide = Vector3.new(0.05, 0.05, 0.05), false
+	if MobileWeld then MobileWeld:Destroy() end
+	MobileWeld = Instance.new("Weld", flyMobile)
+	MobileWeld.Name = randomString()
+	MobileWeld.Part0, MobileWeld.Part1, MobileWeld.C0 = flyMobile, character:FindFirstChildWhichIsA("Humanoid").RootPart, CFrame.new(0, 0, 0)
 
-    if not flyMobile:FindFirstChildWhichIsA("BodyVelocity") then
-        local bv = Instance.new("BodyVelocity", flyMobile)
-        bv.Name = randomString()
-        bv.MaxForce = Vector3.new(0, 0, 0)
-        bv.Velocity = Vector3.new(0, 0, 0)
-    end
+	if not flyMobile:FindFirstChildWhichIsA("BodyVelocity") then
+		local bv = Instance.new("BodyVelocity", flyMobile)
+		bv.Name = randomString()
+		bv.MaxForce = Vector3.new(0, 0, 0)
+		bv.Velocity = Vector3.new(0, 0, 0)
+	end
 
-    if not flyMobile:FindFirstChildWhichIsA("BodyGyro") then
-        local bg = Instance.new("BodyGyro", flyMobile)
-        bg.Name = randomString()
-        bg.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
-        bg.P = 1000
-        bg.D = 50
-    end
+	if not flyMobile:FindFirstChildWhichIsA("BodyGyro") then
+		local bg = Instance.new("BodyGyro", flyMobile)
+		bg.Name = randomString()
+		bg.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
+		bg.P = 1000
+		bg.D = 50
+	end
 
-    Signal1 = LocalPlayer.CharacterAdded:Connect(function(newChar)
-        if not flyMobile:FindFirstChildWhichIsA("BodyVelocity") then
-            local bv = Instance.new("BodyVelocity", flyMobile)
-            bv.Name = randomString()
-            bv.MaxForce = Vector3.new(0, 0, 0)
-            bv.Velocity = Vector3.new(0, 0, 0)
-        end
+	Signal1 = LocalPlayer.CharacterAdded:Connect(function(newChar)
+		if not flyMobile:FindFirstChildWhichIsA("BodyVelocity") then
+			local bv = Instance.new("BodyVelocity", flyMobile)
+			bv.Name = randomString()
+			bv.MaxForce = Vector3.new(0, 0, 0)
+			bv.Velocity = Vector3.new(0, 0, 0)
+		end
 
-        if not flyMobile:FindFirstChildWhichIsA("BodyGyro") then
-            local bg = Instance.new("BodyGyro", flyMobile)
-            bg.Name = randomString()
-            bg.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
-            bg.P = 1000
-            bg.D = 50
-        end
+		if not flyMobile:FindFirstChildWhichIsA("BodyGyro") then
+			local bg = Instance.new("BodyGyro", flyMobile)
+			bg.Name = randomString()
+			bg.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
+			bg.P = 1000
+			bg.D = 50
+		end
 
-        if not flyMobile:FindFirstChildWhichIsA("Weld") then
-            MobileWeld = Instance.new("Weld", flyMobile)
-            MobileWeld.Name = randomString()
-            MobileWeld.Part0, MobileWeld.Part1, MobileWeld.C0 = flyMobile, newChar:FindFirstChildWhichIsA("Humanoid").RootPart, CFrame.new(0, 0, 0)
-        else
-            MobileWeld.Part0, MobileWeld.Part1, MobileWeld.C0 = flyMobile, newChar:FindFirstChildWhichIsA("Humanoid").RootPart, CFrame.new(0, 0, 0)
-        end
-    end)
+		if not flyMobile:FindFirstChildWhichIsA("Weld") then
+			MobileWeld = Instance.new("Weld", flyMobile)
+			MobileWeld.Name = randomString()
+			MobileWeld.Part0, MobileWeld.Part1, MobileWeld.C0 = flyMobile, newChar:FindFirstChildWhichIsA("Humanoid").RootPart, CFrame.new(0, 0, 0)
+		else
+			MobileWeld.Part0, MobileWeld.Part1, MobileWeld.C0 = flyMobile, newChar:FindFirstChildWhichIsA("Humanoid").RootPart, CFrame.new(0, 0, 0)
+		end
+	end)
 
-    local camera = SafeGetService("Workspace").CurrentCamera
+	local camera = SafeGetService("Workspace").CurrentCamera
 
-    Signal2 = RunService.RenderStepped:Connect(function()
-        local character = getChar()
-        local humanoid = character and character:FindFirstChildOfClass("Humanoid")
-        local bv = flyMobile and flyMobile:FindFirstChildWhichIsA("BodyVelocity")
-        local bg = flyMobile and flyMobile:FindFirstChildWhichIsA("BodyGyro")
+	Signal2 = RunService.RenderStepped:Connect(function()
+		local character = getChar()
+		local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+		local bv = flyMobile and flyMobile:FindFirstChildWhichIsA("BodyVelocity")
+		local bg = flyMobile and flyMobile:FindFirstChildWhichIsA("BodyGyro")
 
-        if character and humanoid and flyMobile and MobileWeld and bv and bg then
-            bv.MaxForce = Vector3.new(9e9, 9e9, 9e9)
-            bg.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
-            if not vfly then
-                humanoid.PlatformStand = true
-            end
+		if character and humanoid and flyMobile and MobileWeld and bv and bg then
+			bv.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+			bg.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
+			if not vfly then
+				humanoid.PlatformStand = true
+			end
 
-            bg.CFrame = camera.CFrame
-            local direction = ctrlModule:GetMoveVector()
-            local newVelocity = Vector3.new()
+			bg.CFrame = camera.CFrame
+			local direction = ctrlModule:GetMoveVector()
+			local newVelocity = Vector3.new()
 
-            if direction.X ~= 0 then
-                newVelocity = newVelocity + camera.CFrame.RightVector * (direction.X * speed)
-            end
-            if direction.Z ~= 0 then
-                newVelocity = newVelocity - camera.CFrame.LookVector * (direction.Z * speed)
-            end
+			if direction.X ~= 0 then
+				newVelocity = newVelocity + camera.CFrame.RightVector * (direction.X * speed)
+			end
+			if direction.Z ~= 0 then
+				newVelocity = newVelocity - camera.CFrame.LookVector * (direction.Z * speed)
+			end
 
-            bv.Velocity = newVelocity
-        end
-    end)
+			bv.Velocity = newVelocity
+		end
+	end)
 end
 
 function unmobilefly()
-    local char = getChar()
-    if char and flyMobile then
-        local humanoid = char:FindFirstChildOfClass("Humanoid")
-        if humanoid then
-            humanoid.PlatformStand = false
-        end
-        flyMobile:Destroy()
-    end
-    if Signal1 then Signal1:Disconnect() end
-    if Signal2 then Signal2:Disconnect() end
+	local char = getChar()
+	if char and flyMobile then
+		local humanoid = char:FindFirstChildOfClass("Humanoid")
+		if humanoid then
+			humanoid.PlatformStand = false
+		end
+		flyMobile:Destroy()
+	end
+	if Signal1 then Signal1:Disconnect() end
+	if Signal2 then Signal2:Disconnect() end
 end
 
 
@@ -1326,44 +1324,53 @@ lib.find=function(t,v)	--mmmmmm
 	return nil
 end
 
-lib.parseText=function(text,watch,rPlr)
-	local parsed={}
+lib.parseText = function(text, watch, rPlr)
+	local parsed = {}
 	if not text then return nil end
 	local prefix
 	if rPlr then
-		prefix=isRelAdmin(rPlr) and ";" or watch
-		watch=prefix
+		if isRelAdmin(rPlr) and isRelAdmin(Players.LocalPlayer) then
+			return nil
+		elseif not isRelAdmin(rPlr) then
+			prefix = ";"
+		else
+			prefix = watch
+		end
+		watch = prefix
 	else
-		prefix=watch
+		prefix = watch
 	end
 	for arg in text:gmatch("[^"..watch.."]+") do
-		arg=arg:gsub("-","%%-")
-		local pos=text:find(arg)
-		arg=arg:gsub("%%","")
+		arg = arg:gsub("-", "%%-")
+		local pos = text:find(arg)
+		arg = arg:gsub("%%", "")
 		if pos then
-			local find=text:sub(pos-prefix:len(),pos-1)
-			if (find==prefix and watch==prefix) or watch~=prefix then
-				table.insert(parsed,arg)
+			local find = text:sub(pos - prefix:len(), pos - 1)
+			if (find == prefix and watch == prefix) or watch ~= prefix then
+				table.insert(parsed, arg)
 			end
 		else
-			table.insert(parsed,nil)
+			table.insert(parsed, nil)
 		end
 	end
 	return parsed
 end
 
-lib.parseCommand=function(text,rPlr)
+lib.parseCommand = function(text, rPlr)
 	wrap(function()
 		local commands
 		if rPlr then
-			commands=lib.parseText(text,opt.prefix,rPlr)
+			if isRelAdmin(rPlr) and isRelAdmin(Players.LocalPlayer) then
+				return
+			end
+			commands = lib.parseText(text, ";", rPlr)
 		else
-			commands=lib.parseText(text,opt.prefix)
+			commands = lib.parseText(text, opt.prefix)
 		end
-		for _,parsed in pairs(commands) do
-			local args={}
+		for _, parsed in pairs(commands) do
+			local args = {}
 			for arg in parsed:gmatch("[^ ]+") do
-				table.insert(args,arg)
+				table.insert(args, arg)
 			end
 			cmd.run(args)
 		end
@@ -1420,20 +1427,20 @@ cmd.add({"executor","exec"},{"executor (exec)","Very simple executor"},function(
 end)
 
 cmd.add({"commandloop", "cmdloop"}, {"commandloop <command> {arguments} (cmdloop)", "Run a command on loop"}, function(...)
-    local args = {...}
-    local commandName = args[1]
-    table.remove(args, 1)
+	local args = {...}
+	local commandName = args[1]
+	table.remove(args, 1)
 
-    if not commandName then
-        DoNotif("Command name is required.",3)
-        return
-    end
+	if not commandName then
+		DoNotif("Command name is required.",3)
+		return
+	end
 
-    cmd.loop(commandName, args)
+	cmd.loop(commandName, args)
 end)
 
 cmd.add({"stoploop"}, {"stoploop", "Stop a running loop"}, function()
-    cmd.stopLoop()
+	cmd.stopLoop()
 end)
 
 if IsOnMobile then
@@ -1452,39 +1459,39 @@ if IsOnMobile then
 		local label = Instance.new("TextLabel")
 		local closeButton = Instance.new("TextButton")
 		local closeCorner = Instance.new("UICorner")
-	
+
 		local sizeRange = {0.5, 3}
 		local minSize, maxSize = sizeRange[1], sizeRange[2]
-	
-		scaleFrame.Parent = CoreGui
+
+		scaleFrame.Parent = (gethui and gethui()) or (CoreGui or PlrGui)
 		frame.Parent = scaleFrame
 		frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 		frame.Size = UDim2.new(0, 400, 0, 120)
 		frame.Position = UDim2.new(0.5,-283/2+5,0.5,-260/2+5)
 		frame.BorderSizePixel = 0
 		frame.BackgroundTransparency = 0.05
-	
+
 		frameCorner.CornerRadius = UDim.new(0.1, 0)
 		frameCorner.Parent = frame
-	
+
 		slider.Parent = frame
 		slider.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 		slider.Size = UDim2.new(0.8, 0, 0.2, 0)
 		slider.Position = UDim2.new(0.1, 0, 0.5, 0)
 		slider.AnchorPoint = Vector2.new(0, 0.5)
 		slider.BorderSizePixel = 0
-	
+
 		sliderCorner.CornerRadius = UDim.new(0.5, 0)
 		sliderCorner.Parent = slider
-	
+
 		progress.Parent = slider
 		progress.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
 		progress.Size = UDim2.new((NAScale - minSize) / (maxSize - minSize), 0, 1, 0)
 		progress.BorderSizePixel = 0
-	
+
 		progressCorner.CornerRadius = UDim.new(0.5, 0)
 		progressCorner.Parent = progress
-	
+
 		knob.Parent = slider
 		knob.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 		knob.Size = UDim2.new(0, 25, 1.5, 0)
@@ -1492,10 +1499,10 @@ if IsOnMobile then
 		knob.Text = ""
 		knob.BorderSizePixel = 0
 		knob.AutoButtonColor = false
-	
+
 		knobCorner.CornerRadius = UDim.new(1, 0)
 		knobCorner.Parent = knob
-	
+
 		label.Parent = frame
 		label.BackgroundTransparency = 1
 		label.Size = UDim2.new(1, 0, 0.3, 0)
@@ -1505,7 +1512,7 @@ if IsOnMobile then
 		label.Font = Enum.Font.Gotham
 		label.TextSize = 18
 		label.TextXAlignment = Enum.TextXAlignment.Center
-	
+
 		closeButton.Parent = frame
 		closeButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
 		closeButton.Size = UDim2.new(0, 30, 0, 30)
@@ -1515,26 +1522,26 @@ if IsOnMobile then
 		closeButton.Font = Enum.Font.Gotham
 		closeButton.TextSize = 14
 		closeButton.BorderSizePixel = 0
-	
+
 		closeCorner.CornerRadius = UDim.new(0.5, 0)
 		closeCorner.Parent = closeButton
-	
+
 		local function update(scale)
 			NAimageButton.Size = UDim2.new(0, 32 * scale, 0, 33 * scale)
 			progress.Size = UDim2.new((scale - minSize) / (maxSize - minSize) + 0.05, 0, 1, 0)
 			knob.Position = UDim2.new((scale - minSize) / (maxSize - minSize), 0, -0.25, 0)
 			label.Text = "Scale: "..string.format("%.2f", scale)
 		end
-	
+
 		update(NAScale)
-	
+
 		local dragging = false
 		local dragInput
 		local sliderStart, sliderWidth
-	
+
 		local UserInputService = UserInputService
 		local RunService = RunService
-	
+
 		knob.InputBegan:Connect(function(input)
 			if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
 				dragging = true
@@ -1550,7 +1557,7 @@ if IsOnMobile then
 				end)
 			end
 		end)
-		
+
 		UserInputService.InputChanged:Connect(function(input)
 			if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
 				local mouseX = input.Position.X
@@ -1560,11 +1567,11 @@ if IsOnMobile then
 				update(NAScale)
 			end
 		end)
-	
+
 		MouseButtonFix(closeButton,function()
 			scaleFrame:Destroy()
 		end)
-	
+
 		gui.draggable(frame)
 	end)
 end
@@ -1645,26 +1652,26 @@ cmd.add({"updatelog","updlog","updates"},{"updatelog (updlog,updates)","show the
 end)
 
 cmd.add({"discord"}, {"discord", "Copy an invite link to the official Nameless Admin Discord server"}, function()
-    local inviteLink = "https://discord.gg/zS7TpV3p64"
-    
-    if setclipboard then
-        Notify({
-            Title = "Discord",
-            Description = inviteLink,
-            Buttons = {
-                {Text = "Copy Link", Callback = function() setclipboard(inviteLink) end},
-                {Text = "Close", Callback = function() end}
-            }
-        })
-    else
-        Notify({
-            Title = "Discord",
-            Description = "Your exploit does not support setclipboard.\nPlease manually type the invite link: "..inviteLink,
-            Buttons = {
-                {Text = "Close", Callback = function() end}
-            }
-        })
-    end
+	local inviteLink = "https://discord.gg/zS7TpV3p64"
+
+	if setclipboard then
+		Notify({
+			Title = "Discord",
+			Description = inviteLink,
+			Buttons = {
+				{Text = "Copy Link", Callback = function() setclipboard(inviteLink) end},
+				{Text = "Close", Callback = function() end}
+			}
+		})
+	else
+		Notify({
+			Title = "Discord",
+			Description = "Your exploit does not support setclipboard.\nPlease manually type the invite link: "..inviteLink,
+			Buttons = {
+				{Text = "Close", Callback = function() end}
+			}
+		})
+	end
 end)
 
 cmd.add({"clickfling","mousefling"},{"mousefling (clickfling)","Fling a player by clicking them"},function()
@@ -1900,183 +1907,352 @@ cmd.add({"clickfling","mousefling"},{"mousefling (clickfling)","Fling a player b
 end)
 
 cmd.add({"ping"},{"ping","Shows your ping"},function()
-	local Ping=Instance.new("ScreenGui")
-	local Pingtext=Instance.new("TextLabel")
-	local UICorner=Instance.new("UICorner")
-	local UIAspectRatioConstraint=Instance.new("UIAspectRatioConstraint")
-	local UIStroke=Instance.new("UIStroke")
-	local CloseButton=Instance.new("TextButton")
-	local UICornerClose=Instance.new("UICorner")
+	local Ping = Instance.new("ScreenGui")
+	local Pingtext = Instance.new("TextLabel")
+	local UICorner = Instance.new("UICorner")
+	local UIStroke = Instance.new("UIStroke")
+	local MinimizeButton = Instance.new("TextButton")
+	local UICornerMinimize = Instance.new("UICorner")
+	local CloseButton = Instance.new("TextButton")
+	local UICornerClose = Instance.new("UICorner")
 
-	Ping.Name="Ping"
-	Ping.Parent=gethui() or COREGUI or PlrGui
-	Ping.ZIndexBehavior=Enum.ZIndexBehavior.Sibling
-	Ping.ResetOnSpawn=false
+	Ping.Name = "Ping"
+	Ping.Parent = gethui() or COREGUI or PlrGui
+	Ping.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+	Ping.ResetOnSpawn = false
 
-	Pingtext.Name="Pingtext"
-	Pingtext.Parent=Ping
-	Pingtext.BackgroundColor3=Color3.fromRGB(25,25,35)
-	Pingtext.BackgroundTransparency=0.2
-	Pingtext.Position=UDim2.new(0,0,0,48)
-	Pingtext.Size=UDim2.new(0,201,0,35)
-	Pingtext.Font=Enum.Font.GothamSemibold
-	Pingtext.Text="Ping: --"
-	Pingtext.TextColor3=Color3.fromRGB(255,255,255)
-	Pingtext.TextSize=16
-	Pingtext.TextXAlignment=Enum.TextXAlignment.Center
-	Pingtext.TextWrapped=true
+	Pingtext.Name = "Pingtext"
+	Pingtext.Parent = Ping
+	Pingtext.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+	Pingtext.BackgroundTransparency = 0.2
+	Pingtext.Position = UDim2.new(0, 0, 0, 48)
+	Pingtext.Size = UDim2.new(0, 201, 0, 35)
+	Pingtext.Font = Enum.Font.GothamSemibold
+	Pingtext.Text = "Ping: --"
+	Pingtext.TextColor3 = Color3.fromRGB(255, 255, 255)
+	Pingtext.TextSize = 16
+	Pingtext.TextXAlignment = Enum.TextXAlignment.Center
+	Pingtext.TextWrapped = true
 
-	CloseButton.Name="CloseButton"
-	CloseButton.Parent=Pingtext
-	CloseButton.BackgroundColor3=Color3.fromRGB(255,50,50)
-	CloseButton.Position=UDim2.new(1,-25,0.5,-10)
-	CloseButton.Size=UDim2.new(0,20,0,20)
-	CloseButton.Font=Enum.Font.GothamBold
-	CloseButton.Text="X"
-	CloseButton.TextColor3=Color3.fromRGB(255,255,255)
-	CloseButton.TextSize=14
-	CloseButton.ZIndex=10
+	CloseButton.Name = "CloseButton"
+	CloseButton.Parent = Pingtext
+	CloseButton.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+	CloseButton.Position = UDim2.new(1, -25, 0.5, -10)
+	CloseButton.Size = UDim2.new(0, 20, 0, 20)
+	CloseButton.Font = Enum.Font.GothamBold
+	CloseButton.Text = "X"
+	CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+	CloseButton.TextSize = 14
+	CloseButton.ZIndex = 10
 
-	UICornerClose.CornerRadius=UDim.new(0,10)
-	UICornerClose.Parent=CloseButton
+	UICornerClose.CornerRadius = UDim.new(0, 10)
+	UICornerClose.Parent = CloseButton
 
-	UICorner.CornerRadius=UDim.new(0,10)
-	UICorner.Parent=Pingtext
+	MinimizeButton.Name = "MinimizeButton"
+	MinimizeButton.Parent = Pingtext
+	MinimizeButton.BackgroundColor3 = Color3.fromRGB(50, 50, 255)
+	MinimizeButton.Position = UDim2.new(1, -50, 0.5, -10)
+	MinimizeButton.Size = UDim2.new(0, 20, 0, 20)
+	MinimizeButton.Font = Enum.Font.GothamBold
+	MinimizeButton.Text = "-"
+	MinimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+	MinimizeButton.TextSize = 14
+	MinimizeButton.ZIndex = 10
 
-	UIStroke.Color=Color3.fromRGB(100,100,255)
-	UIStroke.Thickness=1.5
-	UIStroke.Parent=Pingtext
+	UICornerMinimize.CornerRadius = UDim.new(0, 10)
+	UICornerMinimize.Parent = MinimizeButton
 
-	UIAspectRatioConstraint.Parent=Pingtext
-	UIAspectRatioConstraint.AspectRatio=5.743
+	UICorner.CornerRadius = UDim.new(0, 10)
+	UICorner.Parent = Pingtext
 
-	MouseButtonFix(CloseButton,function()
+	UIStroke.Color = Color3.fromRGB(100, 100, 255)
+	UIStroke.Thickness = 1.5
+	UIStroke.Parent = Pingtext
+
+	local minimized = false
+	MouseButtonFix(MinimizeButton, function()
+		minimized = not minimized
+		Pingtext.Size = minimized and UDim2.new(0, 201, 0, 20) or UDim2.new(0, 201, 0, 35)
+		Pingtext.Text = minimized and "Ping" or "Ping: --"
+	end)
+
+	MouseButtonFix(CloseButton, function()
 		Ping:Destroy()
 	end)
 
-	local RunService=RunService
-	local lastUpdate=0
-	local updateInterval=0.5
+	local RunService = RunService
+	local lastUpdate = 0
+	local updateInterval = 0.5
 
-	RunService.RenderStepped:Connect(function() 
-		local currentTime=tick()
-		if currentTime-lastUpdate>=updateInterval then
-			local pingValue=SafeGetService("Stats").Network.ServerStatsItem["Data Ping"]
-			local ping=tonumber(pingValue:GetValueString():match("%d+"))
+	RunService.RenderStepped:Connect(function()
+		local currentTime = tick()
+		if currentTime - lastUpdate >= updateInterval then
+			local pingValue = SafeGetService("Stats").Network.ServerStatsItem["Data Ping"]
+			local ping = tonumber(pingValue:GetValueString():match("%d+"))
 
 			local color
-			if ping<=50 then
-				color=Color3.fromRGB(0,255,100)
-			elseif ping<=100 then
-				color=Color3.fromRGB(255,255,0)
+			if ping <= 50 then
+				color = Color3.fromRGB(0, 255, 100)
+			elseif ping <= 100 then
+				color = Color3.fromRGB(255, 255, 0)
 			else
-				color=Color3.fromRGB(255,50,50)
+				color = Color3.fromRGB(255, 50, 50)
 			end
 
-			Pingtext.Text="Ping: "..ping.." ms"
-			Pingtext.TextColor3=color
-			lastUpdate=currentTime
+			if not minimized then
+				Pingtext.Text = "Ping: "..ping.." ms"
+				Pingtext.TextColor3 = color
+			end
+
+			lastUpdate = currentTime
 		end
 	end)
+
 	gui.draggable(Pingtext)
 end)
 
 cmd.add({"fps"},{"fps","Shows your fps"},function()
-	local Fps=Instance.new("ScreenGui")
-	local Fpstext=Instance.new("TextLabel")
-	local UICorner=Instance.new("UICorner")
-	local UIAspectRatioConstraint=Instance.new("UIAspectRatioConstraint")
-	local UIStroke=Instance.new("UIStroke")
-	local CloseButton=Instance.new("TextButton")
-	local UICornerClose=Instance.new("UICorner")
+	local Fps = Instance.new("ScreenGui")
+	local Fpstext = Instance.new("TextLabel")
+	local UICorner = Instance.new("UICorner")
+	local UIStroke = Instance.new("UIStroke")
+	local MinimizeButton = Instance.new("TextButton")
+	local UICornerMinimize = Instance.new("UICorner")
+	local CloseButton = Instance.new("TextButton")
+	local UICornerClose = Instance.new("UICorner")
 
-	Fps.Name="Fps"
-	Fps.Parent=gethui() or COREGUI or PlrGui
-	Fps.ZIndexBehavior=Enum.ZIndexBehavior.Sibling
-	Fps.ResetOnSpawn=false
+	Fps.Name = "Fps"
+	Fps.Parent = gethui() or COREGUI or PlrGui
+	Fps.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+	Fps.ResetOnSpawn = false
 
-	Fpstext.Name="Fpstext"
-	Fpstext.Parent=Fps
-	Fpstext.BackgroundColor3=Color3.fromRGB(25,25,35)
-	Fpstext.BackgroundTransparency=0.2
-	Fpstext.Position=UDim2.new(0,0,0,6)
-	Fpstext.Size=UDim2.new(0,201,0,35)
-	Fpstext.Font=Enum.Font.GothamSemibold
-	Fpstext.Text="FPS: --"
-	Fpstext.TextColor3=Color3.fromRGB(255,255,255)
-	Fpstext.TextSize=16
-	Fpstext.TextXAlignment=Enum.TextXAlignment.Center
-	Fpstext.TextWrapped=true
+	Fpstext.Name = "Fpstext"
+	Fpstext.Parent = Fps
+	Fpstext.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+	Fpstext.BackgroundTransparency = 0.2
+	Fpstext.Position = UDim2.new(0, 0, 0, 6)
+	Fpstext.Size = UDim2.new(0, 201, 0, 35)
+	Fpstext.Font = Enum.Font.GothamSemibold
+	Fpstext.Text = "FPS: --"
+	Fpstext.TextColor3 = Color3.fromRGB(255, 255, 255)
+	Fpstext.TextSize = 16
+	Fpstext.TextXAlignment = Enum.TextXAlignment.Center
+	Fpstext.TextWrapped = true
 
-	CloseButton.Name="CloseButton"
-	CloseButton.Parent=Fpstext
-	CloseButton.BackgroundColor3=Color3.fromRGB(255,50,50)
-	CloseButton.Position=UDim2.new(1,-25,0.5,-10)
-	CloseButton.Size=UDim2.new(0,20,0,20)
-	CloseButton.Font=Enum.Font.GothamBold
-	CloseButton.Text="X"
-	CloseButton.TextColor3=Color3.fromRGB(255,255,255)
-	CloseButton.TextSize=14
-	CloseButton.ZIndex=10
+	CloseButton.Name = "CloseButton"
+	CloseButton.Parent = Fpstext
+	CloseButton.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+	CloseButton.Position = UDim2.new(1, -25, 0.5, -10)
+	CloseButton.Size = UDim2.new(0, 20, 0, 20)
+	CloseButton.Font = Enum.Font.GothamBold
+	CloseButton.Text = "X"
+	CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+	CloseButton.TextSize = 14
+	CloseButton.ZIndex = 10
 
-	UICornerClose.CornerRadius=UDim.new(0,10)
-	UICornerClose.Parent=CloseButton
+	UICornerClose.CornerRadius = UDim.new(0, 10)
+	UICornerClose.Parent = CloseButton
 
-	UICorner.CornerRadius=UDim.new(0,10)
-	UICorner.Parent=Fpstext
+	MinimizeButton.Name = "MinimizeButton"
+	MinimizeButton.Parent = Fpstext
+	MinimizeButton.BackgroundColor3 = Color3.fromRGB(50, 50, 255)
+	MinimizeButton.Position = UDim2.new(1, -50, 0.5, -10)
+	MinimizeButton.Size = UDim2.new(0, 20, 0, 20)
+	MinimizeButton.Font = Enum.Font.GothamBold
+	MinimizeButton.Text = "-"
+	MinimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+	MinimizeButton.TextSize = 14
+	MinimizeButton.ZIndex = 10
 
-	UIStroke.Color=Color3.fromRGB(100,100,255)
-	UIStroke.Thickness=1.5
-	UIStroke.Parent=Fpstext
+	UICornerMinimize.CornerRadius = UDim.new(0, 10)
+	UICornerMinimize.Parent = MinimizeButton
 
-	UIAspectRatioConstraint.Parent=Fpstext
-	UIAspectRatioConstraint.AspectRatio=5.743
+	UICorner.CornerRadius = UDim.new(0, 10)
+	UICorner.Parent = Fpstext
 
-	MouseButtonFix(CloseButton,function()
+	UIStroke.Color = Color3.fromRGB(100, 100, 255)
+	UIStroke.Thickness = 1.5
+	UIStroke.Parent = Fpstext
+
+	local minimized = false
+	MouseButtonFix(MinimizeButton, function()
+		minimized = not minimized
+		Fpstext.Size = minimized and UDim2.new(0, 201, 0, 20) or UDim2.new(0, 201, 0, 35)
+		Fpstext.Text = minimized and "FPS" or "FPS: --"
+	end)
+
+	MouseButtonFix(CloseButton, function()
 		Fps:Destroy()
 	end)
 
-	local RunService=RunService
-	local frames={}
-	local lastUpdate=0
-	local updateInterval=0.5
+	local RunService = RunService
+	local frames = {}
+	local lastUpdate = 0
+	local updateInterval = 0.5
 
-	RunService.RenderStepped:Connect(function(deltaTime) 
-		table.insert(frames,deltaTime)
+	RunService.RenderStepped:Connect(function(deltaTime)
+		table.insert(frames, deltaTime)
 
-		if #frames>30 then
-			table.remove(frames,1)
+		if #frames > 30 then
+			table.remove(frames, 1)
 		end
 
-		local currentTime=tick()
-		if currentTime-lastUpdate>=updateInterval then
-			local sum=0
-			for _,frame in ipairs(frames) do
-				sum=sum+frame
+		local currentTime = tick()
+		if currentTime - lastUpdate >= updateInterval then
+			local sum = 0
+			for _, frame in ipairs(frames) do
+				sum = sum + frame
 			end
-			local avgFrameTime=sum/#frames
-			local fps=math.round(1/avgFrameTime)
+			local avgFrameTime = sum / #frames
+			local fps = math.round(1 / avgFrameTime)
 
 			local color
-			if fps>=50 then
-				color=Color3.fromRGB(0,255,100)
-			elseif fps>=30 then
-				color=Color3.fromRGB(255,255,0)
+			if fps >= 50 then
+				color = Color3.fromRGB(0, 255, 100)
+			elseif fps >= 30 then
+				color = Color3.fromRGB(255, 255, 0)
 			else
-				color=Color3.fromRGB(255,50,50)
+				color = Color3.fromRGB(255, 50, 50)
 			end
 
-			Fpstext.Text="FPS: "..fps
-			Fpstext.TextColor3=color
-			lastUpdate=currentTime
+			if not minimized then
+				Fpstext.Text = "FPS: "..fps
+				Fpstext.TextColor3 = color
+			end
+
+			lastUpdate = currentTime
 		end
 	end)
+
 	gui.draggable(Fpstext)
 end)
 
 cmd.add({"stats"},{"stats","Shows both FPS and ping"},function()
-	cmd.run({"fps"})
-	cmd.run({"ping"})
+	local PingFPS = Instance.new("ScreenGui")
+	local PingFPSText = Instance.new("TextLabel")
+	local UICorner = Instance.new("UICorner")
+	local UIStroke = Instance.new("UIStroke")
+	local MinimizeButton = Instance.new("TextButton")
+	local UICornerMinimize = Instance.new("UICorner")
+	local CloseButton = Instance.new("TextButton")
+	local UICornerClose = Instance.new("UICorner")
+
+	PingFPS.Name = "PingFPS"
+	PingFPS.Parent = gethui() or COREGUI or PlrGui
+	PingFPS.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+	PingFPS.ResetOnSpawn = false
+
+	PingFPSText.Name = "PingFPSText"
+	PingFPSText.Parent = PingFPS
+	PingFPSText.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+	PingFPSText.BackgroundTransparency = 0.2
+	PingFPSText.Position = UDim2.new(0, 0, 0, 48)
+	PingFPSText.Size = UDim2.new(0, 250, 0, 50)
+	PingFPSText.Font = Enum.Font.GothamSemibold
+	PingFPSText.Text = "Ping: -- ms | FPS: --"
+	PingFPSText.TextColor3 = Color3.fromRGB(255, 255, 255)
+	PingFPSText.TextSize = 14
+	PingFPSText.TextXAlignment = Enum.TextXAlignment.Center
+	PingFPSText.TextWrapped = true
+
+	CloseButton.Name = "CloseButton"
+	CloseButton.Parent = PingFPSText
+	CloseButton.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+	CloseButton.Position = UDim2.new(1, -25, 0.5, -10)
+	CloseButton.Size = UDim2.new(0, 20, 0, 20)
+	CloseButton.Font = Enum.Font.GothamBold
+	CloseButton.Text = "X"
+	CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+	CloseButton.TextSize = 14
+	CloseButton.ZIndex = 10
+
+	UICornerClose.CornerRadius = UDim.new(0, 10)
+	UICornerClose.Parent = CloseButton
+
+	MinimizeButton.Name = "MinimizeButton"
+	MinimizeButton.Parent = PingFPSText
+	MinimizeButton.BackgroundColor3 = Color3.fromRGB(50, 50, 255)
+	MinimizeButton.Position = UDim2.new(1, -50, 0.5, -10)
+	MinimizeButton.Size = UDim2.new(0, 20, 0, 20)
+	MinimizeButton.Font = Enum.Font.GothamBold
+	MinimizeButton.Text = "-"
+	MinimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+	MinimizeButton.TextSize = 14
+	MinimizeButton.ZIndex = 10
+
+	UICornerMinimize.CornerRadius = UDim.new(0, 10)
+	UICornerMinimize.Parent = MinimizeButton
+
+	UICorner.CornerRadius = UDim.new(0, 10)
+	UICorner.Parent = PingFPSText
+
+	UIStroke.Color = Color3.fromRGB(100, 100, 255)
+	UIStroke.Thickness = 1.5
+	UIStroke.Parent = PingFPSText
+
+	local minimized = false
+	MouseButtonFix(MinimizeButton, function()
+		minimized = not minimized
+		PingFPSText.Size = minimized and UDim2.new(0, 250, 0, 20) or UDim2.new(0, 250, 0, 50)
+		PingFPSText.Text = minimized and "Ping/FPS" or "Ping: -- ms | FPS: --"
+	end)
+
+	MouseButtonFix(CloseButton, function()
+		PingFPS:Destroy()
+	end)
+
+	local RunService = RunService
+	local frames = {}
+	local lastUpdate = 0
+	local updateInterval = 0.5
+
+	RunService.RenderStepped:Connect(function(deltaTime)
+		table.insert(frames, deltaTime)
+
+		if #frames > 30 then
+			table.remove(frames, 1)
+		end
+
+		local currentTime = tick()
+		if currentTime - lastUpdate >= updateInterval then
+			local sum = 0
+			for _, frame in ipairs(frames) do
+				sum = sum + frame
+			end
+			local avgFrameTime = sum / #frames
+			local fps = math.round(1 / avgFrameTime)
+
+			local pingValue = SafeGetService("Stats").Network.ServerStatsItem["Data Ping"]
+			local ping = tonumber(pingValue:GetValueString():match("%d+"))
+
+			local pingColor
+			if ping <= 50 then
+				pingColor = Color3.fromRGB(0, 255, 100)
+			elseif ping <= 100 then
+				pingColor = Color3.fromRGB(255, 255, 0)
+			else
+				pingColor = Color3.fromRGB(255, 50, 50)
+			end
+
+			local fpsColor
+			if fps >= 50 then
+				fpsColor = Color3.fromRGB(0, 255, 100)
+			elseif fps >= 30 then
+				fpsColor = Color3.fromRGB(255, 255, 0)
+			else
+				fpsColor = Color3.fromRGB(255, 50, 50)
+			end
+
+			if not minimized then
+				PingFPSText.Text = "Ping: "..ping.." ms | FPS: "..fps
+				PingFPSText.TextColor3 = pingColor
+			end
+
+			lastUpdate = currentTime
+		end
+	end)
+
+	gui.draggable(PingFPSText)
 end)
 
 cmd.add({"commands","cmds"},{"commands (cmds)","Open the command list"},function()
@@ -2106,28 +2282,28 @@ cmd.add({"commandcount","cc"},{"commandcount (cc)","Counds how many commands NA 
 end)
 
 cmd.add({"flyfling"}, {"flyfling", "makes you fly and fling"}, function()
-    cmd.run({'unwalkfling'})
-    if IsOnMobile then
-        unmobilefly()
-    elseif IsOnPC then
-        cmd.run({'unvfly'})
-    end
+	cmd.run({'unwalkfling'})
+	if IsOnMobile then
+		unmobilefly()
+	elseif IsOnPC then
+		cmd.run({'unvfly'})
+	end
 
-    cmd.run({'walkfling'})
-    if IsOnMobile then
-        mobilefly(50, true)
-    elseif IsOnPC then
-        cmd.run({'vfly'})
-    end
+	cmd.run({'walkfling'})
+	if IsOnMobile then
+		mobilefly(50, true)
+	elseif IsOnPC then
+		cmd.run({'vfly'})
+	end
 end)
 
 cmd.add({"unflyfling"}, {"unflyfling", "stops fly and fling"}, function()
-    cmd.run({'unwalkfling'})
-    if IsOnMobile then
-        unmobilefly()
-    elseif IsOnPC then
-        cmd.run({'unvfly'})
-    end
+	cmd.run({'unwalkfling'})
+	if IsOnMobile then
+		unmobilefly()
+	elseif IsOnPC then
+		cmd.run({'unvfly'})
+	end
 end)
 
 hiddenfling = false
@@ -2264,38 +2440,38 @@ cmd.add({"rjre", "rejoinrefresh"}, {"rjre (rejoinrefresh)", "Rejoins and telepor
 end)
 
 cmd.add({"rejoin", "rj"}, {"rejoin (rj)", "Rejoin the game"}, function()
-    local plrs = Players
-    local tp = TeleportService
-    local lp = plrs.LocalPlayer
+	local plrs = Players
+	local tp = TeleportService
+	local lp = plrs.LocalPlayer
 
-    function tpError(err)
-        DoNotif("Teleport failed: "..err)
-    end
+	function tpError(err)
+		DoNotif("Teleport failed: "..err)
+	end
 
-    tp.TeleportInitFailed:Connect(tpError)
+	tp.TeleportInitFailed:Connect(tpError)
 
-    if #plrs:GetPlayers() <= 1 then
-        lp:Kick("Rejoining...")
-        wait()
-        tp:TeleportCancel()
-        local success, err = pcall(function()
-            tp:Teleport(PlaceId)
-        end)
-        if not success then
-            tpError(err)
-        end
-    else
-        tp:TeleportCancel()
-        local success, err = pcall(function()
-            tp:TeleportToPlaceInstance(PlaceId, JobId, lp)
-        end)
-        if not success then
-            tpError(err)
-        end
-    end
+	if #plrs:GetPlayers() <= 1 then
+		lp:Kick("Rejoining...")
+		wait()
+		tp:TeleportCancel()
+		local success, err = pcall(function()
+			tp:Teleport(PlaceId)
+		end)
+		if not success then
+			tpError(err)
+		end
+	else
+		tp:TeleportCancel()
+		local success, err = pcall(function()
+			tp:TeleportToPlaceInstance(PlaceId, JobId, lp)
+		end)
+		if not success then
+			tpError(err)
+		end
+	end
 
-    wait()
-    DoNotif("Rejoining...")
+	wait()
+	DoNotif("Rejoining...")
 end)
 
 cmd.add({"teleporttoplace","toplace","ttp"},{"teleporttoplace (PlaceId) (toplace,ttp)","Teleports you using PlaceId"},function(...)
@@ -2307,72 +2483,72 @@ end,true)
 --made by the_king.78
 cmd.add({"adonisbypass","bypassadonis","badonis","adonisb"},{"adonisbypass (bypassadonis,badonis,adonisb)","bypasses adonis admin detection"},function()
 	local DebugFunc = getinfo or debug.getinfo
-local IsDebug = false
-local hooks = {}
+	local IsDebug = false
+	local hooks = {}
 
-local DetectedMeth, KillMeth
+	local DetectedMeth, KillMeth
 
-for index, value in getgc(true) do
-    if typeof(value) == "table" then
-        local detected = rawget(value, "Detected")
-        local kill = rawget(value, "Kill")
+	for index, value in getgc(true) do
+		if typeof(value) == "table" then
+			local detected = rawget(value, "Detected")
+			local kill = rawget(value, "Kill")
 
-        if typeof(detected) == "function" and not DetectedMeth then
-            DetectedMeth = detected
+			if typeof(detected) == "function" and not DetectedMeth then
+				DetectedMeth = detected
 
-            local hook
-            hook = hookfunction(DetectedMeth, function(methodName, methodFunc, methodInfo)
-                if methodName ~= "_" then
-                    if IsDebug then
-                        DoNotif("Adonis Detected\nMethod: "..tostring(methodName).."\nInfo: "..tostring(methodFunc))
-                    end
-                end
+				local hook
+				hook = hookfunction(DetectedMeth, function(methodName, methodFunc, methodInfo)
+					if methodName ~= "_" then
+						if IsDebug then
+							DoNotif("Adonis Detected\nMethod: "..tostring(methodName).."\nInfo: "..tostring(methodFunc))
+						end
+					end
 
-                return true
-            end)
+					return true
+				end)
 
-            table.insert(hooks, DetectedMeth)
-        end
+				table.insert(hooks, DetectedMeth)
+			end
 
-        if rawget(value, "Variables") and rawget(value, "Process") and typeof(kill) == "function" and not KillMeth then
-            KillMeth = kill
-            local hook
-            hook = hookfunction(KillMeth, function(killFunc)
-                if IsDebug then
-                    DoNotif("Adonis tried to detect: "..tostring(killFunc))
-                end
-            end)
+			if rawget(value, "Variables") and rawget(value, "Process") and typeof(kill) == "function" and not KillMeth then
+				KillMeth = kill
+				local hook
+				hook = hookfunction(KillMeth, function(killFunc)
+					if IsDebug then
+						DoNotif("Adonis tried to detect: "..tostring(killFunc))
+					end
+				end)
 
-            table.insert(hooks, KillMeth)
-        end
-    end
-end
+				table.insert(hooks, KillMeth)
+			end
+		end
+	end
 
-local hook
-hook = hookfunction(getrenv().debug.info, newcclosure(function(...)
-    local functionName, functionDetails = ...
+	local hook
+	hook = hookfunction(getrenv().debug.info, newcclosure(function(...)
+		local functionName, functionDetails = ...
 
-    if DetectedMeth and functionName == DetectedMeth then
-        if IsDebug or not IsDebug then
-            DoNotif("Adonis was bypassed by the_king.78")
-        end
+		if DetectedMeth and functionName == DetectedMeth then
+			if IsDebug or not IsDebug then
+				DoNotif("Adonis was bypassed by the_king.78")
+			end
 
-        return coroutine.yield(coroutine.running())
-    end
+			return coroutine.yield(coroutine.running())
+		end
 
-    return hook(...)
-end))
+		return hook(...)
+	end))
 end)
 
 --[ LOCALPLAYER ]--
 function respawn()
-    local characterFrame = getRoot(getChar()).CFrame
-    local character = getChar()
-    character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
+	local characterFrame = getRoot(getChar()).CFrame
+	local character = getChar()
+	character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
 	character:FindFirstChildOfClass("Humanoid").Health=0
-    player.CharacterAdded:Wait()
-    wait(0.2)
-    getRoot(character).CFrame = characterFrame
+	player.CharacterAdded:Wait()
+	wait(0.2)
+	getRoot(character).CFrame = characterFrame
 end
 
 abort=0
@@ -2460,129 +2636,129 @@ vFlySpeed = 1
 vKeybindConn = nil
 
 function toggleVFly()
-    if vFlyEnabled then
-        FLYING = false
-        if IsOnMobile then
-            unmobilefly()
-        else
-            cmdlp.Character.Humanoid.PlatformStand = false
-            if goofyFLY then goofyFLY:Destroy() end
-        end
-        vFlyEnabled = false
-    else
-        FLYING = true
-        if IsOnMobile then
-            mobilefly(vFlySpeed, true)
-        else
-            sFLY(true)
-        end
-        vFlyEnabled = true
-    end
+	if vFlyEnabled then
+		FLYING = false
+		if IsOnMobile then
+			unmobilefly()
+		else
+			cmdlp.Character.Humanoid.PlatformStand = false
+			if goofyFLY then goofyFLY:Destroy() end
+		end
+		vFlyEnabled = false
+	else
+		FLYING = true
+		if IsOnMobile then
+			mobilefly(vFlySpeed, true)
+		else
+			sFLY(true)
+		end
+		vFlyEnabled = true
+	end
 end
 
 function connectVFlyKey()
-    if vKeybindConn then
-        vKeybindConn:Disconnect()
-    end
-    vKeybindConn = cmdm.KeyDown:Connect(function(KEY)
-        if KEY:lower() == vToggleKey then
-            toggleVFly()
-        end
-    end)
+	if vKeybindConn then
+		vKeybindConn:Disconnect()
+	end
+	vKeybindConn = cmdm.KeyDown:Connect(function(KEY)
+		if KEY:lower() == vToggleKey then
+			toggleVFly()
+		end
+	end)
 end
 
 cmd.add({"vfly", "vehiclefly"}, {"vehiclefly (vfly)", "be able to fly vehicles"}, function(...)
-    local vFlySpeed = IsOnMobile and ((...) or 50) or ((...) or 1)
-    connectVFlyKey()
+	local vFlySpeed = IsOnMobile and ((...) or 50) or ((...) or 1)
+	connectVFlyKey()
 	vFlyEnabled = true
 
-    if IsOnMobile then
-        wait()
-        DoNotif(adminName.." detected mobile. vFly button added for easier use.")
+	if IsOnMobile then
+		wait()
+		DoNotif(adminName.." detected mobile. vFly button added for easier use.")
 
-        if vRAHH then
-            vRAHH:Destroy()
-            vRAHH = nil
-        end
+		if vRAHH then
+			vRAHH:Destroy()
+			vRAHH = nil
+		end
 
-        vRAHH = Instance.new("ScreenGui")
-        local btn = Instance.new("TextButton")
-        local corner = Instance.new("UICorner")
-        local aspect = Instance.new("UIAspectRatioConstraint")
+		vRAHH = Instance.new("ScreenGui")
+		local btn = Instance.new("TextButton")
+		local corner = Instance.new("UICorner")
+		local aspect = Instance.new("UIAspectRatioConstraint")
 
-        vRAHH.Parent = COREGUI
-        vRAHH.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-        vRAHH.ResetOnSpawn = false
+		vRAHH.Parent = (gethui and gethui()) or (CoreGui or PlrGui)
+		vRAHH.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+		vRAHH.ResetOnSpawn = false
 
-        btn.Parent = vRAHH
-        btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-        btn.BackgroundTransparency = 0.1
-        btn.Position = UDim2.new(0.9, 0, 0.6, 0)
-        btn.Size = UDim2.new(0.05, 0, 0.1, 0)
-        btn.Font = Enum.Font.GothamBold
-        btn.Text = "vFly"
-        btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-        btn.TextSize = 18
-        btn.TextWrapped = true
-        btn.Active = true
-        btn.TextScaled = true
+		btn.Parent = vRAHH
+		btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+		btn.BackgroundTransparency = 0.1
+		btn.Position = UDim2.new(0.9, 0, 0.6, 0)
+		btn.Size = UDim2.new(0.05, 0, 0.1, 0)
+		btn.Font = Enum.Font.GothamBold
+		btn.Text = "vFly"
+		btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+		btn.TextSize = 18
+		btn.TextWrapped = true
+		btn.Active = true
+		btn.TextScaled = true
 
-        corner.CornerRadius = UDim.new(0.2, 0)
-        corner.Parent = btn
+		corner.CornerRadius = UDim.new(0.2, 0)
+		corner.Parent = btn
 
-        aspect.Parent = btn
-        aspect.AspectRatio = 1.0
+		aspect.Parent = btn
+		aspect.AspectRatio = 1.0
 
-        coroutine.wrap(function()
-            MouseButtonFix(btn,function()
-                if not vOn then
-                    vOn = true
-                    btn.Text = "UnvFly"
-                    btn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
-                    mobilefly(vFlySpeed, true)
-                    cmdlp.Character.Humanoid.PlatformStand = false
-                else
-                    vOn = false
-                    btn.Text = "vFly"
-                    btn.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
-                    unmobilefly()
-                end
-            end)
-        end)()
+		coroutine.wrap(function()
+			MouseButtonFix(btn,function()
+				if not vOn then
+					vOn = true
+					btn.Text = "UnvFly"
+					btn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+					mobilefly(vFlySpeed, true)
+					cmdlp.Character.Humanoid.PlatformStand = false
+				else
+					vOn = false
+					btn.Text = "vFly"
+					btn.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
+					unmobilefly()
+				end
+			end)
+		end)()
 
-        gui.draggable(btn)
-    else
-        FLYING = false
-        cmdlp.Character.Humanoid.PlatformStand = false
-        wait()
+		gui.draggable(btn)
+	else
+		FLYING = false
+		cmdlp.Character.Humanoid.PlatformStand = false
+		wait()
 
-        DoNotif("Vehicle fly enabled. Press '"..vToggleKey:upper().."' to toggle vehicle flying.")
-        sFLY(true)
-        speedofthevfly = vFlySpeed
-        speedofthefly = vFlySpeed
-    end
+		DoNotif("Vehicle fly enabled. Press '"..vToggleKey:upper().."' to toggle vehicle flying.")
+		sFLY(true)
+		speedofthevfly = vFlySpeed
+		speedofthefly = vFlySpeed
+	end
 end, true)
 
 cmd.add({"unvfly", "unvehiclefly"}, {"unvehiclefly (unvfly)", "disable vehicle fly"}, function()
-    wait()
-    if IsOnMobile then
-        DoNotif("Mobile vFly Disabled.")
-        unmobilefly()
-    else
-        DoNotif("Not flying anymore")
-        FLYING = false
-        cmdlp.Character.Humanoid.PlatformStand = false
-        if goofyFLY then goofyFLY:Destroy() end
-    end
-    vOn = false
-    if vRAHH then
-        vRAHH:Destroy()
-        vRAHH = nil
-    end
-    if vKeybindConn then
-        vKeybindConn:Disconnect()
-        vKeybindConn = nil
-    end
+	wait()
+	if IsOnMobile then
+		DoNotif("Mobile vFly Disabled.")
+		unmobilefly()
+	else
+		DoNotif("Not flying anymore")
+		FLYING = false
+		cmdlp.Character.Humanoid.PlatformStand = false
+		if goofyFLY then goofyFLY:Destroy() end
+	end
+	vOn = false
+	if vRAHH then
+		vRAHH:Destroy()
+		vRAHH = nil
+	end
+	if vKeybindConn then
+		vKeybindConn:Disconnect()
+		vKeybindConn = nil
+	end
 end)
 
 cmd.add({"equiptools","equipall"},{"equiptools","Equip all of your tools"},function()
@@ -2849,9 +3025,8 @@ end)
 
 cmd.add({"fpsbooster","lowgraphics","boostfps","lowg"},{"fpsbooster (lowgraphics,boostfps,lowg)","Low graphics mode if the game is laggy"},function()
 	local decalsYeeted = true
-	local g = game
-	local w = g:GetService("Workspace")
-	local l = g:GetService("Lighting")
+	local w = SafeGetService("Workspace")
+	local l = SafeGetService("Lighting")
 	local t = w.Terrain
 
 	function optimizeInstance(v)
@@ -3107,10 +3282,10 @@ cmd.add({"copytools","ctools"},{"copytools <player> (ctools)","Copies the tools 
 end,true)
 
 cmd.add({"localtime", "yourtime"}, {"localtime (yourtime)", "Shows your current time"}, function()
-    local time = os.date("*t")
-    local clock = string.format("%02d:%02d:%02d", time.hour, time.min, time.sec)
+	local time = os.date("*t")
+	local clock = string.format("%02d:%02d:%02d", time.hour, time.min, time.sec)
 
-    DoNotif("Your Local Time Is: "..clock)
+	DoNotif("Your Local Time Is: "..clock)
 end)
 
 cmd.add({"cartornado", "ctornado"}, {"cartornado (ctornado)", "Tornados a car just sit in the car"}, function()
@@ -3228,7 +3403,7 @@ cmd.add({"sUNCtest","sUNC"},{"sUNCtest (sUNC)","uses Super UNC test that test th
 		["printcheckpoints"] = false,
 		["delaybetweentests"] = 0
 	}
-	
+
 	loadstring(game:HttpGet("https://script.sunc.su/"))()
 end)
 
@@ -3237,7 +3412,7 @@ cmd.add({"vulnerabilitytest","vulntest"},{"vulnerabilitytest (vulntest)","Test i
 end)
 
 cmd.add({"respawn", "re"}, {"respawn", "Respawn your character"}, function()
-    respawn()
+	respawn()
 end)
 
 cmd.add({"antisit"},{"antisit","Prevents the player from sitting"},function()
@@ -3526,113 +3701,113 @@ cmd.add({"harked","comet"},{"harked (comet)","Executes Comet which is like harke
 end)
 
 cmd.add({"triggerbot", "tbot"}, {"triggerbot (tbot)", "Executes a script that automatically clicks the mouse when the mouse is on a player"}, function()
-    local ToggleKey = Enum.KeyCode.Z
-    local FieldOfView = 10
+	local ToggleKey = Enum.KeyCode.Z
+	local FieldOfView = 10
 
-    local Players = Players
-    local RunService = RunService
-    local UIS = UserInputService
-    local Camera = SafeGetService("Workspace").CurrentCamera
+	local Players = Players
+	local RunService = RunService
+	local UIS = UserInputService
+	local Camera = SafeGetService("Workspace").CurrentCamera
 
-    local Player = Players.LocalPlayer
-    local Mouse = Player:GetMouse()
-    local Toggled = false
-    local Mode = "FFA"
-    local LastMode = nil
+	local Player = Players.LocalPlayer
+	local Mouse = Player:GetMouse()
+	local Toggled = false
+	local Mode = "FFA"
+	local LastMode = nil
 
-    local GUI = Instance.new("ScreenGui")
-    local On = Instance.new("TextLabel")
-    local uicorner = Instance.new("UICorner")
-    GUI.Name = "GUI"
-    GUI.Parent = COREGUI
-    On.Name = "On"
-    On.Parent = GUI
-    On.BackgroundColor3 = Color3.fromRGB(12, 4, 20)
-    On.BackgroundTransparency = 0.14
-    On.BorderSizePixel = 0
-    On.Position = UDim2.new(0.88, 0, 0.33, 0)
-    On.Size = UDim2.new(0, 160, 0, 20)
-    On.Font = Enum.Font.SourceSans
-    On.Text = "TriggerBot On: false (Key: Q)"
-    On.TextColor3 = Color3.new(1, 1, 1)
-    On.TextScaled = true
-    On.TextSize = 14
-    On.TextWrapped = true
-    uicorner.Parent = On
+	local GUI = Instance.new("ScreenGui")
+	local On = Instance.new("TextLabel")
+	local uicorner = Instance.new("UICorner")
+	GUI.Name = "GUI"
+	GUI.Parent = (gethui and gethui()) or (CoreGui or PlrGui)
+	On.Name = "On"
+	On.Parent = GUI
+	On.BackgroundColor3 = Color3.fromRGB(12, 4, 20)
+	On.BackgroundTransparency = 0.14
+	On.BorderSizePixel = 0
+	On.Position = UDim2.new(0.88, 0, 0.33, 0)
+	On.Size = UDim2.new(0, 160, 0, 20)
+	On.Font = Enum.Font.SourceSans
+	On.Text = "TriggerBot On: false (Key: Q)"
+	On.TextColor3 = Color3.new(1, 1, 1)
+	On.TextScaled = true
+	On.TextSize = 14
+	On.TextWrapped = true
+	uicorner.Parent = On
 
-    local function IsInFieldOfView(target)
-        local targetPosition = target.Position
-        local screenPoint, onScreen = Camera:WorldToScreenPoint(targetPosition)
-        if onScreen then
-            local mousePosition = Vector2.new(Mouse.X, Mouse.Y)
-            local targetScreenPosition = Vector2.new(screenPoint.X, screenPoint.Y)
-            local distance = (mousePosition - targetScreenPosition).Magnitude
-            return distance <= FieldOfView
-        end
-        return false
-    end
+	local function IsInFieldOfView(target)
+		local targetPosition = target.Position
+		local screenPoint, onScreen = Camera:WorldToScreenPoint(targetPosition)
+		if onScreen then
+			local mousePosition = Vector2.new(Mouse.X, Mouse.Y)
+			local targetScreenPosition = Vector2.new(screenPoint.X, screenPoint.Y)
+			local distance = (mousePosition - targetScreenPosition).Magnitude
+			return distance <= FieldOfView
+		end
+		return false
+	end
 
-    local function IsEnemy(otherPlayer)
-        if Mode == "FFA" then
-            return true
-        else
-            return otherPlayer.Team ~= nil and Player.Team ~= nil and otherPlayer.Team ~= Player.Team
-        end
-    end
+	local function IsEnemy(otherPlayer)
+		if Mode == "FFA" then
+			return true
+		else
+			return otherPlayer.Team ~= nil and Player.Team ~= nil and otherPlayer.Team ~= Player.Team
+		end
+	end
 
-    local function GetClosestPlayer()
-        for _, otherPlayer in pairs(Players:GetPlayers()) do
-            if otherPlayer ~= Player and IsEnemy(otherPlayer) and otherPlayer.Character then
-                for _, part in pairs(otherPlayer.Character:GetChildren()) do
-                    if part:IsA("BasePart") and IsInFieldOfView(part) then
-                        return otherPlayer
-                    end
-                end
-            end
-        end
-        return nil
-    end
+	local function GetClosestPlayer()
+		for _, otherPlayer in pairs(Players:GetPlayers()) do
+			if otherPlayer ~= Player and IsEnemy(otherPlayer) and otherPlayer.Character then
+				for _, part in pairs(otherPlayer.Character:GetChildren()) do
+					if part:IsA("BasePart") and IsInFieldOfView(part) then
+						return otherPlayer
+					end
+				end
+			end
+		end
+		return nil
+	end
 
-    local function Click()
-        mouse1click()
-    end
+	local function Click()
+		mouse1click()
+	end
 
-    local function CheckMode()
-        if #Players:GetPlayers() > 0 and Players.LocalPlayer.Team == nil then
-            Mode = "FFA"
-        else
-            Mode = "Team"
-        end
+	local function CheckMode()
+		if #Players:GetPlayers() > 0 and Players.LocalPlayer.Team == nil then
+			Mode = "FFA"
+		else
+			Mode = "Team"
+		end
 
-        if Mode ~= LastMode then
-            DoNotif("Mode changed to: "..Mode)
-            LastMode = Mode
-        end
-    end
+		if Mode ~= LastMode then
+			DoNotif("Mode changed to: "..Mode)
+			LastMode = Mode
+		end
+	end
 
-    UIS.InputBegan:Connect(function(input, processed)
-        if not processed and input.KeyCode == ToggleKey then
-            Toggled = not Toggled
-            On.Text = "TriggerBot On: "..tostring(Toggled).." (Key: "..ToggleKey.Name..")"
-        end
-    end)
+	UIS.InputBegan:Connect(function(input, processed)
+		if not processed and input.KeyCode == ToggleKey then
+			Toggled = not Toggled
+			On.Text = "TriggerBot On: "..tostring(Toggled).." (Key: "..ToggleKey.Name..")"
+		end
+	end)
 
-    RunService.RenderStepped:Connect(function()
-        CheckMode()
-        if Toggled then
-            local targetPlayer = GetClosestPlayer()
-            if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("Humanoid") then
-                local humanoid = targetPlayer.Character.Humanoid
-                if humanoid.Health > 0 then
-                    Click()
-                end
-            end
-        end
-    end)
+	RunService.RenderStepped:Connect(function()
+		CheckMode()
+		if Toggled then
+			local targetPlayer = GetClosestPlayer()
+			if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("Humanoid") then
+				local humanoid = targetPlayer.Character.Humanoid
+				if humanoid.Health > 0 then
+					Click()
+				end
+			end
+		end
+	end)
 
 	On.Text = "TriggerBot On: "..tostring(Toggled).." (Key: "..ToggleKey.Name..")"
 
-    DoNotif("Advanced Trigger Bot Loaded")
+	DoNotif("Advanced Trigger Bot Loaded")
 end)
 
 cmd.add({"nofog"},{"nofog","Removes all fog from the game"},function()
@@ -3784,8 +3959,8 @@ end)
 local tpUI = nil
 
 cmd.add({"clicktp", "tptool"}, {"clicktp (tptool)", "Teleport where your mouse is"}, function()
-	local Players = game:GetService("Players")
-	local TweenService = game:GetService("TweenService")
+	local Players = SafeGetService("Players")
+	local TweenService = SafeGetService("TweenService")
 	local player = Players.LocalPlayer
 	local mouse = player:GetMouse()
 
@@ -3990,7 +4165,7 @@ cmd.add({"synapsedex","sdex"},{"synapsedex (sdex)","Loads SynapseX's dex explore
 
 	local Dex=game:GetObjects("rbxassetid://9553291002")[1]
 	Dex.Name=RandomCharacters(rng:NextInteger(5,20))
-	Dex.Parent=COREGUI
+	Dex.Parent=(gethui and gethui()) or (CoreGui or PlrGui)
 
 	function Load(Obj,Url)
 		function GiveOwnGlobals(Func,Script)
@@ -4033,54 +4208,27 @@ cmd.add({"synapsedex","sdex"},{"synapsedex (sdex)","Loads SynapseX's dex explore
 	Load(Dex)
 end)
 
-local af = false
-local afc = {}
-local partStates = {}
+local antifling = nil
 
-cmd.add({"antifling"}, {"antifling", "makes other players non-collidable with you"}, function()
-	af = true
-	partStates = {}
-
-	task.spawn(function()
-		while af do
-			for _, player in pairs(Players:GetPlayers()) do
-				if player ~= Players.LocalPlayer and player.Character then
-					for _, part in pairs(player.Character:GetDescendants()) do
-						if part:IsA("BasePart") then
-							local id = player.UserId.."_"..part:GetFullName()
-							if partStates[id] == nil then
-								partStates[id] = part.CanCollide
-							end
-							part.CanCollide = false
-						end
-					end
-				end
-			end
-			task.wait(0.4)
-		end
-	end)
-
-	DoNotif("Anti fling enabled")
+cmd.add({"antifling"},{"antifling","makes other players non-collidable with you"},function()
+	if antifling then antifling:Disconnect() antifling=nil end
+    antifling=RunService.Stepped:Connect(function()
+        for _,plr in ipairs(Players:GetPlayers()) do
+            if plr~=LocalPlayer and plr.Character then
+                for _,p in ipairs(plr.Character:GetDescendants()) do
+                    if p:IsA("BasePart") then
+                        p.CanCollide=false
+                    end
+                end
+            end
+        end
+    end)
+	DoNotif("Antifling Enabled")
 end)
 
 cmd.add({"unantifling"}, {"unantifling", "restores collision for other players"}, function()
-	af = false
-
-	for _, player in pairs(Players:GetPlayers()) do
-		if player ~= Players.LocalPlayer and player.Character then
-			for _, part in pairs(player.Character:GetDescendants()) do
-				if part:IsA("BasePart") then
-					local id = player.UserId.."_"..part:GetFullName()
-					if partStates[id] ~= nil then
-						part.CanCollide = partStates[id]
-					end
-				end
-			end
-		end
-	end
-
-	partStates = {}
-	DoNotif("Anti fling disabled")
+	if antifling then antifling:Disconnect() antifling = nil end
+	DoNotif("Antifling Disabled")
 end)
 
 cmd.add({"gravitygun"},{"gravitygun","Probably the best gravity gun script thats fe"},function()
@@ -4235,47 +4383,47 @@ cmd.add({"disable"}, {"disable", "Disables a specific CoreGui"}, function()
 end)
 
 cmd.add({"reverb", "reverbcontrol"}, {"reverb (reverbcontrol)", "Manage sound reverb settings"}, function()
-    local reverbButtons = {}
-    for _, reverbType in ipairs(Enum.ReverbType:GetEnumItems()) do
-        table.insert(reverbButtons, {
-            Text = reverbType.Name,
-            Callback = function()
-                SoundService.AmbientReverb = reverbType
-            end
-        })
-    end
+	local reverbButtons = {}
+	for _, reverbType in ipairs(Enum.ReverbType:GetEnumItems()) do
+		table.insert(reverbButtons, {
+			Text = reverbType.Name,
+			Callback = function()
+				SoundService.AmbientReverb = reverbType
+			end
+		})
+	end
 
-    table.insert(reverbButtons, {
-        Text = "Cancel",
-        Callback = function() end
-    })
+	table.insert(reverbButtons, {
+		Text = "Cancel",
+		Callback = function() end
+	})
 
-    Notify({
-        Title = "Sound Reverb Options",
-        Buttons = reverbButtons
-    })
+	Notify({
+		Title = "Sound Reverb Options",
+		Buttons = reverbButtons
+	})
 end)
 
 cmd.add({"cam", "camera", "cameratype"}, {"cam (camera, cameratype)", "Manage camera type settings"}, function()
-    local cameraTypeButtons = {}
-    for _, cameraType in ipairs(Enum.CameraType:GetEnumItems()) do
-        table.insert(cameraTypeButtons, {
-            Text = cameraType.Name,
-            Callback = function()
-                SafeGetService("Workspace").CurrentCamera.CameraType = cameraType
-            end
-        })
-    end
+	local cameraTypeButtons = {}
+	for _, cameraType in ipairs(Enum.CameraType:GetEnumItems()) do
+		table.insert(cameraTypeButtons, {
+			Text = cameraType.Name,
+			Callback = function()
+				SafeGetService("Workspace").CurrentCamera.CameraType = cameraType
+			end
+		})
+	end
 
-    table.insert(cameraTypeButtons, {
-        Text = "Cancel",
-        Callback = function() end
-    })
+	table.insert(cameraTypeButtons, {
+		Text = "Cancel",
+		Callback = function() end
+	})
 
-    Notify({
-        Title = "Camera Type Options",
-        Buttons = cameraTypeButtons
-    })
+	Notify({
+		Title = "Camera Type Options",
+		Buttons = cameraTypeButtons
+	})
 end)
 
 cmd.add({"esp"}, {"esp", "locate where the players are"}, function()
@@ -4538,49 +4686,49 @@ end)
 local autorjthingy = nil
 
 cmd.add({"autorejoin", "autorj"}, {"autorejoin", "Rejoins the server if you get kicked / disconnected"}, function()
-    if autorjthingy then
-        autorjthingy:Disconnect()
-        autorjthingy = nil
-    end
+	if autorjthingy then
+		autorjthingy:Disconnect()
+		autorjthingy = nil
+	end
 
-    function handleRejoin()
-        if #Players:GetPlayers() <= 1 then
-            Players.LocalPlayer:Kick("Rejoining...")
-            wait()
-            TeleportService:Teleport(PlaceId, Players.LocalPlayer)
-        else
-            TeleportService:TeleportToPlaceInstance(PlaceId, JobId, Players.LocalPlayer)
-        end
-    end
+	function handleRejoin()
+		if #Players:GetPlayers() <= 1 then
+			Players.LocalPlayer:Kick("Rejoining...")
+			wait()
+			TeleportService:Teleport(PlaceId, Players.LocalPlayer)
+		else
+			TeleportService:TeleportToPlaceInstance(PlaceId, JobId, Players.LocalPlayer)
+		end
+	end
 
-    local promptOverlay = COREGUI:FindFirstChild("RobloxPromptGui"):FindFirstChild("promptOverlay")
-    if not promptOverlay then
-        DoNotif("Error: Could not find promptOverlay!")
-        return
-    end
+	local promptOverlay = COREGUI:FindFirstChild("RobloxPromptGui"):FindFirstChild("promptOverlay")
+	if not promptOverlay then
+		DoNotif("Error: Could not find promptOverlay!")
+		return
+	end
 
-    autorjthingy = promptOverlay.DescendantAdded:Connect(function(descendant)
-        if descendant.Name == "ErrorTitle" and descendant.Text:sub(1, 12) == "Disconnected" then
-            handleRejoin()
-            descendant:GetPropertyChangedSignal("Text"):Connect(function()
-                if descendant.Text:sub(1, 12) == "Disconnected" then
-                    handleRejoin()
-                end
-            end)
-        end
-    end)
+	autorjthingy = promptOverlay.DescendantAdded:Connect(function(descendant)
+		if descendant.Name == "ErrorTitle" and descendant.Text:sub(1, 12) == "Disconnected" then
+			handleRejoin()
+			descendant:GetPropertyChangedSignal("Text"):Connect(function()
+				if descendant.Text:sub(1, 12) == "Disconnected" then
+					handleRejoin()
+				end
+			end)
+		end
+	end)
 
-    DoNotif("Auto Rejoin is now enabled!")
+	DoNotif("Auto Rejoin is now enabled!")
 end)
 
 cmd.add({"unautorejoin", "unautorj"}, {"unautorejoin (unautorj)", "Disables auto rejoin command"}, function()
-    if autorjthingy then
-        autorjthingy:Disconnect()
-        autorjthingy = nil
-        DoNotif("Auto Rejoin is now disabled!")
-    else
-        DoNotif("Auto Rejoin is already disabled!")
-    end
+	if autorjthingy then
+		autorjthingy:Disconnect()
+		autorjthingy = nil
+		DoNotif("Auto Rejoin is now disabled!")
+	else
+		DoNotif("Auto Rejoin is already disabled!")
+	end
 end)
 
 dadojadoqwdqwd='© 2025 ltseverydayyou'
@@ -4632,9 +4780,11 @@ cmd.add({"functionspy"},{"functionspy","Check console"},function()
 	local output=Instance.new("TextLabel")
 	local clear_2=Instance.new("TextButton")
 	local copy=Instance.new("TextButton")
+	local UICorner = Instance.new("UICorner")
+	local UIStroke = Instance.new("UIStroke")
 
 	FunctionSpy.Name="FunctionSpy"
-	FunctionSpy.Parent=COREGUI
+	FunctionSpy.Parent=(gethui and gethui()) or (CoreGui or PlrGui)
 	FunctionSpy.ZIndexBehavior=Enum.ZIndexBehavior.Sibling
 
 	Main.Name="Main"
@@ -4643,6 +4793,23 @@ cmd.add({"functionspy"},{"functionspy","Check console"},function()
 	Main.BorderSizePixel=0
 	Main.Position=UDim2.new(0,10,0,36)
 	Main.Size=UDim2.new(0,536,0,328)
+	Main.Active=true
+
+	local function addRoundedCorners(instance, radius)
+		local corner = UICorner:Clone()
+		corner.CornerRadius = UDim.new(0, radius)
+		corner.Parent = instance
+	end
+
+	local function addStroke(instance, color, thickness)
+		local stroke = UIStroke:Clone()
+		stroke.Color = color
+		stroke.Thickness = thickness
+		stroke.Parent = instance
+	end
+
+	addRoundedCorners(Main, 10)
+	addStroke(Main, Color3.fromRGB(255, 255, 255), 2)
 
 	LeftPanel.Name="LeftPanel"
 	LeftPanel.Parent=Main
@@ -4712,6 +4879,14 @@ cmd.add({"functionspy"},{"functionspy","Check console"},function()
 	Title.TextSize=14.000
 	Title.TextWrapped=true
 
+	local gradient = Instance.new("UIGradient")
+	gradient.Color = ColorSequence.new{
+		ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 0, 255)),
+		ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 255, 255))
+	}
+	gradient.Rotation = 45
+	gradient.Parent = Title
+
 	clear.Name="clear"
 	clear.Parent=Title
 	clear.BackgroundTransparency=1.000
@@ -4721,6 +4896,12 @@ cmd.add({"functionspy"},{"functionspy","Check console"},function()
 	clear.Image="rbxassetid://3926305904"
 	clear.ImageRectOffset=Vector2.new(924,724)
 	clear.ImageRectSize=Vector2.new(36,36)
+
+	clear.MouseButton1Click:Connect(function()
+		if _G.functionspy then
+			_G.functionspy.shutdown()
+		end
+	end)
 
 	RightPanel.Name="RightPanel"
 	RightPanel.Parent=Main
@@ -4771,6 +4952,32 @@ cmd.add({"functionspy"},{"functionspy","Check console"},function()
 	copy.TextColor3=Color3.fromRGB(255,255,255)
 	copy.TextSize=14.000
 
+	local function addHoverEffect(button)
+		button.MouseEnter:Connect(function()
+			button.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+		end)
+		button.MouseLeave:Connect(function()
+			button.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+		end)
+	end
+
+	addHoverEffect(clear_2)
+	addHoverEffect(copy)
+
+	gui.draggable(Main,Title)
+
+	local shadow = Instance.new("ImageLabel")
+	shadow.Name = "Shadow"
+	shadow.Parent = Main
+	shadow.BackgroundTransparency = 1
+	shadow.Size = UDim2.new(1, 20, 1, 20)
+	shadow.Position = UDim2.new(0, -10, 0, -10)
+	shadow.Image = "rbxassetid://1316045217"
+	shadow.ImageColor3 = Color3.new(0, 0, 0)
+	shadow.ImageTransparency = 0.5
+	shadow.ScaleType = Enum.ScaleType.Slice
+	shadow.SliceCenter = Rect.new(10, 10, 118, 118)
+
 	function AKIHDI_fake_script()
 		_G.functionspy={
 			instance=Main.Parent;
@@ -4806,6 +5013,12 @@ cmd.add({"functionspy"},{"functionspy","Check console"},function()
 				currentInfo=text
 			end))
 		end
+
+		MouseButtonFix(clear,function()
+			if _G.functionspy then
+				_G.functionspy.shutdown()
+			end
+		end)
 
 		MouseButtonFix(Main.RightPanel.copy,function()
 			if currentInfo~=nil then
@@ -5004,44 +5217,6 @@ cmd.add({"functionspy"},{"functionspy","Check console"},function()
 
 	end
 	coroutine.wrap(AKIHDI_fake_script)()
-	function KVVJTK_fake_script()
-		local UIS=SafeGetService('UserInputService')
-		local frame=FakeTitle.Parent
-		local dragToggle=nil
-		local dragSpeed=0.25
-		local dragStart=nil
-		local startPos=nil
-
-		function updateInput(input)
-			local delta=input.Position-dragStart
-			local position=UDim2.new(startPos.X.Scale,startPos.X.Offset+delta.X,
-				startPos.Y.Scale,startPos.Y.Offset+delta.Y)
-			SafeGetService('TweenService'):Create(frame,TweenInfo.new(dragSpeed),{Position=position}):Play()
-		end
-
-		table.insert(_G.functionspy.connections,frame.Title.InputBegan:Connect(function(input)
-			if (input.UserInputType==Enum.UserInputType.MouseButton1 or input.UserInputType==Enum.UserInputType.Touch) then 
-				dragToggle=true
-				dragStart=input.Position
-				startPos=frame.Position
-				input.Changed:Connect(function()
-					if input.UserInputState==Enum.UserInputState.End then
-						dragToggle=false
-					end
-				end)
-			end
-		end))
-
-		table.insert(_G.functionspy.connections,UIS.InputChanged:Connect(function(input)
-			if input.UserInputType==Enum.UserInputType.MouseMovement or input.UserInputType==Enum.UserInputType.Touch then
-				if dragToggle then
-					updateInput(input)
-				end
-			end
-		end))
-
-	end
-	coroutine.wrap(KVVJTK_fake_script)()
 	function BIPVKVC_fake_script()
 		local script=Instance.new('LocalScript',FakeTitle)
 
@@ -5091,222 +5266,222 @@ flySpeed = 1
 keybindConn = nil
 
 function toggleFly()
-    if flyEnabled then
-        FLYING = false
-        if IsOnMobile then
-            unmobilefly()
-        else
-            cmdlp.Character.Humanoid.PlatformStand = false
-            if goofyFLY then goofyFLY:Destroy() end
-        end
-        flyEnabled = false
-    else
-        FLYING = true
-        if IsOnMobile then
-            mobilefly(flySpeed)
-        else
-            sFLY()
-        end
-        flyEnabled = true
-    end
+	if flyEnabled then
+		FLYING = false
+		if IsOnMobile then
+			unmobilefly()
+		else
+			cmdlp.Character.Humanoid.PlatformStand = false
+			if goofyFLY then goofyFLY:Destroy() end
+		end
+		flyEnabled = false
+	else
+		FLYING = true
+		if IsOnMobile then
+			mobilefly(flySpeed)
+		else
+			sFLY()
+		end
+		flyEnabled = true
+	end
 end
 
 function connectFlyKey()
-    if keybindConn then
-        keybindConn:Disconnect()
-    end
-    keybindConn = cmdm.KeyDown:Connect(function(KEY)
-        if KEY:lower() == toggleKey then
-            toggleFly()
-        end
-    end)
+	if keybindConn then
+		keybindConn:Disconnect()
+	end
+	keybindConn = cmdm.KeyDown:Connect(function(KEY)
+		if KEY:lower() == toggleKey then
+			toggleFly()
+		end
+	end)
 end
 
 cmd.add({"fly"}, {"fly [speed]", "Enable flight"}, function(...)
-    local flySpeed = IsOnMobile and ((...) or 50) or ((...) or 1)
-    connectFlyKey()
+	local flySpeed = IsOnMobile and ((...) or 50) or ((...) or 1)
+	connectFlyKey()
 	flyEnabled=true
 
-    if IsOnMobile then
-        wait()
-        DoNotif(adminName.." detected mobile. Fly button added for easier use.")
+	if IsOnMobile then
+		wait()
+		DoNotif(adminName.." detected mobile. Fly button added for easier use.")
 
-        if mFlyBruh then
-            mFlyBruh:Destroy()
-            mFlyBruh = nil
-        end
+		if mFlyBruh then
+			mFlyBruh:Destroy()
+			mFlyBruh = nil
+		end
 
-        mFlyBruh = Instance.new("ScreenGui")
-        local btn = Instance.new("TextButton")
-        local corner = Instance.new("UICorner")
-        local aspect = Instance.new("UIAspectRatioConstraint")
+		mFlyBruh = Instance.new("ScreenGui")
+		local btn = Instance.new("TextButton")
+		local corner = Instance.new("UICorner")
+		local aspect = Instance.new("UIAspectRatioConstraint")
 
-        mFlyBruh.Parent = COREGUI
-        mFlyBruh.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-        mFlyBruh.ResetOnSpawn = false
+		mFlyBruh.Parent = (gethui and gethui()) or COREGUI or PlrGui
+		mFlyBruh.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+		mFlyBruh.ResetOnSpawn = false
 
-        btn.Parent = mFlyBruh
-        btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-        btn.BackgroundTransparency = 0.1
-        btn.Position = UDim2.new(0.9, 0, 0.6, 0)
-        btn.Size = UDim2.new(0.05, 0, 0.1, 0)
-        btn.Font = Enum.Font.GothamBold
-        btn.Text = "Fly"
-        btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-        btn.TextSize = 18
-        btn.TextWrapped = true
-        btn.Active = true
-        btn.TextScaled = true
+		btn.Parent = mFlyBruh
+		btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+		btn.BackgroundTransparency = 0.1
+		btn.Position = UDim2.new(0.9, 0, 0.6, 0)
+		btn.Size = UDim2.new(0.05, 0, 0.1, 0)
+		btn.Font = Enum.Font.GothamBold
+		btn.Text = "Fly"
+		btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+		btn.TextSize = 18
+		btn.TextWrapped = true
+		btn.Active = true
+		btn.TextScaled = true
 
-        corner.CornerRadius = UDim.new(0.2, 0)
-        corner.Parent = btn
+		corner.CornerRadius = UDim.new(0.2, 0)
+		corner.Parent = btn
 
-        aspect.Parent = btn
-        aspect.AspectRatio = 1.0
+		aspect.Parent = btn
+		aspect.AspectRatio = 1.0
 
-        coroutine.wrap(function()
-            MouseButtonFix(btn,function()
-                if not mOn then
-                    mOn = true
-                    btn.Text = "Unfly"
-                    btn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
-                    mobilefly(flySpeed)
-                else
-                    mOn = false
-                    btn.Text = "Fly"
-                    btn.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
-                    unmobilefly()
-                end
-            end)
-        end)()
+		coroutine.wrap(function()
+			MouseButtonFix(btn,function()
+				if not mOn then
+					mOn = true
+					btn.Text = "Unfly"
+					btn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+					mobilefly(flySpeed)
+				else
+					mOn = false
+					btn.Text = "Fly"
+					btn.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
+					unmobilefly()
+				end
+			end)
+		end)()
 
-        gui.draggable(btn)
-    else
-        FLYING = false
-        cmdlp.Character.Humanoid.PlatformStand = false
-        wait()
+		gui.draggable(btn)
+	else
+		FLYING = false
+		cmdlp.Character.Humanoid.PlatformStand = false
+		wait()
 
-        DoNotif("Fly enabled. Press '"..toggleKey:upper().."' to toggle flying.")
-        sFLY()
-        speedofthevfly = flySpeed
-        speedofthefly = flySpeed
-    end
+		DoNotif("Fly enabled. Press '"..toggleKey:upper().."' to toggle flying.")
+		sFLY()
+		speedofthevfly = flySpeed
+		speedofthefly = flySpeed
+	end
 end, true)
 
 cmd.add({"unfly"}, {"unfly", "Disable flight"}, function()
-    wait()
-    if IsOnMobile then
-        DoNotif("Mobile Fly Disabled.")
-        unmobilefly()
-    else
-        DoNotif("Not flying anymore")
-        FLYING = false
-        cmdlp.Character.Humanoid.PlatformStand = false
-        if goofyFLY then goofyFLY:Destroy() end
-    end
-    mOn = false
-    if mFlyBruh then
-        mFlyBruh:Destroy()
-        mFlyBruh = nil
-    end
-    if keybindConn then
-        keybindConn:Disconnect()
-        keybindConn = nil
-    end
+	wait()
+	if IsOnMobile then
+		DoNotif("Mobile Fly Disabled.")
+		unmobilefly()
+	else
+		DoNotif("Not flying anymore")
+		FLYING = false
+		cmdlp.Character.Humanoid.PlatformStand = false
+		if goofyFLY then goofyFLY:Destroy() end
+	end
+	mOn = false
+	if mFlyBruh then
+		mFlyBruh:Destroy()
+		mFlyBruh = nil
+	end
+	if keybindConn then
+		keybindConn:Disconnect()
+		keybindConn = nil
+	end
 end)
 
 TFlyEnabled = false
 tflyCORE = nil
 
 cmd.add({"tfly", "tweenfly"}, {"tfly [speed] (tweenfly)", "Enables smooth flying"}, function(...)
-    TFlyEnabled = true
-    local speed = (...) or 2
-    local e1, e2
-    local Humanoid = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-    local mouse = LocalPlayer:GetMouse()
+	TFlyEnabled = true
+	local speed = (...) or 2
+	local e1, e2
+	local Humanoid = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+	local mouse = LocalPlayer:GetMouse()
 
-    tflyCORE = Instance.new("Part", SafeGetService("Workspace").CurrentCamera)
-    tflyCORE:SetAttribute("tflyPart", true)
-    tflyCORE.Size = Vector3.new(0.05, 0.05, 0.05)
-    tflyCORE.CanCollide = false
+	tflyCORE = Instance.new("Part", SafeGetService("Workspace").CurrentCamera)
+	tflyCORE:SetAttribute("tflyPart", true)
+	tflyCORE.Size = Vector3.new(0.05, 0.05, 0.05)
+	tflyCORE.CanCollide = false
 
-    local keys = { w = false, a = false, s = false, d = false }
+	local keys = { w = false, a = false, s = false, d = false }
 
-    if IsOnPC then
-        e1 = mouse.KeyDown:Connect(function(key)
-            if not tflyCORE or not tflyCORE.Parent then
-                e1:Disconnect()
-                e2:Disconnect()
-                return
-            end
-            if keys[key] ~= nil then
-                keys[key] = true
-            end
-        end)
+	if IsOnPC then
+		e1 = mouse.KeyDown:Connect(function(key)
+			if not tflyCORE or not tflyCORE.Parent then
+				e1:Disconnect()
+				e2:Disconnect()
+				return
+			end
+			if keys[key] ~= nil then
+				keys[key] = true
+			end
+		end)
 
-        e2 = mouse.KeyUp:Connect(function(key)
-            if keys[key] ~= nil then
-                keys[key] = false
-            end
-        end)
-    end
+		e2 = mouse.KeyUp:Connect(function(key)
+			if keys[key] ~= nil then
+				keys[key] = false
+			end
+		end)
+	end
 
-    local Weld = Instance.new("Weld", tflyCORE)
-    Weld.Part0 = tflyCORE
-    Weld.Part1 = Humanoid.RootPart
-    Weld.C0 = CFrame.new(0, 0, 0)
+	local Weld = Instance.new("Weld", tflyCORE)
+	Weld.Part0 = tflyCORE
+	Weld.Part1 = Humanoid.RootPart
+	Weld.C0 = CFrame.new(0, 0, 0)
 
-    local pos = Instance.new("BodyPosition", tflyCORE)
-    local gyro = Instance.new("BodyGyro", tflyCORE)
-    pos.maxForce = Vector3.new(math.huge, math.huge, math.huge)
-    pos.position = tflyCORE.Position
-    gyro.maxTorque = Vector3.new(9e9, 9e9, 9e9)
-    gyro.cframe = tflyCORE.CFrame
+	local pos = Instance.new("BodyPosition", tflyCORE)
+	local gyro = Instance.new("BodyGyro", tflyCORE)
+	pos.maxForce = Vector3.new(math.huge, math.huge, math.huge)
+	pos.position = tflyCORE.Position
+	gyro.maxTorque = Vector3.new(9e9, 9e9, 9e9)
+	gyro.cframe = tflyCORE.CFrame
 
-    repeat
-        wait()
-        Humanoid.PlatformStand = true
-        local newPosition = gyro.cframe - gyro.cframe.p + pos.position
+	repeat
+		wait()
+		Humanoid.PlatformStand = true
+		local newPosition = gyro.cframe - gyro.cframe.p + pos.position
 
-        if IsOnPC then
-            local camera = SafeGetService("Workspace").CurrentCamera
-            if keys.w then
-                newPosition = newPosition + camera.CoordinateFrame.LookVector * speed
-            end
-            if keys.s then
-                newPosition = newPosition - camera.CoordinateFrame.LookVector * speed
-            end
-            if keys.d then
-                newPosition = newPosition * CFrame.new(speed, 0, 0)
-            end
-            if keys.a then
-                newPosition = newPosition * CFrame.new(-speed, 0, 0)
-            end
-        elseif IsOnMobile then
-            local direction = ctrlModule:GetMoveVector()
-            if direction.Magnitude > 0 then
-                local camera = SafeGetService("Workspace").CurrentCamera
-                newPosition = newPosition + (direction.X * camera.CFrame.RightVector * speed)
-                newPosition = newPosition - (direction.Z * camera.CFrame.LookVector * speed)
-            end
-        end
+		if IsOnPC then
+			local camera = SafeGetService("Workspace").CurrentCamera
+			if keys.w then
+				newPosition = newPosition + camera.CoordinateFrame.LookVector * speed
+			end
+			if keys.s then
+				newPosition = newPosition - camera.CoordinateFrame.LookVector * speed
+			end
+			if keys.d then
+				newPosition = newPosition * CFrame.new(speed, 0, 0)
+			end
+			if keys.a then
+				newPosition = newPosition * CFrame.new(-speed, 0, 0)
+			end
+		elseif IsOnMobile then
+			local direction = ctrlModule:GetMoveVector()
+			if direction.Magnitude > 0 then
+				local camera = SafeGetService("Workspace").CurrentCamera
+				newPosition = newPosition + (direction.X * camera.CFrame.RightVector * speed)
+				newPosition = newPosition - (direction.Z * camera.CFrame.LookVector * speed)
+			end
+		end
 
-        pos.position = newPosition.p
-        gyro.cframe = SafeGetService("Workspace").CurrentCamera.CoordinateFrame
-    until not TFlyEnabled
+		pos.position = newPosition.p
+		gyro.cframe = SafeGetService("Workspace").CurrentCamera.CoordinateFrame
+	until not TFlyEnabled
 
-    if gyro then gyro:Destroy() end
-    if pos then pos:Destroy() end
-    Humanoid.PlatformStand = false
+	if gyro then gyro:Destroy() end
+	if pos then pos:Destroy() end
+	Humanoid.PlatformStand = false
 end, true)
 
 cmd.add({"untfly", "untweenfly"}, {"untfly (untweenfly)", "Disables tween flying"}, function()
-    TFlyEnabled = false
-    for _, v in pairs(SafeGetService("Workspace"):GetDescendants()) do
-        if v:GetAttribute("tflyPart") then
-            v:Destroy()
-        end
-    end
+	TFlyEnabled = false
+	for _, v in pairs(SafeGetService("Workspace"):GetDescendants()) do
+		if v:GetAttribute("tflyPart") then
+			v:Destroy()
+		end
+	end
 end)
 
 cmd.add({"noclip","nclip","nc"},{"noclip","Disable your player's collision"},function()
@@ -5323,6 +5498,82 @@ end)
 
 cmd.add({"clip","c"},{"clip","Enable your player's collision"},function()
 	lib.disconnect("noclip")
+end)
+
+local bangCon
+local originalPos
+
+cmd.add({"antibang"}, {"antibang", "prevents users to bang you (still WORK IN PROGRESS)"}, function()
+	if bangCon then
+        bangCon:Disconnect()
+        bangCon = nil
+    end
+    local root = getRoot(LocalPlayer.Character)
+    if not root then return end
+    originalPos = root.CFrame
+    local orgHeight = SafeGetService("Workspace").FallenPartsDestroyHeight
+    local anims = {"rbxassetid://5918726674", "rbxassetid://148840371"}
+    local inVoid = false
+    local targetPlayer = nil
+	local toldNotif = false
+
+    LocalPlayer.CharacterAdded:Connect(function(char)
+        task.wait(1)
+        root = getRoot(char)
+    end)
+
+    bangCon = game:GetService("RunService").Stepped:Connect(function()
+        for _, p in pairs(game:GetService("Players"):GetPlayers()) do
+            if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                if (p.Character.HumanoidRootPart.Position - root.Position).Magnitude <= 10 then
+                    local tracks = p.Character:FindFirstChild("Humanoid"):GetPlayingAnimationTracks()
+                    for _, t in pairs(tracks) do
+                        if table.find(anims, t.Animation.AnimationId) then
+                            if not inVoid then
+                                inVoid = true
+                                targetPlayer = p
+                                SafeGetService("Workspace").FallenPartsDestroyHeight = 0/1/0
+                                root.CFrame = CFrame.new(Vector3.new(0, orgHeight - 25, 0))
+								if not toldNotif then
+									toldNotif=true
+									DoNotif("Antibang activated | Target: "..targetPlayer.Name,2)
+								end
+                            end
+                        end
+                    end
+                end
+            end
+        end
+
+        if inVoid then
+            local char = LocalPlayer.Character
+            local r = char and char:FindFirstChild("HumanoidRootPart")
+            if r and r.Position.Y <= orgHeight + 25 then
+                r.Velocity = Vector3.new(r.Velocity.X, r.Velocity.Y + 10, r.Velocity.Z)
+            end
+
+            if not targetPlayer or not targetPlayer.Character or not targetPlayer.Character:FindFirstChild("Humanoid") or targetPlayer.Character.Humanoid.Health <= 0 then
+                inVoid = false
+                targetPlayer = nil
+                root.CFrame = originalPos
+				root.Anchored=true
+				task.wait();
+				root.Anchored=false
+                SafeGetService("Workspace").FallenPartsDestroyHeight = orgHeight
+				if toldNotif then
+					toldNotif=false
+					DoNotif("Antibang deactivated",2)
+				end
+            end
+        end
+    end)
+end)
+
+cmd.add({"unantibang"}, {"unantibang", "disables antibang"}, function()
+    if bangCon then
+        bangCon:Disconnect()
+        bangCon = nil
+    end
 end)
 
 cmd.add({"orbit"}, {"orbit <player> <distance>", "Orbit around a player"}, function(p,d)
@@ -5535,24 +5786,24 @@ function getAllTools()
 end
 
 cmd.add({"fakelag", "flag"}, {"fakelag (flag)", "fake lag"}, function()
-    if FakeLag then return end
-    FakeLag = true
+	if FakeLag then return end
+	FakeLag = true
 
-    while FakeLag do
-        local root = getRoot(getChar())
-        if root then
-            root.Anchored = true
-            wait(0.05)
-            root.Anchored = false
-            wait(0.05)
-        else
-            FakeLag = false
-        end
-    end
+	while FakeLag do
+		local root = getRoot(getChar())
+		if root then
+			root.Anchored = true
+			wait(0.05)
+			root.Anchored = false
+			wait(0.05)
+		else
+			FakeLag = false
+		end
+	end
 end)
 
 cmd.add({"unfakelag", "unflag"}, {"unfakelag (unflag)", "stops the fake lag command"}, function()
-    FakeLag = false
+	FakeLag = false
 end)
 
 local r=math.rad
@@ -5755,37 +6006,37 @@ cmd.add({"placename","pname"},{"placename (pname)","Copies the game's place name
 end)
 
 function getTgt(user)
-    if user == nil then
-        user = plr.Name
-    end
-    return getPlr(user)
+	if user == nil then
+		user = plr.Name
+	end
+	return getPlr(user)
 end
 
 cmd.add({"copyname", "cname"}, {"copyname <player> (cname)", "Copies the username of the target"}, function(...)
-    local usr = ...
-    local tgt = getTgt(usr)
+	local usr = ...
+	local tgt = getTgt(usr)
 
-    setclipboard(tostring(tgt.Name))
-    wait()
-    DoNotif("Copied the username of "..tgt.DisplayName)
+	setclipboard(tostring(tgt.Name))
+	wait()
+	DoNotif("Copied the username of "..tgt.DisplayName)
 end, true)
 
 cmd.add({"copydisplay", "cdisplay"}, {"copydisplay <player> (cdisplay)", "Copies the display name of the target"}, function(...)
-    local usr = ...
-    local tgt = getTgt(usr)
+	local usr = ...
+	local tgt = getTgt(usr)
 
-    setclipboard(tostring(tgt.DisplayName))
-    wait()
-    DoNotif("Copied the display name of "..tgt.Name)
+	setclipboard(tostring(tgt.DisplayName))
+	wait()
+	DoNotif("Copied the display name of "..tgt.Name)
 end, true)
 
 cmd.add({"copyid", "id"}, {"copyid <player> (id)", "Copies the UserId of the target"}, function(...)
-    local usr = ...
-    local tgt = getTgt(usr)
+	local usr = ...
+	local tgt = getTgt(usr)
 
-    setclipboard(tostring(tgt.UserId))
-    wait()
-    DoNotif("Copied the UserId of "..tgt.Name)
+	setclipboard(tostring(tgt.UserId))
+	wait()
+	DoNotif("Copied the UserId of "..tgt.Name)
 end, true)
 
 --[ PLAYER ]--
@@ -5830,9 +6081,9 @@ cmd.add({"night"},{"night","Makes it night"},function()
 end)
 
 cmd.add({"chat", "message"}, {"chat <text> (message)", "Chats for you, useful if you're muted"}, function(...)
-    local chatMessage = table.concat({...}, " ")
-    local chatTarget = "All"
-    lib.LocalPlayerChat(chatMessage, chatTarget)
+	local chatMessage = table.concat({...}, " ")
+	local chatTarget = "All"
+	lib.LocalPlayerChat(chatMessage, chatTarget)
 end, true)
 
 cmd.add({"privatemessage", "pm"}, {"privatemessage <player> <text> (pm)", "Sends a private message to a player"}, function(...)
@@ -6034,12 +6285,12 @@ cmd.add({"jend"}, {"jend", "nil"}, function()
 	_G.SawFinish = true
 end)
 
-cmd.add({"fling"},{"fling <player>", "Fling the given player"},function(plr)
-	local player = Players.LocalPlayer
+cmd.add({"fling"}, {"fling <player>", "Fling the given player"}, function(plr)
+	local player = LocalPlayer
 	local mouse = player:GetMouse()
 	local Targets = {plr}
 
-	local Players = Players
+	local Players = game:GetService("Players")
 	local Player = Players.LocalPlayer
 
 	local AllBool = false
@@ -6093,7 +6344,7 @@ cmd.add({"fling"},{"fling <player>", "Fling the given player"},function(plr)
 			TRootPart = THumanoid.RootPart
 		end
 		if TCharacter:FindFirstChild("Head") then
-			THead = TCharacter:FindFirstChild("Head")
+			THead = TCharacter.Head
 		end
 		if TCharacter:FindFirstChildOfClass("Accessory") then
 			Accessory = TCharacter:FindFirstChildOfClass("Accessory")
@@ -6523,48 +6774,48 @@ cmd.add({"unwatch2", "unview2"}, {"unwatch2 (unview2)", "Stop spectating with GU
 end)
 
 cmd.add({"stealaudio","getaudio","steal","logaudio"},{"stealaudio <player> (getaudio,logaudio,steal)","Save all sounds a player is playing to a file -Cyrus"},function(p)
-    wait()
-    local player = getPlr(p)
-    local audios = ""
-    if player then
-        local char = player.Character
-        if char then
-            for _, v in pairs(char:GetDescendants()) do
-                if v:IsA("Sound") and v.Playing then
-                    audios = audios..("%s\n"):format(v.SoundId)
-                end
-            end
-        end
-    end
-    if audios ~= "" then
-        setclipboard(tostring(audios))
-        DoNotif("Audio links have been copied to your clipboard.")
-    end
+	wait()
+	local player = getPlr(p)
+	local audios = ""
+	if player then
+		local char = player.Character
+		if char then
+			for _, v in pairs(char:GetDescendants()) do
+				if v:IsA("Sound") and v.Playing then
+					audios = audios..("%s\n"):format(v.SoundId)
+				end
+			end
+		end
+	end
+	if audios ~= "" then
+		setclipboard(tostring(audios))
+		DoNotif("Audio links have been copied to your clipboard.")
+	end
 end,true)
 
 cmd.add({"follow","stalk","walk"},{"follow <player>","Follow a player wherever they go"},function(p)
-    lib.disconnect("follow")
-    local targetPlayer = getPlr(p)
-    if not targetPlayer then
-        DoNotif("Player not found or invalid.")
-        return
-    end
-    lib.connect("follow",RunService.Stepped:Connect(function()
+	lib.disconnect("follow")
+	local targetPlayer = getPlr(p)
+	if not targetPlayer then
+		DoNotif("Player not found or invalid.")
+		return
+	end
+	lib.connect("follow",RunService.Stepped:Connect(function()
 		print'began'
-        local target = targetPlayer.Character
-        if target and character then
-            local hum = character:FindFirstChildWhichIsA("Humanoid")
-            local targetPart = target:FindFirstChild("Head")
-            if hum and targetPart then
-                local targetPos = targetPart.Position
-                hum:MoveTo(targetPos)
-            else
-                lib.disconnect("follow")
-            end
-        else
-            lib.disconnect("follow")
-        end
-    end))
+		local target = targetPlayer.Character
+		if target and character then
+			local hum = character:FindFirstChildWhichIsA("Humanoid")
+			local targetPart = target:FindFirstChild("Head")
+			if hum and targetPart then
+				local targetPos = targetPart.Position
+				hum:MoveTo(targetPos)
+			else
+				lib.disconnect("follow")
+			end
+		else
+			lib.disconnect("follow")
+		end
+	end))
 end,true)
 
 cmd.add({"unfollow","unstalk","unwalk","unpathfind"},{"unfollow","Stop all attempts to follow a player"},function()
@@ -6688,11 +6939,11 @@ cmd.add({"loopfling"},{"loopfling <player>","Loop voids a player"},function(plr)
 
 	Loopvoid=true
 	repeat wait()
-		local player=Players.LocalPlayer
+		local player=LocalPlayer
 		local mouse=player:GetMouse()
 
-		local Players=Players
-		local Player=Players.LocalPlayer
+		local Players=game:GetService("Players")
+		local Player=LocalPlayer
 
 		local AllBool=false
 
@@ -7192,19 +7443,19 @@ cmd.add({"unloopwaveat","unloopwat"},{"unloopwaveat <player> (unloopwat)","Stops
 end)
 
 cmd.add({"tools", "gears"}, {"tools <player> (gears)", "Copies tools from ReplicatedStorage and Lighting"}, function()
-    function copyTools(source)
-        for _, item in pairs(source:GetDescendants()) do
-            if item:IsA('Tool') or item:IsA('HopperBin') then
-                item:Clone().Parent = getBp()
-            end
-        end
-    end
+	function copyTools(source)
+		for _, item in pairs(source:GetDescendants()) do
+			if item:IsA('Tool') or item:IsA('HopperBin') then
+				item:Clone().Parent = getBp()
+			end
+		end
+	end
 
-    copyTools(Lighting)
-    copyTools(ReplicatedStorage)
+	copyTools(Lighting)
+	copyTools(ReplicatedStorage)
 
-    wait()
-    DoNotif("Copied tools from ReplicatedStorage and Lighting", 3)
+	wait()
+	DoNotif("Copied tools from ReplicatedStorage and Lighting", 3)
 end)
 
 cmd.add({"waveat","wat"},{"waveat <player> (wat)","Wave to a player"},function(...)
@@ -7834,17 +8085,17 @@ cmd.add({"unloopfling"},{"unloopfling","Stops loop flinging a player"},function(
 end)
 
 cmd.add({"inspect"}, {"inspect", "checks a user's items"}, function(args)
-    local targetPlayers = getPlr(args[1] or LocalPlayer)
-    
-    for _, playerName in ipairs(targetPlayers) do
-        local player = Players:FindFirstChild(playerName)
-        if player then
-            GuiService:CloseInspectMenu()
-            GuiService:InspectPlayerFromUserId(player.UserId)
-        else
-            DoNotif("Player not found: "..tostring(playerName))
-        end
-    end
+	local targetPlayers = getPlr(args[1] or LocalPlayer)
+
+	for _, playerName in ipairs(targetPlayers) do
+		local player = Players:FindFirstChild(playerName)
+		if player then
+			GuiService:CloseInspectMenu()
+			GuiService:InspectPlayerFromUserId(player.UserId)
+		else
+			DoNotif("Player not found: "..tostring(playerName))
+		end
+	end
 end, true)
 
 cmd.add({"noprompt","nopurchaseprompts","noprompts"},{"noprompt (nopurchaseprompts,noprompts)","remove the stupid purchase prompt"},function()
@@ -7870,79 +8121,79 @@ end)
 local hiddenGUIS = {}
 
 cmd.add({"hideguis"}, {"hideguis", "Hides GUIs"}, function()
-    for _, guiElement in pairs(PlrGui:GetDescendants()) do
-        if (guiElement:IsA("Frame") or guiElement:IsA("ImageLabel") or guiElement:IsA("ScrollingFrame")) and guiElement.Visible then
-            guiElement.Visible = false
-            if not table.find(hiddenGUIS, guiElement) then
-                table.insert(hiddenGUIS, guiElement)
-            end
-        end
-    end
+	for _, guiElement in pairs(PlrGui:GetDescendants()) do
+		if (guiElement:IsA("Frame") or guiElement:IsA("ImageLabel") or guiElement:IsA("ScrollingFrame")) and guiElement.Visible then
+			guiElement.Visible = false
+			if not table.find(hiddenGUIS, guiElement) then
+				table.insert(hiddenGUIS, guiElement)
+			end
+		end
+	end
 end)
 
 cmd.add({"showguis"}, {"showguis", "Shows GUIs that were hidden using hideguis"}, function()
-    for _, guiElement in pairs(hiddenGUIS) do
-        guiElement.Visible = true
-    end
-    hiddenGUIS = {}
+	for _, guiElement in pairs(hiddenGUIS) do
+		guiElement.Visible = true
+	end
+	hiddenGUIS = {}
 end)
 
 local spinThingy = nil
 local spinPart = nil
 
 cmd.add({"spin"}, {"spin {amount}", "Makes your character spin as fast as you want"}, function(...)
-    wait()
+	wait()
 
-    local spinSpeed = (...)
-    if not spinSpeed then spinSpeed = 20 end
+	local spinSpeed = (...)
+	if not spinSpeed then spinSpeed = 20 end
 
-    if spinThingy then
-        spinThingy:Destroy()
-        spinThingy = nil
-    end
+	if spinThingy then
+		spinThingy:Destroy()
+		spinThingy = nil
+	end
 
-    if spinPart then
-        spinPart:Destroy()
-        spinPart = nil
-    end
+	if spinPart then
+		spinPart:Destroy()
+		spinPart = nil
+	end
 
-    spinPart = Instance.new("Part")
-    spinPart.Name = "SpinPart"
-    spinPart.Anchored = false
-    spinPart.CanCollide = false
-    spinPart.Transparency = 1
-    spinPart.Size = Vector3.new(1, 1, 1)
-    spinPart.Parent = workspace.CurrentCamera
-    spinPart.CFrame = getRoot(LocalPlayer.Character).CFrame
+	spinPart = Instance.new("Part")
+	spinPart.Name = "SpinPart"
+	spinPart.Anchored = false
+	spinPart.CanCollide = false
+	spinPart.Transparency = 1
+	spinPart.Size = Vector3.new(1, 1, 1)
+	spinPart.Parent = workspace.CurrentCamera
+	spinPart.CFrame = getRoot(LocalPlayer.Character).CFrame
 
-    spinThingy = Instance.new("BodyAngularVelocity")
-    spinThingy.Name = "NamelessSpinner"
-    spinThingy.Parent = spinPart
-    spinThingy.MaxTorque = Vector3.new(0, math.huge, 0)
-    spinThingy.AngularVelocity = Vector3.new(0, spinSpeed, 0)
+	spinThingy = Instance.new("BodyAngularVelocity")
+	spinThingy.Name = "NamelessSpinner"
+	spinThingy.Parent = spinPart
+	spinThingy.MaxTorque = Vector3.new(0, math.huge, 0)
+	spinThingy.AngularVelocity = Vector3.new(0, spinSpeed, 0)
 
-    local weld = Instance.new("WeldConstraint")
-    weld.Part0 = spinPart
-    weld.Part1 = getRoot(LocalPlayer.Character)
-    weld.Parent = spinPart
+	local weld = Instance.new("WeldConstraint")
+	weld.Part0 = spinPart
+	weld.Part1 = getRoot(LocalPlayer.Character)
+	weld.Parent = spinPart
 
-    DoNotif("Spinning...")
+	DoNotif("Spinning...")
 end, true)
 
 cmd.add({"unspin"}, {"unspin", "Makes your character unspin"}, function()
-    wait()
+	wait()
 
-    if spinThingy then
-        spinThingy:Destroy()
-        spinThingy = nil
-    end
+	if spinThingy then
+		spinThingy:Destroy()
+		spinThingy = nil
+	end
 
-    if spinPart then
-        spinPart:Destroy()
-        spinPart = nil
-    end
+	if spinPart then
+		spinPart:Destroy()
+		spinPart = nil
+	end
 
-    DoNotif("Spin Disabled", 3)
+	DoNotif("Spin Disabled", 3)
 end)
 
 cmd.add({"notepad"},{"notepad","notepad for making scripts / etc"},function()
@@ -8064,24 +8315,24 @@ end)
 
 cmd.add({"lighting", "lightingcontrol"}, {"lighting (lightingcontrol)", "Manage lighting technology settings"}, function()
 	local lightingButtons = {}
-        for _, lightingType in ipairs(Enum.Technology:GetEnumItems()) do
-            table.insert(lightingButtons, {
-                Text = lightingType.Name,
-                Callback = function()
-                    Lighting.Technology = lightingType
-                end
-            })
-        end
-
+	for _, lightingType in ipairs(Enum.Technology:GetEnumItems()) do
 		table.insert(lightingButtons, {
-			Text = "Cancel",
-			Callback = function() end
+			Text = lightingType.Name,
+			Callback = function()
+				Lighting.Technology = lightingType
+			end
 		})
+	end
 
-        Notify({
-            Title = "Lighting Technology Options",
-            Buttons = lightingButtons
-        })
+	table.insert(lightingButtons, {
+		Text = "Cancel",
+		Callback = function() end
+	})
+
+	Notify({
+		Title = "Lighting Technology Options",
+		Buttons = lightingButtons
+	})
 end)
 
 cmd.add({"tweengotocampos","tweentocampos","tweentcp"},{"tweengotocampos (tweentcp)","Another version of goto camera position but bypassing more anti-cheats"},function()
@@ -8110,316 +8361,322 @@ cmd.add({"tweengotocampos","tweentocampos","tweentcp"},{"tweengotocampos (tweent
 end)
 
 cmd.add({"delete", "remove", "del"}, {"delete {partname} (remove, del)", "Removes any part with a certain name from the workspace"}, function(...)
-    local deleteCount = 0
-    local args = {...}
-    local targetName = table.concat(args, " ")
+	local deleteCount = 0
+	local args = {...}
+	local targetName = table.concat(args, " ")
 
-    for _, descendant in pairs(SafeGetService("Workspace"):GetDescendants()) do
-        if descendant.Name:lower() == targetName:lower() then
-            descendant:Destroy()
-            deleteCount = deleteCount + 1
-        end
-    end
+	for _, descendant in pairs(SafeGetService("Workspace"):GetDescendants()) do
+		if descendant.Name:lower() == targetName:lower() then
+			descendant:Destroy()
+			deleteCount = deleteCount + 1
+		end
+	end
 
-    wait()
+	wait()
 
-    if deleteCount > 0 then
-        DoNotif("Deleted "..deleteCount.." instance(s) of '"..targetName.."'", 2.5)
-    else
-        DoNotif("'"..targetName.."' not found to delete", 2.5)
-    end
+	if deleteCount > 0 then
+		DoNotif("Deleted "..deleteCount.." instance(s) of '"..targetName.."'", 2.5)
+	else
+		DoNotif("'"..targetName.."' not found to delete", 2.5)
+	end
 end, true)
 
 local autoRemover = {}
 local autoRemoveConnection = nil
 
 function handleDescendantAdd(part)
-    if #autoRemover > 0 then
-        if FindInTable(autoRemover, part.Name:lower()) then
-            wait()
-            part:Destroy()
-        end
-    else
-        if autoRemoveConnection then
-            autoRemoveConnection:Disconnect()
-            autoRemoveConnection = nil
-        end
-    end
+	if #autoRemover > 0 then
+		if FindInTable(autoRemover, part.Name:lower()) then
+			wait()
+			part:Destroy()
+		end
+	else
+		if autoRemoveConnection then
+			autoRemoveConnection:Disconnect()
+			autoRemoveConnection = nil
+		end
+	end
 end
 
 cmd.add({"autodelete", "autoremove", "autodel"}, {"autodelete {partname} (autoremove, autodel)", "Removes any part with a certain name from the workspace on loop"}, function(...)
-    local args = {...}
-    local targetName = table.concat(args, " "):lower()
+	local args = {...}
+	local targetName = table.concat(args, " "):lower()
 
-    if not FindInTable(autoRemover, targetName) then
-        table.insert(autoRemover, targetName)
-        for _, part in pairs(SafeGetService("Workspace"):GetDescendants()) do
-            if part.Name:lower() == targetName then
-                part:Destroy()
-            end
-        end
-    end
+	if not FindInTable(autoRemover, targetName) then
+		table.insert(autoRemover, targetName)
+		for _, part in pairs(SafeGetService("Workspace"):GetDescendants()) do
+			if part.Name:lower() == targetName then
+				part:Destroy()
+			end
+		end
+	end
 
-    if not autoRemoveConnection then
-        autoRemoveConnection = SafeGetService("Workspace").DescendantAdded:Connect(handleDescendantAdd)
-    end
+	if not autoRemoveConnection then
+		autoRemoveConnection = SafeGetService("Workspace").DescendantAdded:Connect(handleDescendantAdd)
+	end
 
-    wait()
-    DoNotif("Auto deleting instances with name: "..targetName, 2.5)
+	wait()
+	DoNotif("Auto deleting instances with name: "..targetName, 2.5)
 end, true)
 
 cmd.add({"unautodelete", "unautoremove", "unautodel"}, {"unautodelete {partname} (unautoremove, unautodel)", "Disables autodelete"}, function()
-    if autoRemoveConnection then
-        autoRemoveConnection:Disconnect()
-        autoRemoveConnection = nil
-    end
-    autoRemover = {}
+	if autoRemoveConnection then
+		autoRemoveConnection:Disconnect()
+		autoRemoveConnection = nil
+	end
+	autoRemover = {}
 end)
 
 cmd.add({"deleteclass", "removeclass", "dc"}, {"deleteclass {ClassName} (removeclass, dc)", "Removes any part with a certain classname from the workspace"}, function(...)
-    local args = {...}
-    local targetClass = args[1]:lower()
-    local deleteCount = 0
+	local args = {...}
+	local targetClass = args[1]:lower()
+	local deleteCount = 0
 
-    for _, part in pairs(SafeGetService("Workspace"):GetDescendants()) do
-        if part.ClassName:lower() == targetClass then
-            part:Destroy()
-            deleteCount = deleteCount + 1
-        end
-    end
+	for _, part in pairs(SafeGetService("Workspace"):GetDescendants()) do
+		if part.ClassName:lower() == targetClass then
+			part:Destroy()
+			deleteCount = deleteCount + 1
+		end
+	end
 
-    wait()
-    if deleteCount > 0 then
-        DoNotif("Deleted "..deleteCount.." instance(s) of class: "..targetClass, 2.5)
-    else
-        DoNotif("No instances of class: "..targetClass.." found to delete", 2.5)
-    end
+	wait()
+	if deleteCount > 0 then
+		DoNotif("Deleted "..deleteCount.." instance(s) of class: "..targetClass, 2.5)
+	else
+		DoNotif("No instances of class: "..targetClass.." found to delete", 2.5)
+	end
 end, true)
 
 local autoClassRemover = {}
 local autoClassConnection = nil
 
 function handleClassDescendantAdd(part)
-    if #autoClassRemover > 0 then
-        if FindInTable(autoClassRemover, part.ClassName:lower()) then
-            wait()
-            part:Destroy()
-        end
-    else
-        if autoClassConnection then
-            autoClassConnection:Disconnect()
-            autoClassConnection = nil
-        end
-    end
+	if #autoClassRemover > 0 then
+		if FindInTable(autoClassRemover, part.ClassName:lower()) then
+			wait()
+			part:Destroy()
+		end
+	else
+		if autoClassConnection then
+			autoClassConnection:Disconnect()
+			autoClassConnection = nil
+		end
+	end
 end
 
 cmd.add({"autodeleteclass", "autoremoveclass", "autodc"}, {"autodeleteclass {ClassName} (autoremoveclass, autodc)", "Removes any part with a certain classname from the workspace on loop"}, function(...)
-    local args = {...}
-    local targetClass = args[1]:lower()
+	local args = {...}
+	local targetClass = args[1]:lower()
 
-    if not FindInTable(autoClassRemover, targetClass) then
-        table.insert(autoClassRemover, targetClass)
-        for _, part in pairs(SafeGetService("Workspace"):GetDescendants()) do
-            if part.ClassName:lower() == targetClass then
-                part:Destroy()
-            end
-        end
-    end
+	if not FindInTable(autoClassRemover, targetClass) then
+		table.insert(autoClassRemover, targetClass)
+		for _, part in pairs(SafeGetService("Workspace"):GetDescendants()) do
+			if part.ClassName:lower() == targetClass then
+				part:Destroy()
+			end
+		end
+	end
 
-    if not autoClassConnection then
-        autoClassConnection = SafeGetService("Workspace").DescendantAdded:Connect(handleClassDescendantAdd)
-    end
+	if not autoClassConnection then
+		autoClassConnection = SafeGetService("Workspace").DescendantAdded:Connect(handleClassDescendantAdd)
+	end
 
-    wait()
-    DoNotif("Auto deleting instances with class: "..targetClass, 2.5)
+	wait()
+	DoNotif("Auto deleting instances with class: "..targetClass, 2.5)
 end, true)
 
 cmd.add({"unautodeleteclass", "unautoremoveclass", "unautodc"}, {"unautodeleteclass {ClassName} (unautoremoveclass, unautodc)", "Disables autodeleteclass"}, function()
-    if autoClassConnection then
-        autoClassConnection:Disconnect()
-        autoClassConnection = nil
-    end
-    autoClassRemover = {}
+	if autoClassConnection then
+		autoClassConnection:Disconnect()
+		autoClassConnection = nil
+	end
+	autoClassRemover = {}
 end)
 
 cmd.add({"chardelete", "charremove", "chardel", "cdelete", "cremove", "cdel"}, {"chardelete {partname} (charremove, chardel, cdelete, cremove, cdel)", "Removes any part with a certain name from your character"}, function(...)
-    local args = {...}
-    local targetName = table.concat(args, " "):lower()
-    local deleteCount = 0
+	local args = {...}
+	local targetName = table.concat(args, " "):lower()
+	local deleteCount = 0
 
-    for _, part in pairs(Player.Character:GetDescendants()) do
-        if part.Name:lower() == targetName then
-            part:Destroy()
-            deleteCount = deleteCount + 1
-        end
-    end
+	for _, part in pairs(Player.Character:GetDescendants()) do
+		if part.Name:lower() == targetName then
+			part:Destroy()
+			deleteCount = deleteCount + 1
+		end
+	end
 
-    wait()
-    if deleteCount > 0 then
-        DoNotif("Deleted "..deleteCount.." instance(s) of '"..targetName.."' inside the character", 2.5)
-    else
-        DoNotif("'"..targetName.."' not found in the character", 2.5)
-    end
+	wait()
+	if deleteCount > 0 then
+		DoNotif("Deleted "..deleteCount.." instance(s) of '"..targetName.."' inside the character", 2.5)
+	else
+		DoNotif("'"..targetName.."' not found in the character", 2.5)
+	end
 end, true)
 
 cmd.add({"chardeleteclass", "charremoveclass", "chardeleteclassname", "cdc"}, {"chardeleteclass {ClassName} (charremoveclass, chardeleteclassname, cdc)", "Removes any part with a certain classname from your character"}, function(...)
-    local args = {...}
-    local targetClass = args[1]:lower()
-    local deleteCount = 0
+	local args = {...}
+	local targetClass = args[1]:lower()
+	local deleteCount = 0
 
-    for _, part in pairs(Player.Character:GetDescendants()) do
-        if part.ClassName:lower() == targetClass then
-            part:Destroy()
-            deleteCount = deleteCount + 1
-        end
-    end
+	for _, part in pairs(Player.Character:GetDescendants()) do
+		if part.ClassName:lower() == targetClass then
+			part:Destroy()
+			deleteCount = deleteCount + 1
+		end
+	end
 
-    wait()
-    if deleteCount > 0 then
-        DoNotif("Deleted "..deleteCount.." instance(s) of class: "..targetClass.." inside the character", 2.5)
-    else
-        DoNotif("No instances of class: "..targetClass.." found in the character", 2.5)
-    end
+	wait()
+	if deleteCount > 0 then
+		DoNotif("Deleted "..deleteCount.." instance(s) of class: "..targetClass.." inside the character", 2.5)
+	else
+		DoNotif("No instances of class: "..targetClass.." found in the character", 2.5)
+	end
 end, true)
 
 cmd.add({"gotopart", "topart", "toprt"}, {"gotopart {partname} (topart, toprt)", "Teleports you to a part by name"}, function(...)
-    local partName = table.concat({...}, " "):lower()
+	local partName = table.concat({...}, " "):lower()
 
-    for _, part in pairs(SafeGetService("Workspace"):GetDescendants()) do
-        if part:IsA("BasePart") and part.Name:lower() == partName then
-            if getHum() then
-                getHum().Sit = false
-                wait(0.1)
-            end
-            if getChar() then
-                getChar():PivotTo(part:GetPivot())
-            end
-            wait(0.2)
-        end
-    end
+	for _, part in pairs(SafeGetService("Workspace"):GetDescendants()) do
+		if part:IsA("BasePart") and part.Name:lower() == partName then
+			if getHum() then
+				getHum().Sit = false
+				wait(0.1)
+			end
+			if getChar() then
+				getChar():PivotTo(part:GetPivot())
+			end
+			wait(0.2)
+		end
+	end
 end, true)
 
 cmd.add({"tweengotopart", "tgotopart", "ttopart", "ttoprt"}, {"tweengotopart {partname} (tgotopart, ttopart, ttoprt)", "Tweens your character to a part by name"}, function(...)
-    local partName = table.concat({...}, " "):lower()
+	local partName = table.concat({...}, " "):lower()
 
-    for _, part in pairs(SafeGetService("Workspace"):GetDescendants()) do
-        if part:IsA("BasePart") and part.Name:lower() == partName then
-            if getHum() then
-                getHum().Sit = false
-                wait(0.1)
-            end
-            TweenService:Create(
-                getRoot(getChar()),
-                TweenInfo.new(1, Enum.EasingStyle.Linear),
-                {CFrame = part.CFrame}
-            ):Play()
-            wait(1)
-        end
-    end
+	for _, part in pairs(SafeGetService("Workspace"):GetDescendants()) do
+		if part:IsA("BasePart") and part.Name:lower() == partName then
+			if getHum() then
+				getHum().Sit = false
+				wait(0.1)
+			end
+			TweenService:Create(
+				getRoot(getChar()),
+				TweenInfo.new(1, Enum.EasingStyle.Linear),
+				{CFrame = part.CFrame}
+			):Play()
+			wait(1)
+		end
+	end
 end, true)
 
 cmd.add({"gotopartclass", "gpc", "gotopartc", "gotoprtc"}, {"gotopartclass {classname} (gpc, gotopartc, gotoprtc)", "Teleports you to a part by classname"}, function(...)
-    local className = ({...})[1]:lower()
+	local className = ({...})[1]:lower()
 
-    for _, part in pairs(SafeGetService("Workspace"):GetDescendants()) do
-        if part:IsA("BasePart") and part.ClassName:lower() == className then
-            if getHum() then
-                getHum().Sit = false
-                wait(0.1)
-            end
-            if getChar() then
-                getChar():PivotTo(part:GetPivot())
-            end
-            wait(0.2)
-        end
-    end
+	for _, part in pairs(SafeGetService("Workspace"):GetDescendants()) do
+		if part:IsA("BasePart") and part.ClassName:lower() == className then
+			if getHum() then
+				getHum().Sit = false
+				wait(0.1)
+			end
+			if getChar() then
+				getChar():PivotTo(part:GetPivot())
+			end
+			wait(0.2)
+		end
+	end
 end, true)
 
 cmd.add({"bringpart", "bpart", "bprt"}, {"bringpart {partname} (bpart, bprt)", "Brings a part to your character by name"}, function(...)
-    local partName = table.concat({...}, " "):lower()
+	local partName = table.concat({...}, " "):lower()
 
-    for _, part in pairs(SafeGetService("Workspace"):GetDescendants()) do
-        if part:IsA("BasePart") and part.Name:lower() == partName then
-            if getChar() then
-                part:PivotTo(getChar():GetPivot())
-            end
-        end
-    end
+	for _, part in pairs(SafeGetService("Workspace"):GetDescendants()) do
+		if part:IsA("BasePart") and part.Name:lower() == partName then
+			if getChar() then
+				part:PivotTo(getChar():GetPivot())
+			end
+		end
+	end
 end, true)
 
 cmd.add({"bringmodel", "bmodel"}, {"bringmodel {modelname} (bmodel)", "Brings a model to your character by name"}, function(...)
-    local modelName = table.concat({...}, " "):lower()
+	local modelName = table.concat({...}, " "):lower()
 
-    for _, model in pairs(SafeGetService("Workspace"):GetDescendants()) do
-        if model:IsA("Model") and model.Name:lower() == modelName then
-            if getChar() then
-                model:PivotTo(getChar():GetPivot())
-            end
-        end
-    end
+	for _, model in pairs(SafeGetService("Workspace"):GetDescendants()) do
+		if model:IsA("Model") and model.Name:lower() == modelName then
+			if getChar() then
+				model:PivotTo(getChar():GetPivot())
+			end
+		end
+	end
 end, true)
 
 cmd.add({"gotomodel", "tomodel"}, {"gotomodel {modelname} (tomodel)", "Teleports you to a model by name"}, function(...)
-    local modelName = table.concat({...}, " "):lower()
+	local modelName = table.concat({...}, " "):lower()
 
-    for _, model in pairs(SafeGetService("Workspace"):GetDescendants()) do
-        if model:IsA("Model") and model.Name:lower() == modelName then
-            if getHum() then
-                getHum().Sit = false
-                wait(0.1)
-            end
-            if getChar() then
-                getChar():PivotTo(model:GetPivot())
-            end
-            wait(0.2)
-        end
-    end
+	for _, model in pairs(SafeGetService("Workspace"):GetDescendants()) do
+		if model:IsA("Model") and model.Name:lower() == modelName then
+			if getHum() then
+				getHum().Sit = false
+				wait(0.1)
+			end
+			if getChar() then
+				getChar():PivotTo(model:GetPivot())
+			end
+			wait(0.2)
+		end
+	end
 end, true)
 
 function setHumanoidStates(humanoid, stateEnabled)
-    states = {
-        Enum.HumanoidStateType.Climbing,
-        Enum.HumanoidStateType.FallingDown,
-        Enum.HumanoidStateType.Flying,
-        Enum.HumanoidStateType.Freefall,
-        Enum.HumanoidStateType.GettingUp,
-        Enum.HumanoidStateType.Jumping,
-        Enum.HumanoidStateType.Landed,
-        Enum.HumanoidStateType.Physics,
-        Enum.HumanoidStateType.PlatformStanding,
-        Enum.HumanoidStateType.Ragdoll,
-        Enum.HumanoidStateType.Running,
-        Enum.HumanoidStateType.RunningNoPhysics,
-        Enum.HumanoidStateType.Seated,
-        Enum.HumanoidStateType.StrafingNoPhysics,
-        Enum.HumanoidStateType.Swimming
-    }
+	local states = {
+		Enum.HumanoidStateType.Climbing,
+		Enum.HumanoidStateType.FallingDown,
+		Enum.HumanoidStateType.Flying,
+		Enum.HumanoidStateType.Freefall,
+		Enum.HumanoidStateType.GettingUp,
+		Enum.HumanoidStateType.Jumping,
+		Enum.HumanoidStateType.Landed,
+		Enum.HumanoidStateType.Physics,
+		Enum.HumanoidStateType.PlatformStanding,
+		Enum.HumanoidStateType.Ragdoll,
+		Enum.HumanoidStateType.Running,
+		Enum.HumanoidStateType.RunningNoPhysics,
+		Enum.HumanoidStateType.Seated,
+		Enum.HumanoidStateType.StrafingNoPhysics,
+		Enum.HumanoidStateType.Swimming
+	}
 
-    for _, state in ipairs(states) do
-        humanoid:SetStateEnabled(state, stateEnabled)
-    end
+	for _, state in ipairs(states) do
+		humanoid:SetStateEnabled(state, stateEnabled)
+	end
 end
 
-cmd.add({"swim"}, {"swim {speed}", "Swim in the air"}, function(speed)
-    speaker = Players.LocalPlayer
-    SafeGetService("Workspace").Gravity = 0
+local originalGravity = SafeGetService("Workspace").Gravity
 
-    if getHum() then
-        setHumanoidStates(getHum(), false)
-        getHum():ChangeState(Enum.HumanoidStateType.Swimming)
-        getHum().WalkSpeed = speed or 16
-    end
+cmd.add({"swim"}, {"swim {speed}", "Swim in the air"}, function(speed)
+	local player = Players.LocalPlayer
+	local humanoid = getHum()
+
+	if humanoid then
+		SafeGetService("Workspace").Gravity = 3.5
+		setHumanoidStates(humanoid, false)
+		humanoid:ChangeState(Enum.HumanoidStateType.Swimming)
+		humanoid.WalkSpeed = speed or 16
+	else
+		warn("Humanoid not found!")
+	end
 end, true)
 
 cmd.add({"unswim"}, {"unswim", "Stops the swim script"}, function()
-    speaker = Players.LocalPlayer
-    SafeGetService("Workspace").Gravity = 168
+	local player = Players.LocalPlayer
+	local humanoid = getHum()
 
-    if getHum() then
-        setHumanoidStates(getHum(), true)
-        getHum():ChangeState(Enum.HumanoidStateType.RunningNoPhysics)
-        getHum().WalkSpeed = 16
-    end
+	if humanoid then
+		SafeGetService("Workspace").Gravity = originalGravity
+		setHumanoidStates(humanoid, true)
+		humanoid:ChangeState(Enum.HumanoidStateType.RunningNoPhysics)
+		humanoid.WalkSpeed = 16
+	end
 end)
 
 local espList = {}
@@ -8556,28 +8813,28 @@ cmd.add({"unclickesp", "uncesp"}, {"unclickesp (uncesp)", "Removes ESP from part
 end)
 
 cmd.add({"viewpart", "viewp", "vpart"}, {"viewpart {partname} (viewp, vpart)", "Views a part"}, function(...)
-    local args = table.concat({...}, " "):lower()
-    local camera = SafeGetService("Workspace").CurrentCamera
+	local args = table.concat({...}, " "):lower()
+	local camera = SafeGetService("Workspace").CurrentCamera
 
-    for _, descendant in ipairs(SafeGetService("Workspace"):GetDescendants()) do
-        if descendant.Name:lower() == args then
-            if descendant:IsA("BasePart") then
-                camera.CameraSubject = descendant
-                return
-            elseif descendant:IsA("Model") or descendant:IsA("Folder") then
-                for _, child in ipairs(descendant:GetDescendants()) do
-                    if child:IsA("BasePart") then
-                        camera.CameraSubject = child
-                        return
-                    end
-                end
-            end
-        end
-    end
+	for _, descendant in ipairs(SafeGetService("Workspace"):GetDescendants()) do
+		if descendant.Name:lower() == args then
+			if descendant:IsA("BasePart") then
+				camera.CameraSubject = descendant
+				return
+			elseif descendant:IsA("Model") or descendant:IsA("Folder") then
+				for _, child in ipairs(descendant:GetDescendants()) do
+					if child:IsA("BasePart") then
+						camera.CameraSubject = child
+						return
+					end
+				end
+			end
+		end
+	end
 end, true)
 
 cmd.add({"unviewpart", "unviewp"}, {"unviewpart (unviewp)", "Unviews the part"}, function()
-    SafeGetService("Workspace").CurrentCamera.CameraSubject = getHum()
+	SafeGetService("Workspace").CurrentCamera.CameraSubject = getHum()
 end)
 
 cmd.add({"console"},{"console","Opens developer console"},function()
@@ -8587,183 +8844,183 @@ end)
 local isHitboxActive = false
 
 cmd.add({"hitbox", "hbox"}, {"hitbox {amount}", "Modifies everyone's hitbox to the specified size"}, function(playerName, size)
-    if isHitboxActive then
-        isHitboxActive = false
-    end
+	if isHitboxActive then
+		isHitboxActive = false
+	end
 
-    local targetPlayer = getPlr(playerName)
-    _G.HeadSize = size or 10
-    _G.Disabled = true
-    isHitboxActive = true
+	local targetPlayer = getPlr(playerName)
+	_G.HeadSize = size or 10
+	_G.Disabled = true
+	isHitboxActive = true
 
-    local function modifyHitbox(character)
-        local rootPart = getRoot(character)
-        rootPart.Size = Vector3.new(_G.HeadSize, _G.HeadSize, _G.HeadSize)
-        rootPart.Transparency = 0.9
-        rootPart.BrickColor = BrickColor.new("Really black")
-        rootPart.Material = "Neon"
-        rootPart.CanCollide = false
-    end
+	local function modifyHitbox(character)
+		local rootPart = getRoot(character)
+		rootPart.Size = Vector3.new(_G.HeadSize, _G.HeadSize, _G.HeadSize)
+		rootPart.Transparency = 0.9
+		rootPart.BrickColor = BrickColor.new("Really black")
+		rootPart.Material = "Neon"
+		rootPart.CanCollide = false
+	end
 
-    RunService.Stepped:Connect(function()
-        if isHitboxActive then
-            if playerName == "all" or playerName == "others" then
-                for _, player in ipairs(SafeGetService('Players'):GetPlayers()) do
-                    if player.Name ~= SafeGetService('Players').LocalPlayer.Name then
-                        modifyHitbox(player.Character)
-                    end
-                end
-            else
-                modifyHitbox(targetPlayer.Character)
-            end
-        end
-    end)
+	RunService.Stepped:Connect(function()
+		if isHitboxActive then
+			if playerName == "all" or playerName == "others" then
+				for _, player in ipairs(SafeGetService('Players'):GetPlayers()) do
+					if player.Name ~= SafeGetService('Players').LocalPlayer.Name then
+						modifyHitbox(player.Character)
+					end
+				end
+			else
+				modifyHitbox(targetPlayer.Character)
+			end
+		end
+	end)
 end, true)
 
 cmd.add({"unhitbox", "unhbox"}, {"unhitbox", "Disables hitbox modifications"}, function(playerName)
-    local targetPlayer = getPlr(playerName)
-    _G.HeadSize = 5
-    _G.Disabled = false
-    isHitboxActive = false
+	local targetPlayer = getPlr(playerName)
+	_G.HeadSize = 5
+	_G.Disabled = false
+	isHitboxActive = false
 
-    local function resetHitbox(character)
-        local rootPart = getRoot(character)
-        rootPart.Size = Vector3.new(_G.HeadSize, _G.HeadSize, _G.HeadSize)
-        rootPart.Transparency = 1
-        rootPart.BrickColor = BrickColor.new("Really black")
-        rootPart.Material = "Neon"
-        rootPart.CanCollide = false
-    end
+	local function resetHitbox(character)
+		local rootPart = getRoot(character)
+		rootPart.Size = Vector3.new(_G.HeadSize, _G.HeadSize, _G.HeadSize)
+		rootPart.Transparency = 1
+		rootPart.BrickColor = BrickColor.new("Really black")
+		rootPart.Material = "Neon"
+		rootPart.CanCollide = false
+	end
 
-    if playerName == "all" or playerName == "others" then
-        for _, player in ipairs(SafeGetService('Players'):GetPlayers()) do
-            if player.Name ~= SafeGetService('Players').LocalPlayer.Name then
-                resetHitbox(player.Character)
-            end
-        end
-    else
-        resetHitbox(targetPlayer.Character)
-    end
+	if playerName == "all" or playerName == "others" then
+		for _, player in ipairs(SafeGetService('Players'):GetPlayers()) do
+			if player.Name ~= SafeGetService('Players').LocalPlayer.Name then
+				resetHitbox(player.Character)
+			end
+		end
+	else
+		resetHitbox(targetPlayer.Character)
+	end
 end)
 
 cmd.add({"breakcars", "bcars"}, {"breakcars (bcars)", "Breaks any car"}, function()
-    DoNotif("Car breaker loaded, sit on a vehicle and be the driver")
+	DoNotif("Car breaker loaded, sit on a vehicle and be the driver")
 
-    local UserInputService = UserInputService
-    local Mouse = Players.LocalPlayer:GetMouse()
-    local Workspace = SafeGetService("Workspace")
-    local Folder = Instance.new("Folder", Workspace)
-    local Part = Instance.new("Part", Folder)
-    local Attachment1 = Instance.new("Attachment", Part)
+	local UserInputService = UserInputService
+	local Mouse = Players.LocalPlayer:GetMouse()
+	local Workspace = SafeGetService("Workspace")
+	local Folder = Instance.new("Folder", Workspace)
+	local Part = Instance.new("Part", Folder)
+	local Attachment1 = Instance.new("Attachment", Part)
 
-    Part.Anchored = true
-    Part.CanCollide = false
-    Part.Transparency = 1
+	Part.Anchored = true
+	Part.CanCollide = false
+	Part.Transparency = 1
 
-    local UpdatedPosition = Mouse.Hit + Vector3.new(0, 5, 0)
+	local UpdatedPosition = Mouse.Hit + Vector3.new(0, 5, 0)
 
-    local function setupNetworkAccess()
-        settings().Physics.AllowSleep = false
-        while RunService.RenderStepped:Wait() do
-            for _, player in ipairs(Players:GetPlayers()) do
-                if player ~= Players.LocalPlayer then
-                    player.MaximumSimulationRadius = 0
-                    sethiddenproperty(player, "SimulationRadius", 0)
-                end
-            end
-            Players.LocalPlayer.MaximumSimulationRadius = math.pow(math.huge, math.huge)
-            setsimulationradius(math.huge)
-        end
-    end
+	local function setupNetworkAccess()
+		settings().Physics.AllowSleep = false
+		while RunService.RenderStepped:Wait() do
+			for _, player in ipairs(Players:GetPlayers()) do
+				if player ~= Players.LocalPlayer then
+					player.MaximumSimulationRadius = 0
+					sethiddenproperty(player, "SimulationRadius", 0)
+				end
+			end
+			Players.LocalPlayer.MaximumSimulationRadius = math.pow(math.huge, math.huge)
+			setsimulationradius(math.huge)
+		end
+	end
 
-    coroutine.wrap(setupNetworkAccess)()
+	coroutine.wrap(setupNetworkAccess)()
 
-    local function applyForceToPart(part)
-        if part:IsA("Part") and not part.Anchored and not part.Parent:FindFirstChild("Humanoid") and not part.Parent:FindFirstChild("Head") and part.Name ~= "Handle" then
-            Mouse.TargetFilter = part
+	local function applyForceToPart(part)
+		if part:IsA("Part") and not part.Anchored and not part.Parent:FindFirstChild("Humanoid") and not part.Parent:FindFirstChild("Head") and part.Name ~= "Handle" then
+			Mouse.TargetFilter = part
 
-            for _, child in ipairs(part:GetChildren()) do
-                if child:IsA("BodyAngularVelocity") or child:IsA("BodyForce") or child:IsA("BodyGyro") or child:IsA("BodyPosition") or child:IsA("BodyThrust") or child:IsA("BodyVelocity") or child:IsA("RocketPropulsion") then
-                    child:Destroy()
-                end
-            end
+			for _, child in ipairs(part:GetChildren()) do
+				if child:IsA("BodyAngularVelocity") or child:IsA("BodyForce") or child:IsA("BodyGyro") or child:IsA("BodyPosition") or child:IsA("BodyThrust") or child:IsA("BodyVelocity") or child:IsA("RocketPropulsion") then
+					child:Destroy()
+				end
+			end
 
-            if part:FindFirstChild("Attachment") then
-                part:FindFirstChild("Attachment"):Destroy()
-            end
-            if part:FindFirstChild("AlignPosition") then
-                part:FindFirstChild("AlignPosition"):Destroy()
-            end
-            if part:FindFirstChild("Torque") then
-                part:FindFirstChild("Torque"):Destroy()
-            end
+			if part:FindFirstChild("Attachment") then
+				part:FindFirstChild("Attachment"):Destroy()
+			end
+			if part:FindFirstChild("AlignPosition") then
+				part:FindFirstChild("AlignPosition"):Destroy()
+			end
+			if part:FindFirstChild("Torque") then
+				part:FindFirstChild("Torque"):Destroy()
+			end
 
-            part.CanCollide = false
+			part.CanCollide = false
 
-            local torque = Instance.new("Torque", part)
-            torque.Torque = Vector3.new(100000, 100000, 100000)
+			local torque = Instance.new("Torque", part)
+			torque.Torque = Vector3.new(100000, 100000, 100000)
 
-            local alignPosition = Instance.new("AlignPosition", part)
-            local attachment2 = Instance.new("Attachment", part)
+			local alignPosition = Instance.new("AlignPosition", part)
+			local attachment2 = Instance.new("Attachment", part)
 
-            torque.Attachment0 = attachment2
-            alignPosition.MaxForce = math.huge
-            alignPosition.MaxVelocity = math.huge
-            alignPosition.Responsiveness = 200
-            alignPosition.Attachment0 = attachment2
-            alignPosition.Attachment1 = Attachment1
-        end
-    end
+			torque.Attachment0 = attachment2
+			alignPosition.MaxForce = math.huge
+			alignPosition.MaxVelocity = math.huge
+			alignPosition.Responsiveness = 200
+			alignPosition.Attachment0 = attachment2
+			alignPosition.Attachment1 = Attachment1
+		end
+	end
 
-    for _, descendant in ipairs(Workspace:GetDescendants()) do
-        applyForceToPart(descendant)
-    end
+	for _, descendant in ipairs(Workspace:GetDescendants()) do
+		applyForceToPart(descendant)
+	end
 
-    Workspace.DescendantAdded:Connect(function(descendant)
-        applyForceToPart(descendant)
-    end)
+	Workspace.DescendantAdded:Connect(function(descendant)
+		applyForceToPart(descendant)
+	end)
 
-    UserInputService.InputBegan:Connect(function(input, isChatting)
-        if input.KeyCode == Enum.KeyCode.E and not isChatting then
-            UpdatedPosition = Mouse.Hit + Vector3.new(0, 5, 0)
-        end
-    end)
+	UserInputService.InputBegan:Connect(function(input, isChatting)
+		if input.KeyCode == Enum.KeyCode.E and not isChatting then
+			UpdatedPosition = Mouse.Hit + Vector3.new(0, 5, 0)
+		end
+	end)
 
-    spawn(function()
-        while RunService.RenderStepped:Wait() do
-            Attachment1.WorldCFrame = UpdatedPosition
-        end
-    end)
+	spawn(function()
+		while RunService.RenderStepped:Wait() do
+			Attachment1.WorldCFrame = UpdatedPosition
+		end
+	end)
 end)
 
 cmd.add({"firetouchinterests", "fti"}, {"firetouchinterests (fti)", "Fires every Touch Interest that's in workspace"}, function()
-    touchInterestCount = 0
+	touchInterestCount = 0
 
-    for _, descendant in ipairs(SafeGetService("Workspace"):GetDescendants()) do
-        if descendant:IsA("TouchTransmitter") then
-            touchInterestCount = touchInterestCount + 1
+	for _, descendant in ipairs(SafeGetService("Workspace"):GetDescendants()) do
+		if descendant:IsA("TouchTransmitter") then
+			touchInterestCount = touchInterestCount + 1
 
-            task.spawn(function()
-                firetouchinterest(getRoot(getChar()), descendant.Parent, 0) -- 0 is touch
-                task.wait()
-                firetouchinterest(getRoot(getChar()), descendant.Parent, 1) -- 1 is untouch
-            end)
+			task.spawn(function()
+				firetouchinterest(getRoot(getChar()), descendant.Parent, 0) -- 0 is touch
+				task.wait()
+				firetouchinterest(getRoot(getChar()), descendant.Parent, 1) -- 1 is untouch
+			end)
 
-            local part = descendant:FindFirstAncestorWhichIsA("BasePart")
-            if part then
-                task.wait()
-                local originalCFrame = part.CFrame
-                part.CFrame = getRoot(getChar()).CFrame
-                task.delay(0.1, function()
-                    part.CFrame = originalCFrame
-                end)
-            end
-        end
-    end
+			local part = descendant:FindFirstAncestorWhichIsA("BasePart")
+			if part then
+				task.wait()
+				local originalCFrame = part.CFrame
+				part.CFrame = getRoot(getChar()).CFrame
+				task.delay(0.1, function()
+					part.CFrame = originalCFrame
+				end)
+			end
+		end
+	end
 
-    wait()
+	wait()
 
-    DoNotif("Fired "..touchInterestCount.." touch interests")
+	DoNotif("Fired "..touchInterestCount.." touch interests")
 end)
 
 local infJump = nil
@@ -9008,99 +9265,99 @@ fbCon, fbCon1, fbCon2, fbCon3, fbCon4 = nil, nil, nil, nil, nil
 nightCon, nightCon1, nightCon2, nightCon3, nightCon4 = nil, nil, nil, nil, nil
 
 cmd.add({"loopfullbright", "loopfb", "lfb"}, {"loopfullbright (loopfb,lfb)", "Sunshiiiine!"}, function()
-    if fbCon then fbCon:Disconnect() end
-    if fbCon1 then fbCon1:Disconnect() end
-    if fbCon2 then fbCon2:Disconnect() end
-    if fbCon3 then fbCon3:Disconnect() end
-    if fbCon4 then fbCon4:Disconnect() end
+	if fbCon then fbCon:Disconnect() end
+	if fbCon1 then fbCon1:Disconnect() end
+	if fbCon2 then fbCon2:Disconnect() end
+	if fbCon3 then fbCon3:Disconnect() end
+	if fbCon4 then fbCon4:Disconnect() end
 
-    Lighting.Brightness = 1
-    Lighting.ClockTime = 12
-    Lighting.FogEnd = 786543
-    Lighting.GlobalShadows = false
-    Lighting.Ambient = Color3.fromRGB(178, 178, 178)
+	Lighting.Brightness = 1
+	Lighting.ClockTime = 12
+	Lighting.FogEnd = 786543
+	Lighting.GlobalShadows = false
+	Lighting.Ambient = Color3.fromRGB(178, 178, 178)
 
-    fbCon = Lighting:GetPropertyChangedSignal("Brightness"):Connect(function()
-        if Lighting.Brightness ~= 1 then
-            Lighting.Brightness = 1
-        end
-    end)
-    fbCon1 = Lighting:GetPropertyChangedSignal("ClockTime"):Connect(function()
-        if Lighting.ClockTime ~= 12 then
-            Lighting.ClockTime = 12
-        end
-    end)
-    fbCon2 = Lighting:GetPropertyChangedSignal("FogEnd"):Connect(function()
-        if Lighting.FogEnd ~= 786543 then
-            Lighting.FogEnd = 786543
-        end
-    end)
-    fbCon3 = Lighting:GetPropertyChangedSignal("GlobalShadows"):Connect(function()
-        if Lighting.GlobalShadows ~= false then
-            Lighting.GlobalShadows = false
-        end
-    end)
-    fbCon4 = Lighting:GetPropertyChangedSignal("Ambient"):Connect(function()
-        if Lighting.Ambient ~= Color3.fromRGB(178, 178, 178) then
-            Lighting.Ambient = Color3.fromRGB(178, 178, 178)
-        end
-    end)
+	fbCon = Lighting:GetPropertyChangedSignal("Brightness"):Connect(function()
+		if Lighting.Brightness ~= 1 then
+			Lighting.Brightness = 1
+		end
+	end)
+	fbCon1 = Lighting:GetPropertyChangedSignal("ClockTime"):Connect(function()
+		if Lighting.ClockTime ~= 12 then
+			Lighting.ClockTime = 12
+		end
+	end)
+	fbCon2 = Lighting:GetPropertyChangedSignal("FogEnd"):Connect(function()
+		if Lighting.FogEnd ~= 786543 then
+			Lighting.FogEnd = 786543
+		end
+	end)
+	fbCon3 = Lighting:GetPropertyChangedSignal("GlobalShadows"):Connect(function()
+		if Lighting.GlobalShadows ~= false then
+			Lighting.GlobalShadows = false
+		end
+	end)
+	fbCon4 = Lighting:GetPropertyChangedSignal("Ambient"):Connect(function()
+		if Lighting.Ambient ~= Color3.fromRGB(178, 178, 178) then
+			Lighting.Ambient = Color3.fromRGB(178, 178, 178)
+		end
+	end)
 end)
 
 cmd.add({"unloopfullbright", "unloopfb", "unlfb"}, {"unloopfullbright (unloopfb,unlfb)", "No more sunshine"}, function()
-    if fbCon then fbCon:Disconnect() end
-    if fbCon1 then fbCon1:Disconnect() end
-    if fbCon2 then fbCon2:Disconnect() end
-    if fbCon3 then fbCon3:Disconnect() end
-    if fbCon4 then fbCon4:Disconnect() end
+	if fbCon then fbCon:Disconnect() end
+	if fbCon1 then fbCon1:Disconnect() end
+	if fbCon2 then fbCon2:Disconnect() end
+	if fbCon3 then fbCon3:Disconnect() end
+	if fbCon4 then fbCon4:Disconnect() end
 end)
 
 cmd.add({"loopnight", "loopn", "ln"}, {"loopnight (loopn,ln)", "Moonlight."}, function()
-    if nightCon then nightCon:Disconnect() end
-    if nightCon1 then nightCon1:Disconnect() end
-    if nightCon2 then nightCon2:Disconnect() end
-    if nightCon3 then nightCon3:Disconnect() end
-    if nightCon4 then nightCon4:Disconnect() end
+	if nightCon then nightCon:Disconnect() end
+	if nightCon1 then nightCon1:Disconnect() end
+	if nightCon2 then nightCon2:Disconnect() end
+	if nightCon3 then nightCon3:Disconnect() end
+	if nightCon4 then nightCon4:Disconnect() end
 
-    Lighting.Brightness = 1
-    Lighting.ClockTime = 0
-    Lighting.FogEnd = 786543
-    Lighting.GlobalShadows = false
-    Lighting.Ambient = Color3.fromRGB(178, 178, 178)
+	Lighting.Brightness = 1
+	Lighting.ClockTime = 0
+	Lighting.FogEnd = 786543
+	Lighting.GlobalShadows = false
+	Lighting.Ambient = Color3.fromRGB(178, 178, 178)
 
-    nightCon = Lighting:GetPropertyChangedSignal("Brightness"):Connect(function()
-        if Lighting.Brightness ~= 1 then
-            Lighting.Brightness = 1
-        end
-    end)
-    nightCon1 = Lighting:GetPropertyChangedSignal("ClockTime"):Connect(function()
-        if Lighting.ClockTime ~= 0 then
-            Lighting.ClockTime = 0
-        end
-    end)
-    nightCon2 = Lighting:GetPropertyChangedSignal("FogEnd"):Connect(function()
-        if Lighting.FogEnd ~= 786543 then
-            Lighting.FogEnd = 786543
-        end
-    end)
-    nightCon3 = Lighting:GetPropertyChangedSignal("GlobalShadows"):Connect(function()
-        if Lighting.GlobalShadows ~= false then
-            Lighting.GlobalShadows = false
-        end
-    end)
-    nightCon4 = Lighting:GetPropertyChangedSignal("Ambient"):Connect(function()
-        if Lighting.Ambient ~= Color3.fromRGB(178, 178, 178) then
-            Lighting.Ambient = Color3.fromRGB(178, 178, 178)
-        end
-    end)
+	nightCon = Lighting:GetPropertyChangedSignal("Brightness"):Connect(function()
+		if Lighting.Brightness ~= 1 then
+			Lighting.Brightness = 1
+		end
+	end)
+	nightCon1 = Lighting:GetPropertyChangedSignal("ClockTime"):Connect(function()
+		if Lighting.ClockTime ~= 0 then
+			Lighting.ClockTime = 0
+		end
+	end)
+	nightCon2 = Lighting:GetPropertyChangedSignal("FogEnd"):Connect(function()
+		if Lighting.FogEnd ~= 786543 then
+			Lighting.FogEnd = 786543
+		end
+	end)
+	nightCon3 = Lighting:GetPropertyChangedSignal("GlobalShadows"):Connect(function()
+		if Lighting.GlobalShadows ~= false then
+			Lighting.GlobalShadows = false
+		end
+	end)
+	nightCon4 = Lighting:GetPropertyChangedSignal("Ambient"):Connect(function()
+		if Lighting.Ambient ~= Color3.fromRGB(178, 178, 178) then
+			Lighting.Ambient = Color3.fromRGB(178, 178, 178)
+		end
+	end)
 end)
 
 cmd.add({"unloopnight", "unloopn", "unln"}, {"unloopnight (unloopn,unln)", "No more moonlight."}, function()
-    if nightCon then nightCon:Disconnect() end
-    if nightCon1 then nightCon1:Disconnect() end
-    if nightCon2 then nightCon2:Disconnect() end
-    if nightCon3 then nightCon3:Disconnect() end
-    if nightCon4 then nightCon4:Disconnect() end
+	if nightCon then nightCon:Disconnect() end
+	if nightCon1 then nightCon1:Disconnect() end
+	if nightCon2 then nightCon2:Disconnect() end
+	if nightCon3 then nightCon3:Disconnect() end
+	if nightCon4 then nightCon4:Disconnect() end
 end)
 
 fogLoop=nil
@@ -9642,144 +9899,144 @@ cmd.add({"fpscap"},{"fpscap <number>","Sets the fps cap to whatever you want"},f
 end,true)
 
 cmd.add({"toolinvisible", "tinvis"}, {"toolinvisible (tinvis)", "Be invisible while still being able to use tools"}, function()
-    local offset = 1100
-    invisible = false
-    local grips = {}
-    local heldTool
-    local gripChanged
-    local handle
-    local weld
+	local offset = 1100
+	invisible = false
+	local grips = {}
+	local heldTool
+	local gripChanged
+	local handle
+	local weld
 	HH = getChar().Humanoid.HipHeight
 
-    function setDisplayDistance(distance)
-        for _, player in pairs(Players:GetPlayers()) do
-            if player.Character and player.Character:FindFirstChildWhichIsA("Humanoid") then
-                player.Character:FindFirstChildWhichIsA("Humanoid").NameDisplayDistance = distance
-                player.Character:FindFirstChildWhichIsA("Humanoid").HealthDisplayDistance = distance
-            end
-        end
-    end
+	function setDisplayDistance(distance)
+		for _, player in pairs(Players:GetPlayers()) do
+			if player.Character and player.Character:FindFirstChildWhichIsA("Humanoid") then
+				player.Character:FindFirstChildWhichIsA("Humanoid").NameDisplayDistance = distance
+				player.Character:FindFirstChildWhichIsA("Humanoid").HealthDisplayDistance = distance
+			end
+		end
+	end
 
-    local tool = Instance.new("Tool", Players.LocalPlayer.Backpack)
-    tool.Name = "Turn Invisible"
-    tool.RequiresHandle = false
-    tool.CanBeDropped = false
+	local tool = Instance.new("Tool", Players.LocalPlayer.Backpack)
+	tool.Name = "Turn Invisible"
+	tool.RequiresHandle = false
+	tool.CanBeDropped = false
 
-    tool.Equipped:Connect(function()
-        wait()
-        if not invisible then
-            invisible = true
-            tool.Name = "Visible Enabled"
+	tool.Equipped:Connect(function()
+		wait()
+		if not invisible then
+			invisible = true
+			tool.Name = "Visible Enabled"
 
-            if handle then
-                handle:Destroy()
-            end
-            if weld then
-                weld:Destroy()
-            end
+			if handle then
+				handle:Destroy()
+			end
+			if weld then
+				weld:Destroy()
+			end
 
-            handle = Instance.new("Part", SafeGetService("Workspace"))
-            handle.Name = "Handle"
-            handle.Transparency = 1
-            handle.CanCollide = false
-            handle.Size = Vector3.new(2, 1, 1)
+			handle = Instance.new("Part", SafeGetService("Workspace"))
+			handle.Name = "Handle"
+			handle.Transparency = 1
+			handle.CanCollide = false
+			handle.Size = Vector3.new(2, 1, 1)
 
-            weld = Instance.new("Weld", handle)
-            weld.Part0 = handle
-            weld.Part1 = getRoot(getChar())
-            weld.C0 = CFrame.new(0, offset - 1.5, 0)
+			weld = Instance.new("Weld", handle)
+			weld.Part0 = handle
+			weld.Part1 = getRoot(getChar())
+			weld.C0 = CFrame.new(0, offset - 1.5, 0)
 
-            setDisplayDistance(offset + 100)
-            SafeGetService("Workspace").CurrentCamera.CameraSubject = handle
-            getRoot(getChar()).CFrame = getRoot(getChar()).CFrame * CFrame.new(0, offset, 0)
-            getChar().Humanoid.HipHeight = offset
-            getChar().Humanoid:ChangeState(11)
+			setDisplayDistance(offset + 100)
+			SafeGetService("Workspace").CurrentCamera.CameraSubject = handle
+			getRoot(getChar()).CFrame = getRoot(getChar()).CFrame * CFrame.new(0, offset, 0)
+			getChar().Humanoid.HipHeight = offset
+			getChar().Humanoid:ChangeState(11)
 
-            for _, child in pairs(Players.LocalPlayer.Backpack:GetChildren()) do
-                if child:IsA("Tool") and child ~= tool then
-                    grips[child] = child.Grip
-                end
-            end
+			for _, child in pairs(Players.LocalPlayer.Backpack:GetChildren()) do
+				if child:IsA("Tool") and child ~= tool then
+					grips[child] = child.Grip
+				end
+			end
 			if getHum() then
 				getHum():SetStateEnabled("Seated", false)
 				getHum().Sit = true
 			end
-        else
-            invisible = false
-            tool.Name = "Visible Disabled"
+		else
+			invisible = false
+			tool.Name = "Visible Disabled"
 
-            if handle then
-                handle:Destroy()
-            end
-            if weld then
-                weld:Destroy()
-            end
+			if handle then
+				handle:Destroy()
+			end
+			if weld then
+				weld:Destroy()
+			end
 
-            for _, child in pairs(getChar():GetChildren()) do
-                if child:IsA("Tool") then
-                    child.Parent = Players.LocalPlayer.Backpack
-                end
-            end
+			for _, child in pairs(getChar():GetChildren()) do
+				if child:IsA("Tool") then
+					child.Parent = Players.LocalPlayer.Backpack
+				end
+			end
 
-            for tool, grip in pairs(grips) do
-                if tool then
-                    tool.Grip = grip
-                end
-            end
+			for tool, grip in pairs(grips) do
+				if tool then
+					tool.Grip = grip
+				end
+			end
 
-            heldTool = nil
-            setDisplayDistance(100)
-            SafeGetService("Workspace").CurrentCamera.CameraSubject = getChar().Humanoid
-            getRoot(getChar()).CFrame = getRoot(getChar()).CFrame * CFrame.new(0, -offset, 0)
-            getChar().Humanoid.HipHeight = HH
+			heldTool = nil
+			setDisplayDistance(100)
+			SafeGetService("Workspace").CurrentCamera.CameraSubject = getChar().Humanoid
+			getRoot(getChar()).CFrame = getRoot(getChar()).CFrame * CFrame.new(0, -offset, 0)
+			getChar().Humanoid.HipHeight = HH
 
 			if getHum() then
 				getHum():SetStateEnabled("Seated", true)
 				getHum().Sit = false
 			end
-        end
+		end
 
-        tool.Parent = Players.LocalPlayer.Backpack
-    end)
+		tool.Parent = Players.LocalPlayer.Backpack
+	end)
 
-    getChar().ChildAdded:Connect(function(child)
-        wait()
-        if invisible and child:IsA("Tool") and child ~= heldTool and child ~= tool then
-            heldTool = child
-            local lastGrip = heldTool.Grip
+	getChar().ChildAdded:Connect(function(child)
+		wait()
+		if invisible and child:IsA("Tool") and child ~= heldTool and child ~= tool then
+			heldTool = child
+			local lastGrip = heldTool.Grip
 
-            if not grips[heldTool] then
-                grips[heldTool] = lastGrip
-            end
+			if not grips[heldTool] then
+				grips[heldTool] = lastGrip
+			end
 
-            for _, track in pairs(getChar().Humanoid:GetPlayingAnimationTracks()) do
-                track:Stop()
-            end
+			for _, track in pairs(getChar().Humanoid:GetPlayingAnimationTracks()) do
+				track:Stop()
+			end
 
-            getChar().Animate.Disabled = true
-            heldTool.Grip = heldTool.Grip * (CFrame.new(0, offset - 1.5, 1.5) * CFrame.Angles(math.rad(-90), 0, 0))
-            heldTool.Parent = Players.LocalPlayer.Backpack
-            heldTool.Parent = getChar()
+			getChar().Animate.Disabled = true
+			heldTool.Grip = heldTool.Grip * (CFrame.new(0, offset - 1.5, 1.5) * CFrame.Angles(math.rad(-90), 0, 0))
+			heldTool.Parent = Players.LocalPlayer.Backpack
+			heldTool.Parent = getChar()
 
-            if gripChanged then
-                gripChanged:Disconnect()
-            end
+			if gripChanged then
+				gripChanged:Disconnect()
+			end
 
-            gripChanged = heldTool:GetPropertyChangedSignal("Grip"):Connect(function()
-                wait()
-                if not invisible then
-                    gripChanged:Disconnect()
-                end
+			gripChanged = heldTool:GetPropertyChangedSignal("Grip"):Connect(function()
+				wait()
+				if not invisible then
+					gripChanged:Disconnect()
+				end
 
-                if heldTool.Grip ~= lastGrip then
-                    lastGrip = heldTool.Grip * (CFrame.new(0, offset - 1.5, 1.5) * CFrame.Angles(math.rad(-90), 0, 0))
-                    heldTool.Grip = lastGrip
-                    heldTool.Parent = Players.LocalPlayer.Backpack
-                    heldTool.Parent = getChar()
-                end
-            end)
-        end
-    end)
+				if heldTool.Grip ~= lastGrip then
+					lastGrip = heldTool.Grip * (CFrame.new(0, offset - 1.5, 1.5) * CFrame.Angles(math.rad(-90), 0, 0))
+					heldTool.Grip = lastGrip
+					heldTool.Parent = Players.LocalPlayer.Backpack
+					heldTool.Parent = getChar()
+				end
+			end)
+		end
+	end)
 end)
 
 invisBtnlol = nil
@@ -9789,142 +10046,142 @@ InvisibleCharacter = nil
 OriginalPosition = nil
 
 cmd.add({"invisible", "invis"}, {"invisible (invis)", "Sets invisibility to scare people or something"}, function()
-    local Keybind = Enum.KeyCode.E
-    local UIS = UserInputService
-    local Player = Players.LocalPlayer
-    local Character = Player.Character or Player.CharacterAdded:Wait()
-    Character.Archivable = true
+	local Keybind = Enum.KeyCode.E
+	local UIS = UserInputService
+	local Player = Players.LocalPlayer
+	local Character = Player.Character or Player.CharacterAdded:Wait()
+	Character.Archivable = true
 	OriginalPosition = getRoot(Character).CFrame
 
-    local function TurnVisible()
-        if not IsInvis then return end
-        IsInvis = false
+	local function TurnVisible()
+		if not IsInvis then return end
+		IsInvis = false
 		OriginalPosition = getRoot(InvisibleCharacter).CFrame
-        if invisKeybindConnection then
-            invisKeybindConnection:Disconnect()
-            invisKeybindConnection = nil
-        end
-        if invisBtnlol then
-            invisBtnlol:Destroy()
-            invisBtnlol = nil
-        end
-        if InvisibleCharacter then
-            InvisibleCharacter:Destroy()
-            InvisibleCharacter = nil
-        end
-        Player.Character = Character
+		if invisKeybindConnection then
+			invisKeybindConnection:Disconnect()
+			invisKeybindConnection = nil
+		end
+		if invisBtnlol then
+			invisBtnlol:Destroy()
+			invisBtnlol = nil
+		end
+		if InvisibleCharacter then
+			InvisibleCharacter:Destroy()
+			InvisibleCharacter = nil
+		end
+		Player.Character = Character
 		getRoot(Player.Character).CFrame=OriginalPosition
-        Character.Parent = SafeGetService("Workspace")
-        DoNotif("Invisibility has been turned off.")
+		Character.Parent = SafeGetService("Workspace")
+		DoNotif("Invisibility has been turned off.")
 		StarterGui:SetCore("ResetButtonCallback", true)
-    end
+	end
 
-    local function ToggleInvisibility()
-        if not IsInvis then
-            IsInvis = true
-            InvisibleCharacter = Character:Clone()
-            InvisibleCharacter.Parent = SafeGetService("Workspace")
-            for _, v in pairs(InvisibleCharacter:GetDescendants()) do
-                if v:IsA("BasePart") then
-                    v.Transparency = v.Name:lower() == "humanoidrootpart" and 1 or 0.5
-                end
-            end
-            local root = getRoot(Character)
-            if root then
-                OriginalPosition = root.CFrame
-                root.CFrame = CFrame.new(0, 10000, 0)
-            end
-            wait(0.5)
-            Character.Parent = Lighting
-            if OriginalPosition then
-                local invisRoot = getRoot(InvisibleCharacter)
-                if invisRoot then
-                    invisRoot.CFrame = OriginalPosition
-                end
-            end
-            Player.Character = InvisibleCharacter
-            SafeGetService("Workspace").CurrentCamera.CameraSubject = InvisibleCharacter:FindFirstChildWhichIsA("Humanoid")
-            DoNotif("You are now invisible.")
+	local function ToggleInvisibility()
+		if not IsInvis then
+			IsInvis = true
+			InvisibleCharacter = Character:Clone()
+			InvisibleCharacter.Parent = SafeGetService("Workspace")
+			for _, v in pairs(InvisibleCharacter:GetDescendants()) do
+				if v:IsA("BasePart") then
+					v.Transparency = v.Name:lower() == "humanoidrootpart" and 1 or 0.5
+				end
+			end
+			local root = getRoot(Character)
+			if root then
+				OriginalPosition = root.CFrame
+				root.CFrame = CFrame.new(0, 10000, 0)
+			end
+			wait(0.5)
+			Character.Parent = Lighting
+			if OriginalPosition then
+				local invisRoot = getRoot(InvisibleCharacter)
+				if invisRoot then
+					invisRoot.CFrame = OriginalPosition
+				end
+			end
+			Player.Character = InvisibleCharacter
+			SafeGetService("Workspace").CurrentCamera.CameraSubject = InvisibleCharacter:FindFirstChildWhichIsA("Humanoid")
+			DoNotif("You are now invisible.")
 			StarterGui:SetCore("ResetButtonCallback", false)
-        else
-            TurnVisible()
-        end
-    end
+		else
+			TurnVisible()
+		end
+	end
 
-    invisKeybindConnection = UIS.InputBegan:Connect(function(input, gameProcessed)
-        if input.UserInputType == Enum.UserInputType.Keyboard and input.KeyCode == Keybind and not gameProcessed then
-            ToggleInvisibility()
-        end
-    end)
+	invisKeybindConnection = UIS.InputBegan:Connect(function(input, gameProcessed)
+		if input.UserInputType == Enum.UserInputType.Keyboard and input.KeyCode == Keybind and not gameProcessed then
+			ToggleInvisibility()
+		end
+	end)
 
-    local humanoid = Character:FindFirstChild("Humanoid")
-    if humanoid then
-        humanoid.Died:Connect(function()
-            TurnVisible()
-        end)
-    end
+	local humanoid = Character:FindFirstChild("Humanoid")
+	if humanoid then
+		humanoid.Died:Connect(function()
+			TurnVisible()
+		end)
+	end
 
-    if IsOnMobile then
-        if invisBtnlol then invisBtnlol:Destroy() invisBtnlol = nil end
-        invisBtnlol = Instance.new("ScreenGui")
-        local TextButton = Instance.new("TextButton")
-        local UICorner = Instance.new("UICorner")
-        local UIAspectRatioConstraint = Instance.new("UIAspectRatioConstraint")
+	if IsOnMobile then
+		if invisBtnlol then invisBtnlol:Destroy() invisBtnlol = nil end
+		invisBtnlol = Instance.new("ScreenGui")
+		local TextButton = Instance.new("TextButton")
+		local UICorner = Instance.new("UICorner")
+		local UIAspectRatioConstraint = Instance.new("UIAspectRatioConstraint")
 
-        invisBtnlol.Parent = COREGUI
-        invisBtnlol.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+		invisBtnlol.Parent = (gethui and gethui()) or (CoreGui or PlrGui)
+		invisBtnlol.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
-        TextButton.Parent = invisBtnlol
-        TextButton.BackgroundColor3 = Color3.fromRGB(12, 4, 20)
-        TextButton.BackgroundTransparency = 0.14
-        TextButton.Position = UDim2.new(0.9, 0, 0.8, 0)
-        TextButton.Size = UDim2.new(0.1, 0, 0.1, 0)
-        TextButton.Font = Enum.Font.SourceSansBold
-        TextButton.Text = "Invisible"
-        TextButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-        TextButton.TextSize = 15
-        TextButton.TextWrapped = true
-        TextButton.Active = true
-        TextButton.TextScaled = true
+		TextButton.Parent = invisBtnlol
+		TextButton.BackgroundColor3 = Color3.fromRGB(12, 4, 20)
+		TextButton.BackgroundTransparency = 0.14
+		TextButton.Position = UDim2.new(0.9, 0, 0.8, 0)
+		TextButton.Size = UDim2.new(0.1, 0, 0.1, 0)
+		TextButton.Font = Enum.Font.SourceSansBold
+		TextButton.Text = "Invisible"
+		TextButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+		TextButton.TextSize = 15
+		TextButton.TextWrapped = true
+		TextButton.Active = true
+		TextButton.TextScaled = true
 
-        UICorner.Parent = TextButton
-        UIAspectRatioConstraint.Parent = TextButton
-        UIAspectRatioConstraint.AspectRatio = 1.0
+		UICorner.Parent = TextButton
+		UIAspectRatioConstraint.Parent = TextButton
+		UIAspectRatioConstraint.AspectRatio = 1.0
 
-        gui.draggable(TextButton)
+		gui.draggable(TextButton)
 
-        MouseButtonFix(TextButton,function()
-            ToggleInvisibility()
-            TextButton.Text = IsInvis and "Visible" or "Invisible"
-        end)
-    end
+		MouseButtonFix(TextButton,function()
+			ToggleInvisibility()
+			TextButton.Text = IsInvis and "Visible" or "Invisible"
+		end)
+	end
 
-    wait()
-    DoNotif("Invisible loaded, press "..Keybind.Name.." to toggle or use the mobile button.")
+	wait()
+	DoNotif("Invisible loaded, press "..Keybind.Name.." to toggle or use the mobile button.")
 end)
 
 cmd.add({"fireremotes", "fremotes", "frem"}, {"fireremotes (fremotes, frem)", "Fires every remote"}, function()
-    remoteCount = 0
+	remoteCount = 0
 
-    for _, descendant in ipairs(game:GetDescendants()) do
-        if not descendant:IsDescendantOf(COREGUI) then
-            NACaller(function()
-                if descendant:IsA("RemoteEvent") then
-                    pcall(function()
-                        descendant:FireServer()
-                    end)
-                    remoteCount = remoteCount + 1
-                elseif descendant:IsA("RemoteFunction") then
-                    pcall(function()
-                        descendant:InvokeServer()
-                    end)
-                    remoteCount = remoteCount + 1
-                end
-            end)
-        end
-    end
+	for _, descendant in ipairs(game:GetDescendants()) do
+		if not descendant:IsDescendantOf(COREGUI) then
+			NACaller(function()
+				if descendant:IsA("RemoteEvent") then
+					pcall(function()
+						descendant:FireServer()
+					end)
+					remoteCount = remoteCount + 1
+				elseif descendant:IsA("RemoteFunction") then
+					pcall(function()
+						descendant:InvokeServer()
+					end)
+					remoteCount = remoteCount + 1
+				end
+			end)
+		end
+	end
 
-    DoNotif("Fired "..remoteCount.." remotes")
+	DoNotif("Fired "..remoteCount.." remotes")
 end)
 
 local fovcon = nil
@@ -10079,9 +10336,9 @@ localPlayer.Chatted:Connect(function(str)
 end)
 
 --[[ Admin Player]]
-function IsAdminAndRun(Message,Player)
+function IsAdminAndRun(Message, Player)
 	if Admin[Player.UserId] or isRelAdmin(Player) then
-		lib.parseCommand(Message,Player)
+		lib.parseCommand(Message, Player)
 	end
 end
 
@@ -10449,11 +10706,11 @@ gui.draggable=function(ui, dragui)
 		local delta = input.Position - dragStart
 		local newXOffset = startPos.X.Offset + delta.X
 		local newYOffset = startPos.Y.Offset + delta.Y
-		
+
 		local screenSize = ui.Parent.AbsoluteSize
 		local newXScale = startPos.X.Scale + (newXOffset / screenSize.X)
 		local newYScale = startPos.Y.Scale + (newYOffset / screenSize.Y)
-	
+
 		ui.Position = UDim2.new(newXScale, 0, newYScale, 0)
 	end
 
@@ -11212,7 +11469,7 @@ NACaller(function()
 end)
 
 CaptureService.CaptureBegan:Connect(function()
-    if NAimageButton then
+	if NAimageButton then
 		NAimageButton.Visible=false
 	elseif Info then
 		Info.Visible=false
@@ -11222,7 +11479,7 @@ CaptureService.CaptureBegan:Connect(function()
 end)
 
 CaptureService.CaptureEnded:Connect(function()
-    task.delay(0.1, function()
+	task.delay(0.1, function()
 		if NAimageButton then
 			NAimageButton.Visible=true
 		elseif Info then
@@ -11230,7 +11487,7 @@ CaptureService.CaptureEnded:Connect(function()
 		elseif Info2 then
 			Info2.Visible=true
 		end
-    end)
+	end)
 end)
 
 print([[
@@ -11262,7 +11519,7 @@ end)
 task.spawn(function()
 	while task.wait(1) do
 		local currentTime = os.date("%H:%M:%S")
-        Info2.Text = "Updated On: "..updDate.."\nCurrent Time: "..currentTime
+		Info2.Text = "Updated On: "..updDate.."\nCurrent Time: "..currentTime
 	end
 end)
 
