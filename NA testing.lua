@@ -1348,10 +1348,12 @@ lib.parseText = function(text, watch, rPlr)
 	if not text then return nil end
 	local prefix
 	if rPlr then
-		if isRelAdmin(rPlr) then
+		if isRelAdmin(rPlr) and isRelAdmin(Players.LocalPlayer) then
 			return nil
-		else
+		elseif not isRelAdmin(rPlr) then
 			prefix = ";"
+		else
+			prefix = watch
 		end
 		watch = prefix
 	else
@@ -1373,18 +1375,21 @@ lib.parseText = function(text, watch, rPlr)
 	return parsed
 end
 
-lib.parseCommand=function(text,rPlr)
+lib.parseCommand = function(text, rPlr)
 	wrap(function()
 		local commands
 		if rPlr then
-			commands=lib.parseText(text,opt.prefix,rPlr)
+			if isRelAdmin(rPlr) and isRelAdmin(Players.LocalPlayer) then
+				return
+			end
+			commands = lib.parseText(text, opt.prefix, rPlr)
 		else
-			commands=lib.parseText(text,opt.prefix)
+			commands = lib.parseText(text, opt.prefix)
 		end
-		for _,parsed in pairs(commands) do
-			local args={}
+		for _, parsed in pairs(commands) do
+			local args = {}
 			for arg in parsed:gmatch("[^ ]+") do
-				table.insert(args,arg)
+				table.insert(args, arg)
 			end
 			cmd.run(args)
 		end
