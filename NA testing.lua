@@ -784,7 +784,7 @@ end
 
 --[[ FUNCTION TO GET A PLAYER ]]--
 getPlr = function(Name)
-	local Players = Players
+	local Players = game:GetService("Players")
 	local LocalPlayer = Players.LocalPlayer
 
 	if not Name or Name == "" or Name:lower() == "me" then
@@ -846,9 +846,9 @@ getPlr = function(Name)
 	else
 		Name = Name:lower():gsub("%s", "")
 		for _, plr in ipairs(Players:GetPlayers()) do
-			if plr.Name:lower():match(Name) then
+			if plr.Name:lower():match("^" .. Name) then
 				return plr
-			elseif plr.DisplayName:lower():match("^"..Name) then
+			elseif plr.DisplayName:lower():match("^" .. Name) then
 				return plr
 			end
 		end
