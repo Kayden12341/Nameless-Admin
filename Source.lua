@@ -8766,48 +8766,61 @@ cmd.add({"firetouchinterests", "fti"}, {"firetouchinterests (fti)", "Fires every
     DoNotif("Fired "..touchInterestCount.." touch interests")
 end)
 
-local infJump=nil
-local jumpFixy=nil
+local infJump = nil
+local jumpFixy = nil
 
-cmd.add({"infjump","infinitejump"},{"infjump (infinitejump)","Makes you be able to jump infinitly"},function()
-
-	wait();
+cmd.add({"infjump", "infinitejump"}, {"infjump (infinitejump)", "Makes you be able to jump infinitely"}, function()
+	wait()
 
 	DoNotif("Infinite Jump Enabled")
 
-	local r=0
-	local d=0.25
+	local lastJumpTime = 0
+	local jumpCooldown = 0.25
 
-	function fix()
-		if infJump then infJump:Disconnect() infJump = nil end
+	local function fix()
+		if infJump then
+			infJump:Disconnect()
+			infJump = nil
+		end
 
-		hum = getHum()
+		local hum = getHum()
 		if not hum then
 			local char = plr.Character or plr.CharacterAdded:Wait()
 			hum = char:WaitForChild("Humanoid")
 		end
 
-		infJump = humanoid:GetPropertyChangedSignal("Jump"):Connect(function()
-			if tick() - r > d then
-				r = tick()
-				humanoid:ChangeState("Jumping")
+		infJump = hum:GetPropertyChangedSignal("Jump"):Connect(function()
+			if tick() - lastJumpTime > jumpCooldown then
+				lastJumpTime = tick()
+				hum:ChangeState(Enum.HumanoidStateType.Jumping)
 			end
 		end)
 	end
 
 	fix()
 
-	if jumpFixy then jumpFixy:Disconnect() jumpFixy=nil end
-	jumpFixy=plr.CharacterAdded:Connect(fix)
+	if jumpFixy then
+		jumpFixy:Disconnect()
+		jumpFixy = nil
+	end
+
+	jumpFixy = plr.CharacterAdded:Connect(fix)
 end)
 
-cmd.add({"uninfjump","uninfinitejump"},{"uninfjump (uninfinitejump)","Makes you NOT be able to infinitly jump"},function()
-	wait();
+cmd.add({"uninfjump", "uninfinitejump"}, {"uninfjump (uninfinitejump)", "Makes you NOT be able to infinitely jump"}, function()
+	wait()
 
-	DoNotif("Infinite Jump Disabled",3)
+	DoNotif("Infinite Jump Disabled", 3)
 
-	if infJump then infJump:Disconnect() infJump=nil end
-	if jumpFixy then jumpFixy:Disconnect() jumpFixy=nil end
+	if infJump then
+		infJump:Disconnect()
+		infJump = nil
+	end
+
+	if jumpFixy then
+		jumpFixy:Disconnect()
+		jumpFixy = nil
+	end
 end)
 
 local flyjump=nil
