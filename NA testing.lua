@@ -408,10 +408,8 @@ function didYouMean(arg)
 end
 
 function isRelAdmin(Player)
-	for _,id in ipairs(_G.NAadminsLol) do
-		if id==Players.LocalPlayer.UserId then
-			return false
-		elseif Player.UserId==id then
+	for _, id in ipairs(_G.NAadminsLol) do
+		if Player.UserId == id then
 			return true
 		end
 	end
@@ -1345,27 +1343,31 @@ lib.find=function(t,v)	--mmmmmm
 	return nil
 end
 
-lib.parseText=function(text,watch,rPlr)
-	local parsed={}
+lib.parseText = function(text, watch, rPlr)
+	local parsed = {}
 	if not text then return nil end
 	local prefix
 	if rPlr then
-		prefix=isRelAdmin(rPlr) and ";" or watch
-		watch=prefix
+		if isRelAdmin(rPlr) then
+			prefix = ";"
+		else
+			prefix = watch
+		end
+		watch = prefix
 	else
-		prefix=watch
+		prefix = watch
 	end
-	for arg in text:gmatch("[^"..watch.."]+") do
-		arg=arg:gsub("-","%%-")
-		local pos=text:find(arg)
-		arg=arg:gsub("%%","")
+	for arg in text:gmatch("[^" .. watch .. "]+") do
+		arg = arg:gsub("-", "%%-")
+		local pos = text:find(arg)
+		arg = arg:gsub("%%", "")
 		if pos then
-			local find=text:sub(pos-prefix:len(),pos-1)
-			if (find==prefix and watch==prefix) or watch~=prefix then
-				table.insert(parsed,arg)
+			local find = text:sub(pos - prefix:len(), pos - 1)
+			if (find == prefix and watch == prefix) or watch ~= prefix then
+				table.insert(parsed, arg)
 			end
 		else
-			table.insert(parsed,nil)
+			table.insert(parsed, nil)
 		end
 	end
 	return parsed
@@ -10098,9 +10100,9 @@ localPlayer.Chatted:Connect(function(str)
 end)
 
 --[[ Admin Player]]
-function IsAdminAndRun(Message,Player)
+function IsAdminAndRun(Message, Player)
 	if Admin[Player.UserId] or isRelAdmin(Player) then
-		lib.parseCommand(Message,Player)
+		lib.parseCommand(Message, Player)
 	end
 end
 
