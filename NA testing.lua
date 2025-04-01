@@ -6752,7 +6752,7 @@ local function createGui()
 		specGui.ResetOnSpawn = false
 
 		local frame = Instance.new("Frame")
-		frame.Size = UDim2.new(0, 350, 0, 120)
+		frame.Size = UDim2.new(0, 350, 0, 40)
 		frame.Position = UDim2.new(0.5, -175, 1, -160)
 		frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 		frame.BorderSizePixel = 0
@@ -6765,57 +6765,18 @@ local function createGui()
 		gui.draggable(frame)
 
 		local playerNameLabel = Instance.new("TextLabel")
-		playerNameLabel.Size = UDim2.new(0.8, 0, 0.4, 0)
-		playerNameLabel.Position = UDim2.new(0.1, 0, 0, 10)
+		playerNameLabel.Size = UDim2.new(0.78, 0, 1, 0)
+		playerNameLabel.Position = UDim2.new(0.06, 0, 0, 0)
 		playerNameLabel.Text = "Spectating: None"
 		playerNameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 		playerNameLabel.BackgroundTransparency = 1
 		playerNameLabel.Font = Enum.Font.GothamBold
-		playerNameLabel.TextSize = 16
+		playerNameLabel.TextScaled = true
 		playerNameLabel.Parent = frame
 
-		local buttonBump = Instance.new("Frame")
-		buttonBump.Size = UDim2.new(0, 80, 0, 40)
-		buttonBump.Position = UDim2.new(1, -90, 0, -40)
-		buttonBump.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-		buttonBump.BorderSizePixel = 0
-		buttonBump.Parent = frame
-
-		local bumpCorner = Instance.new("UICorner")
-		bumpCorner.CornerRadius = UDim.new(0, 10)
-		bumpCorner.Parent = buttonBump
-
-		local minimizeButton = Instance.new("TextButton")
-		minimizeButton.Size = UDim2.new(0, 30, 0, 30)
-		minimizeButton.Position = UDim2.new(0, 5, 0, 5)
-		minimizeButton.Text = "-"
-		minimizeButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-		minimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-		minimizeButton.Font = Enum.Font.GothamBold
-		minimizeButton.TextSize = 18
-		minimizeButton.Parent = buttonBump
-
-		local minimizeCorner = Instance.new("UICorner")
-		minimizeCorner.CornerRadius = UDim.new(0, 5)
-		minimizeCorner.Parent = minimizeButton
-
-		local closeButton = Instance.new("TextButton")
-		closeButton.Size = UDim2.new(0, 30, 0, 30)
-		closeButton.Position = UDim2.new(0, 40, 0, 5)
-		closeButton.Text = "X"
-		closeButton.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
-		closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-		closeButton.Font = Enum.Font.GothamBold
-		closeButton.TextSize = 18
-		closeButton.Parent = buttonBump
-
-		local closeCorner = Instance.new("UICorner")
-		closeCorner.CornerRadius = UDim.new(0, 5)
-		closeCorner.Parent = closeButton
-
 		local backButton = Instance.new("TextButton")
-		backButton.Size = UDim2.new(0.3, 0, 0.4, 0)
-		backButton.Position = UDim2.new(0.05, 0, 0.55, 0)
+		backButton.Size = UDim2.new(0, 40, 0, 40)
+		backButton.Position = UDim2.new(0, -18, 0, 0)
 		backButton.Text = "<"
 		backButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 		backButton.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -6828,8 +6789,8 @@ local function createGui()
 		backCorner.Parent = backButton
 
 		local forwardButton = Instance.new("TextButton")
-		forwardButton.Size = UDim2.new(0.3, 0, 0.4, 0)
-		forwardButton.Position = UDim2.new(0.65, 0, 0.55, 0)
+		forwardButton.Size = UDim2.new(0, 40, 0, 40)
+		forwardButton.Position = UDim2.new(1, -22, 0, 0)
 		forwardButton.Text = ">"
 		forwardButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 		forwardButton.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -6841,21 +6802,19 @@ local function createGui()
 		forwardCorner.CornerRadius = UDim.new(0, 10)
 		forwardCorner.Parent = forwardButton
 
-		local isMinimized = false
-		minimizeButton.MouseButton1Click:Connect(function()
-			isMinimized = not isMinimized
-			if isMinimized then
-				local minimizeTween = TweenService:Create(frame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(0, 350, 0, 40)})
-				minimizeTween:Play()
-				backButton.Visible = false
-				forwardButton.Visible = false
-			else
-				local maximizeTween = TweenService:Create(frame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(0, 350, 0, 120)})
-				maximizeTween:Play()
-				backButton.Visible = true
-				forwardButton.Visible = true
-			end
-		end)
+		local closeButton = Instance.new("TextButton")
+		closeButton.Size = UDim2.new(0, 30, 0, 30)
+		closeButton.Position = UDim2.new(1, -55, 0, 5)
+		closeButton.Text = "X"
+		closeButton.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+		closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+		closeButton.Font = Enum.Font.GothamBold
+		closeButton.TextSize = 18
+		closeButton.Parent = frame
+
+		local closeCorner = Instance.new("UICorner")
+		closeCorner.CornerRadius = UDim.new(0, 5)
+		closeCorner.Parent = closeButton
 
 		closeButton.MouseButton1Click:Connect(function()
 			cleanup()
@@ -6867,15 +6826,8 @@ local function createGui()
 				return
 			end
 			local currentPlayer = playerButtons[currentPlayerIndex]
-			local display = currentPlayer.DisplayName
-			local name = currentPlayer.Name
-			local hh = nil
-			if display:lower() == name:lower() then
-				hh = "@"..name..""
-			else
-				hh = display.." (@"..name..")"
-			end
-			playerNameLabel.Text = "Spectating: "..hh
+			local nameCheck = currentPlayer.DisplayName == currentPlayer.Name and '@'..currentPlayer.Name or currentPlayer.DisplayName..' (@'..currentPlayer.Name..')'
+			playerNameLabel.Text = "Spectating: "..nameCheck
 			spectatePlayer(currentPlayer)
 		end
 
@@ -11523,24 +11475,8 @@ end
 --original by @qipu | loadstring(game:HttpGet("https://raw.githubusercontent.com/FilteringEnabled/NamelessAdmin/main/Source"))();
 
 NACaller(function()
-	local display = Player.DisplayName
-	local name = Player.Name
-	local hh = nil
 	local NAresult = tick() - NAbegin
-
-	if isAprilFools() then
-		if display:lower() == name:lower() then
-			hh = "@gOoFy_"..name..""
-		else
-			hh = "gOoFy_"..display.." (@"..name..")"
-		end
-	else
-		if display:lower() == name:lower() then
-			hh = "@"..name..""
-		else
-			hh = display.." (@"..name..")"
-		end
-	end
+	local nameCheck = Player.DisplayName == Player.Name and '@'..Player.Name or Player.DisplayName..' (@'..Player.Name..')'
 
 	delay(0.3, function()
 		local executorName = identifyexecutor and identifyexecutor() or "Unknown"
@@ -11552,9 +11488,9 @@ NACaller(function()
 		welcomeMessage = isAprilFools() and MockText(welcomeMessage) or welcomeMessage
 
 		if identifyexecutor then
-			DoNotif(welcomeMessage.."\nExecutor: "..executorName.."\nUpdated On: "..updDate.."\nTime Taken To Load: "..loadedResults(NAresult), 6, rngMsg().." "..hh)
+			DoNotif(welcomeMessage.."\nExecutor: "..executorName.."\nUpdated On: "..updDate.."\nTime Taken To Load: "..loadedResults(NAresult), 6, rngMsg().." "..nameCheck)
 		else
-			DoNotif(welcomeMessage.."\nUpdated On: "..updDate.."\nTime Taken To Load: "..loadedResults(NAresult), 6, rngMsg().." "..hh)
+			DoNotif(welcomeMessage.."\nUpdated On: "..updDate.."\nTime Taken To Load: "..loadedResults(NAresult), 6, rngMsg().." "..nameCheck)
 		end
 
 		local queueTitle = "Would you like to enable QueueOnTeleport?"
