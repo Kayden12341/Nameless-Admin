@@ -40,21 +40,21 @@ function SafeGetService(service)
 	return cloneref(game:GetService(service)) or game:GetService(service)
 end
 
+function isAprilFools()
+    local d = os.date("*t")
+    return d.month == 4 and d.day == 1
+end
+
 NACaller(function() getgenv().RealNamelessLoaded=true end)
 NACaller(function() getgenv().NATestingVer=true end)
 
 --[[ Version ]]--
-local curVer=2.3
+local curVer = isAprilFools() and string.format("%.1f", math.random() * 500.0) or "2.3"
 
 --[[ Brand ]]--
 local mainName = 'Nameless Admin'
 local testingName = 'NA Testing'
 local adminName = 'NA'
-
-function isAprilFools()
-    local d = os.date("*t")
-    return d.month == 4 and d.day == 1
-end
 
 function yayApril(t)
     local variants = {
