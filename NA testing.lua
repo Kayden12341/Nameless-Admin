@@ -51,6 +51,20 @@ local mainName = 'Nameless Admin'
 local testingName = 'NA Testing'
 local adminName = 'NA'
 
+function isAprilFools()
+    local d = os.date("*t")
+    return d.month == 4 and d.day == 1
+end
+
+function yayApril(t)
+    local variants = {
+        t and "cLuElEsS tEsTiNg" or "cLuElEsS aDmIn",
+        t and "gAy tEsTiNg" or "gAy aDmIn",
+        t and "iNfInItE tEsTiNg" or "iNfInItE aDmIn"
+    }
+    return variants[math.random(#variants)]
+end
+
 local function getSeasonEmoji()
 	local date = os.date("*t")
 	local month = date.month
@@ -97,9 +111,15 @@ end
 
 
 if getgenv().NATestingVer then
-	adminName=testingName
+    if isAprilFools() then
+        testingName = yayApril(true)
+    end
+    adminName = testingName
 else
-	adminName=mainName
+    if isAprilFools() then
+        mainName = yayApril(false)
+    end
+    adminName = mainName
 end
 
 if not gethui then
@@ -11439,6 +11459,7 @@ function mainNameless()
 	end)
 end
 
+math.randomseed(os.time())
 coroutine.wrap(mainNameless)()
 
 if IsOnMobile then
