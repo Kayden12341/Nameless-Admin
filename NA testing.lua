@@ -11488,36 +11488,78 @@ end
 --original by @qipu | loadstring(game:HttpGet("https://raw.githubusercontent.com/FilteringEnabled/NamelessAdmin/main/Source"))();
 
 NACaller(function()
-	local display=Player.DisplayName
-	local name=Player.Name
-	local hh=nil
-	local NAresult=tick()-NAbegin
-	if display:lower()==name:lower() then
-		hh="@"..name..""
+	local display = Player.DisplayName
+	local name = Player.Name
+	local hh = nil
+	local NAresult = tick() - NAbegin
+
+	if isAprilFools() then
+		if display:lower() == name:lower() then
+			hh = "@gOoFy_" .. name .. ""
+		else
+			hh = "gOoFy_" .. display .. " (@" .. name .. ")"
+		end
 	else
-		hh=display.." (@"..name..")"
+		if display:lower() == name:lower() then
+			hh = "@" .. name .. ""
+		else
+			hh = display .. " (@" .. name .. ")"
+		end
 	end
 
-	delay(0.3,function()
-		if identifyexecutor then--idk why i made it as a check
-			DoNotif("Welcome to "..adminName.." V"..curVer.."\nExecutor: "..identifyexecutor().."\nUpdated On: "..updDate.."\nTime Taken To Load: "..loadedResults(NAresult),6,rngMsg().." "..hh)
-		else
-			DoNotif("Welcome to "..adminName.." V"..curVer.."\nUpdated On: "..updDate.."\nTime Taken To Load: "..loadedResults(NAresult),6,rngMsg().." "..hh)
+	delay(0.3, function()
+		local executorName = identifyexecutor and identifyexecutor() or "Unknown"
+		if isAprilFools() and identifyexecutor then
+			executorName = "sUsSy_" .. executorName
 		end
+
+		local welcomeMessage = "Welcome to " .. adminName .. " V" .. curVer
+		if isAprilFools() then
+			welcomeMessage = "wElCoMe tO " .. adminName .. " v" .. curVer .. " 🤡"
+		end
+
+		if identifyexecutor then
+			DoNotif(welcomeMessage .. "\nExecutor: " .. executorName .. "\nUpdated On: " .. updDate .. "\nTime Taken To Load: " .. loadedResults(NAresult), 6, rngMsg() .. " " .. hh)
+		else
+			DoNotif(welcomeMessage .. "\nUpdated On: " .. updDate .. "\nTime Taken To Load: "..loadedResults(NAresult), 6, rngMsg().." "..hh)
+		end
+
+		local queueTitle = "Would you like to enable QueueOnTeleport?"
+		local queueDescription = "With QueueOnTeleport "..adminName .. " will automatically execute itself upon teleporting to a game or place."
+		if isAprilFools() then
+			queueTitle = "wOuLd YoU lIkE tO eNaBlE qUeUeOnTeLePoRt? 🤡"
+			queueDescription = "wItH qUeUeOnTeLePoRt "..adminName.." wIlL aUtOmAtIcAlLy ExEcUtE iTsElF uPoN tElEpOrTiNg To A gAmE oR pLaCe. 🤡"
+		end
+
 		Notify({
-			Title = "Would you like to enabled QueueOnTeleport?",
-			Description = "With QueueOnTeleport "..adminName.." will automatically execute itself upon teleporting to a game or place.",
+			Title = queueTitle,
+			Description = queueDescription,
 			Buttons = {
 				{Text = "Yes", Callback = function() queueteleport(loader) end},
 				{Text = "No", Callback = function() end}
 			}
 		})
+
 		task.wait(3)
-		DoNotif("Your Keybind Prefix: "..opt.prefix,10,adminName.." Keybind Prefix")
-		DoNotif('Added "updlog" command (displays any new changes added into '..adminName..')',nil,"Info")
+
+		local keybindMessage = "Your Keybind Prefix: "..opt.prefix
+		if isAprilFools() then
+			keybindMessage = "yOuR kEyBiNd PrEfIx: "..opt.prefix.." 🤡"
+		end
+		DoNotif(keybindMessage, 10, adminName.." Keybind Prefix")
+
+		local updateLogMessage = 'Added "updlog" command (displays any new changes added into '..adminName..')'
+		if isAprilFools() then
+			updateLogMessage = 'aDdEd "uPdLoG" cOmMaNd (dIsPlAyS aNy NeW cHaNgEs AdDeD iNtO '..adminName..') 🤡'
+		end
+		DoNotif(updateLogMessage, nil, "Info")
 	end)
 
-	cmdInput.PlaceholderText=getSeasonEmoji()..' '..adminName.." V"..curVer..' '..getSeasonEmoji()
+	if isAprilFools() then
+		cmdInput.PlaceholderText = getSeasonEmoji()..adminName.." v"..curVer..' 🤡 '
+	else
+		cmdInput.PlaceholderText = getSeasonEmoji()..' '..adminName.." V"..curVer..' '..getSeasonEmoji()
+	end
 end)
 
 CaptureService.CaptureBegan:Connect(function()
