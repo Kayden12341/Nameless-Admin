@@ -5589,7 +5589,7 @@ cmd.add({"antibang"}, {"antibang", "prevents users to bang you (still WORK IN PR
     if not root then return end
     originalPos = root.CFrame
     local orgHeight = SafeGetService("Workspace").FallenPartsDestroyHeight
-    local anims = {"rbxassetid://5918726674", "rbxassetid://148840371"}
+    local anims = {"rbxassetid://5918726674", "rbxassetid://148840371", "rbxassetid://698251653", "rbxassetid://72042024"}
     local inVoid = false
     local targetPlayer = nil
 	local toldNotif = false
