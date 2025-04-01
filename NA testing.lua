@@ -60,7 +60,19 @@ function yayApril(t)
     local variants = {
         t and "cLuElEsS tEsTiNg" or "cLuElEsS aDmIn",
         t and "gAy tEsTiNg" or "gAy aDmIn",
-        t and "iNfInItE tEsTiNg" or "iNfInItE aDmIn"
+        t and "iNfInItE tEsTiNg" or "iNfInItE aDmIn",
+        t and "sUsSy tEsTiNg" or "sUsSy aDmIn",
+        t and "bRoKeN tEsTiNg" or "bRoKeN aDmIn",
+        t and "sHaDoW tEsTiNg" or "sHaDoW aDmIn",
+        t and "qUiRkY tEsTiNg" or "qUiRkY aDmIn",
+        t and "zOoMy tEsTiNg" or "zOoMy aDmIn",
+        t and "wAcKy tEsTiNg" or "wAcKy aDmIn",
+        t and "bOoBa tEsTiNg" or "bOoBa aDmIn",
+        t and "sPiCy tEsTiNg" or "sPiCy aDmIn",
+        t and "mEmE tEsTiNg" or "mEmE aDmIn",
+        t and "dOoFy tEsTiNg" or "dOoFy aDmIn",
+        t and "sIlLy tEsTiNg" or "sIlLy aDmIn",
+        t and "gObLiN tEsTiNg" or "gObLiN aDmIn"
     }
     return variants[math.random(#variants)]
 end
