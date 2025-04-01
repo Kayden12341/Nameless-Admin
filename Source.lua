@@ -32,6 +32,32 @@ local mainName = 'Nameless Admin'
 local testingName = 'NA Testing'
 local adminName = 'NA'
 
+function isAprilFools()
+    local d = os.date("*t")
+    return d.month == 4 and d.day == 1
+end
+
+function yayApril(t)
+    local variants = {
+        t and "cLuElEsS tEsTiNg" or "cLuElEsS aDmIn",
+        t and "gAy tEsTiNg" or "gAy aDmIn",
+        t and "iNfInItE tEsTiNg" or "iNfInItE aDmIn",
+        t and "sUsSy tEsTiNg" or "sUsSy aDmIn",
+        t and "bRoKeN tEsTiNg" or "bRoKeN aDmIn",
+        t and "sHaDoW tEsTiNg" or "sHaDoW aDmIn",
+        t and "qUiRkY tEsTiNg" or "qUiRkY aDmIn",
+        t and "zOoMy tEsTiNg" or "zOoMy aDmIn",
+        t and "wAcKy tEsTiNg" or "wAcKy aDmIn",
+        t and "bOoBa tEsTiNg" or "bOoBa aDmIn",
+        t and "sPiCy tEsTiNg" or "sPiCy aDmIn",
+        t and "mEmE tEsTiNg" or "mEmE aDmIn",
+        t and "dOoFy tEsTiNg" or "dOoFy aDmIn",
+        t and "sIlLy tEsTiNg" or "sIlLy aDmIn",
+        t and "gObLiN tEsTiNg" or "gObLiN aDmIn"
+    }
+    return variants[math.random(#variants)]
+end
+
 local function getSeasonEmoji()
 	local date = os.date("*t")
 	local month = date.month
@@ -78,9 +104,15 @@ end
 
 
 if getgenv().NATestingVer then
-	adminName=testingName
+    if isAprilFools() then
+        testingName = yayApril(true)
+    end
+    adminName = testingName
 else
-	adminName=mainName
+    if isAprilFools() then
+        mainName = yayApril(false)
+    end
+    adminName = mainName
 end
 
 if not gethui then
@@ -11420,6 +11452,7 @@ function mainNameless()
 	end)
 end
 
+math.randomseed(os.time())
 coroutine.wrap(mainNameless)()
 
 if IsOnMobile then
@@ -11436,36 +11469,78 @@ end
 --original by @qipu | loadstring(game:HttpGet("https://raw.githubusercontent.com/FilteringEnabled/NamelessAdmin/main/Source"))();
 
 NACaller(function()
-	local display=Player.DisplayName
-	local name=Player.Name
-	local hh=nil
-	local NAresult=tick()-NAbegin
-	if display:lower()==name:lower() then
-		hh="@"..name..""
+	local display = Player.DisplayName
+	local name = Player.Name
+	local hh = nil
+	local NAresult = tick() - NAbegin
+
+	if isAprilFools() then
+		if display:lower() == name:lower() then
+			hh = "@gOoFy_" .. name .. ""
+		else
+			hh = "gOoFy_" .. display .. " (@" .. name .. ")"
+		end
 	else
-		hh=display.." (@"..name..")"
+		if display:lower() == name:lower() then
+			hh = "@" .. name .. ""
+		else
+			hh = display .. " (@" .. name .. ")"
+		end
 	end
 
-	delay(0.3,function()
-		if identifyexecutor then--idk why i made it as a check
-			DoNotif("Welcome to "..adminName.." V"..curVer.."\nExecutor: "..identifyexecutor().."\nUpdated On: "..updDate.."\nTime Taken To Load: "..loadedResults(NAresult),6,rngMsg().." "..hh)
-		else
-			DoNotif("Welcome to "..adminName.." V"..curVer.."\nUpdated On: "..updDate.."\nTime Taken To Load: "..loadedResults(NAresult),6,rngMsg().." "..hh)
+	delay(0.3, function()
+		local executorName = identifyexecutor and identifyexecutor() or "Unknown"
+		if isAprilFools() and identifyexecutor then
+			executorName = "sUsSy_" .. executorName
 		end
+
+		local welcomeMessage = "Welcome to " .. adminName .. " V" .. curVer
+		if isAprilFools() then
+			welcomeMessage = "wElCoMe tO " .. adminName .. " v" .. curVer .. " 🤡"
+		end
+
+		if identifyexecutor then
+			DoNotif(welcomeMessage .. "\nExecutor: " .. executorName .. "\nUpdated On: " .. updDate .. "\nTime Taken To Load: " .. loadedResults(NAresult), 6, rngMsg() .. " " .. hh)
+		else
+			DoNotif(welcomeMessage .. "\nUpdated On: " .. updDate .. "\nTime Taken To Load: "..loadedResults(NAresult), 6, rngMsg().." "..hh)
+		end
+
+		local queueTitle = "Would you like to enable QueueOnTeleport?"
+		local queueDescription = "With QueueOnTeleport "..adminName .. " will automatically execute itself upon teleporting to a game or place."
+		if isAprilFools() then
+			queueTitle = "wOuLd YoU lIkE tO eNaBlE qUeUeOnTeLePoRt? 🤡"
+			queueDescription = "wItH qUeUeOnTeLePoRt "..adminName.." wIlL aUtOmAtIcAlLy ExEcUtE iTsElF uPoN tElEpOrTiNg To A gAmE oR pLaCe. 🤡"
+		end
+
 		Notify({
-			Title = "Would you like to enabled QueueOnTeleport?",
-			Description = "With QueueOnTeleport "..adminName.." will automatically execute itself upon teleporting to a game or place.",
+			Title = queueTitle,
+			Description = queueDescription,
 			Buttons = {
 				{Text = "Yes", Callback = function() queueteleport(loader) end},
 				{Text = "No", Callback = function() end}
 			}
 		})
+
 		task.wait(3)
-		DoNotif("Your Keybind Prefix: "..opt.prefix,10,adminName.." Keybind Prefix")
-		DoNotif('Added "updlog" command (displays any new changes added into '..adminName..')',nil,"Info")
+
+		local keybindMessage = "Your Keybind Prefix: "..opt.prefix
+		if isAprilFools() then
+			keybindMessage = "yOuR kEyBiNd PrEfIx: "..opt.prefix.." 🤡"
+		end
+		DoNotif(keybindMessage, 10, adminName.." Keybind Prefix")
+
+		local updateLogMessage = 'Added "updlog" command (displays any new changes added into '..adminName..')'
+		if isAprilFools() then
+			updateLogMessage = 'aDdEd "uPdLoG" cOmMaNd (dIsPlAyS aNy NeW cHaNgEs AdDeD iNtO '..adminName..') 🤡'
+		end
+		DoNotif(updateLogMessage, nil, "Info")
 	end)
 
-	cmdInput.PlaceholderText=getSeasonEmoji()..' '..adminName.." V"..curVer..' '..getSeasonEmoji()
+	if isAprilFools() then
+		cmdInput.PlaceholderText = getSeasonEmoji()..adminName.." v"..curVer..' 🤡 '
+	else
+		cmdInput.PlaceholderText = getSeasonEmoji()..' '..adminName.." V"..curVer..' '..getSeasonEmoji()
+	end
 end)
 
 CaptureService.CaptureBegan:Connect(function()
