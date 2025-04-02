@@ -398,6 +398,7 @@ local AvatarEditorService = SafeGetService("AvatarEditorService");
 local ChatService = SafeGetService("Chat");
 local TextChatService = SafeGetService("TextChatService");
 local CaptureService = SafeGetService("CaptureService");
+local MarketplaceService = SafeGetService("MarketplaceService");
 local IsOnMobile=false--table.find({Enum.Platform.IOS,Enum.Platform.Android},UserInputService:GetPlatform());
 local IsOnPC=false--table.find({Enum.Platform.Windows,Enum.Platform.UWP,Enum.Platform.Linux,Enum.Platform.SteamOS,Enum.Platform.OSX,Enum.Platform.Chromecast,Enum.Platform.WebOS},UserInputService:GetPlatform());
 local sethidden=sethiddenproperty or set_hidden_property or set_hidden_prop
@@ -997,8 +998,10 @@ function round(num,numDecimalPlaces)
 	return math.floor(num*mult+0.5) / mult
 end
 
+GaemInfo=MarketplaceService:GetProductInfo(PlaceId)
+
 function placeName()
-	while true do
+	--[[while true do
 		local success, page = pcall(function()
 			return SafeGetService("AssetService"):GetGamePlacesAsync()
 		end)
@@ -1026,7 +1029,12 @@ function placeName()
 		end
 
 		task.wait(.5)
-	end
+	end]]
+	return GaemInfo.Name
+end
+
+function placeCreator()
+	return GaemInfo.Creator.Name
 end
 
 function removeESP()
@@ -6188,6 +6196,10 @@ cmd.add({"placename","pname"},{"placename (pname)","Copies the game's place name
 	DoNotif("Copied the game's place name: "..placeNaem)
 end)
 
+cmd.add({"gameinfo","ginfo"},{"gameinfo (ginfo)","shows info about the game you're playing"},function()
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/uuuuuuu/refs/heads/main/GameInfo.lua"))()
+end)
+
 function getTgt(user)
 	if user == nil then
 		user = plr.Name
@@ -7362,8 +7374,6 @@ cmd.add({"freegamepass", "freegp"}, {"freegamepass (freegp)", "Makes the client 
 	local mt = getrawmetatable(game)
 	local oldNamecall = mt.__namecall
 	local setReadOnly = setreadonly or make_writeable
-
-	local MarketplaceService = SafeGetService("MarketplaceService")
 
 	setReadOnly(mt, false)
 
@@ -11252,7 +11262,7 @@ Info2.AnchorPoint = Vector2.new(1, 1)
 Info2.Position = UDim2.new(1, -10, 1, -10)
 Info2.Size = UDim2.new(0, 200, 0, 20)
 Info2.Font = Enum.Font.Gotham
-Info2.Text = "Updated On: "..updDate.."\ndiscord.gg/zS7TpV3p64"
+Info2.Text = "Updated On: "..updDate.."\n"..dadojadoqwdqwd
 Info2.TextColor3 = Color3.fromRGB(255, 255, 255)
 Info2.TextTransparency = 0.5
 Info2.RichText = true
@@ -11458,12 +11468,12 @@ end)
 task.spawn(function()
 	while task.wait(1) do
 		local currentTime = os.date("%H:%M:%S")
-		Info2.Text = "Updated On: "..updDate.."\nCurrent Time: "..currentTime
+		Info2.Text = "Updated On: "..updDate.."\n"..dadojadoqwdqwd.."\nCurrent Time: "..currentTime
 	end
 end)
 
 task.spawn(function()
-	Info.Text = getSeasonEmoji()..' '..adminName.." V"..curVer..' '..getSeasonEmoji().."\n"..dadojadoqwdqwd.."\nPlace: "..placeName()
+	Info.Text = getSeasonEmoji()..' '..adminName.." V"..curVer..' '..getSeasonEmoji().."\nPlace: "..placeName().."\nOwned By: "..placeCreator()
 end)
 
 task.spawn(function()
