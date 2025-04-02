@@ -7,7 +7,8 @@ function NACaller(pp)--helps me log better
 	if not s then print("NA script err: "..err) end
 end
 
-
+NACaller(function() getgenv().RealNamelessLoaded=true end)
+NACaller(function() getgenv().NATestingVer=false end)
 
 NAbegin=tick()
 
@@ -23,14 +24,26 @@ end
 
 function isAprilFools()
     local d = os.date("*t")
-    return d.month == 4 and d.day == 1
+    return (d.month == 4 and d.day == 1) or (getgenv and getgenv().ActivateAprilMode) or false
 end
 
-NACaller(function() getgenv().RealNamelessLoaded=true end)
-NACaller(function() getgenv().NATestingVer=false end)
+function MockText(text)
+    local mockedText = ""
+    local toggle = true
+    for i = 1, #text do
+        local char = text:sub(i, i)
+        if char:match("%a") then
+            mockedText = mockedText..(toggle and char:upper() or char:lower())
+            toggle = not toggle
+        else
+            mockedText = mockedText..char
+        end
+    end
+    return mockedText
+end
 
 --[[ Version ]]--
-local curVer = isAprilFools() and string.format("%.1f", math.random() * 500.0) or "2.3"
+local curVer = isAprilFools() and string.format("%.1f", math.random() * 1000.0) or "2.3"
 
 --[[ Brand ]]--
 local mainName = 'Nameless Admin'
@@ -39,21 +52,21 @@ local adminName = 'NA'
 
 function yayApril(t)
     local variants = {
-        t and "cLuElEsS tEsTiNg" or "cLuElEsS aDmIn",
-        t and "gAy tEsTiNg" or "gAy aDmIn",
-        t and "iNfInItE tEsTiNg" or "iNfInItE aDmIn",
-        t and "sUsSy tEsTiNg" or "sUsSy aDmIn",
-        t and "bRoKeN tEsTiNg" or "bRoKeN aDmIn",
-        t and "sHaDoW tEsTiNg" or "sHaDoW aDmIn",
-        t and "qUiRkY tEsTiNg" or "qUiRkY aDmIn",
-        t and "zOoMy tEsTiNg" or "zOoMy aDmIn",
-        t and "wAcKy tEsTiNg" or "wAcKy aDmIn",
-        t and "bOoBa tEsTiNg" or "bOoBa aDmIn",
-        t and "sPiCy tEsTiNg" or "sPiCy aDmIn",
-        t and "mEmE tEsTiNg" or "mEmE aDmIn",
-        t and "dOoFy tEsTiNg" or "dOoFy aDmIn",
-        t and "sIlLy tEsTiNg" or "sIlLy aDmIn",
-        t and "gObLiN tEsTiNg" or "gObLiN aDmIn"
+        t and "Clueless Testing" or "Clueless Admin";
+        t and "Gay Testing" or "Gay Admin";
+        t and "Infinite Testing" or "Infinite Admin";
+        t and "Sussy Testing" or "Sussy Admin";
+        t and "Broken Testing" or "Broken Admin";
+        t and "Shadow Testing" or "Shadow Admin";
+        t and "Quirky Testing" or "Quirky Admin";
+        t and "Zoomy Testing" or "Zoomy Admin";
+        t and "Wacky Testing" or "Wacky Admin";
+        t and "Booba Testing" or "Booba Admin";
+        t and "Spicy Testing" or "Spicy Admin";
+        t and "Meme Testing" or "Meme Admin";
+        t and "Doofy Testing" or "Doofy Admin";
+        t and "Silly Testing" or "Silly Admin";
+        t and "Goblin Testing" or "Goblin Admin"
     }
     return variants[math.random(#variants)]
 end
@@ -72,7 +85,7 @@ local function getSeasonEmoji()
 	elseif month == 3 and day == 17 then
 		return '☘️' -- St. Patrick's Day
 	elseif month == 4 and day >= 1 and day <= 15 then
-		return '🐣' -- Easter
+		return '🥚' -- Easter
 	elseif month == 5 then
 		return '💐' -- Mother's Day
 	elseif month == 6 then
@@ -106,11 +119,13 @@ end
 if getgenv().NATestingVer then
     if isAprilFools() then
         testingName = yayApril(true)
+		testingName = MockText(testingName)
     end
     adminName = testingName
 else
     if isAprilFools() then
         mainName = yayApril(false)
+		mainName = MockText(mainName)
     end
     adminName = mainName
 end
@@ -979,17 +994,30 @@ function ESP(player)
 					local espLoop
 					espLoop = RunService.RenderStepped:Connect(function()
 						if COREGUI:FindFirstChild(player.Name..'_ESP') then
-							if player.Character and getRoot(player.Character) and player.Character:FindFirstChildOfClass("Humanoid") and Players.LocalPlayer.Character and getRoot(Players.LocalPlayer.Character) and Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
-								local distance = math.floor((getRoot(Players.LocalPlayer.Character).Position - getRoot(player.Character).Position).magnitude)
+							if player.Character and getRoot(player.Character) and player.Character:FindFirstChildOfClass("Humanoid") then
 								local health = math.floor(player.Character:FindFirstChildOfClass("Humanoid").Health)
 								local maxHealth = math.floor(player.Character:FindFirstChildOfClass("Humanoid").MaxHealth)
 								local teamColor = player.Team and player.Team.TeamColor.Color or Color3.fromRGB(255, 255, 255)
-
+					
 								local displayName = player.DisplayName == player.Name and '@'..player.Name or player.DisplayName..' (@'..player.Name..')'
-
-								textLabel.Text = string.format("%s | Health: %d/%d | Studs: %d | Team: %s", displayName, health, maxHealth, distance, player.Team and player.Team.Name or "None")
-								textLabel.TextColor3 = distance < 50 and Color3.fromRGB(255, 0, 0) or distance < 100 and Color3.fromRGB(255, 165, 0) or Color3.fromRGB(0, 255, 0)
-
+					
+								if Players.LocalPlayer.Character and getRoot(Players.LocalPlayer.Character) and Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
+									local distance = math.floor((getRoot(Players.LocalPlayer.Character).Position - getRoot(player.Character).Position).magnitude)
+									if player.Team then
+										textLabel.Text = string.format("%s | Health: %d/%d | Studs: %d | Team: %s", displayName, health, maxHealth, distance, player.Team.Name)
+									else
+										textLabel.Text = string.format("%s | Health: %d/%d | Studs: %d", displayName, health, maxHealth, distance)
+									end
+									textLabel.TextColor3 = distance < 50 and Color3.fromRGB(255, 0, 0) or distance < 100 and Color3.fromRGB(255, 165, 0) or Color3.fromRGB(0, 255, 0)
+								else
+									if player.Team then
+										textLabel.Text = string.format("%s | Health: %d/%d | Team: %s", displayName, health, maxHealth, player.Team.Name)
+									else
+										textLabel.Text = string.format("%s | Health: %d/%d", displayName, health, maxHealth)
+									end
+									textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+								end
+					
 								highlight.FillColor = teamColor
 							end
 						else
@@ -4360,16 +4388,14 @@ end
 
 cmd.add({"shiftlock","sl"},{"shiftlock (sl)","Enables shiftlock"},function()
 	if IsOnMobile then
-		gui.ShiftlockVis()
+		loadstring(game:HttpGet("https://github.com/ltseverydayyou/uuuuuuu/blob/main/shiftlock?raw=true"))()
 	else
 		EnableShiftlock()
 	end
 end)
 
 cmd.add({"unshiftlock","unsl"},{"unshiftlock (unsl)","Disables shiftlock"},function()
-	if IsOnMobile then
-		gui.ShiftlockInvis()
-	else
+	if IsOnPC then
 		DisableShiftlock()
 	end
 end)
@@ -6705,10 +6731,9 @@ local function createGui()
 		specGui.ResetOnSpawn = false
 
 		local frame = Instance.new("Frame")
-		frame.Size = UDim2.new(0, 350, 0, 120)
+		frame.Size = UDim2.new(0, 350, 0, 40)
 		frame.Position = UDim2.new(0.5, -175, 1, -160)
 		frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-		frame.BackgroundTransparency = 0
 		frame.BorderSizePixel = 0
 		frame.Parent = specGui
 
@@ -6719,8 +6744,8 @@ local function createGui()
 		gui.draggable(frame)
 
 		local playerNameLabel = Instance.new("TextLabel")
-		playerNameLabel.Size = UDim2.new(1, 0, 0.4, 0)
-		playerNameLabel.Position = UDim2.new(0, 0, 0, 10)
+		playerNameLabel.Size = UDim2.new(0.78, 0, 1, 0)
+		playerNameLabel.Position = UDim2.new(0.06, 0, 0, 0)
 		playerNameLabel.Text = "Spectating: None"
 		playerNameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 		playerNameLabel.BackgroundTransparency = 1
@@ -6729,8 +6754,8 @@ local function createGui()
 		playerNameLabel.Parent = frame
 
 		local backButton = Instance.new("TextButton")
-		backButton.Size = UDim2.new(0.3, 0, 0.4, 0)
-		backButton.Position = UDim2.new(0.05, 0, 0.55, 0)
+		backButton.Size = UDim2.new(0, 40, 0, 40)
+		backButton.Position = UDim2.new(0, -18, 0, 0)
 		backButton.Text = "<"
 		backButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 		backButton.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -6743,8 +6768,8 @@ local function createGui()
 		backCorner.Parent = backButton
 
 		local forwardButton = Instance.new("TextButton")
-		forwardButton.Size = UDim2.new(0.3, 0, 0.4, 0)
-		forwardButton.Position = UDim2.new(0.65, 0, 0.55, 0)
+		forwardButton.Size = UDim2.new(0, 40, 0, 40)
+		forwardButton.Position = UDim2.new(1, -22, 0, 0)
 		forwardButton.Text = ">"
 		forwardButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 		forwardButton.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -6756,25 +6781,36 @@ local function createGui()
 		forwardCorner.CornerRadius = UDim.new(0, 10)
 		forwardCorner.Parent = forwardButton
 
+		local closeButton = Instance.new("TextButton")
+		closeButton.Size = UDim2.new(0, 30, 0, 30)
+		closeButton.Position = UDim2.new(1, -55, 0, 5)
+		closeButton.Text = "X"
+		closeButton.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+		closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+		closeButton.Font = Enum.Font.GothamBold
+		closeButton.TextSize = 18
+		closeButton.Parent = frame
+
+		local closeCorner = Instance.new("UICorner")
+		closeCorner.CornerRadius = UDim.new(0, 5)
+		closeCorner.Parent = closeButton
+
+		closeButton.MouseButton1Click:Connect(function()
+			cleanup()
+		end)
+
 		local function updateSpectating()
 			if #playerButtons == 0 then
 				playerNameLabel.Text = "Spectating: None"
 				return
 			end
 			local currentPlayer = playerButtons[currentPlayerIndex]
-			local display=currentPlayer.DisplayName
-			local name=currentPlayer.Name
-			local hh=nil
-			if display:lower()==name:lower() then
-				hh="@"..name..""
-			else
-				hh=display.." (@"..name..")"
-			end
-			playerNameLabel.Text = "Spectating: "..hh
+			local nameCheck = currentPlayer.DisplayName == currentPlayer.Name and '@'..currentPlayer.Name or currentPlayer.DisplayName..' (@'..currentPlayer.Name..')'
+			playerNameLabel.Text = "Spectating: "..nameCheck
 			spectatePlayer(currentPlayer)
 		end
 
-		MouseButtonFix(backButton,function()
+		MouseButtonFix(backButton, function()
 			if #playerButtons == 0 then return end
 			currentPlayerIndex = currentPlayerIndex - 1
 			if currentPlayerIndex < 1 then
@@ -6783,7 +6819,7 @@ local function createGui()
 			updateSpectating()
 		end)
 
-		MouseButtonFix(forwardButton,function()
+		MouseButtonFix(forwardButton, function()
 			if #playerButtons == 0 then return end
 			currentPlayerIndex = currentPlayerIndex + 1
 			if currentPlayerIndex > #playerButtons then
@@ -10474,7 +10510,6 @@ local UpdLogsFrame=ScreenGui:FindFirstChild("UpdLog");
 local UpdLogsTitle=UpdLogsFrame:FindFirstChild("Topbar"):FindFirstChild("TopBar"):FindFirstChild("Title");
 local UpdLogsList=UpdLogsFrame:FindFirstChild("Container"):FindFirstChild("List");
 local UpdLogsLabel=UpdLogsList:FindFirstChildOfClass("TextLabel");
-local ShiftlockUi=ScreenGui:FindFirstChild("LockButton");
 local resizeFrame=ScreenGui:FindFirstChild("Resizeable");
 local resizeXY={
 	Top        ={Vector2.new(0,-1),    Vector2.new(0,-1),    "rbxassetid://2911850935"},
@@ -10487,6 +10522,8 @@ local resizeXY={
 	BottomLeft    ={Vector2.new(-1,1),    Vector2.new(1,0),    "rbxassetid://2911851859"},
 	BottomRight    ={Vector2.new(1,1),    Vector2.new(0,0),    "rbxassetid://2911852219"},
 }
+
+if ScreenGui:FindFirstChild("LockButton") then ScreenGui.LockButton:Destroy() end
 
 cmdExample.Parent=nil
 chatExample.Parent=nil
@@ -10583,16 +10620,6 @@ gui.updateLogs=function()
 		warn("huh?")
 	end
 	UpdLogsFrame.Position=UDim2.new(0.5,-283/2+5,0.5,-260/2+5)
-end
-gui.ShiftlockVis=function()
-	if not ShiftlockUi.Visible then
-		ShiftlockUi.Visible=true
-	end
-end
-gui.ShiftlockInvis=function()
-	if ShiftlockUi.Visible then
-		ShiftlockUi.Visible=false
-	end
 end
 
 gui.tween=function(obj,style,direction,duration,goal)
@@ -10851,47 +10878,6 @@ gui.menuifyv2=function(menu)
 	menu.Visible=false
 end
 
-gui.shiftlock=function(sLock,lockImg)
-	local V=false
-	local g=nil
-	local GameSettings=UserSettings():GetService("UserGameSettings")
-	local J=nil
-	lockImg.Active=false
-
-	function ForceShiftLock()
-		local i,k=pcall(function()
-			return GameSettings.RotationType
-		end)
-		_=i
-		g=k
-		J=RunService.RenderStepped:Connect(function()
-			pcall(function()
-				GameSettings.RotationType=Enum.RotationType.CameraRelative
-			end)
-		end)
-	end
-
-	function EndForceShiftLock()
-		if J then
-			pcall(function()
-				GameSettings.RotationType=g or Enum.RotationType.MovementRelative
-			end)
-			J:Disconnect()
-		end
-	end
-
-	MouseButtonFix(sLock,function()
-		V=not V
-		lockImg.ImageColor3=V and Color3.fromRGB(0,170,255) or Color3.fromRGB(255,255,255)
-		if V then
-			ForceShiftLock()
-		else
-			EndForceShiftLock()
-		end
-	end)
-	gui.draggable(sLock)
-end
-
 gui.loadCommands=function()
 	for i,v in pairs(cmdAutofill:GetChildren()) do
 		if v.Name~="UIListLayout" then
@@ -11111,7 +11097,6 @@ cmdBar.Visible=true
 gui.menuifyv2(chatLogsFrame)
 gui.menuify(commandsFrame)
 gui.menuify(UpdLogsFrame)
-gui.shiftlock(ShiftlockUi,ShiftlockUi.btnIcon)
 
 --[[ GUI RESIZE FUNCTION ]]--
 
@@ -11469,48 +11454,29 @@ end
 --original by @qipu | loadstring(game:HttpGet("https://raw.githubusercontent.com/FilteringEnabled/NamelessAdmin/main/Source"))();
 
 NACaller(function()
-	local display = Player.DisplayName
-	local name = Player.Name
-	local hh = nil
 	local NAresult = tick() - NAbegin
-
-	if isAprilFools() then
-		if display:lower() == name:lower() then
-			hh = "@gOoFy_" .. name .. ""
-		else
-			hh = "gOoFy_" .. display .. " (@" .. name .. ")"
-		end
-	else
-		if display:lower() == name:lower() then
-			hh = "@" .. name .. ""
-		else
-			hh = display .. " (@" .. name .. ")"
-		end
-	end
+	local nameCheck = Player.DisplayName == Player.Name and '@'..Player.Name or Player.DisplayName..' (@'..Player.Name..')'
 
 	delay(0.3, function()
 		local executorName = identifyexecutor and identifyexecutor() or "Unknown"
-		if isAprilFools() and identifyexecutor then
-			executorName = "sUsSy_" .. executorName
-		end
 
-		local welcomeMessage = "Welcome to " .. adminName .. " V" .. curVer
-		if isAprilFools() then
-			welcomeMessage = "wElCoMe tO " .. adminName .. " v" .. curVer .. " 🤡"
-		end
+		executorName = isAprilFools() and MockText(executorName) or executorName
+
+		local welcomeMessage = "Welcome to "..adminName.." V"..curVer
+		
+		welcomeMessage = isAprilFools() and MockText(welcomeMessage) or welcomeMessage
 
 		if identifyexecutor then
-			DoNotif(welcomeMessage .. "\nExecutor: " .. executorName .. "\nUpdated On: " .. updDate .. "\nTime Taken To Load: " .. loadedResults(NAresult), 6, rngMsg() .. " " .. hh)
+			DoNotif(welcomeMessage.."\nExecutor: "..executorName.."\nUpdated On: "..updDate.."\nTime Taken To Load: "..loadedResults(NAresult), 6, rngMsg().." "..nameCheck)
 		else
-			DoNotif(welcomeMessage .. "\nUpdated On: " .. updDate .. "\nTime Taken To Load: "..loadedResults(NAresult), 6, rngMsg().." "..hh)
+			DoNotif(welcomeMessage.."\nUpdated On: "..updDate.."\nTime Taken To Load: "..loadedResults(NAresult), 6, rngMsg().." "..nameCheck)
 		end
 
 		local queueTitle = "Would you like to enable QueueOnTeleport?"
-		local queueDescription = "With QueueOnTeleport "..adminName .. " will automatically execute itself upon teleporting to a game or place."
-		if isAprilFools() then
-			queueTitle = "wOuLd YoU lIkE tO eNaBlE qUeUeOnTeLePoRt? 🤡"
-			queueDescription = "wItH qUeUeOnTeLePoRt "..adminName.." wIlL aUtOmAtIcAlLy ExEcUtE iTsElF uPoN tElEpOrTiNg To A gAmE oR pLaCe. 🤡"
-		end
+		local queueDescription = "With QueueOnTeleport "..adminName.." will automatically execute itself upon teleporting to a game or place."
+
+		queueTitle = isAprilFools() and MockText(queueTitle) or queueTitle
+		queueDescription = isAprilFools() and MockText(queueDescription) or queueDescription
 
 		Notify({
 			Title = queueTitle,
@@ -11523,21 +11489,23 @@ NACaller(function()
 
 		task.wait(3)
 
-		local keybindMessage = "Your Keybind Prefix: "..opt.prefix
-		if isAprilFools() then
-			keybindMessage = "yOuR kEyBiNd PrEfIx: "..opt.prefix.." 🤡"
+		if IsOnPC then
+			local keybindMessage = "Your Keybind Prefix: "..opt.prefix
+
+			keybindMessage = isAprilFools() and MockText(keybindMessage) or keybindMessage
+
+			DoNotif(keybindMessage, 10, adminName.." Keybind Prefix")
 		end
-		DoNotif(keybindMessage, 10, adminName.." Keybind Prefix")
 
 		local updateLogMessage = 'Added "updlog" command (displays any new changes added into '..adminName..')'
-		if isAprilFools() then
-			updateLogMessage = 'aDdEd "uPdLoG" cOmMaNd (dIsPlAyS aNy NeW cHaNgEs AdDeD iNtO '..adminName..') 🤡'
-		end
+
+		updateLogMessage = isAprilFools() and MockText(updateLogMessage) or updateLogMessage
+
 		DoNotif(updateLogMessage, nil, "Info")
 	end)
 
 	if isAprilFools() then
-		cmdInput.PlaceholderText = getSeasonEmoji()..adminName.." v"..curVer..' 🤡 '
+		cmdInput.PlaceholderText = '🤡 '..adminName.." V"..curVer..' 🤡'
 	else
 		cmdInput.PlaceholderText = getSeasonEmoji()..' '..adminName.." V"..curVer..' '..getSeasonEmoji()
 	end

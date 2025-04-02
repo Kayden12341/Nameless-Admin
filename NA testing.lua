@@ -26,7 +26,8 @@ function NACaller(pp)--helps me log better
 	if not s then print("NA script err: "..err) end
 end
 
-
+NACaller(function() getgenv().RealNamelessLoaded=true end)
+NACaller(function() getgenv().NATestingVer=true end)
 
 NAbegin=tick()
 
@@ -42,7 +43,7 @@ end
 
 function isAprilFools()
     local d = os.date("*t")
-    return d.month == 4 and d.day == 1
+    return (d.month == 4 and d.day == 1) or (getgenv and getgenv().ActivateAprilMode) or false
 end
 
 function MockText(text)
@@ -59,9 +60,6 @@ function MockText(text)
     end
     return mockedText
 end
-
-NACaller(function() getgenv().RealNamelessLoaded=true end)
-NACaller(function() getgenv().NATestingVer=true end)
 
 --[[ Version ]]--
 local curVer = isAprilFools() and string.format("%.1f", math.random() * 1000.0) or "2.3"
