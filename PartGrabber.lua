@@ -32,11 +32,11 @@ function protectUI(sGui)
         return cloneref(game:GetService(service)) or game:GetService(service)
     end
 
-    local COREGUI = SafeGetService("CoreGui")
-    local rPlayer = SafeGetService("Players"):FindFirstChildWhichIsA("Player")
-    local coreGuiProtection = {}
-    local RunService = SafeGetService("RunService")
-    local LocalPlayer = SafeGetService("Players").LocalPlayer
+    local cGUI = SafeGetService("CoreGui")
+    local rPlr = SafeGetService("Players"):FindFirstChildWhichIsA("Player")
+    local cGUIProtect = {}
+    local rService = SafeGetService("RunService")
+    local lPlr = SafeGetService("Players").LocalPlayer
 
     local function NAProtection(inst, var)
         if inst then
@@ -58,32 +58,32 @@ function protectUI(sGui)
     elseif (not is_sirhurt_closure) and (syn and syn.protect_gui) then
         NAProtection(sGui)
         syn.protect_gui(sGui)
-        sGui.Parent = COREGUI
+        sGui.Parent = cGUI
         return sGui
-    elseif COREGUI:FindFirstChildWhichIsA("ScreenGui") then
+    elseif cGUI:FindFirstChildWhichIsA("ScreenGui") then
         pcall(function()
             for _, v in pairs(sGui:GetDescendants()) do
-                coreGuiProtection[v] = rPlayer.Name
+                cGUIProtect[v] = rPlr.Name
             end
             sGui.DescendantAdded:Connect(function(v)
-                coreGuiProtection[v] = rPlayer.Name
+                cGUIProtect[v] = rPlr.Name
             end)
-            coreGuiProtection[sGui] = rPlayer.Name
+            cGUIProtect[sGui] = rPlr.Name
 
             local meta = getrawmetatable(game)
             local tostr = meta.__tostring
             setreadonly(meta, false)
             meta.__tostring = newcclosure(function(t)
-                if coreGuiProtection[t] and not checkcaller() then
-                    return coreGuiProtection[t]
+                if cGUIProtect[t] and not checkcaller() then
+                    return cGUIProtect[t]
                 end
                 return tostr(t)
             end)
         end)
-        if not RunService:IsStudio() then
-            local newGui = COREGUI:FindFirstChildWhichIsA("ScreenGui")
+        if not rService:IsStudio() then
+            local newGui = cGUI:FindFirstChildWhichIsA("ScreenGui")
             newGui.DescendantAdded:Connect(function(v)
-                coreGuiProtection[v] = rPlayer.Name
+                cGUIProtect[v] = rPlr.Name
             end)
             for _, v in pairs(sGui:GetChildren()) do
                 v.Parent = newGui
@@ -91,13 +91,13 @@ function protectUI(sGui)
             sGui = newGui
         end
         return sGui
-    elseif COREGUI then
+    elseif cGUI then
         NAProtection(sGui)
-        sGui.Parent = COREGUI
+        sGui.Parent = cGUI
         return sGui
-    elseif LocalPlayer and LocalPlayer:FindFirstChild("PlayerGui") then
+    elseif lPlr and lPlr:FindFirstChild("PlayerGui") then
         NAProtection(sGui)
-        sGui.Parent = LocalPlayer:FindFirstChild("PlayerGui")
+        sGui.Parent = lPlr:FindFirstChild("PlayerGui")
         return sGui
     else
         return nil
