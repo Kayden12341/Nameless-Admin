@@ -11355,7 +11355,7 @@ NACaller(function()
 			Title = queueTitle,
 			Description = queueDescription,
 			Buttons = {
-				{Text = "Yes", Callback = function() queueteleport(loader) end},
+				{Text = "Yes", Callback = function() queueteleport(loader) if isAprilFools() then queueteleport("getgenv().ActivateAprilMode=true") end end},
 				{Text = "No", Callback = function() end}
 			}
 		})
