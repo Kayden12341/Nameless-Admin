@@ -21,8 +21,91 @@ local UIGradient_2 = Instance.new("UIGradient")
 local UIStroke = Instance.new("UIStroke")
 local StatusLabel = Instance.new("TextLabel")
 
+function protectUI(sGui)
+    local function blankfunction(...)
+        return ...
+    end
+
+    local cloneref = cloneref or blankfunction
+
+    local function SafeGetService(service)
+        return cloneref(game:GetService(service)) or game:GetService(service)
+    end
+
+    local COREGUI = SafeGetService("CoreGui")
+    local rPlayer = SafeGetService("Players"):FindFirstChildWhichIsA("Player")
+    local coreGuiProtection = {}
+    local RunService = SafeGetService("RunService")
+    local LocalPlayer = SafeGetService("Players").LocalPlayer
+
+    local function NAProtection(inst, var)
+        if inst then
+            if var then
+                inst[var] = "\0"
+                inst.Archivable = false
+            else
+                inst.Name = "\0"
+                inst.Archivable = false
+            end
+        end
+    end
+
+    if (get_hidden_gui or gethui) then
+        local hiddenUI = (get_hidden_gui or gethui)
+        NAProtection(sGui)
+        sGui.Parent = hiddenUI()
+        return sGui
+    elseif (not is_sirhurt_closure) and (syn and syn.protect_gui) then
+        NAProtection(sGui)
+        syn.protect_gui(sGui)
+        sGui.Parent = COREGUI
+        return sGui
+    elseif COREGUI:FindFirstChildWhichIsA("ScreenGui") then
+        pcall(function()
+            for _, v in pairs(sGui:GetDescendants()) do
+                coreGuiProtection[v] = rPlayer.Name
+            end
+            sGui.DescendantAdded:Connect(function(v)
+                coreGuiProtection[v] = rPlayer.Name
+            end)
+            coreGuiProtection[sGui] = rPlayer.Name
+
+            local meta = getrawmetatable(game)
+            local tostr = meta.__tostring
+            setreadonly(meta, false)
+            meta.__tostring = newcclosure(function(t)
+                if coreGuiProtection[t] and not checkcaller() then
+                    return coreGuiProtection[t]
+                end
+                return tostr(t)
+            end)
+        end)
+        if not RunService:IsStudio() then
+            local newGui = COREGUI:FindFirstChildWhichIsA("ScreenGui")
+            newGui.DescendantAdded:Connect(function(v)
+                coreGuiProtection[v] = rPlayer.Name
+            end)
+            for _, v in pairs(sGui:GetChildren()) do
+                v.Parent = newGui
+            end
+            sGui = newGui
+        end
+        return sGui
+    elseif COREGUI then
+        NAProtection(sGui)
+        sGui.Parent = COREGUI
+        return sGui
+    elseif LocalPlayer and LocalPlayer:FindFirstChild("PlayerGui") then
+        NAProtection(sGui)
+        sGui.Parent = LocalPlayer:FindFirstChild("PlayerGui")
+        return sGui
+    else
+        return nil
+    end
+end
+
 prtGrab.Name = "prtGrab"
-prtGrab.Parent = gethui() or (game:GetService("CoreGui") or game:GetService("Players").LocalPlayer:FindFirstChildWhichIsA("PlayerGui"))
+protectUI(prtGrab)
 prtGrab.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 prtGrab.ResetOnSpawn = false
 
