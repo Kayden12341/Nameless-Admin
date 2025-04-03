@@ -8881,7 +8881,14 @@ function createBox(part, color, transparency)
 	box.Adornee = part
 	box.AlwaysOnTop = true
 	box.ZIndex = 0
-	box.Size = part:IsA("BasePart") and part.Size or Vector3.new(4, 4, 4)
+	if part:IsA("BasePart") then
+		box.Size = part.Size
+	elseif part:FindFirstChildWhichIsA("BasePart") then
+		box.Size = part:FindFirstChildWhichIsA("BasePart").Size
+	else
+		box.Size = Vector3.new(4, 4, 4)
+	end
+
 	box.Transparency = transparency or 0.45
 	box.Color3 = color
 	return box
@@ -8906,7 +8913,7 @@ function enableEsp(objType, color)
 	for _, obj in pairs(SafeGetService("Workspace"):GetDescendants()) do
 		if obj:IsA(objType) then
 			local parent = obj.Parent
-			if parent and parent:IsA("BasePart") then
+			if parent and parent:IsA("BasePart") or parent:IsA("Model") then
 				createBox(parent, color, 0.45)
 			end
 		end
@@ -8916,7 +8923,7 @@ function enableEsp(objType, color)
 		espTriggers[objType] = SafeGetService("Workspace").DescendantAdded:Connect(function(obj)
 			if obj:IsA(objType) then
 				local parent = obj.Parent
-				if parent and parent:IsA("BasePart") then
+				if parent and parent:IsA("BasePart") or parent:IsA("Model") then
 					createBox(parent, color, 0.45)
 				end
 			end
