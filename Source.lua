@@ -533,6 +533,10 @@ function isRelAdmin(Player)
 	return false
 end
 
+function nameChecker(plr)
+	return plr.DisplayName == plr.Name and '@'..plr.Name or plr.DisplayName..' (@'..plr.Name..')'
+end
+
 function loadedResults(res)
 	if res == nil or type(res) ~= "number" then 
 		res = 0 
@@ -1105,7 +1109,7 @@ function ESP(player)
 								local maxHealth = math.floor(player.Character:FindFirstChildOfClass("Humanoid").MaxHealth)
 								local teamColor = player.Team and player.Team.TeamColor.Color or Color3.fromRGB(255, 255, 255)
 
-								local displayName = player.DisplayName == player.Name and '@'..player.Name or player.DisplayName..' (@'..player.Name..')'
+								local displayName = nameChecker(player)
 
 								if Players.LocalPlayer.Character and getRoot(Players.LocalPlayer.Character) and Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
 									local distance = math.floor((getRoot(Players.LocalPlayer.Character).Position - getRoot(player.Character).Position).magnitude)
@@ -6614,7 +6618,7 @@ cmd.add({"copyname", "cname"}, {"copyname <player> (cname)", "Copies the usernam
 
 	setclipboard(tostring(tgt.Name))
 	wait()
-	DoNotif("Copied the username of "..tgt.DisplayName)
+	DoNotif("Copied the username of "..nameChecker(tgt))
 end, true)
 
 cmd.add({"copydisplay", "cdisplay"}, {"copydisplay <player> (cdisplay)", "Copies the display name of the target"}, function(...)
@@ -6623,7 +6627,7 @@ cmd.add({"copydisplay", "cdisplay"}, {"copydisplay <player> (cdisplay)", "Copies
 
 	setclipboard(tostring(tgt.DisplayName))
 	wait()
-	DoNotif("Copied the display name of "..tgt.Name)
+	DoNotif("Copied the display name of "..nameChecker(tgt))
 end, true)
 
 cmd.add({"copyid", "id"}, {"copyid <player> (id)", "Copies the UserId of the target"}, function(...)
@@ -6632,7 +6636,7 @@ cmd.add({"copyid", "id"}, {"copyid <player> (id)", "Copies the UserId of the tar
 
 	setclipboard(tostring(tgt.UserId))
 	wait()
-	DoNotif("Copied the UserId of "..tgt.Name)
+	DoNotif("Copied the UserId of "..nameChecker(tgt))
 end, true)
 
 --[ PLAYER ]--
@@ -7377,7 +7381,7 @@ local function createGui()
 				return
 			end
 			local currentPlayer = playerButtons[currentPlayerIndex]
-			local nameCheck = currentPlayer.DisplayName == currentPlayer.Name and '@'..currentPlayer.Name or currentPlayer.DisplayName.." (@ "..currentPlayer.Name.." )"
+			local nameCheck = nameChecker(currentPlayer)
 			dropdownButton.Text = "Spectating: "..nameCheck
 			if currentPlayer == game.Players.LocalPlayer then
 				dropdownButton.TextColor3 = Color3.fromRGB(255, 255, 0)
@@ -7445,7 +7449,7 @@ local function createGui()
 					local playerButton = Instance.new("TextButton")
 					playerButton.Size = UDim2.new(1, 0, 0, 30)
 					playerButton.Position = UDim2.new(0, 0, 0, (i - 1) * 30)
-					local displayText = player.DisplayName == player.Name and '@'..player.Name or player.DisplayName.." (@ "..player.Name.." )"
+					local displayText = nameChecker(player)
 					playerButton.Text = displayText
 					playerButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 					playerButton.Font = Enum.Font.Gotham
@@ -7487,24 +7491,35 @@ cmd.add({"unwatch2", "unview2"}, {"unwatch2 (unview2)", "Stop spectating with GU
 	cleanup()
 end)
 
-cmd.add({"stealaudio","getaudio","steal","logaudio"},{"stealaudio <player> (getaudio,logaudio,steal)","Save all sounds a player is playing to a file -Cyrus"},function(p)
-	wait()
-	local player = getPlr(p)
-	local audios = ""
-	if player then
-		local char = player.Character
-		if char then
-			for _, v in pairs(char:GetDescendants()) do
-				if v:IsA("Sound") and v.Playing then
-					audios = audios..("%s\n"):format(v.SoundId)
-				end
-			end
-		end
-	end
-	if audios ~= "" then
-		setclipboard(tostring(audios))
-		DoNotif("Audio links have been copied to your clipboard.")
-	end
+cmd.add({"stealaudio", "getaudio", "steal", "logaudio"},{"stealaudio <player> (getaudio,logaudio,steal)","Save all sounds a player is playing to a file -Cyrus"},function(p)
+        wait()
+
+        local player = getPlr(p)
+        if not player then
+            DoNotif("Player not found.")
+            return
+        end
+
+        local char = player.Character
+        if not char then
+            DoNotif("Character not found for player "..player.Name)
+            return
+        end
+
+        local audioList = {}
+        for _, songer in pairs(char:GetDescendants()) do
+            if songer:IsA("Sound") and songer.Playing then
+                table.insert(audioList, songer.SoundId)
+            end
+        end
+
+        if #audioList > 0 then
+            local audios = table.concat(audioList, "\n")
+            setclipboard(audios)
+            DoNotif("Audio links have been copied to your clipboard.")
+        else
+            DoNotif("No playing audio found for player "..player.Name)
+        end
 end,true)
 
 cmd.add({"follow","stalk","walk"},{"follow <player>","Follow a player wherever they go"},function(p)
@@ -11967,7 +11982,7 @@ end
 
 NACaller(function()
 	local NAresult = tick() - NAbegin
-	local nameCheck = Player.DisplayName == Player.Name and '@'..Player.Name or Player.DisplayName..' (@'..Player.Name..')'
+	local nameCheck = nameChecker(Player)
 
 	delay(0.3, function()
 		local executorName = identifyexecutor and identifyexecutor() or "Unknown"
