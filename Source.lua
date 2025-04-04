@@ -903,76 +903,82 @@ function MouseButtonFix(button,clickCallback)
 end
 
 --[[ FUNCTION TO GET A PLAYER ]]--
-getPlr = function(Name)
-	local Players = SafeGetService("Players")
-	local LocalPlayer = Players.LocalPlayer
+function getPlr(Name)
+    local LocalPlayer = Players.LocalPlayer
+    local allPlayers = Players:GetPlayers()
+    
+    if not Name or Name == "" or Name:lower() == "me" then
+        return LocalPlayer
+    end
 
-	if not Name or Name == "" or Name:lower() == "me" then
-		return LocalPlayer
-	elseif Name:lower() == "random" then
-		local otherPlayers = {}
-		for _, plr in ipairs(Players:GetPlayers()) do
-			if plr ~= LocalPlayer then
-				table.insert(otherPlayers, plr)
-			end
-		end
-		if #otherPlayers > 0 then
-			return otherPlayers[math.random(#otherPlayers)]
-		end
-	elseif Name:lower() == "friends" then
-		local friends = {}
-		for _, plr in ipairs(Players:GetPlayers()) do
-			if plr:IsFriendsWith(LocalPlayer.UserId) and plr ~= LocalPlayer then
-				table.insert(friends, plr)
-			end
-		end
-		return friends
-	elseif Name:lower() == "nonfriends" then
-		local nonFriends = {}
-		for _, plr in ipairs(Players:GetPlayers()) do
-			if not plr:IsFriendsWith(LocalPlayer.UserId) and plr ~= LocalPlayer then
-				table.insert(nonFriends, plr)
-			end
-		end
-		return nonFriends
-	elseif Name:lower() == "enemies" then
-		local nonTeam = {}
-		local team = LocalPlayer.Team
-		for _, plr in ipairs(Players:GetPlayers()) do
-			if plr.Team ~= team and plr ~= LocalPlayer then
-				table.insert(nonTeam, plr)
-			end
-		end
-		return nonTeam
-	elseif Name:lower() == "allies" then
-		local teamBuddies = {}
-		local team = LocalPlayer.Team
-		for _, plr in ipairs(Players:GetPlayers()) do
-			if plr.Team == team and plr ~= LocalPlayer then
-				table.insert(teamBuddies, plr)
-			end
-		end
-		return teamBuddies
-	elseif Name:lower() == "all" then
-		return Players:GetPlayers()
-	elseif Name:lower() == "others" then
-		local otherPlayers = {}
-		for _, plr in ipairs(Players:GetPlayers()) do
-			if plr ~= LocalPlayer then
-				table.insert(otherPlayers, plr)
-			end
-		end
-		return otherPlayers
-	else
-		Name = Name:lower():gsub("%s", "")
-		for _, plr in ipairs(Players:GetPlayers()) do
-			if plr.Name:lower():match("^"..Name) then
-				return plr
-			elseif plr.DisplayName:lower():match("^"..Name) then
-				return plr
-			end
-		end
-	end
+    local lowerName = Name:lower()
+
+    if lowerName == "random" then
+        local others = {}
+        for _, player in ipairs(allPlayers) do
+            if player ~= LocalPlayer then
+                table.insert(others, player)
+            end
+        end
+        if #others > 0 then
+            return others[math.random(#others)]
+        end
+    elseif lowerName == "friends" then
+        local friends = {}
+        for _, player in ipairs(allPlayers) do
+            if player ~= LocalPlayer and player:IsFriendsWith(LocalPlayer.UserId) then
+                table.insert(friends, player)
+            end
+        end
+        return table.unpack(friends)
+    elseif lowerName == "nonfriends" then
+        local nonFriends = {}
+        for _, player in ipairs(allPlayers) do
+            if player ~= LocalPlayer and not player:IsFriendsWith(LocalPlayer.UserId) then
+                table.insert(nonFriends, player)
+            end
+        end
+        return table.unpack(nonFriends)
+    elseif lowerName == "enemies" then
+        local enemies = {}
+        local team = LocalPlayer.Team
+        for _, player in ipairs(allPlayers) do
+            if player ~= LocalPlayer and player.Team ~= team then
+                table.insert(enemies, player)
+            end
+        end
+        return table.unpack(enemies)
+    elseif lowerName == "allies" then
+        local allies = {}
+        local team = LocalPlayer.Team
+        for _, player in ipairs(allPlayers) do
+            if player ~= LocalPlayer and player.Team == team then
+                table.insert(allies, player)
+            end
+        end
+        return table.unpack(allies)
+    elseif lowerName == "all" then
+        return table.unpack(allPlayers)
+    elseif lowerName == "others" then
+        local others = {}
+        for _, player in ipairs(allPlayers) do
+            if player ~= LocalPlayer then
+                table.insert(others, player)
+            end
+        end
+        return table.unpack(others)
+    else
+		local playerNames = {}
+        local cleanName = lowerName:gsub("%s", "")
+        for _, player in ipairs(allPlayers) do
+            if player.Name:lower():match("^"..cleanName) or player.DisplayName:lower():match("^"..cleanName) then
+                table.insert(playerNames,player)
+            end
+        end
+		return table.unpack(playerNames)
+    end
+
+    return nil
 end
 
 --[[ MORE VARIABLES ]]--
@@ -2740,7 +2746,7 @@ if IsOnMobile then
 	end)
 end
 cmd.add({"commandcount","cc"},{"commandcount (cc)","Counds how many commands NA has"},function()
-	DoNotif(adminName.." currently has ".. commandcount.." commands")
+	DoNotif(adminName.." currently has "..commandcount.." commands")
 end)
 
 cmd.add({"flyfling"}, {"flyfling", "makes you fly and fling"}, function()
@@ -3067,7 +3073,7 @@ cmd.add({"accountage","accage"},{"accountage <player> (accage)","Tells the accou
 
 	target=getPlr(Username)
 	teller=target.AccountAge
-	accountage="The account age of "..target.Name.." is "..teller
+	accountage="The account age of "..nameChecker(target).." is "..teller
 
 	wait();
 
@@ -3419,6 +3425,10 @@ cmd.add({"unantivoid"},{"unantivoid","Disables antivoid"},function()
 	end
 
 	DoNotif("AntiVoid Disabled", 3)
+end)
+
+cmd.add({"antivoid2"},{"antivoid2","sets FallenPartsDestroyHeight to -inf"},function()
+	game:GetService("Workspace").FallenPartsDestroyHeight = -9e9
 end)
 
 cmd.add({"droptools"},{"dropalltools","Drop all of your tools"},function()
@@ -5152,7 +5162,7 @@ cmd.add({"unadmin"},{"unadmin <player>","removes someone from being admin"},func
 	if Player~=nil and Admin[Player.UserId] then
 		Admin[Player.UserId]=nil
 		ChatMessage("You can no longer use commands",Player.Name)
-		DoNotif(Player.Name.." is no longer an admin",15)
+		DoNotif(nameChecker(Player).." is no longer an admin",15)
 	else
 		DoNotif("Player not found")
 	end
@@ -5236,7 +5246,7 @@ cmd.add({"pingserverhop","pshop"},{"pingserverhop (pshop)","serverhop to a serve
 
 	DoNotif("Searching for server with best ping")
 
-	local Servers = JSONDecode(HttpService, game:HttpGetAsync("https://games.roblox.com/v1/games/".. PlaceId .."/servers/Public?sortOrder=Asc&limit=100")).data
+	local Servers = JSONDecode(HttpService, game:HttpGetAsync("https://games.roblox.com/v1/games/"..PlaceId.."/servers/Public?sortOrder=Asc&limit=100")).data
 	local BestPing = math.huge
 	local BestJobId = nil
 
@@ -5260,52 +5270,58 @@ cmd.add({"pingserverhop","pshop"},{"pingserverhop (pshop)","serverhop to a serve
 	end
 end)
 
-local autorjthingy = nil
+local autoRejoinConnection = nil
 
 cmd.add({"autorejoin", "autorj"}, {"autorejoin", "Rejoins the server if you get kicked / disconnected"}, function()
-	if autorjthingy then
-		autorjthingy:Disconnect()
-		autorjthingy = nil
-	end
+    if autoRejoinConnection then
+        autoRejoinConnection:Disconnect()
+        autoRejoinConnection = nil
+    end
 
-	function handleRejoin()
-		if #Players:GetPlayers() <= 1 then
-			Players.LocalPlayer:Kick("Rejoining...")
-			wait()
-			TeleportService:Teleport(PlaceId, Players.LocalPlayer)
-		else
-			TeleportService:TeleportToPlaceInstance(PlaceId, JobId, Players.LocalPlayer)
-		end
-	end
+    local function handleRejoin()
+        if #Players:GetPlayers() <= 1 then
+            Players.LocalPlayer:Kick("Rejoining...")
+            wait()
+            TeleportService:Teleport(PlaceId, Players.LocalPlayer)
+        else
+            TeleportService:TeleportToPlaceInstance(PlaceId, JobId, Players.LocalPlayer)
+        end
+    end
 
-	local promptOverlay = COREGUI:FindFirstChild("RobloxPromptGui"):FindFirstChild("promptOverlay")
-	if not promptOverlay then
-		DoNotif("Error: Could not find promptOverlay!")
-		return
-	end
+    local promptGui = COREGUI:FindFirstChild("RobloxPromptGui")
+    if not promptGui then
+        DoNotif("Error: RobloxPromptGui not found!")
+        return
+    end
 
-	autorjthingy = promptOverlay.DescendantAdded:Connect(function(descendant)
-		if descendant.Name == "ErrorTitle" and descendant.Text:sub(1, 12) == "Disconnected" then
-			handleRejoin()
-			descendant:GetPropertyChangedSignal("Text"):Connect(function()
-				if descendant.Text:sub(1, 12) == "Disconnected" then
-					handleRejoin()
-				end
-			end)
-		end
-	end)
+    local promptOverlay = promptGui:FindFirstChild("promptOverlay")
+    if not promptOverlay then
+        DoNotif("Error: promptOverlay not found!")
+        return
+    end
 
-	DoNotif("Auto Rejoin is now enabled!")
+    autoRejoinConnection = promptOverlay.DescendantAdded:Connect(function(descendant)
+        if descendant.Name == "ErrorTitle" and descendant.Text:sub(1, 12) == "Disconnected" then
+            handleRejoin()
+            descendant:GetPropertyChangedSignal("Text"):Connect(function()
+                if descendant.Text:sub(1, 12) == "Disconnected" then
+                    handleRejoin()
+                end
+            end)
+        end
+    end)
+
+    DoNotif("Auto Rejoin is now enabled!")
 end)
 
 cmd.add({"unautorejoin", "unautorj"}, {"unautorejoin (unautorj)", "Disables auto rejoin command"}, function()
-	if autorjthingy then
-		autorjthingy:Disconnect()
-		autorjthingy = nil
-		DoNotif("Auto Rejoin is now disabled!")
-	else
-		DoNotif("Auto Rejoin is already disabled!")
-	end
+    if autoRejoinConnection then
+        autoRejoinConnection:Disconnect()
+        autoRejoinConnection = nil
+        DoNotif("Auto Rejoin is now disabled!")
+    else
+        DoNotif("Auto Rejoin is already disabled!")
+    end
 end)
 
 dadojadoqwdqwd='© 2025 ltseverydayyou'
@@ -7502,7 +7518,7 @@ cmd.add({"stealaudio", "getaudio", "steal", "logaudio"},{"stealaudio <player> (g
 
         local char = player.Character
         if not char then
-            DoNotif("Character not found for player "..player.Name)
+            DoNotif("Character not found for player "..nameChecker(player))
             return
         end
 
@@ -7518,7 +7534,7 @@ cmd.add({"stealaudio", "getaudio", "steal", "logaudio"},{"stealaudio <player> (g
             setclipboard(audios)
             DoNotif("Audio links have been copied to your clipboard.")
         else
-            DoNotif("No playing audio found for player "..player.Name)
+            DoNotif("No playing audio found for player "..nameChecker(player))
         end
 end,true)
 
@@ -12088,10 +12104,6 @@ task.spawn(function()
 			break
 		end
 	end
-end)
-
-task.spawn(function()
-	game:GetService("Workspace").FallenPartsDestroyHeight = -9e9
 end)
 
 task.spawn(function()
