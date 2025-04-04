@@ -10964,49 +10964,73 @@ end
 gui.resizeable = function(ui, min, max)
 	min = min or Vector2.new(ui.AbsoluteSize.X, ui.AbsoluteSize.Y)
 	max = max or Vector2.new(5000, 5000)
+
 	local rgui = resizeFrame:Clone()
 	rgui.Parent = ui
+
 	local mode
 	local UIPos
 	local lastSize
 	local lastPos = Vector2.new()
 	local dragging = false
-	local draggingFinger = nil
-	local currentTouchPos = nil
+
+	local function updateResize(currentPos)
+		if not dragging or not mode then return end
+
+		local xy = resizeXY[mode.Name]
+		if not xy then return end
+
+		local delta = currentPos - lastPos
+
+		local resizeDelta = Vector2.new(
+			delta.X * xy[1].X,
+			delta.Y * xy[1].Y
+		)
+
+		local newSize = Vector2.new(
+			lastSize.X + resizeDelta.X,
+			lastSize.Y + resizeDelta.Y
+		)
+
+		newSize = Vector2.new(
+			math.clamp(newSize.X, min.X, max.X),
+			math.clamp(newSize.Y, min.Y, max.Y)
+		)
+
+		ui.Size = UDim2.new(0, newSize.X, 0, newSize.Y)
+
+		local newPos = UDim2.new(
+			UIPos.X.Scale,
+			UIPos.X.Offset,
+			UIPos.Y.Scale,
+			UIPos.Y.Offset
+		)
+
+		if xy[1].X < 0 then
+			newPos = UDim2.new(
+				newPos.X.Scale,
+				UIPos.X.Offset + (lastSize.X - newSize.X),
+				newPos.Y.Scale,
+				newPos.Y.Offset
+			)
+		end
+
+		if xy[1].Y < 0 then
+			newPos = UDim2.new(
+				newPos.X.Scale,
+				newPos.X.Offset,
+				newPos.Y.Scale,
+				UIPos.Y.Offset + (lastSize.Y - newSize.Y)
+			)
+		end
+
+		ui.Position = newPos
+	end
 
 	local connection = RunService.RenderStepped:Connect(function()
 		if dragging then
-			local currentPos
-			if draggingFinger and currentTouchPos then
-				currentPos = currentTouchPos
-			else
-				local mousePos = UserInputService:GetMouseLocation()
-				currentPos = Vector2.new(mousePos.X, mousePos.Y)
-			end
-			if dragging and mode then
-				local xy = resizeXY[mode.Name]
-				if xy then
-					local delta = currentPos - lastPos
-					local resizeDelta = Vector2.new(delta.X * xy[1].X, delta.Y * xy[1].Y)
-					local newSize = Vector2.new(lastSize.X + resizeDelta.X, lastSize.Y + resizeDelta.Y)
-					newSize = Vector2.new(math.clamp(newSize.X, min.X, max.X), math.clamp(newSize.Y, min.Y, max.Y))
-					ui.Size = UDim2.new(0, newSize.X, 0, newSize.Y)
-					local newPos = UDim2.new(UIPos.X.Scale, UIPos.X.Offset, UIPos.Y.Scale, UIPos.Y.Offset)
-					if xy[1].X < 0 then
-						newPos = UDim2.new(newPos.X.Scale, UIPos.X.Offset + (lastSize.X - newSize.X), newPos.Y.Scale, newPos.Y.Offset)
-					end
-					if xy[1].Y < 0 then
-						newPos = UDim2.new(newPos.X.Scale, newPos.X.Offset, newPos.Y.Scale, UIPos.Y.Offset + (lastSize.Y - newSize.Y))
-					end
-					ui.Position = newPos
-				end
-			end
-		end
-	end)
-
-	local inputChangedConnection = UserInputService.InputChanged:Connect(function(input, gameProcessed)
-		if dragging and input.UserInputType == Enum.UserInputType.Touch and input.TouchId == draggingFinger then
-			currentTouchPos = input.Position
+			local currentPos = UserInputService:GetMouseLocation()
+			updateResize(Vector2.new(currentPos.X, currentPos.Y))
 		end
 	end)
 
@@ -11015,13 +11039,8 @@ gui.resizeable = function(ui, min, max)
 			if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
 				mode = button
 				dragging = true
-				if input.UserInputType == Enum.UserInputType.Touch then
-					draggingFinger = input.TouchId
-					lastPos = input.Position
-				else
-					local mousePos = UserInputService:GetMouseLocation()
-					lastPos = Vector2.new(mousePos.X, mousePos.Y)
-				end
+				local currentPos = UserInputService:GetMouseLocation()
+				lastPos = Vector2.new(currentPos.X, currentPos.Y)
 				lastSize = ui.AbsoluteSize
 				UIPos = ui.Position
 			end
@@ -11031,51 +11050,36 @@ gui.resizeable = function(ui, min, max)
 			if (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) and mode == button then
 				dragging = false
 				mode = nil
-				if input.UserInputType == Enum.UserInputType.Touch then
-					draggingFinger = nil
-					currentTouchPos = nil
-				end
-				if UserInputService.MouseEnabled then
+				if mouse.Icon == resizeXY[button.Name][3] then
 					mouse.Icon = ""
 				end
 			end
 		end)
 
-		if UserInputService.MouseEnabled then
-			button.MouseEnter:Connect(function()
-				if resizeXY[button.Name] then
-					mouse.Icon = resizeXY[button.Name][3]
-				end
-			end)
+		button.MouseEnter:Connect(function()
+			if resizeXY[button.Name] then
+				mouse.Icon = resizeXY[button.Name][3]
+			end
+		end)
 
-			button.MouseLeave:Connect(function()
-				if not dragging and mouse.Icon == resizeXY[button.Name][3] then
-					mouse.Icon = ""
-				end
-			end)
-		end
+		button.MouseLeave:Connect(function()
+			if not dragging and mouse.Icon == resizeXY[button.Name][3] then
+				mouse.Icon = ""
+			end
+		end)
 	end
 
 	UserInputService.InputEnded:Connect(function(input)
 		if (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) and dragging then
 			dragging = false
 			mode = nil
-			if input.UserInputType == Enum.UserInputType.Touch then
-				draggingFinger = nil
-				currentTouchPos = nil
-			end
-			if UserInputService.MouseEnabled then
-				mouse.Icon = ""
-			end
+			mouse.Icon = ""
 		end
 	end)
 
 	return function()
 		if connection then
 			connection:Disconnect()
-		end
-		if inputChangedConnection then
-			inputChangedConnection:Disconnect()
 		end
 	end
 end
