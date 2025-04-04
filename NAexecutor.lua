@@ -283,11 +283,161 @@ sb.TextColor3 = Color3.fromRGB(100, 255, 100)
 sb.TextSize = 14
 sb.TextXAlignment = Enum.TextXAlignment.Left
 
+local function highlightSyntax(text)
+    local keywords = {
+        ["and"] = true, ["break"] = true, ["do"] = true, ["else"] = true,
+        ["elseif"] = true, ["end"] = true, ["false"] = true, ["for"] = true,
+        ["function"] = true, ["if"] = true, ["in"] = true, ["local"] = true,
+        ["nil"] = true, ["not"] = true, ["or"] = true, ["repeat"] = true,
+        ["return"] = true, ["then"] = true, ["true"] = true, ["until"] = true,
+        ["while"] = true
+    }
+
+    local globals = {
+        ["print"] = true, ["warn"] = true, ["error"] = true, ["Instance"] = true,
+        ["Vector2"] = true, ["Vector3"] = true, ["CFrame"] = true, ["Color3"] = true,
+        ["UDim2"] = true, ["Enum"] = true, ["task"] = true, ["wait"] = true,
+        ["spawn"] = true, ["pcall"] = true, ["xpcall"] = true, ["loadstring"] = true,
+        ["require"] = true, ["game"] = true, ["workspace"] = true, ["script"] = true,
+        ["pairs"] = true, ["ipairs"] = true, ["next"] = true, ["type"] = true,
+        ["assert"] = true, ["tonumber"] = true, ["tostring"] = true
+    }
+
+    local parts = {}
+    local len = #text
+    local i = 1
+    local inString = false
+    local stringChar = nil
+    local inComment = false
+    local inBlockComment = false
+    local inBlockString = false
+
+    while i <= len do
+        local char = text:sub(i, i)
+        local nextTwo = text:sub(i, i+1)
+
+        if inBlockComment then
+            if text:sub(i, i+1) == "]]" then
+                table.insert(parts, '<font color="rgb(100,100,100)">]]</font>')
+                inBlockComment = false
+                i = i + 2
+            else
+                table.insert(parts, '<font color="rgb(100,100,100)">'..char..'</font>')
+                i = i + 1
+            end
+        elseif inBlockString then
+            if text:sub(i, i+1) == "]]" then
+                table.insert(parts, '<font color="rgb(230,180,80)">]]</font>')
+                inBlockString = false
+                i = i + 2
+            else
+                table.insert(parts, '<font color="rgb(230,180,80)">'..char..'</font>')
+                i = i + 1
+            end
+        elseif inComment then
+            if char == "\n" then
+                table.insert(parts, '<font color="rgb(100,100,100)">'..char..'</font>')
+                inComment = false
+            else
+                table.insert(parts, '<font color="rgb(100,100,100)">'..char..'</font>')
+            end
+            i = i + 1
+        elseif inString then
+            if char == stringChar and text:sub(i-1, i-1) ~= "\\" then
+                table.insert(parts, '<font color="rgb(230,180,80)">'..char..'</font>')
+                inString = false
+            else
+                table.insert(parts, '<font color="rgb(230,180,80)">'..char..'</font>')
+            end
+            i = i + 1
+        elseif nextTwo == "--" then
+            if text:sub(i+2, i+3) == "[[" then
+                table.insert(parts, '<font color="rgb(100,100,100)">--[[</font>')
+                inBlockComment = true
+                i = i + 4
+            else
+                table.insert(parts, '<font color="rgb(100,100,100)">--</font>')
+                inComment = true
+                i = i + 2
+            end
+        elseif char == "[" and text:sub(i, i+1) == "[[" then
+            table.insert(parts, '<font color="rgb(230,180,80)">[[</font>')
+            inBlockString = true
+            i = i + 2
+        elseif char == "'" or char == '"' then
+            table.insert(parts, '<font color="rgb(230,180,80)">'..char..'</font>')
+            inString = true
+            stringChar = char
+            i = i + 1
+        elseif char:match("%w") then
+            local j = i
+            local word = ""
+            while j <= len and text:sub(j, j):match("[%w_]") do
+                word = word..text:sub(j, j)
+                j = j + 1
+            end
+
+            if keywords[word] then
+                table.insert(parts, '<font color="rgb(180,100,200)">'..word..'</font>')
+            elseif globals[word] then
+                table.insert(parts, '<font color="rgb(100,180,255)">'..word..'</font>')
+            elseif tonumber(word) then
+                table.insert(parts, '<font color="rgb(180,180,100)">'..word..'</font>')
+            else
+                table.insert(parts, word)
+            end
+            i = j
+        else
+            table.insert(parts, char)
+            i = i + 1
+        end
+    end
+
+    return table.concat(parts)
+end
+
+local function updateSyntax(editor, highlightFrame)
+    local text = editor.Text
+    local highlightedText = highlightSyntax(text)
+    
+    local highlightLabel = highlightFrame:FindFirstChild("HighlightLabel")
+    if not highlightLabel then
+        highlightLabel = Instance.new("TextLabel")
+        highlightLabel.Name = "HighlightLabel"
+        highlightLabel.BackgroundTransparency = 1
+        highlightLabel.Size = UDim2.new(1, 0, 1, 0)
+        highlightLabel.TextXAlignment = Enum.TextXAlignment.Left
+        highlightLabel.TextYAlignment = Enum.TextYAlignment.Top
+        highlightLabel.TextSize = 16
+        highlightLabel.RichText = true
+        highlightLabel.Font = Enum.Font.Code
+        highlightLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+        highlightLabel.Parent = highlightFrame
+    end
+    
+    highlightLabel.Text = highlightedText
+end
+
+local function updateEditorSize()
+    local text = t.Text
+    local textSize = game:GetService("TextService"):GetTextSize(
+        text,
+        t.TextSize,
+        t.Font,
+        Vector2.new(math.huge, math.huge)
+    )
+    local newWidth = math.min(math.max(440, textSize.X + 100), 1000)
+    local newHeight = math.min(math.max(230, textSize.Y + 100), 1000)
+    t.Size = UDim2.new(0, newWidth, 0, newHeight)
+    s.CanvasSize = UDim2.new(0, newWidth, 0, newHeight)
+    hl.Size = t.Size
+end
+
 local function u()
     local txt = t.Text
     local lines = 1
     for i = 1, #txt do
-        if string.sub(txt, i, i) == "\n" then
+        if txt:sub(i, i) == "\n" then
             lines = lines + 1
         end
     end
@@ -360,128 +510,16 @@ local function r()
     m:TweenPosition(UDim2.new(0.308, 0, 0.262, 0), "Out", "Quad", 1, true)
 end
 
-local function highlightSyntax(text)
-    local keywords = {
-        ["and"] = true, ["break"] = true, ["do"] = true, ["else"] = true,
-        ["elseif"] = true, ["end"] = true, ["false"] = true, ["for"] = true,
-        ["function"] = true, ["if"] = true, ["in"] = true, ["local"] = true,
-        ["nil"] = true, ["not"] = true, ["or"] = true, ["repeat"] = true,
-        ["return"] = true, ["then"] = true, ["true"] = true, ["until"] = true, ["while"] = true
-    }
-
-    local globals = {
-        ["print"] = true, ["warn"] = true, ["error"] = true, ["Instance"] = true,
-        ["Vector2"] = true, ["Vector3"] = true, ["CFrame"] = true, ["Color3"] = true,
-        ["UDim2"] = true, ["Enum"] = true, ["task"] = true, ["wait"] = true,
-        ["spawn"] = true, ["pcall"] = true, ["xpcall"] = true, ["loadstring"] = true,
-        ["require"] = true, ["game"] = true, ["workspace"] = true, ["script"] = true
-    }
-
-    local result = ""
-    local inString = false
-    local stringChar = nil
-    local inComment = false
-    local i = 1
-
-    while i <= #text do
-        local char = text:sub(i, i)
-        local nextChar = text:sub(i, i + 1)
-
-        if inComment then
-            if char == "\n" then
-                result = result..'<font color="rgb(100,100,100)">'..char..'</font>'
-                inComment = false
-            else
-                result = result..'<font color="rgb(100,100,100)">'..char..'</font>'
-            end
-        elseif inString then
-            if char == stringChar and text:sub(i - 1, i - 1) ~= "\\" then
-                result = result..'<font color="rgb(230,180,80)">'..char..'</font>'
-                inString = false
-            else
-                result = result..'<font color="rgb(230,180,80)">'..char..'</font>'
-            end
-        elseif nextChar == "--" then
-            result = result..'<font color="rgb(100,100,100)">'..nextChar..'</font>'
-            inComment = true
-            i = i + 1
-        elseif char == "'" or char == '"' then
-            result = result..'<font color="rgb(230,180,80)">'..char..'</font>'
-            inString = true
-            stringChar = char
-        elseif char:match("%w") then
-            local word = ""
-            local j = i
-            while j <= #text and text:sub(j, j):match("[%w_]") do
-                word = word..text:sub(j, j)
-                j = j + 1
-            end
-
-            if keywords[word] then
-                result = result..'<font color="rgb(180,100,200)">'..word..'</font>'
-            elseif globals[word] then
-                result = result..'<font color="rgb(100,180,255)">'..word..'</font>'
-            elseif tonumber(word) then
-                result = result..'<font color="rgb(180,180,100)">'..word..'</font>'
-            else
-                result = result..word
-            end
-
-            i = j - 1
-        else
-            result = result..char
-        end
-
-        i = i + 1
-    end
-
-    return result
-end
-
-local function updateSyntax(editor, highlightFrame)
-    local text = editor.Text
-    local highlightedText = highlightSyntax(text)
-
-    for _, child in pairs(highlightFrame:GetChildren()) do
-        child:Destroy()
-    end
-
-    local highlightLabel = Instance.new("TextLabel")
-    highlightLabel.BackgroundTransparency = 1
-    highlightLabel.Size = UDim2.new(1, 0, 1, 0)
-    highlightLabel.TextXAlignment = Enum.TextXAlignment.Left
-    highlightLabel.TextYAlignment = Enum.TextYAlignment.Top
-    highlightLabel.TextSize = 16
-    highlightLabel.RichText = true
-    highlightLabel.Font = Enum.Font.Code
-    highlightLabel.Text = highlightedText
-    highlightLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-
-    highlightLabel.Parent = highlightFrame
-end
-
-local function updateEditorSize()
-    local text = t.Text
-    local textSize = game:GetService("TextService"):GetTextSize(
-        text,
-        t.TextSize,
-        t.Font,
-        Vector2.new(math.huge, math.huge)
-    )
-
-    t.Size = UDim2.new(0, math.max(440, textSize.X + 100), 0, math.max(230, textSize.Y + 100))
-    s.CanvasSize = UDim2.new(0, t.Size.X.Offset, 0, t.Size.Y.Offset)
-
-    hl.Size = t.Size
-end
-
 t:GetPropertyChangedSignal("Text"):Connect(function()
-    if t.Text~='' then t.TextTransparency=.7 else t.TextTransparency=0 end
+    if t.Text ~= "" then
+        t.TextTransparency = 0.7
+    else
+        t.TextTransparency = 0
+    end
     updateEditorSize()
     updateSyntax(t, hl)
 end)
 
 updateSyntax(t, hl)
-
 r()
 u()
