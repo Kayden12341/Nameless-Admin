@@ -972,6 +972,7 @@ NACaller(function()
 end)
 
 local ESPenabled=false
+local chamsEnabled=false
 
 
 function round(num,numDecimalPlaces)
@@ -1043,13 +1044,22 @@ function ESP(player)
 
 				repeat task.wait(1) until player.Character and getRoot(player.Character) and player.Character:FindFirstChildOfClass("Humanoid")
 
-				local highlight = Instance.new("Highlight")
-				highlight.Name = player.Name
-				highlight.Parent = espHolder
-				highlight.Adornee = player.Character
-				highlight.FillTransparency = 0.3
-				highlight.OutlineTransparency = 0.1
-				highlight.FillColor = Color3.fromRGB(0, 255, 0)
+				local adornments = {}
+
+				for _, part in pairs(player.Character:GetChildren()) do
+					if part:IsA("BasePart") and not part:FindFirstChildOfClass("Accessory") then
+						local boxAdornment = Instance.new("BoxHandleAdornment")
+						boxAdornment.Name = player.Name .. "_Box"
+						boxAdornment.Parent = espHolder
+						boxAdornment.Adornee = part
+						boxAdornment.AlwaysOnTop = true
+						boxAdornment.ZIndex = 0
+						boxAdornment.Size = part.Size
+						boxAdornment.Color3 = Color3.fromRGB(0, 255, 0)
+						boxAdornment.Transparency = 0.45
+						table.insert(adornments, boxAdornment)
+					end
+				end
 
 				if player.Character:FindFirstChild("Head") then
 					local billboardGui = Instance.new("BillboardGui")
@@ -1069,6 +1079,7 @@ function ESP(player)
 					textLabel.TextSize = 14
 					textLabel.TextStrokeTransparency = 0.2
 					textLabel.TextYAlignment = Enum.TextYAlignment.Center
+					textLabel.Visible = not chamsEnabled
 
 					local espLoop
 					espLoop = RunService.RenderStepped:Connect(function()
@@ -1097,7 +1108,9 @@ function ESP(player)
 									textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 								end
 
-								highlight.FillColor = teamColor
+								for _, adornment in pairs(adornments) do
+									adornment.Color3 = teamColor
+								end
 							end
 						else
 							espLoop:Disconnect()
@@ -1127,8 +1140,6 @@ function ESP(player)
 		end)
 	end)
 end
-
-
 
 local Signal1, Signal2 = nil, nil
 local flyMobile, MobileWeld = nil, nil
@@ -2396,6 +2407,171 @@ end)
 
 cmd.add({"commands","cmds"},{"commands (cmds)","Open the command list"},function()
 	gui.commands()
+end)
+
+local debugUI = nil
+
+cmd.add({"chardebug", "cdebug"}, {"chardebug (cdebug)", "debug your character"}, function()
+    local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+    local humanoid = character:WaitForChild("Humanoid")
+    local rootPart = character:WaitForChild("HumanoidRootPart")
+    local workspaceService = SafeGetService("Workspace")
+
+    if debugUI then
+        debugUI:Destroy()
+    end
+
+    debugUI = Instance.new("ScreenGui")
+    debugUI.Name = "DebugGui"
+    NaProtectUI(debugUI)
+
+    local function maekLabel(name, text, position, size)
+        local label = debugUI:FindFirstChild(name)
+        if not label then
+            label = Instance.new("TextLabel")
+            label.Name = name
+            label.Size = size or UDim2.new(0, 250, 0, 50)
+            label.Position = position
+            label.BackgroundTransparency = 0.2
+            label.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+            label.BorderSizePixel = 0
+            label.TextColor3 = Color3.new(1, 1, 1)
+            label.TextXAlignment = Enum.TextXAlignment.Center
+            label.TextYAlignment = Enum.TextYAlignment.Center
+            label.Font = Enum.Font.Code
+            label.TextSize = 16
+            label.TextScaled = true
+            label.ClipsDescendants = true
+            label.Parent = debugUI
+
+            local corner = Instance.new("UICorner")
+            corner.CornerRadius = UDim.new(0.2, 0)
+            corner.Parent = label
+        end
+        label.Text = text
+		gui.draggable(label)
+        return label
+    end
+
+    local labels = {
+        {name = "VelocityLabel", text = ""},
+        {name = "PositionLabel", text = ""},
+        {name = "HealthLabel", text = ""},
+        {name = "FOVLabel", text = ""},
+        {name = "StateLabel", text = ""},
+        {name = "ToolLabel", text = ""},
+        {name = "JumpPowerLabel", text = ""},
+        {name = "WalkSpeedLabel", text = ""}
+    }
+
+    local labelHeight = 50
+    local spacing = 10
+    local totalHeight = (#labels * labelHeight) + ((#labels - 1) * spacing)
+    local startY = 0.5 - (totalHeight / 2) / workspaceService.CurrentCamera.ViewportSize.Y
+
+    for i, labelInfo in ipairs(labels) do
+        local isLeft = i <= math.ceil(#labels / 2)
+        local xOffset = isLeft and 0 or 1
+        local yOffset = startY + ((i - 1) % math.ceil(#labels / 2)) * (labelHeight + spacing) / workspaceService.CurrentCamera.ViewportSize.Y
+        maekLabel(labelInfo.name, labelInfo.text, UDim2.new(xOffset, isLeft and 0 or -250, yOffset, 0), UDim2.new(0, 250, 0, labelHeight))
+    end
+
+    local function updateDebugInfo()
+        local velocity = rootPart.Velocity
+        local position = rootPart.Position
+        local health = humanoid.Health
+        local maxHealth = humanoid.MaxHealth
+        local fov = workspaceService.CurrentCamera.FieldOfView
+        local state = humanoid:GetState()
+        local tool = character:FindFirstChildOfClass("Tool") and character:FindFirstChildOfClass("Tool").Name or "None"
+        local jumpPower = humanoid.JumpPower
+        local walkSpeed = humanoid.WalkSpeed
+
+        debugUI:FindFirstChild("VelocityLabel").Text = string.format("Velocity\nX: %.2f\nY: %.2f\nZ: %.2f", velocity.X, velocity.Y, velocity.Z)
+        debugUI:FindFirstChild("PositionLabel").Text = string.format("Position\nX: %.2f\nY: %.2f\nZ: %.2f", position.X, position.Y, position.Z)
+        debugUI:FindFirstChild("HealthLabel").Text = string.format("Health\n%.2f / %.2f", health, maxHealth)
+        debugUI:FindFirstChild("FOVLabel").Text = string.format("FOV\n%.2f", fov)
+        debugUI:FindFirstChild("StateLabel").Text = string.format("State\n%s", tostring(state))
+        debugUI:FindFirstChild("ToolLabel").Text = string.format("Tool\n%s", tool)
+        debugUI:FindFirstChild("JumpPowerLabel").Text = string.format("Jump Power\n%.2f", jumpPower)
+        debugUI:FindFirstChild("WalkSpeedLabel").Text = string.format("Walk Speed\n%.2f", walkSpeed)
+    end
+
+    RunService:BindToRenderStep("UpdateDebugInfo", Enum.RenderPriority.Last.Value, updateDebugInfo)
+end)
+
+cmd.add({"unchardebug", "uncdebug"}, {"unchardebug (uncdebug)", "disable character debug"}, function()
+    if debugUI then
+        debugUI:Destroy()
+        debugUI = nil
+    end
+    RunService:UnbindFromRenderStep("UpdateDebugInfo")
+end)
+
+cmd.add({"naked"}, {"naked", "no clothing gang"}, function()
+    for _,clothes in ipairs(LocalPlayer.Character:GetChildren()) do
+		if clothes:IsA("Shirt") or clothes:IsA("Pants") or clothes:IsA("ShirtGraphic") then
+			clothes:Destroy()
+		end
+	end
+end)
+
+sRoles = {"mod", "admin", "staff", "dev", "founder", "owner", "supervis", "manager", "management", "executive", "president", "chairman", "chairwoman", "chairperson", "director"}
+
+groupRole = function(player)
+    local role = player:GetRoleInGroup(game.CreatorId)
+    local info = {Role = role, IsStaff = false}
+    if player:IsInGroup(1200769) then
+        info.Role = "Roblox Employee"
+        info.IsStaff = true
+    end
+    for _, staffRole in pairs(sRoles) do
+        if string.find(string.lower(role), staffRole) then
+            info.IsStaff = true
+        end
+    end
+    return info
+end
+
+staffNotifier = nil
+
+cmd.add({"trackstaff"}, {"trackstaff", "Track and notify when a staff member joins the server"}, function()
+    if staffNotifier then
+        staffNotifier:Disconnect()
+    end
+    if game.CreatorType == Enum.CreatorType.Group then
+        local staffList = {}
+        staffNotifier = Players.PlayerAdded:Connect(function(player)
+            local info = groupRole(player)
+            if info.IsStaff then
+                DoNotif(formatUsername(player).." is a "..info.Role)
+            end
+        end)
+        for _, player in pairs(Players:GetPlayers()) do
+            local info = groupRole(player)
+            if info.IsStaff then
+                table.insert(staffList, formatUsername(player).." is a "..info.Role)
+            end
+        end
+        DoNotif(#staffList > 0 and table.concat(staffList, ",\n") or "Tracking enabled")
+    else
+        DoNotif("Game is not owned by a Group")
+    end
+end)
+
+cmd.add({"stoptrackstaff", "untrackstaff"}, {"stoptrackstaff (untrackstaff)", "Stop tracking staff members"}, function()
+    if staffNotifier then
+        staffNotifier:Disconnect()
+    end
+    DoNotif("Tracking disabled")
+end)
+
+cmd.add({"deletevelocity", "dv", "removevelocity", "removeforces"}, {"deletevelocity (dv, removevelocity, removeforces)", "removes any velocity/force instanceson your character"}, function()
+    for _,vel in pairs(LocalPlayer.Character:GetDescendants()) do
+		if vel:IsA("BodyVelocity") or vel:IsA("BodyGyro") or vel:IsA("RocketPropulsion") or vel:IsA("BodyThrust") or vel:IsA("BodyAngularVelocity") or vel:IsA("AngularVelocity") or vel:IsA("BodyForce") or vel:IsA("VectorForce") or vel:IsA("LineForce") then
+			vel:Destroy()
+		end
+	end
 end)
 
 --Mobile Commands for the screen
@@ -4495,44 +4671,108 @@ cmd.add({"unshiftlock","unsl"},{"unshiftlock (unsl)","Disables shiftlock"},funct
 	end
 end)
 
--- loops soon i am just not bothered rn
+-- if you're ready this use the command 'cmdloop enable' to enable the command loop
+-- example 'cmdloop enable shiftlock hidden' (hides notification to display) or set hidden to just anything as long as argument 2 is not empty 💀
 
-cmd.add({"enable"}, {"enable", "Enables a specific CoreGui"}, function()
-	Notify({
-		Title = "Enable a Specific Core Gui Element",
-		--Description = '',
-		--Duration = 3,
-		Buttons = {
-			{Text = "Reset Button", Callback = function() StarterGui:SetCore("ResetButtonCallback", true) end};
-			{Text = "Shiftlock", Callback = function() LocalPlayer.DevEnableMouseLock = true end};
-			{Text = "Backpack", Callback = function() StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, true) end};
-			{Text = "Chat", Callback = function() StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Chat, true) loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/uuuuuuu/refs/heads/main/EnableChat.lua"))() end};
-			{Text = "Health", Callback = function() StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Health, true) end};
-			{Text = "PlayerList (Leaderboard)", Callback = function() StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.PlayerList, true) end};
-			{Text = "Emotes Menu", Callback = function() StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.EmotesMenu, true) end};
-			{Text = "All CoreGui", Callback = function() StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.All, true) loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/uuuuuuu/refs/heads/main/EnableChat.lua"))() end};
-			{Text = "Cancel", Callback = function() end};
-		}
-	})
-end)
+cmd.add({"enable"}, {"enable", "Enables a specific CoreGui"}, function(...)
+    local args = {...}
+    local enableName = args[1]
+    local hiddenNotif = args[2] -- scuffed way lmao
+    local buttons = {}
 
-cmd.add({"disable"}, {"disable", "Disables a specific CoreGui"}, function()
-	Notify({
-		Title = "Disable a Specific Core Gui Element",
-		--Description = '',
-		--Duration = 3,
-		Buttons = {
-			{Text = "Reset Button", Callback = function() StarterGui:SetCore("ResetButtonCallback", false) end};
-			{Text = "Shiftlock", Callback = function() LocalPlayer.DevEnableMouseLock = false end};
-			{Text = "Backpack", Callback = function() StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false) end};
-			{Text = "Chat", Callback = function() StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Chat, false) end};
-			{Text = "Health", Callback = function() StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Health, false) end};
-			{Text = "PlayerList (Leaderboard)", Callback = function() StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.PlayerList, false) end};
-			{Text = "Emotes Menu", Callback = function() StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.EmotesMenu, false) end};
-			{Text = "All CoreGui", Callback = function() StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.All, false) end};
-			{Text = "Cancel", Callback = function() end};
-		}
-	})
+    for _, coreGuiType in ipairs(Enum.CoreGuiType:GetEnumItems()) do
+        table.insert(buttons, {
+            Text = coreGuiType.Name,
+            Callback = function()
+                StarterGui:SetCoreGuiEnabled(coreGuiType, true)
+                if coreGuiType == Enum.CoreGuiType.Chat or coreGuiType == Enum.CoreGuiType.All then
+                    loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/uuuuuuu/refs/heads/main/EnableChat.lua"))()
+                end
+            end
+        })
+    end
+
+    table.insert(buttons, {
+        Text = "Shiftlock",
+        Callback = function()
+            LocalPlayer.DevEnableMouseLock = true
+        end
+    })
+
+    if enableName and enableName ~= "" then
+        local found = false
+        for _, button in ipairs(buttons) do
+            if string.match(button.Text:lower(), enableName:lower()) then
+                button.Callback()
+                if not hiddenNotif then
+                    DoNotif("CoreGui Enabled: " .. button.Text .. " has been enabled.", 3)
+                end
+                found = true
+                break
+            end
+        end
+        if not found then
+            DoNotif("No matching CoreGui element found for: " .. enableName, 3)
+        end
+    else
+        table.insert(buttons, {
+            Text = "Cancel",
+            Callback = function() end
+        })
+        Notify({
+            Title = "Enable a Specific Core Gui Element",
+            Buttons = buttons
+        })
+    end
+end, true)
+
+cmd.add({"disable"}, {"disable", "Disables a specific CoreGui"}, function(...)
+    local args = {...}
+    local disableName = args[1]
+    local hiddenNotif = args[2] -- scuffed way lmao
+    local buttons = {}
+
+    for _, coreGuiType in ipairs(Enum.CoreGuiType:GetEnumItems()) do
+        table.insert(buttons, {
+            Text = coreGuiType.Name,
+            Callback = function()
+                StarterGui:SetCoreGuiEnabled(coreGuiType, false)
+            end
+        })
+    end
+
+    table.insert(buttons, {
+        Text = "Shiftlock",
+        Callback = function()
+            LocalPlayer.DevEnableMouseLock = false
+        end
+    })
+
+    if disableName and disableName ~= "" then
+        local found = false
+        for _, button in ipairs(buttons) do
+            if string.match(button.Text:lower(), disableName:lower()) then
+                button.Callback()
+                if not hiddenNotif then
+                    DoNotif("CoreGui Disabled: " .. button.Text .. " has been disabled.", 3)
+                end
+                found = true
+                break
+            end
+        end
+        if not found then
+            DoNotif("No matching CoreGui element found for: " .. disableName, 3)
+        end
+    else
+        table.insert(buttons, {
+            Text = "Cancel",
+            Callback = function() end
+        })
+        Notify({
+            Title = "Disable a Specific Core Gui Element",
+            Buttons = buttons
+        })
+    end
 end)
 
 cmd.add({"reverb", "reverbcontrol"}, {"reverb (reverbcontrol)", "Manage sound reverb settings"}, function()
@@ -4581,6 +4821,25 @@ end)
 
 cmd.add({"esp"}, {"esp", "locate where the players are"}, function()
 	ESPenabled = true
+	chamsEnabled = false
+	for _, player in pairs(Players:GetPlayers()) do
+		if player.Name ~= Players.LocalPlayer.Name then
+			ESP(player)
+		end
+	end
+
+	if not _G.ESPJoinConnection then
+		_G.ESPJoinConnection = Players.PlayerAdded:Connect(function(player)
+			if ESPenabled and player.Name ~= Players.LocalPlayer.Name then
+				ESP(player)
+			end
+		end)
+	end
+end)
+
+cmd.add({"chams"}, {"chams", "ESP but without the text :shock:"}, function()
+	ESPenabled = true
+	chamsEnabled = true
 	for _, player in pairs(Players:GetPlayers()) do
 		if player.Name ~= Players.LocalPlayer.Name then
 			ESP(player)
@@ -4606,6 +4865,7 @@ end, true)
 
 cmd.add({"unesp", "unlocate"}, {"unesp (unlocate)", "Disables esp"}, function()
 	ESPenabled = false
+	chamsEnabled = false
 	removeESP()
 
 	if _G.ESPJoinConnection then
@@ -8273,6 +8533,20 @@ end)
 
 cmd.add({"unloopfling"},{"unloopfling","Stops loop flinging a player"},function()
 	Loopvoid=false
+end)
+
+cmd.add({"removeterrain", "rterrain", "noterrain"},{"removeterrain (rterrain, noterrain)","clears terrain"},function()
+	game:GetService("Workspace"):FindFirstChildOfClass('Terrain'):Clear()
+end)
+
+cmd.add({"clearnilinstances", "nonilinstances", "cni"},{"clearnilinstances (nonilinstances, cni)","Removes nil instances"},function()
+	if getnilinstances then
+		for _,nill in pairs(getnilinstances()) do
+			nill:Destroy()
+		end
+	else
+		DoNotif("Your exploit does not support getnilinstances")
+	end
 end)
 
 cmd.add({"inspect"}, {"inspect", "checks a user's items"}, function(args)
