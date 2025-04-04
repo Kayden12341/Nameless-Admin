@@ -564,28 +564,28 @@ local function search(q,doEmpty)
 end
 
 sb.MouseButton1Click:Connect(function()
-    local q = engine == "ScriptBlox" and stb.Text:gsub(" ", "%20") or stb.Text:gsub(" ", "-")
+    local q = engine == "ScriptBlox" and stb.Text:gsub(" ", "%%20") or stb.Text:gsub(" ", "-")
     if q ~= "" then
         search(q)
     else
         if engine == "ScriptBlox" then
-            search(q,true)
+            search(q, true)
         else
-        sf:ClearAllChildren()
-        local el = Instance.new("TextLabel")
-        el.Size = UDim2.new(1, 0, 0, 30)
-        el.BackgroundColor3 = c.wa
-        el.BackgroundTransparency = 0.8
-        el.BorderSizePixel = 0
-        el.Font = Enum.Font.Gotham
-        el.Text = "Please enter a search query"
-        el.TextColor3 = c.tx
-        el.TextSize = 14
-        el.Parent = sf
-        
-        local elc = Instance.new("UICorner")
-        elc.CornerRadius = UDim.new(0, 6)
-        elc.Parent = el
+            sf:ClearAllChildren()
+            local el = Instance.new("TextLabel")
+            el.Size = UDim2.new(1, 0, 0, 30)
+            el.BackgroundColor3 = c.wa
+            el.BackgroundTransparency = 0.8
+            el.BorderSizePixel = 0
+            el.Font = Enum.Font.Gotham
+            el.Text = "Please enter a search query"
+            el.TextColor3 = c.tx
+            el.TextSize = 14
+            el.Parent = sf
+
+            local elc = Instance.new("UICorner")
+            elc.CornerRadius = UDim.new(0, 6)
+            elc.Parent = el
         end
     end
 end)
