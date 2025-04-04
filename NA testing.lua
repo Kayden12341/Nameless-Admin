@@ -7500,7 +7500,7 @@ end
 cmd.add({"watch2", "view2", "spectate2"}, {"watch2 <Player> (view2, spectate2)", "Spectate player with GUI"}, function()
 	cleanup()
 	createGui()
-end, true)
+end)
 
 cmd.add({"unwatch2", "unview2"}, {"unwatch2 (unview2)", "Stop spectating with GUI"}, function()
 	cleanup()
