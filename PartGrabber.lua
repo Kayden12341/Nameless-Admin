@@ -418,47 +418,6 @@ grab.MouseButton1Click:Connect(function()
     end
 end)
 
-copy.MouseButton1Click:Connect(function()
-    if selectedPart then
-        local success, result = pcall(function()
-            local instanceInfo = {
-                ClassName = selectedPart.ClassName,
-                Name = selectedPart.Name,
-                Position = tostring(selectedPart.Position),
-                Size = tostring(selectedPart.Size),
-                Anchored = tostring(selectedPart.Anchored),
-                CanCollide = tostring(selectedPart.CanCollide),
-                Transparency = tostring(selectedPart.Transparency),
-                Material = tostring(selectedPart.Material),
-                Color = tostring(selectedPart.Color)
-            }
-            
-            local infoText = "Instance Info:\n"
-            for prop, value in pairs(instanceInfo) do
-                infoText = infoText .. prop .. ": " .. value .. "\n"
-            end
-            
-            return infoText
-        end)
-        
-        if success then
-            setclipboard(result)
-            StatusLabel.Text = "Instance info copied to clipboard!"
-            StatusLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
-            
-            copy.BackgroundColor3 = Color3.fromRGB(60, 200, 60)
-            wait(0.3)
-            copy.BackgroundColor3 = Color3.fromRGB(40, 40, 80)
-        else
-            StatusLabel.Text = "Error copying instance info"
-            StatusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
-        end
-    else
-        StatusLabel.Text = "No part selected to copy"
-        StatusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
-    end
-end)
-
 del.MouseButton1Click:Connect(function()
     if selectedPart then
         local success, err = pcall(function()
