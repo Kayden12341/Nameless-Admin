@@ -158,10 +158,26 @@ function yayApril(t)
 		t and "Meme Testing" or "Meme Admin";
 		t and "Doofy Testing" or "Doofy Admin";
 		t and "Silly Testing" or "Silly Admin";
-		t and "Goblin Testing" or "Goblin Admin"
+		t and "Goblin Testing" or "Goblin Admin";
+		t and "Bingus Testing" or "Bingus Admin";
+		t and "Chonky Testing" or "Chonky Admin";
+		t and "Floofy Testing" or "Floofy Admin";
+		t and "Yeety Testing" or "Yeety Admin";
+		t and "Bonky Testing" or "Bonky Admin";
+		t and "Derpy Testing" or "Derpy Admin";
+		t and "Cheesy Testing" or "Cheesy Admin";
+		t and "Nugget Testing" or "Nugget Admin";
+		t and "Funky Testing" or "Funky Admin";
+		t and "Floppy Testing" or "Floppy Admin";
+		t and "Chunky Testing" or "Chunky Admin";
+		t and "Snazzy Testing" or "Snazzy Admin";
+		t and "Wonky Testing" or "Wonky Admin";
+		t and "Goober Testing" or "Goober Admin";
+		t and "Dorky Testing" or "Dorky Admin";
 	}
 	return variants[math.random(#variants)]
 end
+
 
 local function getSeasonEmoji()
 	local date = os.date("*t")
@@ -2435,66 +2451,116 @@ cmd.add({"chardebug", "cdebug"}, {"chardebug (cdebug)", "debug your character"},
     local humanoid = character:WaitForChild("Humanoid")
     local rootPart = character:WaitForChild("HumanoidRootPart")
     local workspaceService = SafeGetService("Workspace")
-
+    
     if debugUI then
         debugUI:Destroy()
     end
-
+    
     debugUI = Instance.new("ScreenGui")
     debugUI.Name = "DebugGui"
     NaProtectUI(debugUI)
+    
+    local container = Instance.new("Frame")
+    container.Name = "DebugContainer"
+    container.Size = UDim2.new(0, 520, 0, 300)
+    container.Position = UDim2.new(0.5, -260, 0.2, 0)
+    container.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    container.BackgroundTransparency = 0.3
+    container.BorderSizePixel = 0
+    container.Parent = debugUI
+    
+    local containerCorner = Instance.new("UICorner")
+    containerCorner.CornerRadius = UDim.new(0.1, 0)
+    containerCorner.Parent = container
+    
+    local header = Instance.new("TextLabel")
+    header.Name = "HeaderLabel"
+    header.Size = UDim2.new(1, 0, 0, 40)
+    header.BackgroundTransparency = 1
+    header.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+    header.Text = "Debug Information"
+    header.TextColor3 = Color3.new(1, 1, 1)
+    header.Font = Enum.Font.Code
+    header.TextScaled = true
+    header.Parent = container
 
-    local function maekLabel(name, text, position, size)
-        local label = debugUI:FindFirstChild(name)
-        if not label then
-            label = Instance.new("TextLabel")
-            label.Name = name
-            label.Size = size or UDim2.new(0, 250, 0, 50)
-            label.Position = position
-            label.BackgroundTransparency = 0.2
-            label.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-            label.BorderSizePixel = 0
-            label.TextColor3 = Color3.new(1, 1, 1)
-            label.TextXAlignment = Enum.TextXAlignment.Center
-            label.TextYAlignment = Enum.TextYAlignment.Center
-            label.Font = Enum.Font.Code
-            label.TextSize = 16
-            label.TextScaled = true
-            label.ClipsDescendants = true
-            label.Parent = debugUI
+    local minimizeButton = Instance.new("TextButton")
+    minimizeButton.Name = "MinimizeButton"
+    minimizeButton.Size = UDim2.new(0, 40, 0, 40)
+    minimizeButton.Position = UDim2.new(1, -40, 0, 0)
+    minimizeButton.BackgroundTransparency = 1
+    minimizeButton.Text = "-"
+    minimizeButton.TextScaled = true
+    minimizeButton.TextColor3 = Color3.new(1, 1, 1)
+    minimizeButton.Font = Enum.Font.Code
+    minimizeButton.Parent = header
 
-            local corner = Instance.new("UICorner")
-            corner.CornerRadius = UDim.new(0.2, 0)
-            corner.Parent = label
-        end
-        label.Text = text
-		gui.draggable(label)
-        return label
-    end
-
-    local labels = {
-        {name = "VelocityLabel", text = ""},
-        {name = "PositionLabel", text = ""},
-        {name = "HealthLabel", text = ""},
-        {name = "FOVLabel", text = ""},
-        {name = "StateLabel", text = ""},
-        {name = "ToolLabel", text = ""},
-        {name = "JumpPowerLabel", text = ""},
-        {name = "WalkSpeedLabel", text = ""}
+    gui.draggable(container)
+    
+    local labelsInfo = {
+        {name = "VelocityLabel", text = "Velocity\nX: 0.00\nY: 0.00\nZ: 0.00"},
+        {name = "PositionLabel", text = "Position\nX: 0.00\nY: 0.00\nZ: 0.00"},
+        {name = "HealthLabel", text = "Health\n0.00 / 0.00"},
+        {name = "FOVLabel", text = "FOV\n0.00"},
+        {name = "StateLabel", text = "State\nUnknown"},
+        {name = "ToolLabel", text = "Tool\nNone"},
+        {name = "JumpPowerLabel", text = "Jump Power\n0.00"},
+        {name = "WalkSpeedLabel", text = "Walk Speed\n0.00"}
     }
-
+    
+    local labelObjects = {}
+    local labelWidth = 250
     local labelHeight = 50
     local spacing = 10
-    local totalHeight = (#labels * labelHeight) + ((#labels - 1) * spacing)
-    local startY = 0.5 - (totalHeight / 2) / workspaceService.CurrentCamera.ViewportSize.Y
-
-    for i, labelInfo in ipairs(labels) do
-        local isLeft = i <= math.ceil(#labels / 2)
-        local xOffset = isLeft and 0 or 1
-        local yOffset = startY + ((i - 1) % math.ceil(#labels / 2)) * (labelHeight + spacing) / workspaceService.CurrentCamera.ViewportSize.Y
-        maekLabel(labelInfo.name, labelInfo.text, UDim2.new(xOffset, isLeft and 0 or -250, yOffset, 0), UDim2.new(0, 250, 0, labelHeight))
+    local numColumns = 2
+    local startX = 10
+    local startY = header.Size.Y.Offset + 10
+    
+    for i, info in ipairs(labelsInfo) do
+        local column = ((i - 1) % numColumns)
+        local row = math.floor((i - 1) / numColumns)
+        local label = Instance.new("TextLabel")
+        label.Name = info.name
+        label.Size = UDim2.new(0, labelWidth, 0, labelHeight)
+        label.Position = UDim2.new(0, startX + column * (labelWidth + spacing), 0, startY + row * (labelHeight + spacing))
+        label.BackgroundTransparency = 0.2
+        label.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+        label.BorderSizePixel = 0
+        label.TextColor3 = Color3.new(1, 1, 1)
+        label.TextXAlignment = Enum.TextXAlignment.Center
+        label.TextYAlignment = Enum.TextYAlignment.Center
+        label.Font = Enum.Font.Code
+        label.TextSize = 16
+        label.TextScaled = true
+        label.ClipsDescendants = true
+        label.Text = info.text
+        label.Parent = container
+        
+        local corner = Instance.new("UICorner")
+        corner.CornerRadius = UDim.new(0.2, 0)
+        corner.Parent = label
+        
+        labelObjects[info.name] = label
     end
 
+    local isMinimized = false
+    minimizeButton.MouseButton1Click:Connect(function()
+        isMinimized = not isMinimized
+        if isMinimized then
+            for _, label in pairs(labelObjects) do
+                label.Visible = false
+            end
+            container.Size = UDim2.new(0, 520, 0, 40)
+            minimizeButton.Text = "+"
+        else
+            for _, label in pairs(labelObjects) do
+                label.Visible = true
+            end
+            container.Size = UDim2.new(0, 520, 0, 300)
+            minimizeButton.Text = "-"
+        end
+    end)
+    
     local function updateDebugInfo()
         local velocity = rootPart.Velocity
         local position = rootPart.Position
@@ -2506,14 +2572,14 @@ cmd.add({"chardebug", "cdebug"}, {"chardebug (cdebug)", "debug your character"},
         local jumpPower = humanoid.JumpPower
         local walkSpeed = humanoid.WalkSpeed
 
-        debugUI:FindFirstChild("VelocityLabel").Text = string.format("Velocity\nX: %.2f\nY: %.2f\nZ: %.2f", velocity.X, velocity.Y, velocity.Z)
-        debugUI:FindFirstChild("PositionLabel").Text = string.format("Position\nX: %.2f\nY: %.2f\nZ: %.2f", position.X, position.Y, position.Z)
-        debugUI:FindFirstChild("HealthLabel").Text = string.format("Health\n%.2f / %.2f", health, maxHealth)
-        debugUI:FindFirstChild("FOVLabel").Text = string.format("FOV\n%.2f", fov)
-        debugUI:FindFirstChild("StateLabel").Text = string.format("State\n%s", tostring(state))
-        debugUI:FindFirstChild("ToolLabel").Text = string.format("Tool\n%s", tool)
-        debugUI:FindFirstChild("JumpPowerLabel").Text = string.format("Jump Power\n%.2f", jumpPower)
-        debugUI:FindFirstChild("WalkSpeedLabel").Text = string.format("Walk Speed\n%.2f", walkSpeed)
+        labelObjects["VelocityLabel"].Text = string.format("Velocity\nX: %.2f\nY: %.2f\nZ: %.2f", velocity.X, velocity.Y, velocity.Z)
+        labelObjects["PositionLabel"].Text = string.format("Position\nX: %.2f\nY: %.2f\nZ: %.2f", position.X, position.Y, position.Z)
+        labelObjects["HealthLabel"].Text = string.format("Health\n%.2f / %.2f", health, maxHealth)
+        labelObjects["FOVLabel"].Text = string.format("FOV\n%.2f", fov)
+        labelObjects["StateLabel"].Text = string.format("State\n%s", tostring(state))
+        labelObjects["ToolLabel"].Text = string.format("Tool\n%s", tool)
+        labelObjects["JumpPowerLabel"].Text = string.format("Jump Power\n%.2f", jumpPower)
+        labelObjects["WalkSpeedLabel"].Text = string.format("Walk Speed\n%.2f", walkSpeed)
     end
 
     RunService:BindToRenderStep("UpdateDebugInfo", Enum.RenderPriority.Last.Value, updateDebugInfo)
@@ -7127,30 +7193,21 @@ local function createGui()
 		specGui.Name = "SpectateGui"
 		NaProtectUI(specGui)
 		specGui.ResetOnSpawn = false
-
+		specGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+		
 		local frame = Instance.new("Frame")
 		frame.Size = UDim2.new(0, 350, 0, 40)
 		frame.Position = UDim2.new(0.5, -175, 1, -160)
 		frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 		frame.BorderSizePixel = 0
 		frame.Parent = specGui
-
+		
 		local corner = Instance.new("UICorner")
 		corner.CornerRadius = UDim.new(0, 20)
 		corner.Parent = frame
-
+		
 		gui.draggable(frame)
-
-		local playerNameLabel = Instance.new("TextLabel")
-		playerNameLabel.Size = UDim2.new(0.78, 0, 1, 0)
-		playerNameLabel.Position = UDim2.new(0.06, 0, 0, 0)
-		playerNameLabel.Text = "Spectating: None"
-		playerNameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-		playerNameLabel.BackgroundTransparency = 1
-		playerNameLabel.Font = Enum.Font.GothamBold
-		playerNameLabel.TextScaled = true
-		playerNameLabel.Parent = frame
-
+		
 		local backButton = Instance.new("TextButton")
 		backButton.Size = UDim2.new(0, 40, 0, 40)
 		backButton.Position = UDim2.new(0, -18, 0, 0)
@@ -7160,11 +7217,11 @@ local function createGui()
 		backButton.Font = Enum.Font.GothamBold
 		backButton.TextSize = 24
 		backButton.Parent = frame
-
+		
 		local backCorner = Instance.new("UICorner")
 		backCorner.CornerRadius = UDim.new(0, 10)
 		backCorner.Parent = backButton
-
+		
 		local forwardButton = Instance.new("TextButton")
 		forwardButton.Size = UDim2.new(0, 40, 0, 40)
 		forwardButton.Position = UDim2.new(1, -22, 0, 0)
@@ -7174,11 +7231,25 @@ local function createGui()
 		forwardButton.Font = Enum.Font.GothamBold
 		forwardButton.TextSize = 24
 		forwardButton.Parent = frame
-
+		
 		local forwardCorner = Instance.new("UICorner")
 		forwardCorner.CornerRadius = UDim.new(0, 10)
 		forwardCorner.Parent = forwardButton
-
+		
+		local dropdownButton = Instance.new("TextButton")
+		dropdownButton.Size = UDim2.new(0.78, 0, 1, 0)
+		dropdownButton.Position = UDim2.new(0.11, 0, 0, 0)
+		dropdownButton.Text = "Select Player"
+		dropdownButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+		dropdownButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+		dropdownButton.Font = Enum.Font.GothamBold
+		dropdownButton.TextScaled = true
+		dropdownButton.Parent = frame
+		
+		local dropCorner = Instance.new("UICorner")
+		dropCorner.CornerRadius = UDim.new(0, 10)
+		dropCorner.Parent = dropdownButton
+		
 		local closeButton = Instance.new("TextButton")
 		closeButton.Size = UDim2.new(0, 30, 0, 30)
 		closeButton.Position = UDim2.new(1, -55, 0, 5)
@@ -7188,26 +7259,54 @@ local function createGui()
 		closeButton.Font = Enum.Font.GothamBold
 		closeButton.TextSize = 18
 		closeButton.Parent = frame
-
+		
 		local closeCorner = Instance.new("UICorner")
 		closeCorner.CornerRadius = UDim.new(0, 5)
 		closeCorner.Parent = closeButton
-
+		
 		closeButton.MouseButton1Click:Connect(function()
 			cleanup()
 		end)
-
+		
+		local dropdownOpen = false
+		local dropdownList
+		
 		local function updateSpectating()
 			if #playerButtons == 0 then
-				playerNameLabel.Text = "Spectating: None"
+				dropdownButton.Text = "Spectating: None"
 				return
 			end
 			local currentPlayer = playerButtons[currentPlayerIndex]
-			local nameCheck = currentPlayer.DisplayName == currentPlayer.Name and '@'..currentPlayer.Name or currentPlayer.DisplayName..' (@'..currentPlayer.Name..')'
-			playerNameLabel.Text = "Spectating: "..nameCheck
+			local nameCheck = currentPlayer.DisplayName == currentPlayer.Name and '@'..currentPlayer.Name or currentPlayer.DisplayName.." (@ "..currentPlayer.Name.." )"
+			dropdownButton.Text = "Spectating: " .. nameCheck
+			if currentPlayer == game.Players.LocalPlayer then
+				dropdownButton.TextColor3 = Color3.fromRGB(255, 255, 0)
+			else
+				dropdownButton.TextColor3 = Color3.fromRGB(0, 162, 255)
+			end
 			spectatePlayer(currentPlayer)
+			
+			if dropdownOpen and dropdownList then
+				for _, child in pairs(dropdownList:GetChildren()) do
+					if child:IsA("TextButton") then
+						local idx = child:GetAttribute("PlayerIndex")
+						if idx then
+							local playerRef = playerButtons[idx]
+							if playerRef then
+								if playerRef == game.Players.LocalPlayer then
+									child.TextColor3 = Color3.fromRGB(255, 255, 0)
+								elseif playerRef == currentPlayer then
+									child.TextColor3 = Color3.fromRGB(0, 162, 255)
+								else
+									child.TextColor3 = Color3.fromRGB(255, 255, 255)
+								end
+							end
+						end
+					end
+				end
+			end
 		end
-
+		
 		MouseButtonFix(backButton, function()
 			if #playerButtons == 0 then return end
 			currentPlayerIndex = currentPlayerIndex - 1
@@ -7216,7 +7315,7 @@ local function createGui()
 			end
 			updateSpectating()
 		end)
-
+		
 		MouseButtonFix(forwardButton, function()
 			if #playerButtons == 0 then return end
 			currentPlayerIndex = currentPlayerIndex + 1
@@ -7225,7 +7324,56 @@ local function createGui()
 			end
 			updateSpectating()
 		end)
-
+		
+		dropdownButton.MouseButton1Click:Connect(function()
+			if dropdownOpen then
+				if dropdownList then dropdownList:Destroy() end
+				dropdownOpen = false
+			else
+				dropdownList = Instance.new("Frame")
+				dropdownList.Size = UDim2.new(1, 0, 0, #playerButtons * 30)
+				dropdownList.Position = UDim2.new(0, 0, 1, 0)
+				dropdownList.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+				dropdownList.BorderSizePixel = 0
+				dropdownList.Parent = frame
+				
+				local listCorner = Instance.new("UICorner")
+				listCorner.CornerRadius = UDim.new(0, 10)
+				listCorner.Parent = dropdownList
+				
+				for i, player in ipairs(playerButtons) do
+					local playerButton = Instance.new("TextButton")
+					playerButton.Size = UDim2.new(1, 0, 0, 30)
+					playerButton.Position = UDim2.new(0, 0, 0, (i - 1) * 30)
+					local displayText = player.DisplayName == player.Name and '@'..player.Name or player.DisplayName.." (@ "..player.Name.." )"
+					playerButton.Text = displayText
+					playerButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+					playerButton.Font = Enum.Font.Gotham
+					playerButton.TextScaled = true
+					if player == game.Players.LocalPlayer then
+						playerButton.TextColor3 = Color3.fromRGB(255, 255, 0)
+					elseif playerButtons[currentPlayerIndex] == player then
+						playerButton.TextColor3 = Color3.fromRGB(0, 162, 255)
+					else
+						playerButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+					end
+					playerButton.Parent = dropdownList
+					playerButton:SetAttribute("PlayerIndex", i)
+					
+					playerButton.MouseButton1Click:Connect(function()
+						currentPlayerIndex = i
+						updateSpectating()
+						if dropdownList then
+							dropdownList:Destroy()
+							dropdownOpen = false
+						end
+					end)
+				end
+				
+				dropdownOpen = true
+			end
+		end)
+		
 		updateSpectating()
 	end
 end
@@ -10698,15 +10846,15 @@ local UpdLogsList=UpdLogsFrame:FindFirstChild("Container"):FindFirstChild("List"
 local UpdLogsLabel=UpdLogsList:FindFirstChildOfClass("TextLabel");
 local resizeFrame=ScreenGui:FindFirstChild("Resizeable");
 local resizeXY={
-	Top        ={Vector2.new(0,-1),    Vector2.new(0,-1),    "rbxassetid://2911850935"},
-	Bottom    ={Vector2.new(0,1),    Vector2.new(0,0),    "rbxassetid://2911850935"},
-	Left    ={Vector2.new(-1,0),    Vector2.new(1,0),    "rbxassetid://2911851464"},
-	Right    ={Vector2.new(1,0),    Vector2.new(0,0),    "rbxassetid://2911851464"},
+	Top = {Vector2.new(0,-1),    Vector2.new(0,-1),    "rbxassetid://2911850935"},
+	Bottom = {Vector2.new(0,1),    Vector2.new(0,0),    "rbxassetid://2911850935"},
+	Left = {Vector2.new(-1,0),    Vector2.new(1,0),    "rbxassetid://2911851464"},
+	Right = {Vector2.new(1,0),    Vector2.new(0,0),    "rbxassetid://2911851464"},
 
-	TopLeft        ={Vector2.new(-1,-1),    Vector2.new(1,-1),    "rbxassetid://2911852219"},
-	TopRight    ={Vector2.new(1,-1),    Vector2.new(0,-1),    "rbxassetid://2911851859"},
-	BottomLeft    ={Vector2.new(-1,1),    Vector2.new(1,0),    "rbxassetid://2911851859"},
-	BottomRight    ={Vector2.new(1,1),    Vector2.new(0,0),    "rbxassetid://2911852219"},
+	TopLeft = {Vector2.new(-1,-1),    Vector2.new(1,-1),    "rbxassetid://2911852219"},
+	TopRight = {Vector2.new(1,-1),    Vector2.new(0,-1),    "rbxassetid://2911851859"},
+	BottomLeft = {Vector2.new(-1,1),    Vector2.new(1,0),    "rbxassetid://2911851859"},
+	BottomRight = {Vector2.new(1,1),    Vector2.new(0,0),    "rbxassetid://2911852219"},
 }
 
 cmdExample.Parent=nil
@@ -10825,39 +10973,33 @@ gui.resizeable = function(ui, min, max)
 	local lastSize
 	local lastPos = Vector2.new()
 	local dragging = false
+	local draggingFinger = nil
+	local currentTouchPos = nil
 
 	local function updateResize(currentPos)
 		if not dragging or not mode then return end
-
 		local xy = resizeXY[mode.Name]
 		if not xy then return end
-
 		local delta = currentPos - lastPos
-
 		local resizeDelta = Vector2.new(
 			delta.X * xy[1].X,
 			delta.Y * xy[1].Y
 		)
-
 		local newSize = Vector2.new(
 			lastSize.X + resizeDelta.X,
 			lastSize.Y + resizeDelta.Y
 		)
-
 		newSize = Vector2.new(
 			math.clamp(newSize.X, min.X, max.X),
 			math.clamp(newSize.Y, min.Y, max.Y)
 		)
-
 		ui.Size = UDim2.new(0, newSize.X, 0, newSize.Y)
-
 		local newPos = UDim2.new(
 			UIPos.X.Scale,
 			UIPos.X.Offset,
 			UIPos.Y.Scale,
 			UIPos.Y.Offset
 		)
-
 		if xy[1].X < 0 then
 			newPos = UDim2.new(
 				newPos.X.Scale,
@@ -10866,7 +11008,6 @@ gui.resizeable = function(ui, min, max)
 				newPos.Y.Offset
 			)
 		end
-
 		if xy[1].Y < 0 then
 			newPos = UDim2.new(
 				newPos.X.Scale,
@@ -10875,14 +11016,25 @@ gui.resizeable = function(ui, min, max)
 				UIPos.Y.Offset + (lastSize.Y - newSize.Y)
 			)
 		end
-
 		ui.Position = newPos
 	end
 
 	local connection = RunService.RenderStepped:Connect(function()
 		if dragging then
-			local currentPos = UserInputService:GetMouseLocation()
-			updateResize(Vector2.new(currentPos.X, currentPos.Y))
+			local currentPos
+			if draggingFinger and currentTouchPos then
+				currentPos = currentTouchPos
+			else
+				local mousePos = UserInputService:GetMouseLocation()
+				currentPos = Vector2.new(mousePos.X, mousePos.Y)
+			end
+			updateResize(currentPos)
+		end
+	end)
+
+	local inputChangedConnection = UserInputService.InputChanged:Connect(function(input, gameProcessed)
+		if dragging and input.UserInputType == Enum.UserInputType.Touch and input.UserInputId == draggingFinger then
+			currentTouchPos = input.Position
 		end
 	end)
 
@@ -10891,8 +11043,13 @@ gui.resizeable = function(ui, min, max)
 			if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
 				mode = button
 				dragging = true
-				local currentPos = UserInputService:GetMouseLocation()
-				lastPos = Vector2.new(currentPos.X, currentPos.Y)
+				if input.UserInputType == Enum.UserInputType.Touch then
+					draggingFinger = input.UserInputId
+					lastPos = input.Position
+				else
+					local mousePos = UserInputService:GetMouseLocation()
+					lastPos = Vector2.new(mousePos.X, mousePos.Y)
+				end
 				lastSize = ui.AbsoluteSize
 				UIPos = ui.Position
 			end
@@ -10902,6 +11059,10 @@ gui.resizeable = function(ui, min, max)
 			if (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) and mode == button then
 				dragging = false
 				mode = nil
+				if input.UserInputType == Enum.UserInputType.Touch then
+					draggingFinger = nil
+					currentTouchPos = nil
+				end
 				if mouse.Icon == resizeXY[button.Name][3] then
 					mouse.Icon = ""
 				end
@@ -10925,6 +11086,10 @@ gui.resizeable = function(ui, min, max)
 		if (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) and dragging then
 			dragging = false
 			mode = nil
+			if input.UserInputType == Enum.UserInputType.Touch then
+				draggingFinger = nil
+				currentTouchPos = nil
+			end
 			mouse.Icon = ""
 		end
 	end)
@@ -10933,56 +11098,88 @@ gui.resizeable = function(ui, min, max)
 		if connection then
 			connection:Disconnect()
 		end
+		if inputChangedConnection then
+			inputChangedConnection:Disconnect()
+		end
 	end
 end
 
 gui.draggable=function(ui, dragui)
 	if not dragui then dragui = ui end
-	local UserInputService = UserInputService
+    local UserInputService = game:GetService("UserInputService")
 
-	local dragging
-	local dragInput
-	local dragStart
-	local startPos
+    local dragging
+    local dragInput
+    local dragStart
+    local startPos
 
-	local function update(input)
-		local delta = input.Position - dragStart
-		local newXOffset = startPos.X.Offset + delta.X
-		local newYOffset = startPos.Y.Offset + delta.Y
+    local function update(input)
+        local delta = input.Position - dragStart
+        local parentSize = ui.Parent.AbsoluteSize
+        local uiSize = ui.AbsoluteSize
 
-		local screenSize = ui.Parent.AbsoluteSize
-		local newXScale = startPos.X.Scale + (newXOffset / screenSize.X)
-		local newYScale = startPos.Y.Scale + (newYOffset / screenSize.Y)
+        local newXOffset = startPos.X.Offset + delta.X
+        local newYOffset = startPos.Y.Offset + delta.Y
 
-		ui.Position = UDim2.new(newXScale, 0, newYScale, 0)
-	end
+        local newXScale = startPos.X.Scale + (newXOffset / parentSize.X)
+        local newYScale = startPos.Y.Scale + (newYOffset / parentSize.Y)
 
-	dragui.InputBegan:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-			dragging = true
-			dragStart = input.Position
-			startPos = ui.Position
+        local minX = 0
+        local minY = 0
+        local maxX = 1 - (uiSize.X / parentSize.X)
+        local maxY = 1 - (uiSize.Y / parentSize.Y)
 
-			input.Changed:Connect(function()
-				if input.UserInputState == Enum.UserInputState.End then
-					dragging = false
-				end
-			end)
-		end
-	end)
+        newXScale = math.clamp(newXScale, minX, maxX)
+        newYScale = math.clamp(newYScale, minY, maxY)
 
-	dragui.InputChanged:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-			dragInput = input
-		end
-	end)
+        ui.Position = UDim2.new(newXScale, 0, newYScale, 0)
+    end
 
-	UserInputService.InputChanged:Connect(function(input)
-		if input == dragInput and dragging then
-			update(input)
-		end
-	end)
-	ui.Active=true
+    dragui.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = ui.Position
+
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+
+    dragui.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            dragInput = input
+        end
+    end)
+
+    UserInputService.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            update(input)
+        end
+    end)
+
+    local function onParentSizeChanged()
+        local parentSize = ui.Parent.AbsoluteSize
+        local uiSize = ui.AbsoluteSize
+        local currentPos = ui.Position
+
+        local minX = 0
+        local minY = 0
+        local maxX = 1 - (uiSize.X / parentSize.X)
+        local maxY = 1 - (uiSize.Y / parentSize.Y)
+
+        local newXScale = math.clamp(currentPos.X.Scale, minX, maxX)
+        local newYScale = math.clamp(currentPos.Y.Scale, minY, maxY)
+
+        ui.Position = UDim2.new(newXScale, 0, newYScale, 0)
+    end
+
+    ui.Parent:GetPropertyChangedSignal("AbsoluteSize"):Connect(onParentSizeChanged)
+    
+    ui.Active = true
 end
 
 gui.draggablev2=function(floght)
@@ -11090,12 +11287,14 @@ for i,v in ipairs(cmdAutofill:GetChildren()) do
 		v.Visible=false
 	end
 end
+
 gui.barSelect=function(speed)
 	centerBar.Visible=true
 	gui.tween(centerBar,"Sine","Out",speed or 0.25,{Size=UDim2.new(0,250,1,15)})
 	gui.tween(leftFill,"Quad","Out",speed or 0.3,{Position=UDim2.new(0,0,0.5,0)})
 	gui.tween(rightFill,"Quad","Out",speed or 0.3,{Position=UDim2.new(1,0,0.5,0)})
 end
+
 gui.barDeselect=function(speed)
 	gui.tween(centerBar,"Sine","Out",speed or 0.25,{Size=UDim2.new(0,250,0,0)})
 	gui.tween(leftFill,"Sine","In",speed or 0.3,{Position=UDim2.new(-0.5,100,0.5,0)})
