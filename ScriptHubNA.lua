@@ -564,7 +564,7 @@ local function search(q,doEmpty)
 end
 
 sb.MouseButton1Click:Connect(function()
-    local q = engine == "ScriptBlox" and stb.Text:gsub(" ", "%%20") or stb.Text:gsub(" ", "-")
+    local q = stb.Text:gsub(" ", "%%20")
     if q ~= "" then
         search(q)
     else
