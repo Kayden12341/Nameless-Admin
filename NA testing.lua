@@ -7906,7 +7906,7 @@ cmd.add({"freegamepass", "freegp"}, {"freegamepass (freegp)", "Returns true if t
 	DoNotif("Free gamepasses is now enabled, to disable rejoin. Keep in mind this command won't work in every game")
 end)
 
-cmd.add({"listen"}, {"listen", "Listen to your target's voice chat"}, function(plr)
+cmd.add({"listen"}, {"listen <player>", "Listen to your target's voice chat"}, function(plr)
 	local trg = getPlr(plr)
 
 	local Root = getRoot(trg.Character)
