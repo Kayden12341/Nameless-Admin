@@ -721,7 +721,9 @@ cmd.loop = function(commandName, args)
 
 					task.spawn(function()
 						while Loops[loopKey] and Loops[loopKey].running do
-							Loops[loopKey].command(unpack(Loops[loopKey].args))
+							pcall(function()
+								Loops[loopKey].command(unpack(Loops[loopKey].args))
+							end)
 							task.wait(Loops[loopKey].interval)
 						end
 					end)
