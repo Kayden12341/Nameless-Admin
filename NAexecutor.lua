@@ -469,7 +469,7 @@ local function updateEditorSize()
         Vector2.new(math.huge, math.huge)
     )
 
-    t.Size = UDim2.new(0, math.max(440, textSize.X + 10), 0, math.max(230, textSize.Y + 10))
+    t.Size = UDim2.new(0, math.max(440, textSize.X + 100), 0, math.max(230, textSize.Y + 100))
     s.CanvasSize = UDim2.new(0, t.Size.X.Offset, 0, t.Size.Y.Offset)
 
     hl.Size = t.Size
