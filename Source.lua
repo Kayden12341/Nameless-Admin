@@ -139,10 +139,26 @@ function yayApril(t)
 		t and "Meme Testing" or "Meme Admin";
 		t and "Doofy Testing" or "Doofy Admin";
 		t and "Silly Testing" or "Silly Admin";
-		t and "Goblin Testing" or "Goblin Admin"
+		t and "Goblin Testing" or "Goblin Admin";
+		t and "Bingus Testing" or "Bingus Admin";
+		t and "Chonky Testing" or "Chonky Admin";
+		t and "Floofy Testing" or "Floofy Admin";
+		t and "Yeety Testing" or "Yeety Admin";
+		t and "Bonky Testing" or "Bonky Admin";
+		t and "Derpy Testing" or "Derpy Admin";
+		t and "Cheesy Testing" or "Cheesy Admin";
+		t and "Nugget Testing" or "Nugget Admin";
+		t and "Funky Testing" or "Funky Admin";
+		t and "Floppy Testing" or "Floppy Admin";
+		t and "Chunky Testing" or "Chunky Admin";
+		t and "Snazzy Testing" or "Snazzy Admin";
+		t and "Wonky Testing" or "Wonky Admin";
+		t and "Goober Testing" or "Goober Admin";
+		t and "Dorky Testing" or "Dorky Admin";
 	}
 	return variants[math.random(#variants)]
 end
+
 
 local function getSeasonEmoji()
 	local date = os.date("*t")
@@ -394,7 +410,7 @@ local FakeLag=false
 local Loopvoid=false
 local loopgrab=false
 local Loopmute=false
-local OrgDestroyHeight = SafeGetService("Workspace").FallenPartsDestroyHeight
+local OrgDestroyHeight = game:GetService("Workspace").FallenPartsDestroyHeight
 local Watch=false
 local Admin={}
 local playerButtons={}
@@ -960,7 +976,7 @@ local plr=Player
 speaker=Player
 local char=plr.Character
 local JSONEncode,JSONDecode=HttpService.JSONEncode,HttpService.JSONDecode
-local con=game.Loaded.Connect
+local LoadedConnect=game.Loaded.Connect
 local LoadTime=tick();
 
 NACaller(function()
@@ -1049,7 +1065,7 @@ function ESP(player)
 				for _, part in pairs(player.Character:GetChildren()) do
 					if part:IsA("BasePart") and not part:FindFirstChildOfClass("Accessory") then
 						local boxAdornment = Instance.new("BoxHandleAdornment")
-						boxAdornment.Name = player.Name .. "_Box"
+						boxAdornment.Name = player.Name.."_Box"
 						boxAdornment.Parent = espHolder
 						boxAdornment.Adornee = part
 						boxAdornment.AlwaysOnTop = true
@@ -2056,354 +2072,431 @@ cmd.add({"clickfling","mousefling"},{"mousefling (clickfling)","Fling a player b
 	end)
 end)
 
-cmd.add({"ping"},{"ping","Shows your ping"},function()
-	local Ping = Instance.new("ScreenGui")
-	local Pingtext = Instance.new("TextLabel")
-	local UICorner = Instance.new("UICorner")
-	local UIStroke = Instance.new("UIStroke")
-	local MinimizeButton = Instance.new("TextButton")
-	local UICornerMinimize = Instance.new("UICorner")
-	local CloseButton = Instance.new("TextButton")
-	local UICornerClose = Instance.new("UICorner")
-
-	Ping.Name = "Ping"
-	NaProtectUI(Ping)
-	Ping.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-	Ping.ResetOnSpawn = false
-
-	Pingtext.Name = "Pingtext"
-	Pingtext.Parent = Ping
-	Pingtext.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
-	Pingtext.BackgroundTransparency = 0.2
-	Pingtext.Position = UDim2.new(0, 0, 0, 48)
-	Pingtext.Size = UDim2.new(0, 201, 0, 35)
-	Pingtext.Font = Enum.Font.GothamSemibold
-	Pingtext.Text = "Ping: --"
-	Pingtext.TextColor3 = Color3.fromRGB(255, 255, 255)
-	Pingtext.TextSize = 16
-	Pingtext.TextXAlignment = Enum.TextXAlignment.Center
-	Pingtext.TextWrapped = true
-
-	CloseButton.Name = "CloseButton"
-	CloseButton.Parent = Pingtext
-	CloseButton.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
-	CloseButton.Position = UDim2.new(1, -25, 0.5, -10)
-	CloseButton.Size = UDim2.new(0, 20, 0, 20)
-	CloseButton.Font = Enum.Font.GothamBold
-	CloseButton.Text = "X"
-	CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-	CloseButton.TextSize = 14
-	CloseButton.ZIndex = 10
-
-	UICornerClose.CornerRadius = UDim.new(0, 10)
-	UICornerClose.Parent = CloseButton
-
-	MinimizeButton.Name = "MinimizeButton"
-	MinimizeButton.Parent = Pingtext
-	MinimizeButton.BackgroundColor3 = Color3.fromRGB(50, 50, 255)
-	MinimizeButton.Position = UDim2.new(1, -50, 0.5, -10)
-	MinimizeButton.Size = UDim2.new(0, 20, 0, 20)
-	MinimizeButton.Font = Enum.Font.GothamBold
-	MinimizeButton.Text = "-"
-	MinimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-	MinimizeButton.TextSize = 14
-	MinimizeButton.ZIndex = 10
-
-	UICornerMinimize.CornerRadius = UDim.new(0, 10)
-	UICornerMinimize.Parent = MinimizeButton
-
-	UICorner.CornerRadius = UDim.new(0, 10)
-	UICorner.Parent = Pingtext
-
-	UIStroke.Color = Color3.fromRGB(100, 100, 255)
-	UIStroke.Thickness = 1.5
-	UIStroke.Parent = Pingtext
-
-	local minimized = false
-	MouseButtonFix(MinimizeButton, function()
-		minimized = not minimized
-		Pingtext.Size = minimized and UDim2.new(0, 201, 0, 20) or UDim2.new(0, 201, 0, 35)
-		Pingtext.Text = minimized and "Ping" or "Ping: --"
-	end)
-
-	MouseButtonFix(CloseButton, function()
-		Ping:Destroy()
-	end)
-
-	local RunService = RunService
-	local lastUpdate = 0
-	local updateInterval = 0.5
-
-	RunService.RenderStepped:Connect(function()
-		local currentTime = tick()
-		if currentTime - lastUpdate >= updateInterval then
-			local pingValue = SafeGetService("Stats").Network.ServerStatsItem["Data Ping"]
-			local ping = tonumber(pingValue:GetValueString():match("%d+"))
-
-			local color
-			if ping <= 50 then
-				color = Color3.fromRGB(0, 255, 100)
-			elseif ping <= 100 then
-				color = Color3.fromRGB(255, 255, 0)
+cmd.add({"ping"}, {"ping", "Shows your ping"}, function()
+	local function createWindow(name, position, maxSize, minSize, defaultText)
+		local screenGui = Instance.new("ScreenGui")
+		screenGui.Name = name
+		NaProtectUI(screenGui)
+		screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+		screenGui.ResetOnSpawn = false
+	
+		local window = Instance.new("TextLabel")
+		window.Name = name.."Label"
+		window.Parent = screenGui
+		window.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+		window.BackgroundTransparency = 0.2
+		window.Position = position
+		window.Size = maxSize
+		window.Font = Enum.Font.GothamSemibold
+		window.Text = defaultText
+		window.TextColor3 = Color3.fromRGB(255, 255, 255)
+		window.TextSize = 16
+		window.TextXAlignment = Enum.TextXAlignment.Center
+		window.TextWrapped = true
+	
+		local uiCorner = Instance.new("UICorner")
+		uiCorner.CornerRadius = UDim.new(0, 10)
+		uiCorner.Parent = window
+	
+		local uiStroke = Instance.new("UIStroke")
+		uiStroke.Color = Color3.fromRGB(100, 100, 255)
+		uiStroke.Thickness = 1.5
+		uiStroke.Parent = window
+	
+		local closeButton = Instance.new("TextButton")
+		closeButton.Name = "CloseButton"
+		closeButton.Parent = window
+		closeButton.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+		closeButton.Position = UDim2.new(1, -25, 0.5, -10)
+		closeButton.Size = UDim2.new(0, 20, 0, 20)
+		closeButton.Font = Enum.Font.GothamBold
+		closeButton.Text = "X"
+		closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+		closeButton.TextSize = 14
+		closeButton.ZIndex = 10
+	
+		local closeUICorner = Instance.new("UICorner")
+		closeUICorner.CornerRadius = UDim.new(0, 10)
+		closeUICorner.Parent = closeButton
+	
+		local minimizeButton = Instance.new("TextButton")
+		minimizeButton.Name = "MinimizeButton"
+		minimizeButton.Parent = window
+		minimizeButton.BackgroundColor3 = Color3.fromRGB(50, 50, 255)
+		minimizeButton.Position = UDim2.new(1, -50, 0.5, -10)
+		minimizeButton.Size = UDim2.new(0, 20, 0, 20)
+		minimizeButton.Font = Enum.Font.GothamBold
+		minimizeButton.Text = "-"
+		minimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+		minimizeButton.TextSize = 14
+		minimizeButton.ZIndex = 10
+	
+		local minUICorner = Instance.new("UICorner")
+		minUICorner.CornerRadius = UDim.new(0, 10)
+		minUICorner.Parent = minimizeButton
+	
+		return {
+			screenGui = screenGui,
+			window = window,
+			closeButton = closeButton,
+			minimizeButton = minimizeButton,
+			maxSize = maxSize,
+			minSize = minSize,
+			defaultText = defaultText,
+			minimized = false
+		}
+	end
+	
+	local function setupMinimize(guiElements)
+		MouseButtonFix(guiElements.minimizeButton, function()
+			guiElements.minimized = not guiElements.minimized
+			local tweenInfo = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+			local targetSize = guiElements.minimized and guiElements.minSize or guiElements.maxSize
+			local tween = TweenService:Create(guiElements.window, tweenInfo, {Size = targetSize})
+			tween:Play()
+			if guiElements.minimized then
+				local title = guiElements.defaultText:match("^(%S+)")
+				guiElements.window.Text = title
 			else
-				color = Color3.fromRGB(255, 50, 50)
+				guiElements.window.Text = guiElements.defaultText
 			end
+		end)
+	end
+	
+	local function setupClose(guiElements)
+		MouseButtonFix(guiElements.closeButton, function()
+			guiElements.screenGui:Destroy()
+		end)
+	end
+	
+	local function setupDraggable(guiElements)
+		gui.draggable(guiElements.window)
+	end
+    local guiElements = createWindow("Ping", UDim2.new(0, 0, 0, 48), UDim2.new(0, 201, 0, 35), UDim2.new(0, 201, 0, 20), "Ping: --")
+    setupMinimize(guiElements)
+    setupClose(guiElements)
+    setupDraggable(guiElements)
+    local lastUpdate = 0
+    local updateInterval = 0.5
 
-			if not minimized then
-				Pingtext.Text = "Ping: "..ping.." ms"
-				Pingtext.TextColor3 = color
-			end
+    RunService.RenderStepped:Connect(function()
+        local currentTime = tick()
+        if currentTime - lastUpdate >= updateInterval then
+            local pingValue = SafeGetService("Stats").Network.ServerStatsItem["Data Ping"]
+            local ping = tonumber(pingValue:GetValueString():match("%d+"))
+            local color
+            if ping <= 50 then
+                color = Color3.fromRGB(0, 255, 100)
+            elseif ping <= 100 then
+                color = Color3.fromRGB(255, 255, 0)
+            else
+                color = Color3.fromRGB(255, 50, 50)
+            end
 
-			lastUpdate = currentTime
-		end
-	end)
+            if not guiElements.minimized then
+                guiElements.window.Text = "Ping: "..ping.." ms"
+                guiElements.window.TextColor3 = color
+            end
 
-	gui.draggable(Pingtext)
+            lastUpdate = currentTime
+        end
+    end)
 end)
 
-cmd.add({"fps"},{"fps","Shows your fps"},function()
-	local Fps = Instance.new("ScreenGui")
-	local Fpstext = Instance.new("TextLabel")
-	local UICorner = Instance.new("UICorner")
-	local UIStroke = Instance.new("UIStroke")
-	local MinimizeButton = Instance.new("TextButton")
-	local UICornerMinimize = Instance.new("UICorner")
-	local CloseButton = Instance.new("TextButton")
-	local UICornerClose = Instance.new("UICorner")
-
-	Fps.Name = "Fps"
-	NaProtectUI(Fps)
-	Fps.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-	Fps.ResetOnSpawn = false
-
-	Fpstext.Name = "Fpstext"
-	Fpstext.Parent = Fps
-	Fpstext.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
-	Fpstext.BackgroundTransparency = 0.2
-	Fpstext.Position = UDim2.new(0, 0, 0, 6)
-	Fpstext.Size = UDim2.new(0, 201, 0, 35)
-	Fpstext.Font = Enum.Font.GothamSemibold
-	Fpstext.Text = "FPS: --"
-	Fpstext.TextColor3 = Color3.fromRGB(255, 255, 255)
-	Fpstext.TextSize = 16
-	Fpstext.TextXAlignment = Enum.TextXAlignment.Center
-	Fpstext.TextWrapped = true
-
-	CloseButton.Name = "CloseButton"
-	CloseButton.Parent = Fpstext
-	CloseButton.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
-	CloseButton.Position = UDim2.new(1, -25, 0.5, -10)
-	CloseButton.Size = UDim2.new(0, 20, 0, 20)
-	CloseButton.Font = Enum.Font.GothamBold
-	CloseButton.Text = "X"
-	CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-	CloseButton.TextSize = 14
-	CloseButton.ZIndex = 10
-
-	UICornerClose.CornerRadius = UDim.new(0, 10)
-	UICornerClose.Parent = CloseButton
-
-	MinimizeButton.Name = "MinimizeButton"
-	MinimizeButton.Parent = Fpstext
-	MinimizeButton.BackgroundColor3 = Color3.fromRGB(50, 50, 255)
-	MinimizeButton.Position = UDim2.new(1, -50, 0.5, -10)
-	MinimizeButton.Size = UDim2.new(0, 20, 0, 20)
-	MinimizeButton.Font = Enum.Font.GothamBold
-	MinimizeButton.Text = "-"
-	MinimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-	MinimizeButton.TextSize = 14
-	MinimizeButton.ZIndex = 10
-
-	UICornerMinimize.CornerRadius = UDim.new(0, 10)
-	UICornerMinimize.Parent = MinimizeButton
-
-	UICorner.CornerRadius = UDim.new(0, 10)
-	UICorner.Parent = Fpstext
-
-	UIStroke.Color = Color3.fromRGB(100, 100, 255)
-	UIStroke.Thickness = 1.5
-	UIStroke.Parent = Fpstext
-
-	local minimized = false
-	MouseButtonFix(MinimizeButton, function()
-		minimized = not minimized
-		Fpstext.Size = minimized and UDim2.new(0, 201, 0, 20) or UDim2.new(0, 201, 0, 35)
-		Fpstext.Text = minimized and "FPS" or "FPS: --"
-	end)
-
-	MouseButtonFix(CloseButton, function()
-		Fps:Destroy()
-	end)
-
-	local RunService = RunService
-	local frames = {}
-	local lastUpdate = 0
-	local updateInterval = 0.5
-
-	RunService.RenderStepped:Connect(function(deltaTime)
-		table.insert(frames, deltaTime)
-
-		if #frames > 30 then
-			table.remove(frames, 1)
-		end
-
-		local currentTime = tick()
-		if currentTime - lastUpdate >= updateInterval then
-			local sum = 0
-			for _, frame in ipairs(frames) do
-				sum = sum + frame
-			end
-			local avgFrameTime = sum / #frames
-			local fps = math.round(1 / avgFrameTime)
-
-			local color
-			if fps >= 50 then
-				color = Color3.fromRGB(0, 255, 100)
-			elseif fps >= 30 then
-				color = Color3.fromRGB(255, 255, 0)
+cmd.add({"fps"}, {"fps", "Shows your fps"}, function()
+	local function createWindow(name, position, maxSize, minSize, defaultText)
+		local screenGui = Instance.new("ScreenGui")
+		screenGui.Name = name
+		NaProtectUI(screenGui)
+		screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+		screenGui.ResetOnSpawn = false
+	
+		local window = Instance.new("TextLabel")
+		window.Name = name.."Label"
+		window.Parent = screenGui
+		window.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+		window.BackgroundTransparency = 0.2
+		window.Position = position
+		window.Size = maxSize
+		window.Font = Enum.Font.GothamSemibold
+		window.Text = defaultText
+		window.TextColor3 = Color3.fromRGB(255, 255, 255)
+		window.TextSize = 16
+		window.TextXAlignment = Enum.TextXAlignment.Center
+		window.TextWrapped = true
+	
+		local uiCorner = Instance.new("UICorner")
+		uiCorner.CornerRadius = UDim.new(0, 10)
+		uiCorner.Parent = window
+	
+		local uiStroke = Instance.new("UIStroke")
+		uiStroke.Color = Color3.fromRGB(100, 100, 255)
+		uiStroke.Thickness = 1.5
+		uiStroke.Parent = window
+	
+		local closeButton = Instance.new("TextButton")
+		closeButton.Name = "CloseButton"
+		closeButton.Parent = window
+		closeButton.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+		closeButton.Position = UDim2.new(1, -25, 0.5, -10)
+		closeButton.Size = UDim2.new(0, 20, 0, 20)
+		closeButton.Font = Enum.Font.GothamBold
+		closeButton.Text = "X"
+		closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+		closeButton.TextSize = 14
+		closeButton.ZIndex = 10
+	
+		local closeUICorner = Instance.new("UICorner")
+		closeUICorner.CornerRadius = UDim.new(0, 10)
+		closeUICorner.Parent = closeButton
+	
+		local minimizeButton = Instance.new("TextButton")
+		minimizeButton.Name = "MinimizeButton"
+		minimizeButton.Parent = window
+		minimizeButton.BackgroundColor3 = Color3.fromRGB(50, 50, 255)
+		minimizeButton.Position = UDim2.new(1, -50, 0.5, -10)
+		minimizeButton.Size = UDim2.new(0, 20, 0, 20)
+		minimizeButton.Font = Enum.Font.GothamBold
+		minimizeButton.Text = "-"
+		minimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+		minimizeButton.TextSize = 14
+		minimizeButton.ZIndex = 10
+	
+		local minUICorner = Instance.new("UICorner")
+		minUICorner.CornerRadius = UDim.new(0, 10)
+		minUICorner.Parent = minimizeButton
+	
+		return {
+			screenGui = screenGui,
+			window = window,
+			closeButton = closeButton,
+			minimizeButton = minimizeButton,
+			maxSize = maxSize,
+			minSize = minSize,
+			defaultText = defaultText,
+			minimized = false
+		}
+	end
+	
+	local function setupMinimize(guiElements)
+		MouseButtonFix(guiElements.minimizeButton, function()
+			guiElements.minimized = not guiElements.minimized
+			local tweenInfo = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+			local targetSize = guiElements.minimized and guiElements.minSize or guiElements.maxSize
+			local tween = TweenService:Create(guiElements.window, tweenInfo, {Size = targetSize})
+			tween:Play()
+			if guiElements.minimized then
+				local title = guiElements.defaultText:match("^(%S+)")
+				guiElements.window.Text = title
 			else
-				color = Color3.fromRGB(255, 50, 50)
+				guiElements.window.Text = guiElements.defaultText
 			end
+		end)
+	end
+	
+	local function setupClose(guiElements)
+		MouseButtonFix(guiElements.closeButton, function()
+			guiElements.screenGui:Destroy()
+		end)
+	end
+	
+	local function setupDraggable(guiElements)
+		gui.draggable(guiElements.window)
+	end
+    local guiElements = createWindow("Fps", UDim2.new(0, 0, 0, 6), UDim2.new(0, 201, 0, 35), UDim2.new(0, 201, 0, 20), "FPS: --")
+    setupMinimize(guiElements)
+    setupClose(guiElements)
+    setupDraggable(guiElements)
+    local frames = {}
+    local lastUpdate = 0
+    local updateInterval = 0.5
 
-			if not minimized then
-				Fpstext.Text = "FPS: "..fps
-				Fpstext.TextColor3 = color
-			end
+    RunService.RenderStepped:Connect(function(deltaTime)
+        table.insert(frames, deltaTime)
+        if #frames > 30 then
+            table.remove(frames, 1)
+        end
 
-			lastUpdate = currentTime
-		end
-	end)
+        local currentTime = tick()
+        if currentTime - lastUpdate >= updateInterval then
+            local sum = 0
+            for _, frame in ipairs(frames) do
+                sum = sum + frame
+            end
+            local avgFrameTime = sum / #frames
+            local fps = math.round(1 / avgFrameTime)
+            local color
+            if fps >= 50 then
+                color = Color3.fromRGB(0, 255, 100)
+            elseif fps >= 30 then
+                color = Color3.fromRGB(255, 255, 0)
+            else
+                color = Color3.fromRGB(255, 50, 50)
+            end
 
-	gui.draggable(Fpstext)
+            if not guiElements.minimized then
+                guiElements.window.Text = "FPS: "..fps
+                guiElements.window.TextColor3 = color
+            end
+
+            lastUpdate = currentTime
+        end
+    end)
 end)
 
-cmd.add({"stats"},{"stats","Shows both FPS and ping"},function()
-	local PingFPS = Instance.new("ScreenGui")
-	local PingFPSText = Instance.new("TextLabel")
-	local UICorner = Instance.new("UICorner")
-	local UIStroke = Instance.new("UIStroke")
-	local MinimizeButton = Instance.new("TextButton")
-	local UICornerMinimize = Instance.new("UICorner")
-	local CloseButton = Instance.new("TextButton")
-	local UICornerClose = Instance.new("UICorner")
-
-	PingFPS.Name = "PingFPS"
-	NaProtectUI(PingFPS)
-	PingFPS.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-	PingFPS.ResetOnSpawn = false
-
-	PingFPSText.Name = "PingFPSText"
-	PingFPSText.Parent = PingFPS
-	PingFPSText.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
-	PingFPSText.BackgroundTransparency = 0.2
-	PingFPSText.Position = UDim2.new(0, 0, 0, 48)
-	PingFPSText.Size = UDim2.new(0, 250, 0, 50)
-	PingFPSText.Font = Enum.Font.GothamSemibold
-	PingFPSText.Text = "Ping: -- ms | FPS: --"
-	PingFPSText.TextColor3 = Color3.fromRGB(255, 255, 255)
-	PingFPSText.TextSize = 14
-	PingFPSText.TextXAlignment = Enum.TextXAlignment.Center
-	PingFPSText.TextWrapped = true
-
-	CloseButton.Name = "CloseButton"
-	CloseButton.Parent = PingFPSText
-	CloseButton.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
-	CloseButton.Position = UDim2.new(1, -25, 0.5, -10)
-	CloseButton.Size = UDim2.new(0, 20, 0, 20)
-	CloseButton.Font = Enum.Font.GothamBold
-	CloseButton.Text = "X"
-	CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-	CloseButton.TextSize = 14
-	CloseButton.ZIndex = 10
-
-	UICornerClose.CornerRadius = UDim.new(0, 10)
-	UICornerClose.Parent = CloseButton
-
-	MinimizeButton.Name = "MinimizeButton"
-	MinimizeButton.Parent = PingFPSText
-	MinimizeButton.BackgroundColor3 = Color3.fromRGB(50, 50, 255)
-	MinimizeButton.Position = UDim2.new(1, -50, 0.5, -10)
-	MinimizeButton.Size = UDim2.new(0, 20, 0, 20)
-	MinimizeButton.Font = Enum.Font.GothamBold
-	MinimizeButton.Text = "-"
-	MinimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-	MinimizeButton.TextSize = 14
-	MinimizeButton.ZIndex = 10
-
-	UICornerMinimize.CornerRadius = UDim.new(0, 10)
-	UICornerMinimize.Parent = MinimizeButton
-
-	UICorner.CornerRadius = UDim.new(0, 10)
-	UICorner.Parent = PingFPSText
-
-	UIStroke.Color = Color3.fromRGB(100, 100, 255)
-	UIStroke.Thickness = 1.5
-	UIStroke.Parent = PingFPSText
-
-	local minimized = false
-	MouseButtonFix(MinimizeButton, function()
-		minimized = not minimized
-		PingFPSText.Size = minimized and UDim2.new(0, 250, 0, 20) or UDim2.new(0, 250, 0, 50)
-		PingFPSText.Text = minimized and "Ping/FPS" or "Ping: -- ms | FPS: --"
-	end)
-
-	MouseButtonFix(CloseButton, function()
-		PingFPS:Destroy()
-	end)
-
-	local RunService = RunService
-	local frames = {}
-	local lastUpdate = 0
-	local updateInterval = 0.5
-
-	RunService.RenderStepped:Connect(function(deltaTime)
-		table.insert(frames, deltaTime)
-
-		if #frames > 30 then
-			table.remove(frames, 1)
-		end
-
-		local currentTime = tick()
-		if currentTime - lastUpdate >= updateInterval then
-			local sum = 0
-			for _, frame in ipairs(frames) do
-				sum = sum + frame
-			end
-			local avgFrameTime = sum / #frames
-			local fps = math.round(1 / avgFrameTime)
-
-			local pingValue = SafeGetService("Stats").Network.ServerStatsItem["Data Ping"]
-			local ping = tonumber(pingValue:GetValueString():match("%d+"))
-
-			local pingColor
-			if ping <= 50 then
-				pingColor = Color3.fromRGB(0, 255, 100)
-			elseif ping <= 100 then
-				pingColor = Color3.fromRGB(255, 255, 0)
+cmd.add({"stats"}, {"stats", "Shows both FPS and ping"}, function()
+	local function createWindow(name, position, maxSize, minSize, defaultText)
+		local screenGui = Instance.new("ScreenGui")
+		screenGui.Name = name
+		NaProtectUI(screenGui)
+		screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+		screenGui.ResetOnSpawn = false
+	
+		local window = Instance.new("TextLabel")
+		window.Name = name.."Label"
+		window.Parent = screenGui
+		window.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+		window.BackgroundTransparency = 0.2
+		window.Position = position
+		window.Size = maxSize
+		window.Font = Enum.Font.GothamSemibold
+		window.Text = defaultText
+		window.TextColor3 = Color3.fromRGB(255, 255, 255)
+		window.TextSize = 14
+		window.TextXAlignment = Enum.TextXAlignment.Center
+		window.TextWrapped = true
+	
+		local uiCorner = Instance.new("UICorner")
+		uiCorner.CornerRadius = UDim.new(0, 10)
+		uiCorner.Parent = window
+	
+		local uiStroke = Instance.new("UIStroke")
+		uiStroke.Color = Color3.fromRGB(100, 100, 255)
+		uiStroke.Thickness = 1.5
+		uiStroke.Parent = window
+	
+		local closeButton = Instance.new("TextButton")
+		closeButton.Name = "CloseButton"
+		closeButton.Parent = window
+		closeButton.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+		closeButton.Position = UDim2.new(1, -25, 0.5, -10)
+		closeButton.Size = UDim2.new(0, 20, 0, 20)
+		closeButton.Font = Enum.Font.GothamBold
+		closeButton.Text = "X"
+		closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+		closeButton.TextSize = 14
+		closeButton.ZIndex = 10
+	
+		local closeUICorner = Instance.new("UICorner")
+		closeUICorner.CornerRadius = UDim.new(0, 10)
+		closeUICorner.Parent = closeButton
+	
+		local minimizeButton = Instance.new("TextButton")
+		minimizeButton.Name = "MinimizeButton"
+		minimizeButton.Parent = window
+		minimizeButton.BackgroundColor3 = Color3.fromRGB(50, 50, 255)
+		minimizeButton.Position = UDim2.new(1, -50, 0.5, -10)
+		minimizeButton.Size = UDim2.new(0, 20, 0, 20)
+		minimizeButton.Font = Enum.Font.GothamBold
+		minimizeButton.Text = "-"
+		minimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+		minimizeButton.TextSize = 14
+		minimizeButton.ZIndex = 10
+	
+		local minUICorner = Instance.new("UICorner")
+		minUICorner.CornerRadius = UDim.new(0, 10)
+		minUICorner.Parent = minimizeButton
+	
+		return {
+			screenGui = screenGui,
+			window = window,
+			closeButton = closeButton,
+			minimizeButton = minimizeButton,
+			maxSize = maxSize,
+			minSize = minSize,
+			defaultText = defaultText,
+			minimized = false
+		}
+	end
+	
+	local function setupMinimize(guiElements)
+		MouseButtonFix(guiElements.minimizeButton, function()
+			guiElements.minimized = not guiElements.minimized
+			local tweenInfo = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+			local targetSize = guiElements.minimized and guiElements.minSize or guiElements.maxSize
+			local tween = TweenService:Create(guiElements.window, tweenInfo, {Size = targetSize})
+			tween:Play()
+			if guiElements.minimized then
+				local title = guiElements.defaultText:match("^(%S+)")
+				guiElements.window.Text = title
 			else
-				pingColor = Color3.fromRGB(255, 50, 50)
+				guiElements.window.Text = guiElements.defaultText
 			end
+		end)
+	end
+	
+	local function setupClose(guiElements)
+		MouseButtonFix(guiElements.closeButton, function()
+			guiElements.screenGui:Destroy()
+		end)
+	end
+	
+	local function setupDraggable(guiElements)
+		gui.draggable(guiElements.window)
+	end
+    local guiElements = createWindow("PingFPS", UDim2.new(0, 0, 0, 48), UDim2.new(0, 250, 0, 50), UDim2.new(0, 250, 0, 20), "Ping: -- ms | FPS: --")
+    setupMinimize(guiElements)
+    setupClose(guiElements)
+    setupDraggable(guiElements)
+    local frames = {}
+    local lastUpdate = 0
+    local updateInterval = 0.5
 
-			local fpsColor
-			if fps >= 50 then
-				fpsColor = Color3.fromRGB(0, 255, 100)
-			elseif fps >= 30 then
-				fpsColor = Color3.fromRGB(255, 255, 0)
-			else
-				fpsColor = Color3.fromRGB(255, 50, 50)
-			end
+    RunService.RenderStepped:Connect(function(deltaTime)
+        table.insert(frames, deltaTime)
+        if #frames > 30 then
+            table.remove(frames, 1)
+        end
 
-			if not minimized then
-				PingFPSText.Text = "Ping: "..ping.." ms | FPS: "..fps
-				PingFPSText.TextColor3 = pingColor
-			end
+        local currentTime = tick()
+        if currentTime - lastUpdate >= updateInterval then
+            local sum = 0
+            for _, frame in ipairs(frames) do
+                sum = sum + frame
+            end
+            local avgFrameTime = sum / #frames
+            local fps = math.round(1 / avgFrameTime)
+            local pingValue = SafeGetService("Stats").Network.ServerStatsItem["Data Ping"]
+            local ping = tonumber(pingValue:GetValueString():match("%d+"))
+            
+            local pingColor
+            if ping <= 50 then
+                pingColor = Color3.fromRGB(0, 255, 100)
+            elseif ping <= 100 then
+                pingColor = Color3.fromRGB(255, 255, 0)
+            else
+                pingColor = Color3.fromRGB(255, 50, 50)
+            end
+            
+            local fpsColor
+            if fps >= 50 then
+                fpsColor = Color3.fromRGB(0, 255, 100)
+            elseif fps >= 30 then
+                fpsColor = Color3.fromRGB(255, 255, 0)
+            else
+                fpsColor = Color3.fromRGB(255, 50, 50)
+            end
 
-			lastUpdate = currentTime
-		end
-	end)
+            if not guiElements.minimized then
+                guiElements.window.Text = "Ping: "..ping.." ms | FPS: "..fps
+                guiElements.window.TextColor3 = pingColor
+            end
 
-	gui.draggable(PingFPSText)
+            lastUpdate = currentTime
+        end
+    end)
 end)
+
 
 cmd.add({"commands","cmds"},{"commands (cmds)","Open the command list"},function()
 	gui.commands()
@@ -2416,66 +2509,116 @@ cmd.add({"chardebug", "cdebug"}, {"chardebug (cdebug)", "debug your character"},
     local humanoid = character:WaitForChild("Humanoid")
     local rootPart = character:WaitForChild("HumanoidRootPart")
     local workspaceService = SafeGetService("Workspace")
-
+    
     if debugUI then
         debugUI:Destroy()
     end
-
+    
     debugUI = Instance.new("ScreenGui")
     debugUI.Name = "DebugGui"
     NaProtectUI(debugUI)
+    
+    local container = Instance.new("Frame")
+    container.Name = "DebugContainer"
+    container.Size = UDim2.new(0, 520, 0, 300)
+    container.Position = UDim2.new(0.5, -260, 0.2, 0)
+    container.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    container.BackgroundTransparency = 0.3
+    container.BorderSizePixel = 0
+    container.Parent = debugUI
+    
+    local containerCorner = Instance.new("UICorner")
+    containerCorner.CornerRadius = UDim.new(0.1, 0)
+    containerCorner.Parent = container
+    
+    local header = Instance.new("TextLabel")
+    header.Name = "HeaderLabel"
+    header.Size = UDim2.new(1, 0, 0, 40)
+    header.BackgroundTransparency = 1
+    header.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+    header.Text = "Debug Information"
+    header.TextColor3 = Color3.new(1, 1, 1)
+    header.Font = Enum.Font.Code
+    header.TextScaled = true
+    header.Parent = container
 
-    local function maekLabel(name, text, position, size)
-        local label = debugUI:FindFirstChild(name)
-        if not label then
-            label = Instance.new("TextLabel")
-            label.Name = name
-            label.Size = size or UDim2.new(0, 250, 0, 50)
-            label.Position = position
-            label.BackgroundTransparency = 0.2
-            label.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-            label.BorderSizePixel = 0
-            label.TextColor3 = Color3.new(1, 1, 1)
-            label.TextXAlignment = Enum.TextXAlignment.Center
-            label.TextYAlignment = Enum.TextYAlignment.Center
-            label.Font = Enum.Font.Code
-            label.TextSize = 16
-            label.TextScaled = true
-            label.ClipsDescendants = true
-            label.Parent = debugUI
+    local minimizeButton = Instance.new("TextButton")
+    minimizeButton.Name = "MinimizeButton"
+    minimizeButton.Size = UDim2.new(0, 40, 0, 40)
+    minimizeButton.Position = UDim2.new(1, -40, 0, 0)
+    minimizeButton.BackgroundTransparency = 1
+    minimizeButton.Text = "-"
+    minimizeButton.TextScaled = true
+    minimizeButton.TextColor3 = Color3.new(1, 1, 1)
+    minimizeButton.Font = Enum.Font.Code
+    minimizeButton.Parent = header
 
-            local corner = Instance.new("UICorner")
-            corner.CornerRadius = UDim.new(0.2, 0)
-            corner.Parent = label
-        end
-        label.Text = text
-		gui.draggable(label)
-        return label
-    end
-
-    local labels = {
-        {name = "VelocityLabel", text = ""},
-        {name = "PositionLabel", text = ""},
-        {name = "HealthLabel", text = ""},
-        {name = "FOVLabel", text = ""},
-        {name = "StateLabel", text = ""},
-        {name = "ToolLabel", text = ""},
-        {name = "JumpPowerLabel", text = ""},
-        {name = "WalkSpeedLabel", text = ""}
+    gui.draggable(container)
+    
+    local labelsInfo = {
+        {name = "VelocityLabel", text = "Velocity\nX: 0.00\nY: 0.00\nZ: 0.00"},
+        {name = "PositionLabel", text = "Position\nX: 0.00\nY: 0.00\nZ: 0.00"},
+        {name = "HealthLabel", text = "Health\n0.00 / 0.00"},
+        {name = "FOVLabel", text = "FOV\n0.00"},
+        {name = "StateLabel", text = "State\nUnknown"},
+        {name = "ToolLabel", text = "Tool\nNone"},
+        {name = "JumpPowerLabel", text = "Jump Power\n0.00"},
+        {name = "WalkSpeedLabel", text = "Walk Speed\n0.00"}
     }
-
+    
+    local labelObjects = {}
+    local labelWidth = 250
     local labelHeight = 50
     local spacing = 10
-    local totalHeight = (#labels * labelHeight) + ((#labels - 1) * spacing)
-    local startY = 0.5 - (totalHeight / 2) / workspaceService.CurrentCamera.ViewportSize.Y
-
-    for i, labelInfo in ipairs(labels) do
-        local isLeft = i <= math.ceil(#labels / 2)
-        local xOffset = isLeft and 0 or 1
-        local yOffset = startY + ((i - 1) % math.ceil(#labels / 2)) * (labelHeight + spacing) / workspaceService.CurrentCamera.ViewportSize.Y
-        maekLabel(labelInfo.name, labelInfo.text, UDim2.new(xOffset, isLeft and 0 or -250, yOffset, 0), UDim2.new(0, 250, 0, labelHeight))
+    local numColumns = 2
+    local startX = 10
+    local startY = header.Size.Y.Offset + 10
+    
+    for i, info in ipairs(labelsInfo) do
+        local column = ((i - 1) % numColumns)
+        local row = math.floor((i - 1) / numColumns)
+        local label = Instance.new("TextLabel")
+        label.Name = info.name
+        label.Size = UDim2.new(0, labelWidth, 0, labelHeight)
+        label.Position = UDim2.new(0, startX + column * (labelWidth + spacing), 0, startY + row * (labelHeight + spacing))
+        label.BackgroundTransparency = 0.2
+        label.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+        label.BorderSizePixel = 0
+        label.TextColor3 = Color3.new(1, 1, 1)
+        label.TextXAlignment = Enum.TextXAlignment.Center
+        label.TextYAlignment = Enum.TextYAlignment.Center
+        label.Font = Enum.Font.Code
+        label.TextSize = 16
+        label.TextScaled = true
+        label.ClipsDescendants = true
+        label.Text = info.text
+        label.Parent = container
+        
+        local corner = Instance.new("UICorner")
+        corner.CornerRadius = UDim.new(0.2, 0)
+        corner.Parent = label
+        
+        labelObjects[info.name] = label
     end
 
+    local isMinimized = false
+    minimizeButton.MouseButton1Click:Connect(function()
+        isMinimized = not isMinimized
+        if isMinimized then
+            for _, label in pairs(labelObjects) do
+                label.Visible = false
+            end
+            container.Size = UDim2.new(0, 520, 0, 40)
+            minimizeButton.Text = "+"
+        else
+            for _, label in pairs(labelObjects) do
+                label.Visible = true
+            end
+            container.Size = UDim2.new(0, 520, 0, 300)
+            minimizeButton.Text = "-"
+        end
+    end)
+    
     local function updateDebugInfo()
         local velocity = rootPart.Velocity
         local position = rootPart.Position
@@ -2487,14 +2630,14 @@ cmd.add({"chardebug", "cdebug"}, {"chardebug (cdebug)", "debug your character"},
         local jumpPower = humanoid.JumpPower
         local walkSpeed = humanoid.WalkSpeed
 
-        debugUI:FindFirstChild("VelocityLabel").Text = string.format("Velocity\nX: %.2f\nY: %.2f\nZ: %.2f", velocity.X, velocity.Y, velocity.Z)
-        debugUI:FindFirstChild("PositionLabel").Text = string.format("Position\nX: %.2f\nY: %.2f\nZ: %.2f", position.X, position.Y, position.Z)
-        debugUI:FindFirstChild("HealthLabel").Text = string.format("Health\n%.2f / %.2f", health, maxHealth)
-        debugUI:FindFirstChild("FOVLabel").Text = string.format("FOV\n%.2f", fov)
-        debugUI:FindFirstChild("StateLabel").Text = string.format("State\n%s", tostring(state))
-        debugUI:FindFirstChild("ToolLabel").Text = string.format("Tool\n%s", tool)
-        debugUI:FindFirstChild("JumpPowerLabel").Text = string.format("Jump Power\n%.2f", jumpPower)
-        debugUI:FindFirstChild("WalkSpeedLabel").Text = string.format("Walk Speed\n%.2f", walkSpeed)
+        labelObjects["VelocityLabel"].Text = string.format("Velocity\nX: %.2f\nY: %.2f\nZ: %.2f", velocity.X, velocity.Y, velocity.Z)
+        labelObjects["PositionLabel"].Text = string.format("Position\nX: %.2f\nY: %.2f\nZ: %.2f", position.X, position.Y, position.Z)
+        labelObjects["HealthLabel"].Text = string.format("Health\n%.2f / %.2f", health, maxHealth)
+        labelObjects["FOVLabel"].Text = string.format("FOV\n%.2f", fov)
+        labelObjects["StateLabel"].Text = string.format("State\n%s", tostring(state))
+        labelObjects["ToolLabel"].Text = string.format("Tool\n%s", tool)
+        labelObjects["JumpPowerLabel"].Text = string.format("Jump Power\n%.2f", jumpPower)
+        labelObjects["WalkSpeedLabel"].Text = string.format("Walk Speed\n%.2f", walkSpeed)
     end
 
     RunService:BindToRenderStep("UpdateDebugInfo", Enum.RenderPriority.Last.Value, updateDebugInfo)
@@ -2686,15 +2829,15 @@ cmd.add({"unwalkfling", "unwfling"}, {"unwalkfling (unwfling)", "stop the walkfl
 end)
 
 cmd.add({"rjre", "rejoinrefresh"}, {"rjre (rejoinrefresh)", "Rejoins and teleports you to your previous position"}, function()
-	if not DONE then
-		DONE = true
-		local hrp = getRoot(getChar())
-
-		if hrp then
-			local tpScript = [[
-                local success, error = pcall(function()
+    if not DONE then
+        DONE = true
+        local hrp = getRoot(LocalPlayer.Character)
+        
+        if hrp then
+            local tpScript = string.format([[
+                local success, err = pcall(function()
                     repeat task.wait() until game:IsLoaded()
-                    local lp = SafeGetService('Players').LocalPlayer
+                    local lp = game:GetService("Players").LocalPlayer
                     local char
                     local startTime = tick()
                     repeat
@@ -2707,14 +2850,14 @@ cmd.add({"rjre", "rejoinrefresh"}, {"rjre (rejoinrefresh)", "Rejoins and telepor
                     local humRP
                     startTime = tick()
                     repeat
-                        humRP = char:FindFirstChild('HumanoidRootPart')
+                        humRP = char:FindFirstChild("HumanoidRootPart")
                         task.wait(0.1)
                     until humRP or (tick() - startTime > 10)
                     
                     if not humRP then return end
                     
-                    local targetPos = Vector3.new(]]..tostring(hrp.Position)..[[)
-                    local targetCFrame = CFrame.new(]]..tostring(hrp.CFrame)..[[)
+                    local targetPos = Vector3.new(%s)
+                    local targetCFrame = CFrame.new(%s)
                     
                     startTime = tick()
                     repeat
@@ -2722,36 +2865,32 @@ cmd.add({"rjre", "rejoinrefresh"}, {"rjre (rejoinrefresh)", "Rejoins and telepor
                         task.wait(0.1)
                     until (humRP.Position - targetPos).Magnitude < 10 or (tick() - startTime > 5)
                 end)
-            ]]
+            ]], tostring(hrp.Position), tostring(hrp.CFrame))
+            
+            queueteleport(tpScript)
+        end
 
-			queueteleport(tpScript)
-		end
+        task.spawn(function()
+            pcall(function()
+                DoNotif("Rejoining back to the same position...")
+            end)
 
-		task.spawn(function()
-			local Players = Players
-			local TeleportService = TeleportService
-			local LocalPlayer = Players.LocalPlayer
+            local success = pcall(function()
+                if #Players:GetPlayers() <= 1 then
+                    LocalPlayer:Kick("\nRejoining...")
+                    task.wait(0.5)
+                    TeleportService:Teleport(PlaceId, LocalPlayer)
+                else
+                    TeleportService:TeleportToPlaceInstance(PlaceId, JobId, LocalPlayer)
+                end
+            end)
 
-			pcall(function()
-				DoNotif("Rejoining back to the same position...")
-			end)
-
-			local success = pcall(function()
-				if #Players:GetPlayers() <= 1 then
-					LocalPlayer:Kick("\nRejoining...")
-					task.wait(0.5)
-					TeleportService:Teleport(PlaceId, LocalPlayer)
-				else
-					TeleportService:TeleportToPlaceInstance(PlaceId, JobId, LocalPlayer)
-				end
-			end)
-
-			if not success then
-				task.wait(1)
-				TeleportService:Teleport(PlaceId, LocalPlayer)
-			end
-		end)
-	end
+            if not success then
+                task.wait(1)
+                TeleportService:Teleport(PlaceId, LocalPlayer)
+            end
+        end)
+    end
 end)
 
 cmd.add({"rejoin", "rj"}, {"rejoin (rj)", "Rejoin the game"}, function()
@@ -3148,21 +3287,16 @@ cmd.add({"usetools","uset"},{"usetools (uset)","Equips all tools, uses them, and
 	end
 end)
 
-cmd.add({"tweento","tweengoto"},{"tweengoto (tweento)","Teleportation method that bypassses some anticheats"},function(...)
-	local Username=(...)
+cmd.add({"tweento","tweengoto", "tgoto"}, {"tweengoto <player> (tweento, tgoto)", "Teleportation method that bypasses some anticheats"}, function(...)
+    local Username = (...)
+    local speaker = Players.LocalPlayer
+    
+    local target = getPlr(Username)
+    if not target or not target.Character then return end
+    
+    TweenService:Create(getRoot(speaker.Character), TweenInfo.new(1, Enum.EasingStyle.Linear), {CFrame = getRoot(target.Character).CFrame}):Play()
+end, true)
 
-
-	char=Players.LocalPlayer
-
-	TweenService=TweenService
-
-	speaker=Players.LocalPlayer
-	Players=Players
-
-	local players=getPlr(Username)
-	TweenService:Create(getRoot(speaker.Character),TweenInfo.new(2,Enum.EasingStyle.Linear),{CFrame=getRoot(players.Character).CFrame+Vector3.new(3,1,0)}):Play()
-
-end,true)
 
 cmd.add({"reach", "swordreach"}, {"reach [number] (swordreach)", "Extends sword reach in one direction"}, function(reachsize)
 	reachsize = tonumber(reachsize) or 25
@@ -3547,7 +3681,7 @@ end)
 cmd.add({"strengthen"},{"strengthen","Makes your character more dense (CustomPhysicalProperties)"},function(...)
 	local args={...}
 	for _,child in pairs(Player.Character:GetDescendants()) do
-		if child.ClassName=="Part" then
+		if child:IsA("BasePart") then
 			if args[1] then
 				child.CustomPhysicalProperties=PhysicalProperties.new(args[1],0.3,0.5)
 			else
@@ -3559,7 +3693,7 @@ end,true)
 
 cmd.add({"unweaken","unstrengthen"},{"unweaken (unstrengthen)","Sets your characters CustomPhysicalProperties to default"},function()
 	for _,child in pairs(Player.Character:GetDescendants()) do
-		if child.ClassName=="Part" then
+		if child:IsA("BasePart") then
 			child.CustomPhysicalProperties=PhysicalProperties.new(0.7,0.3,0.5)
 		end
 	end
@@ -3568,7 +3702,7 @@ end)
 cmd.add({"weaken"},{"weaken","Makes your character less dense"},function(...)
 	local args={...}
 	for _,child in pairs(Player.Character:GetDescendants()) do
-		if child.ClassName=="Part" then
+		if child:IsA("BasePart") then
 			if args[1] then
 				child.CustomPhysicalProperties=PhysicalProperties.new(-args[1],0.3,0.5)
 			else
@@ -3588,6 +3722,32 @@ cmd.add({"seat"},{"seat","Finds a seat and automatically sits on it"},function()
 
 	if #seats == 0 then
 		DoNotif("No seats found in the game", 3)
+		return
+	end
+
+	local humanoid = getChar() and getChar().Humanoid
+	if not humanoid then
+		DoNotif("Your character or humanoid is invalid", 3)
+		return
+	end
+
+	for _ = 1, 8 do
+		local randomSeat = seats[math.random(1, #seats)]
+		randomSeat:Sit(humanoid)
+		task.wait(0.07)
+	end
+end)
+
+cmd.add({"vehicleseat", "vseat"},{"vehicleseat (vseat)","Sits you in a vehicle seat, useful for trying to find cars in games"},function()
+	local seats = {}
+	for _, v in ipairs(game:GetDescendants()) do
+		if v:IsA("VehicleSeat") then
+			table.insert(seats, v)
+		end
+	end
+
+	if #seats == 0 then
+		DoNotif("No VehicleSeats found in the game", 3)
 		return
 	end
 
@@ -3906,7 +4066,7 @@ cmd.add({"anticframeteleport","acframetp","acftp"},{"anticframeteleport (acframe
 	DoNotif("Anti CFrame Teleport enabled", 3)
 
 	local oldCFrame = root.CFrame
-	con(root:GetPropertyChangedSignal("CFrame"), function()
+	LoadedConnect(root:GetPropertyChangedSignal("CFrame"), function()
 		if getgenv().acftp then
 			root.CFrame = oldCFrame
 			task.wait()
@@ -4705,14 +4865,14 @@ cmd.add({"enable"}, {"enable", "Enables a specific CoreGui"}, function(...)
             if string.match(button.Text:lower(), enableName:lower()) then
                 button.Callback()
                 if not hiddenNotif then
-                    DoNotif("CoreGui Enabled: " .. button.Text .. " has been enabled.", 3)
+                    DoNotif("CoreGui Enabled: "..button.Text.." has been enabled.", 3)
                 end
                 found = true
                 break
             end
         end
         if not found then
-            DoNotif("No matching CoreGui element found for: " .. enableName, 3)
+            DoNotif("No matching CoreGui element found for: "..enableName, 3)
         end
     else
         table.insert(buttons, {
@@ -4754,14 +4914,14 @@ cmd.add({"disable"}, {"disable", "Disables a specific CoreGui"}, function(...)
             if string.match(button.Text:lower(), disableName:lower()) then
                 button.Callback()
                 if not hiddenNotif then
-                    DoNotif("CoreGui Disabled: " .. button.Text .. " has been disabled.", 3)
+                    DoNotif("CoreGui Disabled: "..button.Text.." has been disabled.", 3)
                 end
                 found = true
                 break
             end
         end
         if not found then
-            DoNotif("No matching CoreGui element found for: " .. disableName, 3)
+            DoNotif("No matching CoreGui element found for: "..disableName, 3)
         end
     else
         table.insert(buttons, {
@@ -6567,7 +6727,7 @@ cmd.add({"saw"}, {"saw <challenge>", "shush"}, function(...)
 	local challenge = table.concat({...}, " ")
 	_G.SawFinish = false
 
-	function playSound(id, vol)
+	local function playSound(id, vol)
 		local sfx = Instance.new("Sound")
 		sfx.Parent = PlrGui
 		sfx.SoundId = "rbxassetid://"..id
@@ -6578,7 +6738,7 @@ cmd.add({"saw"}, {"saw <challenge>", "shush"}, function(...)
 		end)
 	end
 
-	function createUIElement(class, properties, parent)
+	local function createUIElement(class, properties, parent)
 		local element = Instance.new(class)
 		for prop, value in pairs(properties) do
 			element[prop] = value
@@ -6588,22 +6748,36 @@ cmd.add({"saw"}, {"saw <challenge>", "shush"}, function(...)
 	end
 
 	local ScreenGui = createUIElement("ScreenGui", { Name = randomString() })
-
 	NaProtectUI(ScreenGui)
 
 	local background = createUIElement("Frame", {
 		BackgroundColor3 = Color3.fromRGB(0, 0, 0),
-		BackgroundTransparency = 0.5,
+		BackgroundTransparency = 1,
 		Size = UDim2.new(1, 0, 1, 0),
 		ZIndex = 0
 	}, ScreenGui)
+	
+	local bgTween = TweenService:Create(
+		background,
+		TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+		{ BackgroundTransparency = 0.5 }
+	)
+	bgTween:Play()
+	
+	local progressBar = createUIElement("Frame", {
+		BackgroundColor3 = Color3.fromRGB(50, 50, 50),
+		Position = UDim2.new(0.25, 0, 0.05, 0),
+		Size = UDim2.new(0.5, 0, 0.03, 0),
+		BorderSizePixel = 0,
+		ZIndex = 2
+	}, ScreenGui)
 
-	coroutine.wrap(function()
-		while not _G.SawFinish do
-			background.BackgroundTransparency = math.random(3, 7) / 10
-			task.wait(0.1)
-		end
-	end)()
+	local progressFill = createUIElement("Frame", {
+		BackgroundColor3 = Color3.fromRGB(255, 0, 0),
+		Size = UDim2.new(1, 0, 1, 0),
+		BorderSizePixel = 0,
+		ZIndex = 3
+	}, progressBar)
 
 	local imgLabel = createUIElement("ImageLabel", {
 		AnchorPoint = Vector2.new(0.5, 0),
@@ -6611,7 +6785,8 @@ cmd.add({"saw"}, {"saw <challenge>", "shush"}, function(...)
 		Position = UDim2.new(0.5, 0, 0.1, 0),
 		Size = UDim2.new(0, 150, 0, 150),
 		Image = "rbxassetid://8747893766",
-		ImageColor3 = Color3.fromRGB(255, 0, 0)
+		ImageColor3 = Color3.fromRGB(255, 0, 0),
+		ZIndex = 2
 	}, ScreenGui)
 
 	coroutine.wrap(function()
@@ -6620,7 +6795,7 @@ cmd.add({"saw"}, {"saw <challenge>", "shush"}, function(...)
 			local newRotation = math.random(-10, 10)
 			local tween = TweenService:Create(
 				imgLabel,
-				TweenInfo.new(0.2, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut),
+				TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
 				{ Size = UDim2.new(0, newSize, 0, newSize), Rotation = newRotation }
 			)
 			tween:Play()
@@ -6632,28 +6807,28 @@ cmd.add({"saw"}, {"saw <challenge>", "shush"}, function(...)
 		BackgroundColor3 = Color3.fromRGB(0, 0, 0),
 		BackgroundTransparency = 0.3,
 		AnchorPoint = Vector2.new(0, 0.5),
-		Position = UDim2.new(0, 10, 0.5, 0),
-		Size = UDim2.new(0.3, 0, 0.1, 0),
+		Position = UDim2.new(0.05, 0, 0.5, 0),
+		Size = UDim2.new(0.4, 0, 0.1, 0),
 		Font = Enum.Font.SciFi,
 		Text = "Challenge: "..challenge,
 		TextColor3 = Color3.fromRGB(255, 0, 0),
 		TextSize = 24,
 		TextWrapped = true,
-		ZIndex = 2
+		ZIndex = 3
 	}, ScreenGui)
 
 	local ttLabelRight = createUIElement("TextLabel", {
 		BackgroundColor3 = Color3.fromRGB(0, 0, 0),
 		BackgroundTransparency = 0.3,
 		AnchorPoint = Vector2.new(1, 0.5),
-		Position = UDim2.new(1, -10, 0.5, 0),
-		Size = UDim2.new(0.3, 0, 0.1, 0),
+		Position = UDim2.new(0.95, 0, 0.5, 0),
+		Size = UDim2.new(0.4, 0, 0.1, 0),
 		Font = Enum.Font.SciFi,
 		Text = "Time Remaining: 180 seconds",
 		TextColor3 = Color3.fromRGB(255, 0, 0),
 		TextSize = 24,
 		TextWrapped = true,
-		ZIndex = 2
+		ZIndex = 3
 	}, ScreenGui)
 
 	local dramaticLabel = createUIElement("TextLabel", {
@@ -6667,26 +6842,27 @@ cmd.add({"saw"}, {"saw <challenge>", "shush"}, function(...)
 		TextSize = 50,
 		TextStrokeTransparency = 0.5,
 		TextWrapped = true,
-		ZIndex = 3
+		ZIndex = 4
 	}, ScreenGui)
 
-	function flickerText()
+	local function flickerText()
 		while not _G.SawFinish do
-			ttLabelLeft.TextColor3 = Color3.fromRGB(math.random(200, 255), 0, 0)
-			ttLabelRight.TextColor3 = Color3.fromRGB(math.random(200, 255), 0, 0)
+			local newColor = Color3.fromRGB(math.random(200, 255), 0, 0)
+			ttLabelLeft.TextColor3 = newColor
+			ttLabelRight.TextColor3 = newColor
 			ttLabelLeft.Text = "Challenge: "..challenge:sub(1, math.random(1, #challenge))
-			task.wait(math.random(5, 15) / 100)
+			task.wait(math.random(0.05, 0.15))
 		end
 	end
 
-	function dramaticCountdown(num)
+	local function dramaticCountdown(num)
 		dramaticLabel.Text = tostring(num)
 		playSound(138081500, 2)
 		task.wait(1)
 		dramaticLabel.Text = ""
 	end
 
-	function count()
+	local function count()
 		local num = 180
 		while task.wait(1) do
 			if not _G.SawFinish then
@@ -6694,6 +6870,15 @@ cmd.add({"saw"}, {"saw <challenge>", "shush"}, function(...)
 					num = num - 1
 					playSound(138081500, 1)
 					ttLabelRight.Text = "Time Remaining: "..num.." seconds"
+					
+					local progress = num / 180
+					local tween = TweenService:Create(
+						progressFill,
+						TweenInfo.new(1, Enum.EasingStyle.Linear),
+						{ Size = UDim2.new(progress, 0, 1, 0) }
+					)
+					tween:Play()
+
 					if num == 30 or num == 20 or num == 10 then
 						dramaticCountdown(num)
 					elseif num <= 10 then
@@ -7108,30 +7293,21 @@ local function createGui()
 		specGui.Name = "SpectateGui"
 		NaProtectUI(specGui)
 		specGui.ResetOnSpawn = false
-
+		specGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+		
 		local frame = Instance.new("Frame")
 		frame.Size = UDim2.new(0, 350, 0, 40)
 		frame.Position = UDim2.new(0.5, -175, 1, -160)
 		frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 		frame.BorderSizePixel = 0
 		frame.Parent = specGui
-
+		
 		local corner = Instance.new("UICorner")
 		corner.CornerRadius = UDim.new(0, 20)
 		corner.Parent = frame
-
+		
 		gui.draggable(frame)
-
-		local playerNameLabel = Instance.new("TextLabel")
-		playerNameLabel.Size = UDim2.new(0.78, 0, 1, 0)
-		playerNameLabel.Position = UDim2.new(0.06, 0, 0, 0)
-		playerNameLabel.Text = "Spectating: None"
-		playerNameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-		playerNameLabel.BackgroundTransparency = 1
-		playerNameLabel.Font = Enum.Font.GothamBold
-		playerNameLabel.TextScaled = true
-		playerNameLabel.Parent = frame
-
+		
 		local backButton = Instance.new("TextButton")
 		backButton.Size = UDim2.new(0, 40, 0, 40)
 		backButton.Position = UDim2.new(0, -18, 0, 0)
@@ -7141,11 +7317,11 @@ local function createGui()
 		backButton.Font = Enum.Font.GothamBold
 		backButton.TextSize = 24
 		backButton.Parent = frame
-
+		
 		local backCorner = Instance.new("UICorner")
 		backCorner.CornerRadius = UDim.new(0, 10)
 		backCorner.Parent = backButton
-
+		
 		local forwardButton = Instance.new("TextButton")
 		forwardButton.Size = UDim2.new(0, 40, 0, 40)
 		forwardButton.Position = UDim2.new(1, -22, 0, 0)
@@ -7155,11 +7331,25 @@ local function createGui()
 		forwardButton.Font = Enum.Font.GothamBold
 		forwardButton.TextSize = 24
 		forwardButton.Parent = frame
-
+		
 		local forwardCorner = Instance.new("UICorner")
 		forwardCorner.CornerRadius = UDim.new(0, 10)
 		forwardCorner.Parent = forwardButton
-
+		
+		local dropdownButton = Instance.new("TextButton")
+		dropdownButton.Size = UDim2.new(0.78, 0, 1, 0)
+		dropdownButton.Position = UDim2.new(0.11, 0, 0, 0)
+		dropdownButton.Text = "Select Player"
+		dropdownButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+		dropdownButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+		dropdownButton.Font = Enum.Font.GothamBold
+		dropdownButton.TextScaled = true
+		dropdownButton.Parent = frame
+		
+		local dropCorner = Instance.new("UICorner")
+		dropCorner.CornerRadius = UDim.new(0, 10)
+		dropCorner.Parent = dropdownButton
+		
 		local closeButton = Instance.new("TextButton")
 		closeButton.Size = UDim2.new(0, 30, 0, 30)
 		closeButton.Position = UDim2.new(1, -55, 0, 5)
@@ -7169,26 +7359,54 @@ local function createGui()
 		closeButton.Font = Enum.Font.GothamBold
 		closeButton.TextSize = 18
 		closeButton.Parent = frame
-
+		
 		local closeCorner = Instance.new("UICorner")
 		closeCorner.CornerRadius = UDim.new(0, 5)
 		closeCorner.Parent = closeButton
-
+		
 		closeButton.MouseButton1Click:Connect(function()
 			cleanup()
 		end)
-
+		
+		local dropdownOpen = false
+		local dropdownList
+		
 		local function updateSpectating()
 			if #playerButtons == 0 then
-				playerNameLabel.Text = "Spectating: None"
+				dropdownButton.Text = "Spectating: None"
 				return
 			end
 			local currentPlayer = playerButtons[currentPlayerIndex]
-			local nameCheck = currentPlayer.DisplayName == currentPlayer.Name and '@'..currentPlayer.Name or currentPlayer.DisplayName..' (@'..currentPlayer.Name..')'
-			playerNameLabel.Text = "Spectating: "..nameCheck
+			local nameCheck = currentPlayer.DisplayName == currentPlayer.Name and '@'..currentPlayer.Name or currentPlayer.DisplayName.." (@ "..currentPlayer.Name.." )"
+			dropdownButton.Text = "Spectating: "..nameCheck
+			if currentPlayer == game.Players.LocalPlayer then
+				dropdownButton.TextColor3 = Color3.fromRGB(255, 255, 0)
+			else
+				dropdownButton.TextColor3 = Color3.fromRGB(0, 162, 255)
+			end
 			spectatePlayer(currentPlayer)
+			
+			if dropdownOpen and dropdownList then
+				for _, child in pairs(dropdownList:GetChildren()) do
+					if child:IsA("TextButton") then
+						local idx = child:GetAttribute("PlayerIndex")
+						if idx then
+							local playerRef = playerButtons[idx]
+							if playerRef then
+								if playerRef == game.Players.LocalPlayer then
+									child.TextColor3 = Color3.fromRGB(255, 255, 0)
+								elseif playerRef == currentPlayer then
+									child.TextColor3 = Color3.fromRGB(0, 162, 255)
+								else
+									child.TextColor3 = Color3.fromRGB(255, 255, 255)
+								end
+							end
+						end
+					end
+				end
+			end
 		end
-
+		
 		MouseButtonFix(backButton, function()
 			if #playerButtons == 0 then return end
 			currentPlayerIndex = currentPlayerIndex - 1
@@ -7197,7 +7415,7 @@ local function createGui()
 			end
 			updateSpectating()
 		end)
-
+		
 		MouseButtonFix(forwardButton, function()
 			if #playerButtons == 0 then return end
 			currentPlayerIndex = currentPlayerIndex + 1
@@ -7206,7 +7424,56 @@ local function createGui()
 			end
 			updateSpectating()
 		end)
-
+		
+		dropdownButton.MouseButton1Click:Connect(function()
+			if dropdownOpen then
+				if dropdownList then dropdownList:Destroy() end
+				dropdownOpen = false
+			else
+				dropdownList = Instance.new("Frame")
+				dropdownList.Size = UDim2.new(1, 0, 0, #playerButtons * 30)
+				dropdownList.Position = UDim2.new(0, 0, 1, 0)
+				dropdownList.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+				dropdownList.BorderSizePixel = 0
+				dropdownList.Parent = frame
+				
+				local listCorner = Instance.new("UICorner")
+				listCorner.CornerRadius = UDim.new(0, 10)
+				listCorner.Parent = dropdownList
+				
+				for i, player in ipairs(playerButtons) do
+					local playerButton = Instance.new("TextButton")
+					playerButton.Size = UDim2.new(1, 0, 0, 30)
+					playerButton.Position = UDim2.new(0, 0, 0, (i - 1) * 30)
+					local displayText = player.DisplayName == player.Name and '@'..player.Name or player.DisplayName.." (@ "..player.Name.." )"
+					playerButton.Text = displayText
+					playerButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+					playerButton.Font = Enum.Font.Gotham
+					playerButton.TextScaled = true
+					if player == game.Players.LocalPlayer then
+						playerButton.TextColor3 = Color3.fromRGB(255, 255, 0)
+					elseif playerButtons[currentPlayerIndex] == player then
+						playerButton.TextColor3 = Color3.fromRGB(0, 162, 255)
+					else
+						playerButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+					end
+					playerButton.Parent = dropdownList
+					playerButton:SetAttribute("PlayerIndex", i)
+					
+					playerButton.MouseButton1Click:Connect(function()
+						currentPlayerIndex = i
+						updateSpectating()
+						if dropdownList then
+							dropdownList:Destroy()
+							dropdownOpen = false
+						end
+					end)
+				end
+				
+				dropdownOpen = true
+			end
+		end)
+		
 		updateSpectating()
 	end
 end
@@ -7611,27 +7878,35 @@ cmd.add({"loopfling"},{"loopfling <player>","Loop voids a player"},function(plr)
 	until Loopvoid==false
 end,true)
 
-cmd.add({"freegamepass", "freegp"}, {"freegamepass (freegp)", "Makes the client think you own every gamepass in the game"}, function()
-	local mt = getrawmetatable(game)
-	local oldNamecall = mt.__namecall
-	local setReadOnly = setreadonly or make_writeable
+cmd.add({"freegamepass", "freegp"}, {"freegamepass (freegp)", "Returns true if the UserOwnsGamePassAsync function gets used"}, function()
+	local Hook
+	Hook = hookfunction(MarketplaceService.UserOwnsGamePassAsync, newcclosure(function(self, ...)
+		return true
+	end))
 
-	setReadOnly(mt, false)
+	DoNotif("Free gamepasses is now enabled, to disable rejoin. Keep in mind this command won't work in every game")
+end)
 
-	mt.__namecall = function(self, ...)
-		local args = {...}
-		local method = getnamecallmethod()
+cmd.add({"listen"}, {"listen", "Listen to your target's voice chat"}, function(plr)
+	local trg = getPlr(plr)
 
-		if self == MarketplaceService and method == "UserOwnsGamePassAsync" then
-			return true
-		end
+	local Root = getRoot(trg.Character)
 
-		return oldNamecall(self, ...)
+	if Root then
+		SoundService:SetListener(Enum.ListenerType.ObjectPosition, Root)
 	end
+end,true)
 
-	setReadOnly(mt, true)
+cmd.add({"unlisten"}, {"unlisten", "Stops listening"}, function()
+	SoundService:SetListener(Enum.ListenerType.Camera)
+end)
 
-	DoNotif("Free gamepass has been executed. Keep in mind this won't always work.")
+cmd.add({"lockmouse", "lockm"}, {"lockmouse (lockm)", "Locks your mouse in the center"}, function()
+	UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter
+end)
+
+cmd.add({"unlockmouse", "unlockm"}, {"unlockmouse (unlockm)", "Unlocks your mouse"}, function()
+	UserInputService.MouseBehavior = Enum.MouseBehavior.Default
 end)
 
 local headSit, sitDied = nil, nil
@@ -10679,15 +10954,15 @@ local UpdLogsList=UpdLogsFrame:FindFirstChild("Container"):FindFirstChild("List"
 local UpdLogsLabel=UpdLogsList:FindFirstChildOfClass("TextLabel");
 local resizeFrame=ScreenGui:FindFirstChild("Resizeable");
 local resizeXY={
-	Top        ={Vector2.new(0,-1),    Vector2.new(0,-1),    "rbxassetid://2911850935"},
-	Bottom    ={Vector2.new(0,1),    Vector2.new(0,0),    "rbxassetid://2911850935"},
-	Left    ={Vector2.new(-1,0),    Vector2.new(1,0),    "rbxassetid://2911851464"},
-	Right    ={Vector2.new(1,0),    Vector2.new(0,0),    "rbxassetid://2911851464"},
+	Top = {Vector2.new(0,-1),    Vector2.new(0,-1),    "rbxassetid://2911850935"},
+	Bottom = {Vector2.new(0,1),    Vector2.new(0,0),    "rbxassetid://2911850935"},
+	Left = {Vector2.new(-1,0),    Vector2.new(1,0),    "rbxassetid://2911851464"},
+	Right = {Vector2.new(1,0),    Vector2.new(0,0),    "rbxassetid://2911851464"},
 
-	TopLeft        ={Vector2.new(-1,-1),    Vector2.new(1,-1),    "rbxassetid://2911852219"},
-	TopRight    ={Vector2.new(1,-1),    Vector2.new(0,-1),    "rbxassetid://2911851859"},
-	BottomLeft    ={Vector2.new(-1,1),    Vector2.new(1,0),    "rbxassetid://2911851859"},
-	BottomRight    ={Vector2.new(1,1),    Vector2.new(0,0),    "rbxassetid://2911852219"},
+	TopLeft = {Vector2.new(-1,-1),    Vector2.new(1,-1),    "rbxassetid://2911852219"},
+	TopRight = {Vector2.new(1,-1),    Vector2.new(0,-1),    "rbxassetid://2911851859"},
+	BottomLeft = {Vector2.new(-1,1),    Vector2.new(1,0),    "rbxassetid://2911851859"},
+	BottomRight = {Vector2.new(1,1),    Vector2.new(0,0),    "rbxassetid://2911852219"},
 }
 
 cmdExample.Parent=nil
@@ -10919,56 +11194,121 @@ end
 
 gui.draggable=function(ui, dragui)
 	if not dragui then dragui = ui end
-	local UserInputService = UserInputService
-
-	local dragging
-	local dragInput
-	local dragStart
-	local startPos
-
-	local function update(input)
-		local delta = input.Position - dragStart
-		local newXOffset = startPos.X.Offset + delta.X
-		local newYOffset = startPos.Y.Offset + delta.Y
-
-		local screenSize = ui.Parent.AbsoluteSize
-		local newXScale = startPos.X.Scale + (newXOffset / screenSize.X)
-		local newYScale = startPos.Y.Scale + (newYOffset / screenSize.Y)
-
-		ui.Position = UDim2.new(newXScale, 0, newYScale, 0)
-	end
-
-	dragui.InputBegan:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-			dragging = true
-			dragStart = input.Position
-			startPos = ui.Position
-
-			input.Changed:Connect(function()
-				if input.UserInputState == Enum.UserInputState.End then
-					dragging = false
-				end
-			end)
-		end
-	end)
-
-	dragui.InputChanged:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-			dragInput = input
-		end
-	end)
-
-	UserInputService.InputChanged:Connect(function(input)
-		if input == dragInput and dragging then
-			update(input)
-		end
-	end)
-	ui.Active=true
+    local UserInputService = game:GetService("UserInputService")
+    local dragging
+    local dragInput
+    local dragStart
+    local startPos
+    local function update(input)
+        local delta = input.Position - dragStart
+        local newXOffset = startPos.X.Offset + delta.X
+        local newYOffset = startPos.Y.Offset + delta.Y
+        local screenSize = ui.Parent.AbsoluteSize
+        local newXScale = startPos.X.Scale + (newXOffset / screenSize.X)
+        local newYScale = startPos.Y.Scale + (newYOffset / screenSize.Y)
+        ui.Position = UDim2.new(newXScale, 0, newYScale, 0)
+    end
+    dragui.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = ui.Position
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+    dragui.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            dragInput = input
+        end
+    end)
+    UserInputService.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            update(input)
+        end
+    end)
+    ui.Active = true
 end
 
-gui.draggablev2=function(floght)
-	floght.Active=true
-	floght.Draggable=true
+gui.draggablev2=function(ui, dragui)
+	if not dragui then dragui = ui end
+    local UserInputService = game:GetService("UserInputService")
+
+    local dragging
+    local dragInput
+    local dragStart
+    local startPos
+
+    local function update(input)
+        local delta = input.Position - dragStart
+        local parentSize = ui.Parent.AbsoluteSize
+        local uiSize = ui.AbsoluteSize
+
+        local newXOffset = startPos.X.Offset + delta.X
+        local newYOffset = startPos.Y.Offset + delta.Y
+
+        local newXScale = startPos.X.Scale + (newXOffset / parentSize.X)
+        local newYScale = startPos.Y.Scale + (newYOffset / parentSize.Y)
+
+        local minX = 0
+        local minY = 0
+        local maxX = 1 - (uiSize.X / parentSize.X)
+        local maxY = 1 - (uiSize.Y / parentSize.Y)
+
+        newXScale = math.clamp(newXScale, minX, maxX)
+        newYScale = math.clamp(newYScale, minY, maxY)
+
+        ui.Position = UDim2.new(newXScale, 0, newYScale, 0)
+    end
+
+    dragui.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = ui.Position
+
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+
+    dragui.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            dragInput = input
+        end
+    end)
+
+    UserInputService.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            update(input)
+        end
+    end)
+
+    local function onParentSizeChanged()
+        local parentSize = ui.Parent.AbsoluteSize
+        local uiSize = ui.AbsoluteSize
+        local currentPos = ui.Position
+
+        local minX = 0
+        local minY = 0
+        local maxX = 1 - (uiSize.X / parentSize.X)
+        local maxY = 1 - (uiSize.Y / parentSize.Y)
+
+        local newXScale = math.clamp(currentPos.X.Scale, minX, maxX)
+        local newYScale = math.clamp(currentPos.Y.Scale, minY, maxY)
+
+        ui.Position = UDim2.new(newXScale, 0, newYScale, 0)
+    end
+
+    ui.Parent:GetPropertyChangedSignal("AbsoluteSize"):Connect(onParentSizeChanged)
+    
+    ui.Active = true
 end
 
 gui.menuify=function(menu)
@@ -11071,12 +11411,14 @@ for i,v in ipairs(cmdAutofill:GetChildren()) do
 		v.Visible=false
 	end
 end
+
 gui.barSelect=function(speed)
 	centerBar.Visible=true
 	gui.tween(centerBar,"Sine","Out",speed or 0.25,{Size=UDim2.new(0,250,1,15)})
 	gui.tween(leftFill,"Quad","Out",speed or 0.3,{Position=UDim2.new(0,0,0.5,0)})
 	gui.tween(rightFill,"Quad","Out",speed or 0.3,{Position=UDim2.new(1,0,0.5,0)})
 end
+
 gui.barDeselect=function(speed)
 	gui.tween(centerBar,"Sine","Out",speed or 0.25,{Size=UDim2.new(0,250,0,0)})
 	gui.tween(leftFill,"Sine","In",speed or 0.3,{Position=UDim2.new(-0.5,100,0.5,0)})
@@ -11387,27 +11729,33 @@ end)
 
 --[[ CHAT TO USE COMMANDS ]]--
 function bindToChat(plr, msg)
-	local chatMsg = chatExample:Clone()
+    local chatMsg = chatExample:Clone()
 
-	for i, v in pairs(chatLogs:GetChildren()) do
-		if v:IsA("TextLabel") then
-			v.LayoutOrder = v.LayoutOrder + 1
-		end
-	end
+    for i, v in pairs(chatLogs:GetChildren()) do
+        if v:IsA("TextLabel") then
+            v.LayoutOrder = v.LayoutOrder + 1
+        end
+    end
 
-	chatMsg.Parent = chatLogs
+    chatMsg.Parent = chatLogs
 
-	local displayName = plr.DisplayName or "Unknown"
-	local userName = plr.Name or "Unknown"
+    local displayName = plr.DisplayName or "Unknown"
+    local userName = plr.Name or "Unknown"
 
-	if displayName == userName then
-		chatMsg.Text = ("@%s: %s"):format(userName, msg)
-	else
-		chatMsg.Text = ("%s [@%s]: %s"):format(displayName, userName, msg)
-	end
+    if displayName == userName then
+        chatMsg.Text = ("@%s: %s"):format(userName, msg)
+    else
+        chatMsg.Text = ("%s [@%s]: %s"):format(displayName, userName, msg)
+    end
 
-	local txtSize = gui.txtSize(chatMsg, chatMsg.AbsoluteSize.X, 100)
-	chatMsg.Size = UDim2.new(1, -5, 0, txtSize.Y)
+    if plr == LocalPlayer then
+        chatMsg.TextColor3 = Color3.fromRGB(0, 0, 255)
+    elseif LocalPlayer:IsFriendsWith(plr.UserId) then
+        chatMsg.TextColor3 = Color3.fromRGB(255, 255, 0)
+    end
+
+    local txtSize = gui.txtSize(chatMsg, chatMsg.AbsoluteSize.X, 100)
+    chatMsg.Size = UDim2.new(1, -5, 0, txtSize.Y)
 end
 
 for i,plr in pairs(Players:GetPlayers()) do
@@ -11725,6 +12073,10 @@ task.spawn(function()
 			break
 		end
 	end
+end)
+
+task.spawn(function()
+	game:GetService("Workspace").FallenPartsDestroyHeight = -9e9
 end)
 
 task.spawn(function()
