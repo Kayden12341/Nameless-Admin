@@ -4882,7 +4882,7 @@ cmd.add({"locate"}, {"locate <username>", "locate where the players are"}, funct
 	end
 end, true)
 
-cmd.add({"unesp", "unlocate"}, {"unesp (unlocate)", "Disables esp"}, function()
+cmd.add({"unesp", "unlocate", "unchams"}, {"unesp (unlocate, unchams)", "Disables esp/chams"}, function()
 	ESPenabled = false
 	chamsEnabled = false
 	removeESP()
