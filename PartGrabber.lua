@@ -290,14 +290,14 @@ UIGradient_2.Parent = Main
 local selectedPart = nil
 local selectionBox = nil
 local mouseConnection = nil
+local dragging = false
+local dragConnection = nil
 
 local function GetInstancePath(obj)
     local path = {}
-    
     local function isService(obj)
         return obj.Parent == game and obj ~= game
     end
-    
     if isService(obj) then
         table.insert(path, string.format('game:GetService("%s")', obj.ClassName))
     else
@@ -308,22 +308,18 @@ local function GetInstancePath(obj)
             else
                 table.insert(path, 1, string.format('["%s"]', name:gsub('"', '\\"')))
             end
-            
             if isService(obj.Parent) then
                 table.insert(path, 1, string.format('game:GetService("%s")', obj.Parent.ClassName))
                 break
             end
-            
             obj = obj.Parent
         end
     end
-    
     return table.concat(path):gsub("^%.", "")
 end
 
 local function highlightPart(part)
     if selectionBox then selectionBox:Destroy() end
-    
     selectionBox = Instance.new("SelectionBox")
     selectionBox.Adornee = part
     selectionBox.Name = "PartGrabberSelection"
@@ -332,27 +328,16 @@ local function highlightPart(part)
     selectionBox.SurfaceTransparency = 0.8
     selectionBox.SurfaceColor3 = Color3.fromRGB(60, 120, 255)
     selectionBox.Parent = part
-    
-    spawn(function()
-        local t = 0
-        while selectionBox and selectionBox.Parent do
-            t = t + 0.05
-            selectionBox.Color3 = Color3.fromHSV(0.6, 0.7 + math.sin(t*2)*0.3, 1)
-            wait(0.03)
-        end
-    end)
 end
 
 local function selectPart()
     local player = game:GetService("Players").LocalPlayer
     local mouse = player:GetMouse()
-    
     if mouse.Target then
         selectedPart = mouse.Target
         Found.Text = " "..GetInstancePath(selectedPart)
         StatusLabel.Text = "Part selected: " .. selectedPart.Name
         StatusLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
-        
         highlightPart(selectedPart)
     else
         StatusLabel.Text = "No part selected"
@@ -363,12 +348,60 @@ end
 local function setupMouseConnection()
     local player = game:GetService("Players").LocalPlayer
     local mouse = player:GetMouse()
-    
     mouse.TargetFilter = nil
-    
     if mouseConnection then mouseConnection:Disconnect() end
     mouseConnection = mouse.Button1Down:Connect(selectPart)
 end
+
+local function enableDragging()
+    local player = game:GetService("Players").LocalPlayer
+    local mouse = player:GetMouse()
+    if dragConnection then dragConnection:Disconnect() end
+    dragConnection = mouse.Button1Down:Connect(function()
+        if selectedPart and mouse.Target == selectedPart then
+            dragging = true
+            local partCFrame = selectedPart.CFrame
+            local dragOffset = partCFrame:ToObjectSpace(CFrame.new(mouse.Hit.p))
+            local moveConnection
+            moveConnection = mouse.Move:Connect(function()
+                if dragging then
+                    selectedPart.CFrame = CFrame.new(mouse.Hit.p) * dragOffset
+                end
+            end)
+            local releaseConnection
+            releaseConnection = mouse.Button1Up:Connect(function()
+                dragging = false
+                moveConnection:Disconnect()
+                releaseConnection:Disconnect()
+            end)
+        end
+    end)
+    StatusLabel.Text = "Drag mode enabled! Click & hold to drag."
+    StatusLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
+end
+
+local function disableDragging()
+    if dragConnection then dragConnection:Disconnect() dragConnection = nil end
+    dragging = false
+    StatusLabel.Text = "Drag mode disabled."
+    StatusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
+end
+
+local draggingEnabled = false
+
+copy.Text = "Drag Part"
+copy.MouseButton1Click:Connect(function()
+    draggingEnabled = not draggingEnabled
+    if draggingEnabled then
+        enableDragging()
+        copy.BackgroundColor3 = Color3.fromRGB(60, 200, 60)
+    else
+        disableDragging()
+        copy.BackgroundColor3 = Color3.fromRGB(40, 40, 80)
+    end
+end)
+
+setupMouseConnection()
 
 grab.MouseButton1Click:Connect(function()
     if Found.Text ~= ". . ." then
