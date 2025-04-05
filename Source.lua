@@ -28,18 +28,29 @@ function isAprilFools()
 end
 
 function MockText(text)
-	local mockedText = ""
-	local toggle = true
-	for i = 1, #text do
-		local char = text:sub(i, i)
-		if char:match("%a") then
-			mockedText = mockedText..(toggle and char:upper() or char:lower())
-			toggle = not toggle
-		else
-			mockedText = mockedText..char
-		end
-	end
-	return mockedText
+    local result = {}
+    local toggle = true
+    local glitchChars = {"̶", "̷", "̸"}
+
+    math.randomseed(os.time())
+
+    for i = 1, #text do
+        local char = text:sub(i, i)
+        if char:match("%a") then
+            local transformed = toggle and char:upper() or char:lower()
+            toggle = not toggle
+
+            if math.random() < 0.5 then
+                local glitch = glitchChars[math.random(#glitchChars)]
+                transformed = transformed..glitch
+            end
+
+            table.insert(result, transformed)
+        else
+            table.insert(result, char)
+        end
+    end
+    return table.concat(result)
 end
 
 function NAProtection(inst,var)
@@ -109,6 +120,7 @@ function NaProtectUI(sGui)
 	elseif lPlr and lPlr:FindFirstChild("PlayerGui") then
 		NAProtection(sGui)
 		sGui.Parent = lPlr:FindFirstChild("PlayerGui")
+		sGui.ResetOnSpawn = false
 		return sGui
 	else
 		return nil
@@ -116,7 +128,7 @@ function NaProtectUI(sGui)
 end
 
 --[[ Version ]]--
-local curVer = isAprilFools() and string.format("%.1f", math.random() * 1000.0) or "2.3"
+local curVer = isAprilFools() and string.format("%d.%d.%d", math.random(1, 10), math.random(0, 99), math.random(0, 99)) or "2.3"
 
 --[[ Brand ]]--
 local mainName = 'Nameless Admin'
@@ -463,7 +475,7 @@ end)
 local bringc={}
 
 --[[ Welcome Messages ]]--
-local msg={
+local msg = {
 	"Hey";
 	"Hello";
 	"Hi";
@@ -479,6 +491,33 @@ local msg={
 	"G'day";
 	"Bonjour";
 	"Ciao";
+	"Yo";
+	"Sup";
+	"Nice to see you";
+	"Glad you're here";
+	"Welcome aboard";
+	"Pleasure to meet you";
+	"Heya";
+	"Ahoy";
+	"Good to have you here";
+	"Hello there";
+	"Namaste";
+	"Peace";
+	"What's crackin'";
+	"How's it going";
+	"Welcome to the fam";
+	"Hey buddy";
+	"Greetings, Earthling";
+	"Salute";
+	"Welcome, friend";
+	"Howdy-doo";
+	"What's poppin'";
+	"Hey, stranger";
+	"Welcome to the party";
+	"Hey, superstar";
+	"Welcome to the show";
+	"Hey, champ";
+	"Greetings, traveler";
 }
 
 --[[ Prediction ]]--
@@ -7315,7 +7354,6 @@ local function createGui()
 		specGui.Name = "SpectateGui"
 		NaProtectUI(specGui)
 		specGui.ResetOnSpawn = false
-		specGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 		
 		local frame = Instance.new("Frame")
 		frame.Size = UDim2.new(0, 350, 0, 40)
@@ -7452,35 +7490,60 @@ local function createGui()
 				if dropdownList then dropdownList:Destroy() end
 				dropdownOpen = false
 			else
-				dropdownList = Instance.new("Frame")
-				dropdownList.Size = UDim2.new(1, 0, 0, #playerButtons * 30)
+				dropdownList = Instance.new("ScrollingFrame")
+				local totalHeight = #playerButtons * 30
+				local listHeight = math.min(totalHeight, 150)
+				dropdownList.Size = UDim2.new(1, 0, 0, listHeight)
 				dropdownList.Position = UDim2.new(0, 0, 1, 0)
 				dropdownList.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 				dropdownList.BorderSizePixel = 0
+				dropdownList.ScrollBarThickness = 5
+				dropdownList.CanvasSize = UDim2.new(0, 0, 0, totalHeight)
 				dropdownList.Parent = frame
 				
 				local listCorner = Instance.new("UICorner")
 				listCorner.CornerRadius = UDim.new(0, 10)
 				listCorner.Parent = dropdownList
 				
+				local listLayout = Instance.new("UIListLayout")
+				listLayout.SortOrder = Enum.SortOrder.LayoutOrder
+				listLayout.Parent = dropdownList
+				
 				for i, player in ipairs(playerButtons) do
 					local playerButton = Instance.new("TextButton")
 					playerButton.Size = UDim2.new(1, 0, 0, 30)
-					playerButton.Position = UDim2.new(0, 0, 0, (i - 1) * 30)
-					local displayText = nameChecker(player)
-					playerButton.Text = displayText
+					playerButton.LayoutOrder = i
+					playerButton.Text = ""
 					playerButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 					playerButton.Font = Enum.Font.Gotham
 					playerButton.TextScaled = true
-					if player == game.Players.LocalPlayer then
-						playerButton.TextColor3 = Color3.fromRGB(255, 255, 0)
-					elseif playerButtons[currentPlayerIndex] == player then
-						playerButton.TextColor3 = Color3.fromRGB(0, 162, 255)
-					else
-						playerButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-					end
 					playerButton.Parent = dropdownList
 					playerButton:SetAttribute("PlayerIndex", i)
+					
+					local headshot = Instance.new("ImageLabel")
+					headshot.Size = UDim2.new(0, 30, 0, 30)
+					headshot.Position = UDim2.new(0, 0, 0, 0)
+					headshot.BackgroundTransparency = 1
+					headshot.Parent = playerButton
+					local thumbType = Enum.ThumbnailType.HeadShot
+					local thumbSize = Enum.ThumbnailSize.Size420x420
+					headshot.Image = Players:GetUserThumbnailAsync(player.UserId, thumbType, thumbSize)
+					
+					local nameLabel = Instance.new("TextLabel")
+					nameLabel.Size = UDim2.new(1, -35, 1, 0)
+					nameLabel.Position = UDim2.new(0, 35, 0, 0)
+					nameLabel.BackgroundTransparency = 1
+					nameLabel.Text = nameChecker(player)
+					nameLabel.Font = Enum.Font.Gotham
+					nameLabel.TextScaled = true
+					if player == Players.LocalPlayer then
+						nameLabel.TextColor3 = Color3.fromRGB(255, 255, 0)
+					elseif playerButtons[currentPlayerIndex] == player then
+						nameLabel.TextColor3 = Color3.fromRGB(0, 162, 255)
+					else
+						nameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+					end
+					nameLabel.Parent = playerButton
 					
 					playerButton.MouseButton1Click:Connect(function()
 						currentPlayerIndex = i
