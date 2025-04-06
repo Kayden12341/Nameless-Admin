@@ -2039,34 +2039,75 @@ cmd.add({"discord"}, {"discord", "Copy an invite link to the official Nameless A
 	end
 end)
 
-cmd.add({"clickfling","mousefling"},{"mousefling (clickfling)","Fling a player by clicking them"},function()
-	local Players=Players
-	local Mouse=Players.LocalPlayer:GetMouse()
+clickflingUI = nil
+clickConnections = {}
+clickflingEnabled = true
 
-	Mouse.Button1Down:Connect(function()
-		local Target=Mouse.Target
+cmd.add({"clickfling","mousefling"}, {"clickfling (mousefling)", "Fling a player by clicking them"}, function()
+	clickflingEnabled = true
+	if clickflingUI then clickflingUI:Destroy() end
+	for _, conn in ipairs(clickConnections) do
+		if conn then
+			conn:Disconnect()
+		end
+	end
+	local Mouse = player:GetMouse()
+	clickflingUI = Instance.new("ScreenGui")
+	clickflingUI.Name = "ClickFlingGui"
+	NaProtectUI(clickflingUI)
+	
+	local toggleButton = Instance.new("TextButton")
+	toggleButton.Name = "ToggleButton"
+	toggleButton.Size = UDim2.new(0, 120, 0, 40)
+	toggleButton.Text = "ClickFling: ON"
+	toggleButton.Position = UDim2.new(0.5, -60, 0, 10)
+	toggleButton.TextScaled = 16
+	toggleButton.TextColor3 = Color3.new(1, 1, 1)
+	toggleButton.Font = Enum.Font.GothamBold
+	toggleButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+	toggleButton.BackgroundTransparency = 0.2
+	toggleButton.Parent = clickflingUI
+
+	local uiCorner = Instance.new("UICorner")
+	uiCorner.CornerRadius = UDim.new(0, 8)
+	uiCorner.Parent = toggleButton
+
+	gui.draggable(toggleButton)
+	
+	MouseButtonFix(toggleButton, function()
+		clickflingEnabled = not clickflingEnabled
+		if clickflingEnabled then
+			toggleButton.Text = "ClickFling: ON"
+		else
+			toggleButton.Text = "ClickFling: OFF"
+		end
+	end)
+	
+	local conn = Mouse.Button1Down:Connect(function()
+		if not clickflingEnabled then return end
+		local Target = Mouse.Target
 		if Target and Target.Parent and Target.Parent:IsA("Model") and Players:GetPlayerFromCharacter(Target.Parent) then
-			local PlayerName=Players:GetPlayerFromCharacter(Target.Parent).Name
-			local player=Players.LocalPlayer
-			local Targets={PlayerName}
+			local PlayerName = Players:GetPlayerFromCharacter(Target.Parent).Name
+			local player = Players.LocalPlayer
+			local Targets = {PlayerName}
 
-			local Players=Players
-			local Player=Players.LocalPlayer
+			local Players = Players
+			local Player = Players.LocalPlayer
 
-			local AllBool=false
+			local AllBool = false
 
-			local GetPlayer=function(Name)
-				Name=Name:lower()
-				if Name=="all" or Name=="others" then
-					AllBool=true
+			local GetPlayer = function(Name)
+				Name = Name:lower()
+				if Name == "all" or Name == "others" then
+					AllBool = true
 					return
-				elseif Name=="random" then
-					local GetPlayers=Players:GetPlayers()
-					if Discover(GetPlayers,Player) then table.remove(GetPlayers,Discover(GetPlayers,Player)) end
+				elseif Name == "random" then
+					local GetPlayers = Players:GetPlayers()
+					if Discover(GetPlayers, Player) then table.remove(GetPlayers, Discover(GetPlayers, Player)) end
 					return GetPlayers[math.random(#GetPlayers)]
-				elseif Name~="random" and Name~="all" and Name~="others" then
-					for _,x in next,Players:GetPlayers() do
-						if x~=Player then
+				elseif Name ~= "random" and Name ~= "all" and Name ~= "others" then
+					for _, x in next, Players:GetPlayers() do
+						if x ~= Player then
 							if x.Name:lower():match("^"..Name) then
 								return x;
 							elseif x.DisplayName:lower():match("^"..Name) then
@@ -2079,18 +2120,18 @@ cmd.add({"clickfling","mousefling"},{"mousefling (clickfling)","Fling a player b
 				end
 			end
 
-			local Message=function(_Title,_Text,Time)
+			local Message = function(_Title, _Text, Time)
 				print(_Title)
 				print(_Text)
 				print(Time)
 			end
 
-			local SkidFling=function(TargetPlayer)
-				local Character=Player.Character
-				local Humanoid=Character and Character:FindFirstChildOfClass("Humanoid")
-				local RootPart=Humanoid and Humanoid.RootPart
+			local SkidFling = function(TargetPlayer)
+				local Character = Player.Character
+				local Humanoid = Character and Character:FindFirstChildOfClass("Humanoid")
+				local RootPart = Humanoid and Humanoid.RootPart
 
-				local TCharacter=TargetPlayer.Character
+				local TCharacter = TargetPlayer.Character
 				local THumanoid
 				local TRootPart
 				local THead
@@ -2098,121 +2139,121 @@ cmd.add({"clickfling","mousefling"},{"mousefling (clickfling)","Fling a player b
 				local Handle
 
 				if TCharacter:FindFirstChildOfClass("Humanoid") then
-					THumanoid=TCharacter:FindFirstChildOfClass("Humanoid")
+					THumanoid = TCharacter:FindFirstChildOfClass("Humanoid")
 				end
 				if THumanoid and THumanoid.RootPart then
-					TRootPart=THumanoid.RootPart
+					TRootPart = THumanoid.RootPart
 				end
 				if TCharacter:FindFirstChild("Head") then
-					THead=TCharacter:FindFirstChild("Head")
+					THead = TCharacter:FindFirstChild("Head")
 				end
 				if TCharacter:FindFirstChildOfClass("Accessory") then
-					Accessory=TCharacter:FindFirstChildOfClass("Accessory")
+					Accessory = TCharacter:FindFirstChildOfClass("Accessory")
 				end
 				if Accessoy and Accessory:FindFirstChild("Handle") then
-					Handle=Accessory.Handle
+					Handle = Accessory.Handle
 				end
 
 				if Character and Humanoid and RootPart then
-					if RootPart.Velocity.Magnitude<50 then
-						getgenv().OldPos=RootPart.CFrame
+					if RootPart.Velocity.Magnitude < 50 then
+						getgenv().OldPos = RootPart.CFrame
 					end
 					if THumanoid and THumanoid.Sit and not AllBool then
 					end
 					if THead then
-						SafeGetService("Workspace").CurrentCamera.CameraSubject=THead
+						game:GetService("Workspace").CurrentCamera.CameraSubject = THead
 					elseif not THead and Handle then
-						SafeGetService("Workspace").CurrentCamera.CameraSubject=Handle
+						game:GetService("Workspace").CurrentCamera.CameraSubject = Handle
 					elseif THumanoid and TRootPart then
-						SafeGetService("Workspace").CurrentCamera.CameraSubject=THumanoid
+						game:GetService("Workspace").CurrentCamera.CameraSubject = THumanoid
 					end
 					if not TCharacter:FindFirstChildWhichIsA("BasePart") then
 						return
 					end
 
-					local FPos=function(BasePart,Pos,Ang)
-						RootPart.CFrame=CFrame.new(BasePart.Position)*Pos*Ang
-						Character:SetPrimaryPartCFrame(CFrame.new(BasePart.Position)*Pos*Ang)
-						RootPart.Velocity=Vector3.new(9e7,9e7*10,9e7)
-						RootPart.RotVelocity=Vector3.new(9e8,9e8,9e8)
+					local FPos = function(BasePart, Pos, Ang)
+						RootPart.CFrame = CFrame.new(BasePart.Position) * Pos * Ang
+						Character:SetPrimaryPartCFrame(CFrame.new(BasePart.Position) * Pos * Ang)
+						RootPart.Velocity = Vector3.new(9e7, 9e7 * 10, 9e7)
+						RootPart.RotVelocity = Vector3.new(9e8, 9e8, 9e8)
 					end
 
-					local SFBasePart=function(BasePart)
-						local TimeToWait=2
-						local Time=tick()
-						local Angle=0
+					local SFBasePart = function(BasePart)
+						local TimeToWait = 2
+						local Time = tick()
+						local Angle = 0
 
 						repeat
 							if RootPart and THumanoid then
-								if BasePart.Velocity.Magnitude<50 then
-									Angle=Angle+100
+								if BasePart.Velocity.Magnitude < 50 then
+									Angle = Angle + 100
 
-									FPos(BasePart,CFrame.new(0,1.5,0)+THumanoid.MoveDirection*BasePart.Velocity.Magnitude / 1.25,CFrame.Angles(math.rad(Angle),0,0))
+									FPos(BasePart, CFrame.new(0, 1.5, 0) + THumanoid.MoveDirection * BasePart.Velocity.Magnitude / 1.25, CFrame.Angles(math.rad(Angle), 0, 0))
 									Wait()
 
-									FPos(BasePart,CFrame.new(0,-1.5,0)+THumanoid.MoveDirection*BasePart.Velocity.Magnitude / 1.25,CFrame.Angles(math.rad(Angle),0,0))
+									FPos(BasePart, CFrame.new(0, -1.5, 0) + THumanoid.MoveDirection * BasePart.Velocity.Magnitude / 1.25, CFrame.Angles(math.rad(Angle), 0, 0))
 									Wait()
 
-									FPos(BasePart,CFrame.new(2.25,1.5,-2.25)+THumanoid.MoveDirection*BasePart.Velocity.Magnitude / 1.25,CFrame.Angles(math.rad(Angle),0,0))
+									FPos(BasePart, CFrame.new(2.25, 1.5, -2.25) + THumanoid.MoveDirection * BasePart.Velocity.Magnitude / 1.25, CFrame.Angles(math.rad(Angle), 0, 0))
 									Wait()
 
-									FPos(BasePart,CFrame.new(-2.25,-1.5,2.25)+THumanoid.MoveDirection*BasePart.Velocity.Magnitude / 1.25,CFrame.Angles(math.rad(Angle),0,0))
+									FPos(BasePart, CFrame.new(-2.25, -1.5, 2.25) + THumanoid.MoveDirection * BasePart.Velocity.Magnitude / 1.25, CFrame.Angles(math.rad(Angle), 0, 0))
 									Wait()
 
-									FPos(BasePart,CFrame.new(0,1.5,0)+THumanoid.MoveDirection,CFrame.Angles(math.rad(Angle),0,0))
+									FPos(BasePart, CFrame.new(0, 1.5, 0) + THumanoid.MoveDirection, CFrame.Angles(math.rad(Angle), 0, 0))
 									Wait()
 
-									FPos(BasePart,CFrame.new(0,-1.5,0)+THumanoid.MoveDirection,CFrame.Angles(math.rad(Angle),0,0))
+									FPos(BasePart, CFrame.new(0, -1.5, 0) + THumanoid.MoveDirection, CFrame.Angles(math.rad(Angle), 0, 0))
 									Wait()
 								else
-									FPos(BasePart,CFrame.new(0,1.5,THumanoid.WalkSpeed),CFrame.Angles(math.rad(90),0,0))
+									FPos(BasePart, CFrame.new(0, 1.5, THumanoid.WalkSpeed), CFrame.Angles(math.rad(90), 0, 0))
 									Wait()
 
-									FPos(BasePart,CFrame.new(0,-1.5,-THumanoid.WalkSpeed),CFrame.Angles(0,0,0))
+									FPos(BasePart, CFrame.new(0, -1.5, -THumanoid.WalkSpeed), CFrame.Angles(0, 0, 0))
 									Wait()
 
-									FPos(BasePart,CFrame.new(0,1.5,THumanoid.WalkSpeed),CFrame.Angles(math.rad(90),0,0))
+									FPos(BasePart, CFrame.new(0, 1.5, THumanoid.WalkSpeed), CFrame.Angles(math.rad(90), 0, 0))
 									Wait()
 
-									FPos(BasePart,CFrame.new(0,1.5,TRootPart.Velocity.Magnitude / 1.25),CFrame.Angles(math.rad(90),0,0))
+									FPos(BasePart, CFrame.new(0, 1.5, TRootPart.Velocity.Magnitude / 1.25), CFrame.Angles(math.rad(90), 0, 0))
 									Wait()
 
-									FPos(BasePart,CFrame.new(0,-1.5,-TRootPart.Velocity.Magnitude / 1.25),CFrame.Angles(0,0,0))
+									FPos(BasePart, CFrame.new(0, -1.5, -TRootPart.Velocity.Magnitude / 1.25), CFrame.Angles(0, 0, 0))
 									Wait()
 
-									FPos(BasePart,CFrame.new(0,1.5,TRootPart.Velocity.Magnitude / 1.25),CFrame.Angles(math.rad(90),0,0))
+									FPos(BasePart, CFrame.new(0, 1.5, TRootPart.Velocity.Magnitude / 1.25), CFrame.Angles(math.rad(90), 0, 0))
 									Wait()
 
-									FPos(BasePart,CFrame.new(0,-1.5,0),CFrame.Angles(math.rad(90),0,0))
+									FPos(BasePart, CFrame.new(0, -1.5, 0), CFrame.Angles(math.rad(90), 0, 0))
 									Wait()
 
-									FPos(BasePart,CFrame.new(0,-1.5,0),CFrame.Angles(0,0,0))
+									FPos(BasePart, CFrame.new(0, -1.5, 0), CFrame.Angles(0, 0, 0))
 									Wait()
 
-									FPos(BasePart,CFrame.new(0,-1.5,0),CFrame.Angles(math.rad(-90),0,0))
+									FPos(BasePart, CFrame.new(0, -1.5, 0), CFrame.Angles(math.rad(-90), 0, 0))
 									Wait()
 
-									FPos(BasePart,CFrame.new(0,-1.5,0),CFrame.Angles(0,0,0))
+									FPos(BasePart, CFrame.new(0, -1.5, 0), CFrame.Angles(0, 0, 0))
 									Wait()
 								end
 							else
 								break
 							end
-						until BasePart.Velocity.Magnitude>500 or BasePart.Parent~=TargetPlayer.Character or TargetPlayer.Parent~=Players or not TargetPlayer.Character==TCharacter or THumanoid.Sit or Humanoid.Health <=0 or tick()>Time+TimeToWait
+						until BasePart.Velocity.Magnitude > 500 or BasePart.Parent ~= TargetPlayer.Character or TargetPlayer.Parent ~= Players or not TargetPlayer.Character == TCharacter or THumanoid.Sit or Humanoid.Health <= 0 or tick() > Time + TimeToWait
 					end
 
-					SafeGetService("Workspace").FallenPartsDestroyHeight=0/0
+					game:GetService("Workspace").FallenPartsDestroyHeight = 0/0
 
-					local BV=Instance.new("BodyVelocity")
-					BV.Name="EpixVel"
-					BV.Parent=RootPart
-					BV.Velocity=Vector3.new(9e8,9e8,9e8)
-					BV.MaxForce=Vector3.new(1/0,1/0,1/0)
+					local BV = Instance.new("BodyVelocity")
+					BV.Name = "EpixVel"
+					BV.Parent = RootPart
+					BV.Velocity = Vector3.new(9e8, 9e8, 9e8)
+					BV.MaxForce = Vector3.new(1/0, 1/0, 1/0)
 
-					Humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated,false)
+					Humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated, false)
 
 					if TRootPart and THead then
-						if (TRootPart.CFrame.p-THead.CFrame.p).Magnitude>5 then
+						if (TRootPart.CFrame.p - THead.CFrame.p).Magnitude > 5 then
 							SFBasePart(THead)
 						else
 							SFBasePart(TRootPart)
@@ -2223,42 +2264,41 @@ cmd.add({"clickfling","mousefling"},{"mousefling (clickfling)","Fling a player b
 						SFBasePart(THead)
 					elseif not TRootPart and not THead and Accessory and Handle then
 						SFBasePart(Handle)
-					else
 					end
 
 					BV:Destroy()
-					Humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated,true)
-					SafeGetService("Workspace").CurrentCamera.CameraSubject=Humanoid
+					Humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated, true)
+					game:GetService("Workspace").CurrentCamera.CameraSubject = Humanoid
 
 					repeat
-						RootPart.CFrame=getgenv().OldPos*CFrame.new(0,.5,0)
-						Character:SetPrimaryPartCFrame(getgenv().OldPos*CFrame.new(0,.5,0))
+						RootPart.CFrame = getgenv().OldPos * CFrame.new(0, .5, 0)
+						Character:SetPrimaryPartCFrame(getgenv().OldPos * CFrame.new(0, .5, 0))
 						Humanoid:ChangeState("GettingUp")
-						table.foreach(Character:GetChildren(),function(_,x)
+						table.foreach(Character:GetChildren(), function(_, x)
 							if x:IsA("BasePart") then
-								x.Velocity,x.RotVelocity=Vector3.new(),Vector3.new()
+								x.Velocity, x.RotVelocity = Vector3.new(), Vector3.new()
 							end
 						end)
 						Wait()
-					until (RootPart.Position-getgenv().OldPos.p).Magnitude<25
-					SafeGetService("Workspace").FallenPartsDestroyHeight=getgenv().FPDH
+					until (RootPart.Position - getgenv().OldPos.p).Magnitude < 25
+					game:GetService("Workspace").FallenPartsDestroyHeight = getgenv().FPDH
 				else
 				end
 			end
 
-			getgenv().Welcome=true
-			if Targets[1] then for _,x in next,Targets do GetPlayer(x) end else return end
+			getgenv().Welcome = true
+			if Targets[1] then for _, x in next, Targets do GetPlayer(x) end else return end
 
 			if AllBool then
-				for _,x in next,Players:GetPlayers() do
+				for _, x in next, Players:GetPlayers() do
 					SkidFling(x)
 				end
 			end
 
-			for _,x in next,Targets do
-				if GetPlayer(x) and GetPlayer(x)~=Player then
-					if GetPlayer(x).UserId~=1414978355 then
-						local TPlayer=GetPlayer(x)
+			for _, x in next, Targets do
+				if GetPlayer(x) and GetPlayer(x) ~= Player then
+					if GetPlayer(x).UserId ~= 1414978355 then
+						local TPlayer = GetPlayer(x)
 						if TPlayer then
 							SkidFling(TPlayer)
 						end
@@ -2269,7 +2309,20 @@ cmd.add({"clickfling","mousefling"},{"mousefling (clickfling)","Fling a player b
 			end
 		end
 	end)
+	table.insert(clickConnections, conn)
 end)
+
+cmd.add({"unclickfling", "unmousefling"}, {"unclickfling (unmousefling)","disables clickfling"}, function()
+	clickflingEnabled = false
+	if clickflingUI then clickflingUI:Destroy() end
+	for _, conn in ipairs(clickConnections) do
+		if conn then
+			conn:Disconnect()
+		end
+	end
+	clickConnections = {}
+end)
+
 
 cmd.add({"ping"}, {"ping", "Shows your ping"}, function()
 	local function createWindow(name, position, maxSize, minSize, defaultText)
@@ -5559,8 +5612,6 @@ cmd.add({"unautorejoin", "unautorj"}, {"unautorejoin (unautorj)", "Disables auto
     end
 end)
 
-dadojadoqwdqwd='© 2025 ltseverydayyou'
-
 cmd.add({"functionspy"},{"functionspy","Check console"},function()
 	local toLog={
 		debug.getconstants;
@@ -7720,7 +7771,7 @@ cmd.add({"stealaudio", "getaudio", "steal", "logaudio"}, {"stealaudio <player> (
 		end
 		local char = plr.Character
 		if not char then
-			DoNotif("Character not found for player " .. nameChecker(plr))
+			DoNotif("Character not found for player "..nameChecker(plr))
 			return
 		end
 		local audioList = {}
@@ -7734,7 +7785,7 @@ cmd.add({"stealaudio", "getaudio", "steal", "logaudio"}, {"stealaudio <player> (
 			setclipboard(audios)
 			DoNotif("Audio links have been copied to your clipboard.")
 		else
-			DoNotif("No playing audio found for player " .. nameChecker(plr))
+			DoNotif("No playing audio found for player "..nameChecker(plr))
 		end
 	end
 end, true)
@@ -11968,8 +12019,6 @@ end)
 
 --[[ COMMAND BAR BUTTON ]]--
 local TextLabel = Instance.new("TextLabel")
-local Info = Instance.new("TextLabel")
-local Info2 = Instance.new("TextLabel")
 local UICorner = Instance.new("UICorner")
 local ImageButton = Instance.new("ImageButton")
 local UICorner2 = Instance.new("UICorner")
@@ -11998,36 +12047,6 @@ TextLabel.TextSize = 20
 TextLabel.TextWrapped = true
 TextLabel.ZIndex = 9999
 
-Info.Parent = ScreenGui
-Info.Name = randomString()
-Info.BackgroundTransparency = 1
-Info.AnchorPoint = Vector2.new(0, 1)
-Info.Position = UDim2.new(0, 10, 1, -10)
-Info.Size = UDim2.new(0, 200, 0, 20)
-Info.Font = Enum.Font.Gotham
-Info.Text = getSeasonEmoji()..' '..adminName.." V"..curVer..' '..getSeasonEmoji().."\n"..dadojadoqwdqwd
-Info.TextColor3 = Color3.fromRGB(255, 255, 255)
-Info.TextTransparency = 0.5
-Info.RichText = true
-Info.TextSize = 14
-Info.TextXAlignment = Enum.TextXAlignment.Left
-Info.ZIndex = 9999
-
-Info2.Parent = ScreenGui
-Info2.Name = randomString()
-Info2.BackgroundTransparency = 1
-Info2.AnchorPoint = Vector2.new(1, 1)
-Info2.Position = UDim2.new(1, -10, 1, -10)
-Info2.Size = UDim2.new(0, 200, 0, 20)
-Info2.Font = Enum.Font.Gotham
-Info2.Text = "Updated On: "..updDate.."\n"..dadojadoqwdqwd
-Info2.TextColor3 = Color3.fromRGB(255, 255, 255)
-Info2.TextTransparency = 0.5
-Info2.RichText = true
-Info2.TextSize = 14
-Info2.TextXAlignment = Enum.TextXAlignment.Right
-Info2.ZIndex = 9999
-
 ImageButton.Parent = ScreenGui
 ImageButton.Name = randomString()
 ImageButton.AnchorPoint = Vector2.new(0.5, 0)
@@ -12035,7 +12054,7 @@ ImageButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 ImageButton.BorderSizePixel = 0
 ImageButton.Position = UDim2.new(0.5, 0, -0.2, 0)
 ImageButton.Size = UDim2.new(0, 32 * NAScale, 0, 33 * NAScale)
-ImageButton.Image = "rbxassetid://18567102564"
+ImageButton.Image = "rbxassetid://77352376040674"
 ImageButton.ZIndex = 9999
 
 NAimageButton=ImageButton
@@ -12174,10 +12193,6 @@ end)
 CaptureService.CaptureBegan:Connect(function()
 	if NAimageButton then
 		NAimageButton.Visible=false
-	elseif Info then
-		Info.Visible=false
-	elseif Info2 then
-		Info2.Visible=false
 	end
 end)
 
@@ -12185,10 +12200,6 @@ CaptureService.CaptureEnded:Connect(function()
 	Delay(0.1, function()
 		if NAimageButton then
 			NAimageButton.Visible=true
-		elseif Info then
-			Info.Visible=true
-		elseif Info2 then
-			Info2.Visible=true
 		end
 	end)
 end)
@@ -12221,17 +12232,6 @@ Spawn(function()
 			break
 		end
 	end
-end)
-
-Spawn(function()
-	while Wait(1) do
-		local currentTime = os.date("%H:%M:%S")
-		Info2.Text = "Updated On: "..updDate.."\n"..dadojadoqwdqwd.."\nCurrent Time: "..currentTime
-	end
-end)
-
-Spawn(function()
-	Info.Text = getSeasonEmoji()..' '..adminName.." V"..curVer..' '..getSeasonEmoji().."\nPlace: "..placeName().."\nOwned By: "..placeCreator()
 end)
 
 Spawn(function()
