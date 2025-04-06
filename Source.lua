@@ -5412,9 +5412,7 @@ cmd.add({"admin"},{"admin","whitelist someone to allow them to use commands"},fu
 		Admin[plr.UserId]={plr=plr}
 		ChatMessage("[Nameless Admin] You've got admin. Prefix: ';'",plr.Name)
 		wait(0.2)
-		ChatMessage("[Nameless Admin Commands] glue,unglue,fling,fling2,spinfling,unspinfling,fcd,fti,fpp,fireremotes,holdhat",plr.Name)
-		ChatMessage("reset,commitoof,seizure,unseizure,toolorbit,lay,fall,toolspin,hatspin,sit,joke,kanye",plr.Name)
-		DoNotif(plr.Name.." has now been whitelisted to use commands",15)
+		DoNotif(nameChecker(plr).." has now been whitelisted to use commands",15)
 	else
 		DoNotif("No player found")
 	end
@@ -11922,16 +11920,30 @@ function bindToChat(plr, msg)
     local displayName = plr.DisplayName or "Unknown"
     local userName = plr.Name or "Unknown"
 
-    if displayName == userName then
-        chatMsg.Text = ("@%s: %s"):format(userName, msg)
-    else
-        chatMsg.Text = ("%s [@%s]: %s"):format(displayName, userName, msg)
+    local isNAadmin = false
+    if _G.NAadminsLol then
+        for _, id in ipairs(_G.NAadminsLol) do
+            if plr.UserId == id then
+                isNAadmin = true
+                break
+            end
+        end
     end
 
-    if plr == LocalPlayer then
-        chatMsg.TextColor3 = Color3.fromRGB(0, 0, 255)
-    elseif LocalPlayer:IsFriendsWith(plr.UserId) then
-        chatMsg.TextColor3 = Color3.fromRGB(255, 255, 0)
+    if isNAadmin then
+        chatMsg:Destroy()
+    else
+        if displayName == userName then
+            chatMsg.Text = ("@%s: %s"):format(userName, msg)
+        else
+            chatMsg.Text = ("%s [@%s]: %s"):format(displayName, userName, msg)
+        end
+
+        if plr == LocalPlayer then
+            chatMsg.TextColor3 = Color3.fromRGB(0, 0, 255)
+        elseif LocalPlayer:IsFriendsWith(plr.UserId) then
+            chatMsg.TextColor3 = Color3.fromRGB(255, 255, 0)
+        end
     end
 
     local txtSize = gui.txtSize(chatMsg, chatMsg.AbsoluteSize.X, 100)
@@ -11939,25 +11951,25 @@ function bindToChat(plr, msg)
 end
 
 for i,plr in pairs(Players:GetPlayers()) do
+	plr.Chatted:Connect(function(msg)
+		bindToChat(plr,msg)
+	end)
 	Insert(playerButtons, plr)
 	if plr~=LocalPlayer then
 		CheckPermissions(plr)
 	end
-	plr.Chatted:Connect(function(msg)
-		bindToChat(plr,msg)
-	end)
 end
 
 Players.PlayerAdded:Connect(function(plr)
+	plr.Chatted:Connect(function(msg)
+		bindToChat(plr,msg)
+	end)
 	CheckPermissions(plr)
 	Insert(playerButtons, plr)
 	if ESPenabled then
 		repeat wait(1) until plr.Character
 		ESP(plr)
 	end
-	plr.Chatted:Connect(function(msg)
-		bindToChat(plr,msg)
-	end)
 end)
 
 Players.PlayerRemoving:Connect(function(plr)
