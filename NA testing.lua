@@ -9160,27 +9160,15 @@ cmd.add({"scriptviewer","viewscripts"},{"scriptviewer (viewscripts)","Can view s
 end)
 
 cmd.add({"hydroxide","hydro"},{"hydroxide (hydro)","executes hydroxide"},function()
-	if IsOnMobile then
-		local owner="Hosvile"
-		local branch="revision"
+	local owner="Upbolt"
+	local branch="revision"
 
-		function webImport(file)
-			return loadstring(game:HttpGetAsync(("https://raw.githubusercontent.com/%s/MC-Hydroxide/%s/%s.lua"):format(owner,branch,file)),file..'.lua')()
-		end
-
-		webImport("init")
-		webImport("ui/main")
-	else
-		local owner="Upbolt"
-		local branch="revision"
-
-		function webImport(file)
-			return loadstring(game:HttpGetAsync(("https://raw.githubusercontent.com/%s/Hydroxide/%s/%s.lua"):format(owner,branch,file)),file..'.lua')()
-		end
-
-		webImport("init")
-		webImport("ui/main")
+	function webImport(file)
+		return loadstring(game:HttpGetAsync(("https://raw.githubusercontent.com/%s/Hydroxide/%s/%s.lua"):format(owner,branch,file)),file..'.lua')()
 	end
+
+	webImport("init")
+	webImport("ui/main")
 end)
 
 cmd.add({"remotespy","simplespy","rspy"},{"remotespy (simplespy,rspy)","executes simplespy that supports both pc and mobile"},function()
