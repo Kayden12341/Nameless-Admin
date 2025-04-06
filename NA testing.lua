@@ -9174,7 +9174,7 @@ cmd.add({"hydroxide","hydro"},{"hydroxide (hydro)","executes hydroxide"},functio
 		local owner="Upbolt"
 		local branch="revision"
 
-		function webImport(file)
+		local function webImport(file)
 			return loadstring(game:HttpGetAsync(("https://raw.githubusercontent.com/%s/Hydroxide/%s/%s.lua"):format(owner,branch,file)),file..'.lua')()
 		end
 
