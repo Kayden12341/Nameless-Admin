@@ -607,6 +607,26 @@ function isRelAdmin(Player)
 	return false
 end
 
+function AntiSit()
+	local character = LocalPlayer.Character
+	local humanoid = character and character:FindFirstChild("Humanoid")
+
+	if not humanoid then return end
+
+	humanoid:SetStateEnabled("Seated", false)
+	humanoid.Sit = true
+end
+
+function unAntiSit()
+	local character = LocalPlayer.Character
+	local humanoid = character and character:FindFirstChild("Humanoid")
+
+	if not humanoid then return end
+
+	humanoid:SetStateEnabled("Seated", true)
+	humanoid.Sit = false
+end
+
 function nameChecker(plr)
 	return plr.DisplayName == plr.Name and '@'..plr.Name or plr.DisplayName..' (@'..plr.Name..')'
 end
@@ -841,13 +861,24 @@ function ParseArguments(input)
 end
 
 function randomString()
-	local length=math.random(10,20)
-	local array={}
-	for i=1,length do
-		array[i]=string.char(math.random(32,126))
-	end
-	return table.concat(array)
+    local length = math.random(10, 20)
+    local result = {}
+    local glitchMarks = {"̶", "̷", "̸", "̹", "̺", "̻"}
+    
+    for i = 1, length do
+        local char = string.char(math.random(32, 126))
+        table.insert(result, char)
+        if math.random() < 0.5 then
+            local numGlitches = math.random(1, 3)
+            for j = 1, numGlitches do
+                table.insert(result, glitchMarks[math.random(#glitchMarks)])
+            end
+        end
+    end
+    
+    return table.concat(result)
 end
+
 
 --[[ Fully setup Nameless admin storage ]]
 NA_storage.Name=randomString()
@@ -1423,7 +1454,7 @@ function mobilefly(speed, vfly)
 			bv.MaxForce = Vector3.new(9e9, 9e9, 9e9)
 			bg.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
 			if not vfly then
-				humanoid.PlatformStand = true
+				AntiSit()
 			end
 
 			bg.CFrame = camera.CFrame
@@ -1443,13 +1474,9 @@ function mobilefly(speed, vfly)
 end
 
 function unmobilefly()
-	local char = getChar()
-	if char and flyMobile then
-		local humanoid = char:FindFirstChildOfClass("Humanoid")
-		if humanoid then
-			humanoid.PlatformStand = false
-		end
+	if flyMobile then
 		flyMobile:Destroy()
+		unAntiSit()
 	end
 	if Signal1 then Signal1:Disconnect() end
 	if Signal2 then Signal2:Disconnect() end
@@ -1516,7 +1543,7 @@ function sFLY(vfly)
 		spawn(function()
 			while FLYING do
 				if not vfly then
-					cmdlp.Character:FindFirstChild("Humanoid").PlatformStand = true
+					AntiSit()
 				end
 
 				if CONTROL.L + CONTROL.R ~= 0 or CONTROL.F + CONTROL.B ~= 0 or CONTROL.Q + CONTROL.E ~= 0 then
@@ -1547,7 +1574,7 @@ function sFLY(vfly)
 			SPEED = 0
 			BG:Destroy()
 			BV:Destroy()
-			cmdlp.Character.Humanoid.PlatformStand = false
+			unAntiSit()
 		end)
 	end
 
@@ -3350,7 +3377,7 @@ function toggleVFly()
 		if IsOnMobile then
 			unmobilefly()
 		else
-			cmdlp.Character.Humanoid.PlatformStand = false
+			unAntiSit()
 			if goofyFLY then goofyFLY:Destroy() end
 		end
 		vFlyEnabled = false
@@ -3425,12 +3452,13 @@ cmd.add({"vfly", "vehiclefly"}, {"vehiclefly (vfly)", "be able to fly vehicles"}
 					btn.Text = "UnvFly"
 					btn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
 					mobilefly(vFlySpeed, true)
-					cmdlp.Character.Humanoid.PlatformStand = false
+					unAntiSit()
 				else
 					vOn = false
 					btn.Text = "vFly"
 					btn.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
 					unmobilefly()
+					unAntiSit()
 				end
 			end)
 		end)()
@@ -3438,7 +3466,6 @@ cmd.add({"vfly", "vehiclefly"}, {"vehiclefly (vfly)", "be able to fly vehicles"}
 		gui.draggable(btn)
 	else
 		FLYING = false
-		cmdlp.Character.Humanoid.PlatformStand = false
 		wait()
 
 		DoNotif("Vehicle fly enabled. Press '"..vToggleKey:upper().."' to toggle vehicle flying.")
@@ -3453,10 +3480,11 @@ cmd.add({"unvfly", "unvehiclefly"}, {"unvehiclefly (unvfly)", "disable vehicle f
 	if IsOnMobile then
 		DoNotif("Mobile vFly Disabled.")
 		unmobilefly()
+		unAntiSit()
 	else
 		DoNotif("Not flying anymore")
 		FLYING = false
-		cmdlp.Character.Humanoid.PlatformStand = false
+		unAntiSit()
 		if goofyFLY then goofyFLY:Destroy() end
 	end
 	vOn = false
@@ -4180,31 +4208,13 @@ cmd.add({"respawn", "re"}, {"respawn", "Respawn your character"}, function()
 end)
 
 cmd.add({"antisit"},{"antisit","Prevents the player from sitting"},function()
-	local character = Player.Character
-	local humanoid = character and character:FindFirstChild("Humanoid")
-
-	if not humanoid then
-		DoNotif("Your character or humanoid is invalid", 3)
-		return
-	end
-
-	humanoid:SetStateEnabled("Seated", false)
-	humanoid.Sit = true
+	AntiSit()
 
 	DoNotif("Anti sit enabled", 3)
 end)
 
 cmd.add({"unantisit"},{"unantisit","Allows the player to sit again"},function()
-	local character = Player.Character
-	local humanoid = character and character:FindFirstChild("Humanoid")
-
-	if not humanoid then
-		DoNotif("Your character or humanoid is invalid", 3)
-		return
-	end
-
-	humanoid:SetStateEnabled("Seated", true)
-	humanoid.Sit = false
+	unAntiSit()
 
 	DoNotif("Anti sit disabled", 3)
 end)
@@ -6148,8 +6158,9 @@ function toggleFly()
 		FLYING = false
 		if IsOnMobile then
 			unmobilefly()
+			unAntiSit()
 		else
-			cmdlp.Character.Humanoid.PlatformStand = false
+			unAntiSit()
 			if goofyFLY then goofyFLY:Destroy() end
 		end
 		flyEnabled = false
@@ -6236,7 +6247,7 @@ cmd.add({"fly"}, {"fly [speed]", "Enable flight"}, function(...)
 		gui.draggable(btn)
 	else
 		FLYING = false
-		cmdlp.Character.Humanoid.PlatformStand = false
+		unAntiSit()
 		wait()
 
 		DoNotif("Fly enabled. Press '"..toggleKey:upper().."' to toggle flying.")
@@ -6251,10 +6262,11 @@ cmd.add({"unfly"}, {"unfly", "Disable flight"}, function()
 	if IsOnMobile then
 		DoNotif("Mobile Fly Disabled.")
 		unmobilefly()
+		unAntiSit()
 	else
 		DoNotif("Not flying anymore")
 		FLYING = false
-		cmdlp.Character.Humanoid.PlatformStand = false
+		unAntiSit()
 		if goofyFLY then goofyFLY:Destroy() end
 	end
 	mOn = false
@@ -6337,7 +6349,7 @@ cmd.add({"tfly", "tweenfly"}, {"tfly [speed] (tweenfly)", "Enables smooth flying
 
 	repeat
 		wait()
-		Humanoid.PlatformStand = true
+		AntiSit()
 		local newPosition = gyro.cframe - gyro.cframe.p + pos.position
 
 		if IsOnPC then
@@ -6369,7 +6381,7 @@ cmd.add({"tfly", "tweenfly"}, {"tfly [speed] (tweenfly)", "Enables smooth flying
 
 	if gyro then gyro:Destroy() end
 	if pos then pos:Destroy() end
-	Humanoid.PlatformStand = false
+	unAntiSit()
 end, true)
 
 cmd.add({"untfly", "untweenfly"}, {"untfly (untweenfly)", "Disables tween flying"}, function()
@@ -6435,10 +6447,11 @@ cmd.add({"antibang"}, {"antibang", "prevents users to bang you (still WORK IN PR
 								targetPlayer = p
 								SafeGetService("Workspace").FallenPartsDestroyHeight = 0/1/0
 								platformPart = Instance.new("Part")
-								platformPart.Name = "AntiVoidPlatform"
-								platformPart.Size = Vector3.new(10, 1, 10)
+								platformPart.Name = randomString()
+								platformPart.Size = Vector3.new(9999, 1, 9999)
 								platformPart.Anchored = true
 								platformPart.CanCollide = true
+								platformPart.Transparency = 1
 								platformPart.Position = Vector3.new(0, orgHeight - 30, 0)
 								platformPart.Parent = SafeGetService("Workspace").CurrentCamera
 								root.CFrame = CFrame.new(Vector3.new(0, orgHeight - 25, 0))
@@ -9151,7 +9164,7 @@ cmd.add({"spin"}, {"spin {amount}", "Makes your character spin as fast as you wa
 	end
 
 	spinPart = Instance.new("Part")
-	spinPart.Name = "SpinPart"
+	spinPart.Name = randomString()
 	spinPart.Anchored = false
 	spinPart.CanCollide = false
 	spinPart.Transparency = 1
@@ -9160,7 +9173,7 @@ cmd.add({"spin"}, {"spin {amount}", "Makes your character spin as fast as you wa
 	spinPart.CFrame = getRoot(LocalPlayer.Character).CFrame
 
 	spinThingy = Instance.new("BodyAngularVelocity")
-	spinThingy.Name = "NamelessSpinner"
+	spinThingy.Name = randomString()
 	spinThingy.Parent = spinPart
 	spinThingy.MaxTorque = Vector3.new(0, math.huge, 0)
 	spinThingy.AngularVelocity = Vector3.new(0, spinSpeed, 0)
@@ -12284,6 +12297,15 @@ Spawn(function()
 			break
 		end
 	end
+end)
+
+Spawn(function() -- innit
+	cmdBar.Name = randomString()
+	chatLogsFrame.Name = randomString()
+	commandsFrame.Name = randomString()
+	UpdLogsFrame.Name = randomString()
+	resizeFrame.Name = randomString()
+	description.Name = randomString()
 end)
 
 Spawn(function()

@@ -20,6 +20,8 @@ local UICorner_2 = Instance.new("UICorner")
 local UIGradient_2 = Instance.new("UIGradient")
 local UIStroke = Instance.new("UIStroke")
 local StatusLabel = Instance.new("TextLabel")
+local rename = Instance.new("TextButton")
+local bring = Instance.new("TextButton")
 
 function protectUI(sGui)
     local function blankfunction(...)
@@ -117,7 +119,7 @@ Main.BorderSizePixel = 0
 Main.ClipsDescendants = true
 Main.Draggable = true
 Main.Position = UDim2.new(0.5, 0, 3, 0)
-Main.Size = UDim2.new(0, 420, 0, 180)
+Main.Size = UDim2.new(0, 420, 0, 275)
 
 UIStroke.Parent = Main
 UIStroke.Color = Color3.fromRGB(60, 60, 255)
@@ -210,7 +212,31 @@ del.TextColor3 = Color3.fromRGB(255, 220, 220)
 del.TextSize = 14
 del.AutoButtonColor = true
 
-for _, button in pairs({grab, del, copy}) do
+rename.Name = "rename"
+rename.Parent = Container
+rename.BackgroundColor3 = Color3.fromRGB(40, 40, 80)
+rename.BorderSizePixel = 0
+rename.Position = UDim2.new(0.05, 0, 0.85, 0)
+rename.Size = UDim2.new(0.45, 0, 0, 35)
+rename.Font = Enum.Font.GothamBold
+rename.Text = "Rename Part"
+rename.TextColor3 = Color3.fromRGB(220, 220, 255)
+rename.TextSize = 14
+rename.AutoButtonColor = true
+
+bring.Name = "bring"
+bring.Parent = Container
+bring.BackgroundColor3 = Color3.fromRGB(40, 40, 80)
+bring.BorderSizePixel = 0
+bring.Position = UDim2.new(0.5, 0, 0.85, 0)
+bring.Size = UDim2.new(0.45, 0, 0, 35)
+bring.Font = Enum.Font.GothamBold
+bring.Text = "Bring Part"
+bring.TextColor3 = Color3.fromRGB(220, 220, 255)
+bring.TextSize = 14
+bring.AutoButtonColor = true
+
+for _, button in pairs({grab, del, copy, rename, bring}) do
     local corner = Instance.new("UICorner")
     corner.CornerRadius = UDim.new(0, 6)
     corner.Parent = button
@@ -304,9 +330,9 @@ local function GetInstancePath(obj)
         while obj and obj.Parent do
             local name = obj.Name
             if name:match("^[%a_][%w_]*$") then
-                table.insert(path, 1, "."..name)
+                table.insert(path, 1, "." .. name)
             else
-                table.insert(path, 1, string.format('["%s"]', name:gsub('"', '\\"')))
+                table.insert(path, 1, string.format(':FindFirstChild("%s")', name:gsub('"', '\\"')))
             end
             if isService(obj.Parent) then
                 table.insert(path, 1, string.format('game:GetService("%s")', obj.Parent.ClassName))
@@ -336,7 +362,7 @@ local function selectPart()
     if mouse.Target then
         selectedPart = mouse.Target
         Found.Text = " "..GetInstancePath(selectedPart)
-        StatusLabel.Text = "Part selected: " .. selectedPart.Name
+        StatusLabel.Text = "Part selected: "..selectedPart.Name
         StatusLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
         highlightPart(selectedPart)
     else
@@ -356,24 +382,37 @@ end
 local function enableDragging()
     local player = game:GetService("Players").LocalPlayer
     local mouse = player:GetMouse()
+    local camera = workspace.CurrentCamera
     if dragConnection then dragConnection:Disconnect() end
     dragConnection = mouse.Button1Down:Connect(function()
         if selectedPart and mouse.Target == selectedPart then
             dragging = true
-            local partCFrame = selectedPart.CFrame
-            local dragOffset = partCFrame:ToObjectSpace(CFrame.new(mouse.Hit.p))
-            local moveConnection
-            moveConnection = mouse.Move:Connect(function()
-                if dragging then
-                    selectedPart.CFrame = CFrame.new(mouse.Hit.p) * dragOffset
-                end
-            end)
-            local releaseConnection
-            releaseConnection = mouse.Button1Up:Connect(function()
-                dragging = false
-                moveConnection:Disconnect()
-                releaseConnection:Disconnect()
-            end)
+            local initialPartCFrame = selectedPart.CFrame
+            local dragPlanePoint = initialPartCFrame.p
+            local dragPlaneNormal = camera.CFrame.lookVector
+            local mouseRay = camera:ScreenPointToRay(mouse.X, mouse.Y)
+            local denom = mouseRay.Direction:Dot(dragPlaneNormal)
+            if math.abs(denom) > 1e-6 then
+                local t = (dragPlanePoint - mouseRay.Origin):Dot(dragPlaneNormal) / denom
+                local intersection = mouseRay.Origin + mouseRay.Direction * t
+                local offset = initialPartCFrame:inverse() * CFrame.new(intersection)
+                local moveConnection
+                moveConnection = mouse.Move:Connect(function()
+                    local mouseRay = camera:ScreenPointToRay(mouse.X, mouse.Y)
+                    local denom = mouseRay.Direction:Dot(dragPlaneNormal)
+                    if math.abs(denom) > 1e-6 then
+                        local t = (dragPlanePoint - mouseRay.Origin):Dot(dragPlaneNormal) / denom
+                        local intersection = mouseRay.Origin + mouseRay.Direction * t
+                        selectedPart.CFrame = CFrame.new(intersection) * offset
+                    end
+                end)
+                local releaseConnection
+                releaseConnection = mouse.Button1Up:Connect(function()
+                    dragging = false
+                    moveConnection:Disconnect()
+                    releaseConnection:Disconnect()
+                end)
+            end
         end
     end)
     StatusLabel.Text = "Drag mode enabled! Click & hold to drag."
@@ -435,11 +474,56 @@ del.MouseButton1Click:Connect(function()
             wait(0.3)
             del.BackgroundColor3 = Color3.fromRGB(80, 40, 40)
         else
-            StatusLabel.Text = "Error deleting part: " .. tostring(err):sub(1, 30)
+            StatusLabel.Text = "Error deleting part: "..tostring(err):sub(1, 30)
             StatusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
         end
     else
         StatusLabel.Text = "No part selected to delete"
+        StatusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
+    end
+end)
+
+rename.MouseButton1Click:Connect(function()
+    if selectedPart then
+        local textBox = Instance.new("TextBox")
+        textBox.Parent = Container
+        textBox.Size = Found.Size
+        textBox.Position = Found.Position
+        textBox.Text = selectedPart.Name
+        textBox.ClearTextOnFocus = false
+        textBox.Font = Enum.Font.GothamBold
+        textBox.TextColor3 = Color3.fromRGB(220, 220, 255)
+        textBox.BackgroundColor3 = Color3.fromRGB(50, 50, 60)
+        textBox.BorderSizePixel = 0
+        textBox.FocusLost:Connect(function(enterPressed)
+            if enterPressed then
+                selectedPart.Name = textBox.Text
+                StatusLabel.Text = "Part renamed to "..textBox.Text
+                StatusLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
+                textBox:Destroy()
+            end
+        end)
+        textBox:CaptureFocus()
+    else
+        StatusLabel.Text = "No part selected to rename"
+        StatusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
+    end
+end)
+
+bring.MouseButton1Click:Connect(function()
+    if selectedPart then
+        local player = game:GetService("Players").LocalPlayer
+        local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+        if hrp then
+            selectedPart.CFrame = hrp.CFrame * CFrame.new(0, 0, -5)
+            StatusLabel.Text = "Part brought in front of you"
+            StatusLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
+        else
+            StatusLabel.Text = "HumanoidRootPart not found"
+            StatusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
+        end
+    else
+        StatusLabel.Text = "No part selected to bring"
         StatusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
     end
 end)
@@ -466,7 +550,7 @@ Minimize.MouseButton1Click:Connect(function()
         Main:TweenSize(UDim2.new(0, 420, 0, 30), "Out", "Quint", 0.5, true)
         Minimize.Text = "+"
     else
-        Main:TweenSize(UDim2.new(0, 420, 0, 180), "Out", "Quint", 0.5, true)
+        Main:TweenSize(UDim2.new(0, 420, 0, 275), "Out", "Quint", 0.5, true)
         Minimize.Text = "-"
     end
 end)
