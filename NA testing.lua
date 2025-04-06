@@ -206,7 +206,7 @@ function yayApril(t)
 end
 
 
-local function getSeasonEmoji()
+function getSeasonEmoji()
 	local date = os.date("*t")
 	local month = date.month
 	local day = date.day
@@ -1504,7 +1504,7 @@ local cmdlp=Players.LocalPlayer
 plr=cmdlp
 
 local cmdm=plr:GetMouse()
-local goofyFLY=nil
+goofyFLY=nil
 function sFLY(vfly)
 	while not cmdlp or not cmdlp.Character or not cmdlp.Character:FindFirstChild('HumanoidRootPart') or not cmdlp.Character:FindFirstChild('Humanoid') or not cmdm do
 		wait()
@@ -5567,7 +5567,7 @@ cmd.add({"pingserverhop","pshop"},{"pingserverhop (pshop)","serverhop to a serve
 	end
 end)
 
-local autoRejoinConnection = nil
+autoRejoinConnection = nil
 
 cmd.add({"autorejoin", "autorj"}, {"autorejoin", "Rejoins the server if you get kicked / disconnected"}, function()
     if autoRejoinConnection then
@@ -7567,7 +7567,7 @@ cmd.add({"unwatch", "unview"}, {"unwatch (unview)", "Stop spectating"}, function
 	cleanup()
 end)
 
-local function createGui()
+function createSpecUI()
 	if not specGui then
 		specGui = Instance.new("ScreenGui")
 		specGui.Name = "SpectateGui"
@@ -7784,7 +7784,7 @@ end
 
 cmd.add({"watch2", "view2", "spectate2"}, {"watch2 <Player> (view2, spectate2)", "Spectate player with GUI"}, function()
 	cleanup()
-	createGui()
+	createSpecUI()
 end)
 
 cmd.add({"unwatch2", "unview2"}, {"unwatch2 (unview2)", "Stop spectating with GUI"}, function()
@@ -8608,7 +8608,7 @@ cmd.add({"keyboard"},{"keyboard","provides a keyboard gui for mobile users"},fun
 	loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/uuuuuuu/refs/heads/main/VirtualKeyboard.lua"))();
 end)
 
-local HumanModCons = {}
+HumanModCons = {}
 
 cmd.add({"edgejump", "ejump"}, {"edgejump (ejump)", "Automatically jumps when you get to the edge of an object"}, function()
 	local Char = speaker.Character
