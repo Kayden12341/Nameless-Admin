@@ -442,6 +442,7 @@ local ChatService = SafeGetService("Chat");
 local TextChatService = SafeGetService("TextChatService");
 local CaptureService = SafeGetService("CaptureService");
 local MarketplaceService = SafeGetService("MarketplaceService");
+local TextService = SafeGetService("TextService")
 local IsOnMobile=false--Discover({Enum.Platform.IOS,Enum.Platform.Android},UserInputService:GetPlatform());
 local IsOnPC=false--Discover({Enum.Platform.Windows,Enum.Platform.UWP,Enum.Platform.Linux,Enum.Platform.SteamOS,Enum.Platform.OSX,Enum.Platform.Chromecast,Enum.Platform.WebOS},UserInputService:GetPlatform());
 local sethidden=sethiddenproperty or set_hidden_property or set_hidden_prop
@@ -6396,8 +6397,10 @@ cmd.add({"clip","c"},{"clip","Enable your player's collision"},function()
 	lib.disconnect("noclip")
 end)
 
-local bangCon
-local originalPos
+bangCon = nil
+originalPos = nil
+platformPart = nil
+activationTime = nil
 
 cmd.add({"antibang"}, {"antibang", "prevents users to bang you (still WORK IN PROGRESS)"}, function()
 	if bangCon then
@@ -6412,6 +6415,7 @@ cmd.add({"antibang"}, {"antibang", "prevents users to bang you (still WORK IN PR
 	local inVoid = false
 	local targetPlayer = nil
 	local toldNotif = false
+	local activationTime = nil
 
 	LocalPlayer.CharacterAdded:Connect(function(char)
 		Wait(1)
@@ -6427,12 +6431,20 @@ cmd.add({"antibang"}, {"antibang", "prevents users to bang you (still WORK IN PR
 						if Discover(anims, t.Animation.AnimationId) then
 							if not inVoid then
 								inVoid = true
+								activationTime = tick()
 								targetPlayer = p
 								SafeGetService("Workspace").FallenPartsDestroyHeight = 0/1/0
+								platformPart = Instance.new("Part")
+								platformPart.Name = "AntiVoidPlatform"
+								platformPart.Size = Vector3.new(10, 1, 10)
+								platformPart.Anchored = true
+								platformPart.CanCollide = true
+								platformPart.Position = Vector3.new(0, orgHeight - 30, 0)
+								platformPart.Parent = SafeGetService("Workspace").CurrentCamera
 								root.CFrame = CFrame.new(Vector3.new(0, orgHeight - 25, 0))
 								if not toldNotif then
-									toldNotif=true
-									DoNotif("Antibang activated | Target: "..targetPlayer.Name,2)
+									toldNotif = true
+									DoNotif("Antibang activated | Target: "..targetPlayer.Name, 2)
 								end
 							end
 						end
@@ -6442,23 +6454,26 @@ cmd.add({"antibang"}, {"antibang", "prevents users to bang you (still WORK IN PR
 		end
 
 		if inVoid then
-			local char = LocalPlayer.Character
-			local r = char and char:FindFirstChild("HumanoidRootPart")
-			if r and r.Position.Y <= orgHeight + 25 then
-				r.Velocity = Vector3.new(r.Velocity.X, r.Velocity.Y + 10, r.Velocity.Z)
-			end
-
-			if not targetPlayer or not targetPlayer.Character or not targetPlayer.Character:FindFirstChild("Humanoid") or targetPlayer.Character.Humanoid.Health <= 0 then
+			if (not targetPlayer or not targetPlayer.Character or not targetPlayer.Character:FindFirstChild("Humanoid") or targetPlayer.Character.Humanoid.Health <= 0)
+			   or (activationTime and tick() - activationTime >= 10) then
 				inVoid = false
 				targetPlayer = nil
 				root.CFrame = originalPos
-				root.Anchored=true
-				Wait();
-				root.Anchored=false
+				root.Anchored = true
+				Wait()
+				root.Anchored = false
 				SafeGetService("Workspace").FallenPartsDestroyHeight = orgHeight
+				if platformPart then
+					platformPart:Destroy()
+					platformPart = nil
+				end
 				if toldNotif then
-					toldNotif=false
-					DoNotif("Antibang deactivated",2)
+					toldNotif = false
+					if activationTime and tick() - activationTime >= 10 then
+						DoNotif("Antibang deactivated (timeout)", 2)
+					else
+						DoNotif("Antibang deactivated", 2)
+					end
 				end
 			end
 		end
@@ -6469,6 +6484,10 @@ cmd.add({"unantibang"}, {"unantibang", "disables antibang"}, function()
 	if bangCon then
 		bangCon:Disconnect()
 		bangCon = nil
+	end
+	if platformPart then
+		platformPart:Destroy()
+		platformPart = nil
 	end
 end)
 
@@ -8633,28 +8652,45 @@ cmd.add({"unequiptools"},{"unequiptools","Unequips every tool you are currently 
 	end 
 end)
 
+bangLoop = nil
+bangAnim = nil
+bangDied = nil
+doBang = nil
+
 cmd.add({"bang", "fuck"}, {"bang <player> <number> (fuck)", "fucks the player by attaching to them"}, function(h, d)
+	if bangLoop then
+		bangLoop:Disconnect()
+	end
+	if doBang then
+		doBang:Stop()
+	end
+	if bangAnim then
+		bangAnim:Destroy()
+	end
+	if bangDied then
+		bangDied:Disconnect()
+	end
 	local speed = d or 10
 	local username = h
 	local targets = getPlr(username)
 	if #targets == 0 then return end
 	local plr = targets[1]
-	local bangAnim = Instance.new("Animation")
+	bangAnim = Instance.new("Animation")
 	if not IsR15(Players.LocalPlayer) then
 		bangAnim.AnimationId = "rbxassetid://148840371"
 	else
 		bangAnim.AnimationId = "rbxassetid://5918726674"
 	end
 	local hum = getChar():FindFirstChildOfClass("Humanoid")
-	local bang = hum:LoadAnimation(bangAnim)
-	bang:Play(0.1, 1, 1)
-	bang:AdjustSpeed(speed)
+	doBang = hum:LoadAnimation(bangAnim)
+	doBang:Play(0.1, 1, 1)
+	doBang:AdjustSpeed(speed)
 	local bangplr = plr.Name
 	local bangDied = hum.Died:Connect(function()
 		if bangLoop then
 			bangLoop:Disconnect()
 		end
-		bang:Stop()
+		doBang:Stop()
 		bangAnim:Destroy()
 		bangDied:Disconnect()
 	end)
@@ -8669,6 +8705,21 @@ cmd.add({"bang", "fuck"}, {"bang <player> <number> (fuck)", "fucks the player by
 		end)
 	end)
 end, true)
+
+cmd.add({"unbang","unfuck"},{"unbang","Unbangs the player"},function()
+	if bangLoop then
+		bangLoop:Disconnect()
+	end
+	if doBang then
+		doBang:Stop()
+	end
+	if bangAnim then
+		bangAnim:Destroy()
+	end
+	if bangDied then
+		bangDied:Disconnect()
+	end
+end)
 
 glueloop = {}
 
@@ -8749,15 +8800,6 @@ end, true)
 
 cmd.add({"unloopspook", "unloopscare"}, {"unloopspook <player> (unloopscare)", "Stops the loopspook command"}, function()
 	loopspook = false
-end)
-
-cmd.add({"unbang","unfuck"},{"unbang","Unbangs the player"},function()
-	if bangLoop then
-		bangLoop=bangLoop:Disconnect()
-		bang:Stop()
-		bangAnim:Destroy()
-		bangDied:Disconnect()
-	end
 end)
 
 Airwalker, awPart = nil, nil
@@ -9165,7 +9207,7 @@ cmd.add({"hydroxide","hydro"},{"hydroxide (hydro)","executes hydroxide"},functio
 		local branch = "revision"
 
 		local function webImport(file)
-    		return loadstring(game:HttpGetAsync(("https://raw.githubusercontent.com/%s/MC-Hydroxide/%s/%s.lua"):format(owner, branch, file)), file .. '.lua')()
+    		return loadstring(game:HttpGetAsync(("https://raw.githubusercontent.com/%s/MC-Hydroxide/%s/%s.lua"):format(owner, branch, file)), file..'.lua')()
 		end
 
 		webImport("init")
@@ -11201,7 +11243,7 @@ resizeFrame.Parent=nil
 --[[ GUI FUNCTIONS ]]--
 gui={}
 gui.txtSize=function(ui,x,y)
-	local textService=SafeGetService("TextService")
+	local textService=TextService
 	return textService:GetTextSize(ui.Text,ui.TextSize,ui.Font,Vector2.new(x,y))
 end
 gui.commands = function()
@@ -11774,11 +11816,10 @@ end
 --[[ OPEN THE COMMAND BAR ]]--
 mouse.KeyDown:Connect(function(k)
 	if k:lower()==opt.prefix then
+		Wait();
 		gui.barSelect()
 		cmdInput.Text=''
 		cmdInput:CaptureFocus()
-		wait();
-		cmdInput.Text=''
 	end
 end)
 
@@ -12053,7 +12094,7 @@ TextLabel.AnchorPoint = Vector2.new(0.5, 0.5)
 TextLabel.Position = UDim2.new(0.5, 0, 0.5, 0)
 TextLabel.Size = UDim2.new(0, 2, 0, 33)
 TextLabel.Font = Enum.Font.GothamBold
-TextLabel.Text = getSeasonEmoji()..' '..adminName.." V"..curVer..' '..getSeasonEmoji()
+TextLabel.Text = getSeasonEmoji().." "..adminName.." V"..curVer.." "..getSeasonEmoji()
 TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 TextLabel.TextSize = 20
 TextLabel.TextWrapped = true
@@ -12062,14 +12103,14 @@ TextLabel.ZIndex = 9999
 ImageButton.Parent = ScreenGui
 ImageButton.Name = randomString()
 ImageButton.AnchorPoint = Vector2.new(0.5, 0)
-ImageButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+ImageButton.BackgroundTransparency = 1
 ImageButton.BorderSizePixel = 0
 ImageButton.Position = UDim2.new(0.5, 0, -0.2, 0)
 ImageButton.Size = UDim2.new(0, 32 * NAScale, 0, 33 * NAScale)
 ImageButton.Image = "rbxassetid://77352376040674"
 ImageButton.ZIndex = 9999
 
-NAimageButton=ImageButton
+NAimageButton = ImageButton
 
 UICorner.CornerRadius = UDim.new(0.5, 0)
 UICorner.Parent = ImageButton
@@ -12084,13 +12125,8 @@ UIGradient.Color = ColorSequence.new{
 }
 
 function Swoosh()
-	ImageButton:TweenPosition(UDim2.new(0.5, 0, 0, 0), "Out", "Quint", 2, true)
-	ImageButton:TweenSize(UDim2.new(0, 32 * NAScale, 0, 33 * NAScale), "Out", "Quint", 2, true)
-
-	local tweenService = TweenService
-	local rotationTween = tweenService:Create(ImageButton, TweenInfo.new(2, Enum.EasingStyle.Quint), {Rotation = isAprilFools() and math.random(1,1000) or 720})
-	rotationTween:Play()
-
+	local targetRotation = isAprilFools() and math.random(1, 1000) or 720
+	TweenService:Create(ImageButton, TweenInfo.new(2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Rotation = targetRotation}):Play()
 	gui.draggable(ImageButton)
 end
 
@@ -12098,31 +12134,35 @@ function mainNameless()
 	local txtLabel = TextLabel
 	txtLabel.Size = UDim2.new(0, 2, 0, 33)
 	txtLabel.BackgroundTransparency = 0.14
-
-	local textWidth = SafeGetService("TextService"):GetTextSize(txtLabel.Text, txtLabel.TextSize, txtLabel.Font, Vector2.new(math.huge, math.huge)).X
+	local textWidth = TextService:GetTextSize(txtLabel.Text, txtLabel.TextSize, txtLabel.Font, Vector2.new(math.huge, math.huge)).X
 	local newSize = UDim2.new(0, textWidth + 80, 0, 40)
-
-	txtLabel:TweenSize(newSize, "Out", "Quint", 1, true)
-
-	local tweenService = TweenService
-	tweenService:Create(txtLabel, TweenInfo.new(0.5, Enum.EasingStyle.Sine), {TextTransparency = 0}):Play()
-
+	TweenService:Create(txtLabel, TweenInfo.new(1, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out), {Size = newSize}):Play()
+	TweenService:Create(txtLabel, TweenInfo.new(0.5, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {TextTransparency = 0}):Play()
 	if IsOnMobile then
+		ImageButton.Size = UDim2.new(0, 0, 0, 0)
+		local appearTween = TweenService:Create(ImageButton, TweenInfo.new(1, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out), {
+			Size = UDim2.new(0, 32 * NAScale, 0, 33 * NAScale),
+			Position = UDim2.new(0.5, 0, 0, 0)
+		})
+		appearTween:Play()
 		Swoosh()
 	else
 		ImageButton:Destroy()
 	end
-
 	wait(2)
-
-	local fadeOut = tweenService:Create(txtLabel, TweenInfo.new(0.7, Enum.EasingStyle.Sine), {TextTransparency = 1})
-	local shrink = tweenService:Create(txtLabel, TweenInfo.new(0.7, Enum.EasingStyle.Sine), {Size = UDim2.new(0, 0, 0, 0), Position = UDim2.new(0.5, 0, 0.5, 0)})
-	local fadeOutShadow = tweenService:Create(Shadow, TweenInfo.new(0.7, Enum.EasingStyle.Sine), {BackgroundTransparency = 1})
-
+	local fadeOut = TweenService:Create(txtLabel, TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
+		TextTransparency = 1,
+		BackgroundTransparency = 1
+	})
+	local shrink = TweenService:Create(txtLabel, TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
+		Size = UDim2.new(0, 0, 0, 0),
+		Position = UDim2.new(0.5, 0, 0.5, 0),
+		TextSize = 0
+	})
+	local fadeOutShadow = TweenService:Create(Shadow, TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {BackgroundTransparency = 1})
 	fadeOut:Play()
 	shrink:Play()
 	fadeOutShadow:Play()
-
 	fadeOut.Completed:Connect(function()
 		txtLabel:Destroy()
 		Shadow:Destroy()
