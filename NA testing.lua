@@ -1266,6 +1266,16 @@ function placeCreator()
 	return GaemInfo.Creator.Name
 end
 
+function removeESPonLEAVE(plr)
+	if plr then
+		for _, child in pairs(COREGUI:GetChildren()) do
+			if child.Name == plr.Name..'_ESP' then
+				child:Destroy()
+			end
+		end
+	end
+end
+
 function removeESP()
 	for _, child in pairs(COREGUI:GetChildren()) do
 		if Sub(child.Name, -4) == '_ESP' then
@@ -3478,7 +3488,7 @@ cmd.add({"vfly", "vehiclefly"}, {"vehiclefly (vfly)", "be able to fly vehicles"}
 		toggleBtn.BackgroundColor3 = Color3.fromRGB(50,50,50)
 		toggleBtn.BackgroundTransparency = 0.1
 		toggleBtn.Position = UDim2.new(0.8,0,-0.1,0)
-		toggleBtn.Size = UDim2.new(0.3,0,0.3,0)
+		toggleBtn.Size = UDim2.new(0.4,0,0.4,0)
 		toggleBtn.Font = Enum.Font.SourceSans
 		toggleBtn.Text = "S"
 		toggleBtn.TextColor3 = Color3.fromRGB(255,255,255)
@@ -6292,7 +6302,7 @@ cmd.add({"fly"}, {"fly [speed]", "Enable flight"}, function(...)
 		toggleBtn.BackgroundColor3 = Color3.fromRGB(50,50,50)
 		toggleBtn.BackgroundTransparency = 0.1
 		toggleBtn.Position = UDim2.new(0.8,0,-0.1,0)
-		toggleBtn.Size = UDim2.new(0.3,0,0.3,0)
+		toggleBtn.Size = UDim2.new(0.4,0,0.4,0)
 		toggleBtn.Font = Enum.Font.SourceSans
 		toggleBtn.Text = "S"
 		toggleBtn.TextColor3 = Color3.fromRGB(255,255,255)
@@ -6808,7 +6818,7 @@ cmd.add({"freecam","fc","fcam"},{"freecam [speed] (fc,fcam)","Enable free camera
 		toggleBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 		toggleBtn.BackgroundTransparency = 0.1
 		toggleBtn.Position = UDim2.new(0.9, 0, -0.1, 0)
-		toggleBtn.Size = UDim2.new(0.3, 0, 0.3, 0)
+		toggleBtn.Size = UDim2.new(0.4, 0, 0.4, 0)
 		toggleBtn.Font = Enum.Font.SourceSans
 		toggleBtn.Text = "S"
 		toggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -12311,6 +12321,7 @@ Players.PlayerRemoving:Connect(function(plr)
     if index then
         table.remove(playerButtons, index)
     end
+	removeESPonLEAVE(plr)
 end)
 
 mouse.Move:Connect(function()
