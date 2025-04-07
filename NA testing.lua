@@ -867,11 +867,11 @@ function randomString()
     
     for i = 1, length do
         local char = string.char(math.random(32, 126))
-        table.insert(result, char)
+        Insert(result, char)
         if math.random() < 0.5 then
             local numGlitches = math.random(1, 3)
             for j = 1, numGlitches do
-                table.insert(result, glitchMarks[math.random(#glitchMarks)])
+                Insert(result, glitchMarks[math.random(#glitchMarks)])
             end
         end
     end
@@ -998,7 +998,7 @@ end
 
 function MouseButtonFix(button,clickCallback)
 	local isHolding = false
-	local holdThreshold = 0.35
+	local holdThreshold = 0.45
 	local mouseDownTime = 0
 
 	button.MouseButton1Down:Connect(function()
@@ -1770,18 +1770,20 @@ lib.parseCommand = function(text, rPlr)
 	end)
 end
 
-local connections={}
+local connections = {}
 
-lib.connect=function(name,connection)	--no :(
-	connections[name..tostring(math.random(1000000,9999999))]=connection
+lib.connect = function(name, connection)
+	connections[name] = connections[name] or {}
+	Insert(connections[name], connection)
 	return connection
 end
 
-lib.disconnect=function(name)
-	for title,connection in pairs(connections) do
-		if title:find(name)==1 then
-			connection:Disconnect()
+lib.disconnect = function(name)
+	if connections[name] then
+		for _, conn in ipairs(connections[name]) do
+			conn:Disconnect()
 		end
+		connections[name] = nil
 	end
 end
 
@@ -2337,7 +2339,7 @@ cmd.add({"clickfling","mousefling"}, {"clickfling (mousefling)", "Fling a player
 			end
 		end
 	end)
-	table.insert(clickConnections, conn)
+	Insert(clickConnections, conn)
 end)
 
 cmd.add({"unclickfling", "unmousefling"}, {"unclickfling (unmousefling)","disables clickfling"}, function()
@@ -3418,70 +3420,101 @@ function connectVFlyKey()
 end
 
 cmd.add({"vfly", "vehiclefly"}, {"vehiclefly (vfly)", "be able to fly vehicles"}, function(...)
-	local vFlySpeed = IsOnMobile and ((...) or 50) or ((...) or 1)
+	local arg = (...) or nil
+	vFlySpeed = IsOnMobile and (arg or 50) or (arg or 1)
 	connectVFlyKey()
 	vFlyEnabled = true
-
 	if IsOnMobile then
 		wait()
-		DoNotif(adminName.." detected mobile. vFly button added for easier use.")
-
+		DoNotif(adminName.." detected mobile. vFly button added for easier use.",2)
 		if vRAHH then
 			vRAHH:Destroy()
 			vRAHH = nil
 		end
-
+		cmd.run({"unfly",''})
 		vRAHH = Instance.new("ScreenGui")
 		local btn = Instance.new("TextButton")
+		local speedBox = Instance.new("TextBox")
+		local toggleBtn = Instance.new("TextButton")
 		local corner = Instance.new("UICorner")
+		local corner2 = Instance.new("UICorner")
+		local corner3 = Instance.new("UICorner")
 		local aspect = Instance.new("UIAspectRatioConstraint")
-
 		NaProtectUI(vRAHH)
 		vRAHH.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 		vRAHH.ResetOnSpawn = false
-
 		btn.Parent = vRAHH
-		btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+		btn.BackgroundColor3 = Color3.fromRGB(30,30,30)
 		btn.BackgroundTransparency = 0.1
-		btn.Position = UDim2.new(0.9, 0, 0.6, 0)
-		btn.Size = UDim2.new(0.05, 0, 0.1, 0)
+		btn.Position = UDim2.new(0.9,0,0.5,0)
+		btn.Size = UDim2.new(0.08,0,0.1,0)
 		btn.Font = Enum.Font.GothamBold
 		btn.Text = "vFly"
-		btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+		btn.TextColor3 = Color3.fromRGB(255,255,255)
 		btn.TextSize = 18
 		btn.TextWrapped = true
 		btn.Active = true
 		btn.TextScaled = true
-
-		corner.CornerRadius = UDim.new(0.2, 0)
+		corner.CornerRadius = UDim.new(0.2,0)
 		corner.Parent = btn
-
 		aspect.Parent = btn
 		aspect.AspectRatio = 1.0
-
+		speedBox.Parent = btn
+		speedBox.BackgroundColor3 = Color3.fromRGB(30,30,30)
+		speedBox.BackgroundTransparency = 0.1
+		speedBox.Position = UDim2.new(0,0,0.9,0)
+		speedBox.Size = UDim2.new(1,0,0.5,0)
+		speedBox.Font = Enum.Font.GothamBold
+		speedBox.Text = tostring(vFlySpeed)
+		speedBox.TextColor3 = Color3.fromRGB(255,255,255)
+		speedBox.TextSize = 18
+		speedBox.TextWrapped = true
+		speedBox.ClearTextOnFocus = false
+		speedBox.PlaceholderText = "Speed"
+		speedBox.Visible = false
+		corner2.CornerRadius = UDim.new(0.2,0)
+		corner2.Parent = speedBox
+		toggleBtn.Parent = btn
+		toggleBtn.BackgroundColor3 = Color3.fromRGB(50,50,50)
+		toggleBtn.BackgroundTransparency = 0.1
+		toggleBtn.Position = UDim2.new(0.8,0,-0.1,0)
+		toggleBtn.Size = UDim2.new(0.3,0,0.3,0)
+		toggleBtn.Font = Enum.Font.SourceSans
+		toggleBtn.Text = "S"
+		toggleBtn.TextColor3 = Color3.fromRGB(255,255,255)
+		toggleBtn.TextSize = 14
+		toggleBtn.TextWrapped = true
+		toggleBtn.Active = true
+		toggleBtn.AutoButtonColor = true
+		corner3.CornerRadius = UDim.new(1,0)
+		corner3.Parent = toggleBtn
+		MouseButtonFix(toggleBtn, function()
+			speedBox.Visible = not speedBox.Visible
+		end)
 		coroutine.wrap(function()
-			MouseButtonFix(btn,function()
+			MouseButtonFix(btn, function()
 				if not vOn then
+					local newSpeed = tonumber(speedBox.Text) or vFlySpeed
+					vFlySpeed = newSpeed
+					speedBox.Text = tostring(vFlySpeed)
 					vOn = true
 					btn.Text = "UnvFly"
-					btn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+					btn.BackgroundColor3 = Color3.fromRGB(0,170,0)
 					mobilefly(vFlySpeed, true)
 					getHum().PlatformStand = false
 				else
 					vOn = false
 					btn.Text = "vFly"
-					btn.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
+					btn.BackgroundColor3 = Color3.fromRGB(170,0,0)
 					unmobilefly()
 				end
 			end)
 		end)()
-
 		gui.draggable(btn)
 	else
 		FLYING = false
 		getHum().PlatformStand = false
 		wait()
-
 		DoNotif("Vehicle fly enabled. Press '"..vToggleKey:upper().."' to toggle vehicle flying.")
 		sFLY(true)
 		speedofthevfly = vFlySpeed
@@ -3489,13 +3522,15 @@ cmd.add({"vfly", "vehiclefly"}, {"vehiclefly (vfly)", "be able to fly vehicles"}
 	end
 end, true)
 
-cmd.add({"unvfly", "unvehiclefly"}, {"unvehiclefly (unvfly)", "disable vehicle fly"}, function()
+cmd.add({"unvfly", "unvehiclefly"}, {"unvehiclefly (unvfly)", "disable vehicle fly"}, function(bool)
 	wait()
 	if IsOnMobile then
-		DoNotif("Mobile vFly Disabled.")
+		if not bool then
+			DoNotif("Mobile vFly Disabled.",2)
+		end
 		unmobilefly()
 	else
-		DoNotif("Not flying anymore")
+		DoNotif("Not flying anymore",2)
 		FLYING = false
 		getHum().PlatformStand = false
 		if goofyFLY then goofyFLY:Destroy() end
@@ -6199,69 +6234,100 @@ function connectFlyKey()
 end
 
 cmd.add({"fly"}, {"fly [speed]", "Enable flight"}, function(...)
-	local flySpeed = IsOnMobile and ((...) or 50) or ((...) or 1)
+	local arg = (...) or nil
+	flySpeed = IsOnMobile and (arg or 50) or (arg or 1)
 	connectFlyKey()
-	flyEnabled=true
-
+	flyEnabled = true
 	if IsOnMobile then
 		wait()
-		DoNotif(adminName.." detected mobile. Fly button added for easier use.")
-
+		DoNotif(adminName.." detected mobile. Fly button added for easier use.",2)
 		if mFlyBruh then
 			mFlyBruh:Destroy()
 			mFlyBruh = nil
 		end
-
+		cmd.run({"unvfly",''})
 		mFlyBruh = Instance.new("ScreenGui")
 		local btn = Instance.new("TextButton")
+		local speedBox = Instance.new("TextBox")
+		local toggleBtn = Instance.new("TextButton")
 		local corner = Instance.new("UICorner")
+		local corner2 = Instance.new("UICorner")
+		local corner3 = Instance.new("UICorner")
 		local aspect = Instance.new("UIAspectRatioConstraint")
-
 		NaProtectUI(mFlyBruh)
 		mFlyBruh.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 		mFlyBruh.ResetOnSpawn = false
-
 		btn.Parent = mFlyBruh
-		btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+		btn.BackgroundColor3 = Color3.fromRGB(30,30,30)
 		btn.BackgroundTransparency = 0.1
-		btn.Position = UDim2.new(0.9, 0, 0.6, 0)
-		btn.Size = UDim2.new(0.05, 0, 0.1, 0)
+		btn.Position = UDim2.new(0.9,0,0.5,0)
+		btn.Size = UDim2.new(0.08,0,0.1,0)
 		btn.Font = Enum.Font.GothamBold
 		btn.Text = "Fly"
-		btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+		btn.TextColor3 = Color3.fromRGB(255,255,255)
 		btn.TextSize = 18
 		btn.TextWrapped = true
 		btn.Active = true
 		btn.TextScaled = true
-
-		corner.CornerRadius = UDim.new(0.2, 0)
+		corner.CornerRadius = UDim.new(0.2,0)
 		corner.Parent = btn
-
 		aspect.Parent = btn
 		aspect.AspectRatio = 1.0
-
+		speedBox.Parent = btn
+		speedBox.BackgroundColor3 = Color3.fromRGB(30,30,30)
+		speedBox.BackgroundTransparency = 0.1
+		speedBox.Position = UDim2.new(0,0,0.9,0)
+		speedBox.Size = UDim2.new(1,0,0.5,0)
+		speedBox.Font = Enum.Font.GothamBold
+		speedBox.Text = tostring(flySpeed)
+		speedBox.TextColor3 = Color3.fromRGB(255,255,255)
+		speedBox.TextSize = 18
+		speedBox.TextWrapped = true
+		speedBox.ClearTextOnFocus = false
+		speedBox.PlaceholderText = "Speed"
+		speedBox.Visible = false
+		corner2.CornerRadius = UDim.new(0.2,0)
+		corner2.Parent = speedBox
+		toggleBtn.Parent = btn
+		toggleBtn.BackgroundColor3 = Color3.fromRGB(50,50,50)
+		toggleBtn.BackgroundTransparency = 0.1
+		toggleBtn.Position = UDim2.new(0.8,0,-0.1,0)
+		toggleBtn.Size = UDim2.new(0.3,0,0.3,0)
+		toggleBtn.Font = Enum.Font.SourceSans
+		toggleBtn.Text = "S"
+		toggleBtn.TextColor3 = Color3.fromRGB(255,255,255)
+		toggleBtn.TextSize = 14
+		toggleBtn.TextWrapped = true
+		toggleBtn.Active = true
+		toggleBtn.AutoButtonColor = true
+		corner3.CornerRadius = UDim.new(1,0)
+		corner3.Parent = toggleBtn
+		MouseButtonFix(toggleBtn, function()
+			speedBox.Visible = not speedBox.Visible
+		end)
 		coroutine.wrap(function()
-			MouseButtonFix(btn,function()
+			MouseButtonFix(btn, function()
 				if not mOn then
+					local newSpeed = tonumber(speedBox.Text) or flySpeed
+					flySpeed = newSpeed
+					speedBox.Text = tostring(flySpeed)
 					mOn = true
 					btn.Text = "Unfly"
-					btn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+					btn.BackgroundColor3 = Color3.fromRGB(0,170,0)
 					mobilefly(flySpeed)
 				else
 					mOn = false
 					btn.Text = "Fly"
-					btn.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
+					btn.BackgroundColor3 = Color3.fromRGB(170,0,0)
 					unmobilefly()
 				end
 			end)
 		end)()
-
 		gui.draggable(btn)
 	else
 		FLYING = false
 		getHum().PlatformStand = false
 		wait()
-
 		DoNotif("Fly enabled. Press '"..toggleKey:upper().."' to toggle flying.")
 		sFLY()
 		speedofthevfly = flySpeed
@@ -6269,13 +6335,15 @@ cmd.add({"fly"}, {"fly [speed]", "Enable flight"}, function(...)
 	end
 end, true)
 
-cmd.add({"unfly"}, {"unfly", "Disable flight"}, function()
+cmd.add({"unfly"}, {"unfly", "Disable flight"}, function(bool)
 	wait()
 	if IsOnMobile then
-		DoNotif("Mobile Fly Disabled.")
+		if not bool then
+			DoNotif("Mobile Fly Disabled.",2)
+		end
 		unmobilefly()
 	else
-		DoNotif("Not flying anymore")
+		DoNotif("Not flying anymore",2)
 		FLYING = false
 		getHum().PlatformStand = false
 		if goofyFLY then goofyFLY:Destroy() end
@@ -6502,6 +6570,7 @@ cmd.add({"antibang"}, {"antibang", "prevents users to bang you (still WORK IN PR
 			end
 		end
 	end)
+	DoNotif("Antibang Enabled",3)
 end)
 
 cmd.add({"unantibang"}, {"unantibang", "disables antibang"}, function()
@@ -6513,6 +6582,7 @@ cmd.add({"unantibang"}, {"unantibang", "disables antibang"}, function()
 		platformPart:Destroy()
 		platformPart = nil
 	end
+	DoNotif("Antibang Disabled",3)
 end)
 
 cmd.add({"orbit"}, {"orbit <player> <distance>", "Orbit around a player"}, function(p, d)
@@ -6584,10 +6654,11 @@ cmd.add({"freezewalk"},{"freezewalk","Freezes your character on the server but l
 	DoNotif("freezewalk is activated,reset to stop it")
 end)
 
-local fcpro=nil
+fcBTNTOGGLE= nil
 
-cmd.add({"freecam","fc","fcam"},{"freecam [speed] (fc,fcam)","Enable free camera"},function(speed)
-	if not speed then speed=5 end
+cmd.add({"freecam","fc","fcam"},{"freecam [speed] (fc,fcam)","Enable free camera"},function(...)
+	argg=(...)
+	local speed=argg or 5
 
 	if connections["freecam"] then
 		lib.disconnect("freecam")
@@ -6595,6 +6666,9 @@ cmd.add({"freecam","fc","fcam"},{"freecam [speed] (fc,fcam)","Enable free camera
 		wrap(function() character.PrimaryPart.Anchored = false end)
 	end
 
+	if fcBTNTOGGLE then fcBTNTOGGLE:Destroy() fcBTNTOGGLE=nil end
+
+	function runFREECAM()
 	local dir={w=false,a=false,s=false,d=false}
 	local cf=Instance.new("CFrameValue")
 	local camPart=Instance.new("Part")
@@ -6605,10 +6679,10 @@ cmd.add({"freecam","fc","fcam"},{"freecam [speed] (fc,fcam)","Enable free camera
 		character.PrimaryPart.Anchored=true
 	end)
 
-	lib.connect("freecam",RunService.RenderStepped:Connect(function()
+	lib.connect("freecam",RunService.RenderStepped:Connect(function(dt)
 		local primaryPart=camPart
 		camera.CameraSubject=primaryPart
-
+	
 		local x,y,z=0,0,0
 		if dir.w then z=-1*speed end
 		if dir.a then x=-1*speed end
@@ -6616,7 +6690,7 @@ cmd.add({"freecam","fc","fcam"},{"freecam [speed] (fc,fcam)","Enable free camera
 		if dir.d then x=1*speed end
 		if dir.q then y=1*speed end
 		if dir.e then y=-1*speed end
-
+	
 		if IsOnMobile then
 			local direction = ctrlModule:GetMoveVector()
 			if direction.X ~= 0 then
@@ -6626,12 +6700,12 @@ cmd.add({"freecam","fc","fcam"},{"freecam [speed] (fc,fcam)","Enable free camera
 				z = z + direction.Z * speed
 			end
 		end
-
+	
 		primaryPart.CFrame=CFrame.new(
 			primaryPart.CFrame.p,
 			(camera.CFrame*CFrame.new(0,0,-100)).p
 		)
-
+	
 		local moveDir=CFrame.new(x,y,z)
 		cf.Value=cf.Value:lerp(moveDir,0.2)
 		primaryPart.CFrame=primaryPart.CFrame:lerp(primaryPart.CFrame*cf.Value,0.2)
@@ -6676,6 +6750,113 @@ cmd.add({"freecam","fc","fcam"},{"freecam [speed] (fc,fcam)","Enable free camera
 			dir.q=false
 		end
 	end))
+	end
+
+	if IsOnMobile then
+		if fcBTNTOGGLE then fcBTNTOGGLE:Destroy() fcBTNTOGGLE = nil end
+	
+		fcBTNTOGGLE = Instance.new("ScreenGui")
+		local btn = Instance.new("TextButton")
+		local speedBox = Instance.new("TextBox")
+		local toggleBtn = Instance.new("TextButton")
+		local corner = Instance.new("UICorner")
+		local corner2 = Instance.new("UICorner")
+		local corner3 = Instance.new("UICorner")
+		local aspect = Instance.new("UIAspectRatioConstraint")
+	
+		NaProtectUI(fcBTNTOGGLE)
+		fcBTNTOGGLE.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+		fcBTNTOGGLE.ResetOnSpawn = false
+	
+		btn.Parent = fcBTNTOGGLE
+		btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+		btn.BackgroundTransparency = 0.1
+		btn.Position = UDim2.new(0.9, 0, 0.5, 0)
+		btn.Size = UDim2.new(0.08, 0, 0.1, 0)
+		btn.Font = Enum.Font.GothamBold
+		btn.Text = "FC"
+		btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+		btn.TextSize = 18
+		btn.TextWrapped = true
+		btn.Active = true
+		btn.TextScaled = true
+	
+		corner.CornerRadius = UDim.new(0.2, 0)
+		corner.Parent = btn
+	
+		aspect.Parent = btn
+		aspect.AspectRatio = 1.0
+	
+		speedBox.Parent = btn
+		speedBox.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+		speedBox.BackgroundTransparency = 0.1
+		speedBox.Position = UDim2.new(0, 0, 0.9, 0)
+		speedBox.Size = UDim2.new(1, 0, 0.5, 0)
+		speedBox.Font = Enum.Font.GothamBold
+		speedBox.Text = tostring(speed)
+		speedBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+		speedBox.TextSize = 18
+		speedBox.TextWrapped = true
+		speedBox.ClearTextOnFocus = false
+		speedBox.PlaceholderText = "Speed"
+		speedBox.Visible = false
+
+		corner2.CornerRadius = UDim.new(0.2, 0)
+		corner2.Parent = speedBox
+	
+		toggleBtn.Parent = btn
+		toggleBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+		toggleBtn.BackgroundTransparency = 0.1
+		toggleBtn.Position = UDim2.new(0.9, 0, -0.1, 0)
+		toggleBtn.Size = UDim2.new(0.3, 0, 0.3, 0)
+		toggleBtn.Font = Enum.Font.SourceSans
+		toggleBtn.Text = "S"
+		toggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+		toggleBtn.TextSize = 14
+		toggleBtn.TextWrapped = true
+		toggleBtn.Active = true
+		toggleBtn.AutoButtonColor = true
+
+		corner3.CornerRadius = UDim.new(1, 0)
+		corner3.Parent = toggleBtn
+	
+		MouseButtonFix(toggleBtn, function()
+			speedBox.Visible = not speedBox.Visible
+		end)
+	
+		coroutine.wrap(function()
+			MouseButtonFix(btn, function()
+				if not mOn then
+					local newSpeed = tonumber(speedBox.Text) or 5
+					if newSpeed then
+						speed = newSpeed
+						speedBox.Text = tostring(speed)
+					else
+						speed = 5
+						speedBox.Text = tostring(speed)
+					end
+					mOn = true
+					btn.Text = "UNFC"
+					btn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+					runFREECAM()
+				else
+					mOn = false
+					btn.Text = "FC"
+					btn.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
+					if connections["freecam"] then
+						lib.disconnect("freecam")
+					end
+					camera.CameraSubject = character
+					wrap(function() character.PrimaryPart.Anchored = false end)
+				end
+			end)
+		end)()
+	
+		gui.draggable(btn)
+	else
+		DoNotif("Freecam is activated, use WASD to move around", 2)
+		runFREECAM()
+	end	
 end,true)
 
 cmd.add({"unfreecam","unfc","unfcam"},{"unfreecam (unfc,unfcam)","Disable free camera"},function()
@@ -6684,6 +6865,7 @@ cmd.add({"unfreecam","unfc","unfcam"},{"unfreecam (unfc,unfcam)","Disable free c
 	wrap(function()
 		character.PrimaryPart.Anchored=false
 	end)
+	if fcBTNTOGGLE then fcBTNTOGGLE:Destroy() fcBTNTOGGLE = nil end
 end)
 
 cmd.add({"drophats"},{"drophats","Drop all of your hats"},function()
@@ -8391,7 +8573,7 @@ cmd.add({"loopwalkspeed", "loopws", "lws"}, {"loopwalkspeed <number> (loopws,lws
 				end
 			end
 		end)
-		table.insert(WScons, conn)
+		Insert(WScons, conn)
 	end
 	if loopws and getHum() then
 		getHum().WalkSpeed = getgenv().NamelessWs
@@ -8405,10 +8587,10 @@ cmd.add({"loopwalkspeed", "loopws", "lws"}, {"loopwalkspeed <number> (loopws,lws
 					getHum().WalkSpeed = getgenv().NamelessWs
 				end
 			end)
-			table.insert(WScons, conn2)
+			Insert(WScons, conn2)
 		end
 	end)
-	table.insert(WScons, conn)
+	Insert(WScons, conn)
 end, true)
 
 cmd.add({"unloopwalkspeed", "unloopws", "unlws"}, {"unloopwalkspeed <number> (unloopws,unlws)", "Disable loop walkspeed"}, function()
@@ -8446,8 +8628,8 @@ cmd.add({"loopjumppower", "loopjp", "ljp"}, {"loopjumppower <number> (loopjp,ljp
 				end
 			end
 		end)
-		table.insert(JPcons, conn1)
-		table.insert(JPcons, conn2)
+		Insert(JPcons, conn1)
+		Insert(JPcons, conn2)
 		if getHum().UseJumpPower then
 			getHum().JumpPower = getgenv().NamelessJP
 		else
@@ -8476,11 +8658,11 @@ cmd.add({"loopjumppower", "loopjp", "ljp"}, {"loopjumppower <number> (loopjp,ljp
 					end
 				end
 			end)
-			table.insert(JPcons, conn4)
-			table.insert(JPcons, conn5)
+			Insert(JPcons, conn4)
+			Insert(JPcons, conn5)
 		end
 	end)
-	table.insert(JPcons, conn3)
+	Insert(JPcons, conn3)
 end, true)
 
 cmd.add({"unloopjumppower", "unloopjp", "unljp"}, {"unloopjumppower <number> (unloopjp,unljp)", "Disable loop jump power"}, function()
@@ -11364,11 +11546,14 @@ gui.updateLogs=function()
 	UpdLogsFrame.Position=UDim2.new(0.5,-283/2+5,0.5,-260/2+5)
 end
 
-gui.tween=function(obj,style,direction,duration,goal)
-	local tweenInfo=TweenInfo.new(duration,Enum.EasingStyle[style],Enum.EasingDirection[direction])
-	local tween=TweenService:Create(obj,tweenInfo,goal)
-	tween:Play()
-	return tween
+gui.tween = function(obj, style, direction, duration, goal, callback)
+    style = style or "Sine"
+    direction = direction or "Out"
+    local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle[style], Enum.EasingDirection[direction])
+    local tween = TweenService:Create(obj, tweenInfo, goal)
+    if callback then tween.Completed:Connect(callback) end
+    tween:Play()
+    return tween
 end
 
 gui.resizeable = function(ui, min, max)
@@ -11613,76 +11798,97 @@ gui.draggablev2=function(ui, dragui)
     ui.Active = true
 end
 
-gui.menuify=function(menu)
-	local exit=menu:FindFirstChild("Exit",true)
-	local mini=menu:FindFirstChild("Minimize",true)
-	local minimized=false
-	local isAnimating = false
-	local sizeX,sizeY=Instance.new("IntValue",menu),Instance.new("IntValue",menu)
-	MouseButtonFix(mini,function()
-		if isAnimating then return end
+gui.menuify = function(menu)
+    local exitButton = menu:FindFirstChild("Exit", true)
+    local minimizeButton = menu:FindFirstChild("Minimize", true)
+    local minimized = false
+    local isAnimating = false
+    local sizeX = Instance.new("IntValue", menu)
+    local sizeY = Instance.new("IntValue", menu)
 
-		minimized = not minimized
-		isAnimating = true
+    local function toggleMinimize()
+        if isAnimating then return end
+        minimized = not minimized
+        isAnimating = true
 
-		if minimized then
-			sizeX.Value = menu.Size.X.Offset
-			sizeY.Value = menu.Size.Y.Offset
-			gui.tween(menu, "Quart", "Out", 0.5, {Size = UDim2.new(0, sizeX.Value, 0, 25)}).Completed:Connect(function()
-				isAnimating = false
-			end)
-		else
-			gui.tween(menu, "Quart", "Out", 0.5, {Size = UDim2.new(0, sizeX.Value, 0, sizeY.Value)}).Completed:Connect(function()
-				isAnimating = false
-			end)
-		end
-	end)
-	MouseButtonFix(exit,function()
-		menu.Visible=false
-	end)
-	gui.draggable(menu,menu.Topbar)
-	menu.Visible=false
+        if minimized then
+            sizeX.Value = menu.Size.X.Offset
+            sizeY.Value = menu.Size.Y.Offset
+            gui.tween(menu, "Quart", "Out", 0.5, {Size = UDim2.new(0, sizeX.Value, 0, 25)})
+                .Completed:Connect(function()
+                    isAnimating = false
+                end)
+        else
+            gui.tween(menu, "Quart", "Out", 0.5, {Size = UDim2.new(0, sizeX.Value, 0, sizeY.Value)})
+                .Completed:Connect(function()
+                    isAnimating = false
+                end)
+        end
+    end
+
+    MouseButtonFix(minimizeButton, toggleMinimize)
+    MouseButtonFix(exitButton, function()
+        menu.Visible = false
+    end)
+    gui.draggable(menu, menu.Topbar)
+    menu.Visible = false
 end
-gui.menuifyv2=function(menu)
-	local exit=menu:FindFirstChild("Exit",true)
-	local mini=menu:FindFirstChild("Minimize",true)
-	local clear=menu:FindFirstChild("Clear",true);
-	local minimized=false
-	local isAnimating = false
-	local sizeX,sizeY=Instance.new("IntValue",menu),Instance.new("IntValue",menu)
-	MouseButtonFix(mini,function()
-		if isAnimating then return end
 
-		minimized = not minimized
-		isAnimating = true
+gui.menuifyv2 = function(menu)
+    local exitButton = menu:FindFirstChild("Exit", true)
+    local minimizeButton = menu:FindFirstChild("Minimize", true)
+    local clearButton = menu:FindFirstChild("Clear", true)
+    local minimized = false
+    local isAnimating = false
+    local sizeX = Instance.new("IntValue", menu)
+    local sizeY = Instance.new("IntValue", menu)
 
-		if minimized then
-			sizeX.Value = menu.Size.X.Offset
-			sizeY.Value = menu.Size.Y.Offset
-			gui.tween(menu, "Quart", "Out", 0.5, {Size = UDim2.new(0, sizeX.Value, 0, 25)}).Completed:Connect(function()
-				isAnimating = false
-			end)
-		else
-			gui.tween(menu, "Quart", "Out", 0.5, {Size = UDim2.new(0, sizeX.Value, 0, sizeY.Value)}).Completed:Connect(function()
-				isAnimating = false
-			end)
-		end
-	end)
-	MouseButtonFix(exit,function()
-		menu.Visible=false
-	end)
-	if clear then 
-		MouseButtonFix(clear,function()
-			local t=menu:FindFirstChild("Container",true):FindFirstChildOfClass("ScrollingFrame"):FindFirstChildOfClass("UIListLayout",true)
-			for _,v in ipairs(t.Parent:GetChildren()) do
-				if v:IsA("TextLabel") then
-					v:Destroy()
-				end
-			end
-		end)
-	end
-	gui.draggable(menu,menu.Topbar)
-	menu.Visible=false
+    local function toggleMinimize()
+        if isAnimating then return end
+        minimized = not minimized
+        isAnimating = true
+
+        if minimized then
+            sizeX.Value = menu.Size.X.Offset
+            sizeY.Value = menu.Size.Y.Offset
+            gui.tween(menu, "Quart", "Out", 0.5, {Size = UDim2.new(0, sizeX.Value, 0, 25)})
+                .Completed:Connect(function()
+                    isAnimating = false
+                end)
+        else
+            gui.tween(menu, "Quart", "Out", 0.5, {Size = UDim2.new(0, sizeX.Value, 0, sizeY.Value)})
+                .Completed:Connect(function()
+                    isAnimating = false
+                end)
+        end
+    end
+
+    MouseButtonFix(minimizeButton, toggleMinimize)
+    MouseButtonFix(exitButton, function()
+        menu.Visible = false
+    end)
+
+    if clearButton then
+        MouseButtonFix(clearButton, function()
+            local container = menu:FindFirstChild("Container", true)
+            if container then
+                local scrollingFrame = container:FindFirstChildOfClass("ScrollingFrame")
+                if scrollingFrame then
+                    local layout = scrollingFrame:FindFirstChildOfClass("UIListLayout", true)
+                    if layout then
+                        for _, v in ipairs(layout.Parent:GetChildren()) do
+                            if v:IsA("TextLabel") then
+                                v:Destroy()
+                            end
+                        end
+                    end
+                end
+            end
+        end)
+    end
+
+    gui.draggable(menu, menu.Topbar)
+    menu.Visible = false
 end
 
 gui.loadCommands=function()
@@ -11714,25 +11920,27 @@ for i,v in ipairs(cmdAutofill:GetChildren()) do
 	end
 end
 
-gui.barSelect=function(speed)
-	centerBar.Visible=true
-	gui.tween(centerBar,"Sine","Out",speed or 0.25,{Size=UDim2.new(0,250,1,15)})
-	gui.tween(leftFill,"Quad","Out",speed or 0.3,{Position=UDim2.new(0,0,0.5,0)})
-	gui.tween(rightFill,"Quad","Out",speed or 0.3,{Position=UDim2.new(1,0,0.5,0)})
+gui.barSelect = function(speed)
+    speed = speed or 0.35
+    centerBar.Visible = true
+    gui.tween(centerBar, "Circular", "Out", speed, {Size = UDim2.new(0,250,1,15)})
+    gui.tween(leftFill, "Bounce", "Out", speed/.6, {Position = UDim2.new(0,0,0.5,0)})
+    gui.tween(rightFill, "Bounce", "Out", speed/.6, {Position = UDim2.new(1,0,0.5,0)})
 end
 
-gui.barDeselect=function(speed)
-	gui.tween(centerBar,"Sine","Out",speed or 0.25,{Size=UDim2.new(0,250,0,0)})
-	gui.tween(leftFill,"Sine","In",speed or 0.3,{Position=UDim2.new(-0.5,100,0.5,0)})
-	gui.tween(rightFill,"Sine","In",speed or 0.3,{Position=UDim2.new(1.5,-100,0.5,0)})
-	for i,v in ipairs(cmdAutofill:GetChildren()) do
-		if v:IsA("Frame") then
-			wrap(function()
-				wait(math.random(1,200)/2000)
-				gui.tween(v,"Back","In",0.35,{Size=UDim2.new(0,0,0,25)})
-			end)
-		end
-	end
+gui.barDeselect = function(speed)
+    speed = speed or 0.35
+    gui.tween(centerBar, "Quad", "In", speed, {Size = UDim2.new(0,250,0,0)})
+    gui.tween(leftFill, "Quad", "In", speed, {Position = UDim2.new(-0.5,100,0.5,0)})
+    gui.tween(rightFill, "Quad", "In", speed, {Position = UDim2.new(1.5,-100,0.5,0)})
+    for i, v in ipairs(cmdAutofill:GetChildren()) do
+        if v:IsA("Frame") then
+            wrap(function()
+                wait(math.random(1,200)/2000)
+                gui.tween(v, "Back", "In", 0.35, {Size = UDim2.new(0,0,0,25)})
+            end)
+        end
+    end
 end
 
 --[[ AUTOFILL SEARCHER ]]--
@@ -12063,7 +12271,7 @@ function bindToChat(plr, msg)
         end
 
         if plr == LocalPlayer then
-            chatMsg.TextColor3 = Color3.fromRGB(0, 0, 255)
+            chatMsg.TextColor3 = Color3.fromRGB(0, 0, 155)
         elseif LocalPlayer:IsFriendsWith(plr.UserId) then
             chatMsg.TextColor3 = Color3.fromRGB(255, 255, 0)
         end
@@ -12073,64 +12281,71 @@ function bindToChat(plr, msg)
     chatMsg.Size = UDim2.new(1, -5, 0, txtSize.Y)
 end
 
-for i,plr in pairs(Players:GetPlayers()) do
-	plr.Chatted:Connect(function(msg)
-		bindToChat(plr,msg)
-	end)
-	Insert(playerButtons, plr)
-	if plr~=LocalPlayer then
-		CheckPermissions(plr)
-	end
+function setupPlayer(plr)
+    plr.Chatted:Connect(function(msg)
+        bindToChat(plr, msg)
+    end)
+    
+    Insert(playerButtons, plr)
+    
+    if plr ~= LocalPlayer then
+        CheckPermissions(plr)
+    end
+
+    if ESPenabled then
+        spawn(function()
+            repeat wait(1) until plr.Character
+            ESP(plr)
+        end)
+    end
 end
 
-Players.PlayerAdded:Connect(function(plr)
-	plr.Chatted:Connect(function(msg)
-		bindToChat(plr,msg)
-	end)
-	CheckPermissions(plr)
-	Insert(playerButtons, plr)
-	if ESPenabled then
-		repeat wait(1) until plr.Character
-		ESP(plr)
-	end
-end)
+for _, plr in pairs(Players:GetPlayers()) do
+    setupPlayer(plr)
+end
+
+Players.PlayerAdded:Connect(setupPlayer)
 
 Players.PlayerRemoving:Connect(function(plr)
-	for i, p in ipairs(playerButtons) do
-		if p == plr then
-			table.remove(playerButtons, i)
-			break
-		end
-	end
+    local index = table.find(playerButtons, plr)
+    if index then
+        table.remove(playerButtons, index)
+    end
 end)
 
 mouse.Move:Connect(function()
-	description.Position=UDim2.new(0,mouse.X,0,mouse.Y)
-	size=gui.txtSize(description,200,100)
-	description.Size=UDim2.new(0,size.X,0,size.Y)
+    description.Position = UDim2.new(0, mouse.X, 0, mouse.Y)
+    local newSize = gui.txtSize(description, 200, 100)
+    description.Size = UDim2.new(0, newSize.X, 0, newSize.Y)
 end)
 
+function updateCanvasSize(frame)
+    local layout = frame:FindFirstChildOfClass("UIListLayout")
+    if layout then
+        frame.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y)
+    end
+end
+
 RunService.Stepped:Connect(function()
-	chatLogs.CanvasSize=UDim2.new(0,0,0,chatLogs:FindFirstChildOfClass("UIListLayout").AbsoluteContentSize.Y)
-	commandsList.CanvasSize=UDim2.new(0,0,0,commandsList:FindFirstChildOfClass("UIListLayout").AbsoluteContentSize.Y)
-	UpdLogsList.CanvasSize=UDim2.new(0,0,0,UpdLogsList:FindFirstChildOfClass("UIListLayout").AbsoluteContentSize.Y)
+    updateCanvasSize(chatLogs)
+    updateCanvasSize(commandsList)
+    updateCanvasSize(UpdLogsList)
 end)
 
 NACaller(function()
-	template=UpdLogsLabel
-	list=UpdLogsList
+    local template = UpdLogsLabel
+    local list = UpdLogsList
 
-	UpdLogsTitle.Text=UpdLogsTitle.Text.." "..updDate
+    UpdLogsTitle.Text = UpdLogsTitle.Text.." "..updDate
 
-	if next(updLogs) then
-		for name,txt in pairs(updLogs) do
-			local btn=template:Clone()
-			btn.Parent=list
-			btn.Name=name
-			btn.Text="-"..txt
-		end
-	else
-	end
+    if next(updLogs) then
+        for name, txt in pairs(updLogs) do
+            local btn = template:Clone()
+            btn.Parent = list
+            btn.Name = name
+            btn.Text = "-"..txt
+        end
+    end
 end)
 
 --[[ COMMAND BAR BUTTON ]]--
@@ -12189,7 +12404,7 @@ UIGradient.Color = ColorSequence.new{
 
 function Swoosh()
 	local targetRotation = isAprilFools() and math.random(1, 1000) or 720
-	TweenService:Create(ImageButton, TweenInfo.new(2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Rotation = targetRotation}):Play()
+	TweenService:Create(ImageButton, TweenInfo.new(1.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Rotation = targetRotation}):Play()
 	gui.draggable(ImageButton)
 end
 
