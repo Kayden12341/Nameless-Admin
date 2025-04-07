@@ -8363,14 +8363,13 @@ cmd.add({"loopwalkspeed", "loopws", "lws"}, {"loopwalkspeed <number> (loopws,lws
 	if loopws and getHum() then
 		getHum().WalkSpeed = getgenv().NamelessWs
 	end
-	local conn = LocalPlayer.CharacterAdded:Connect(function(character)
-		wait(0.1)
-		local hum = character:FindFirstChildOfClass("Humanoid")
-		if hum and loopws then
-			hum.WalkSpeed = getgenv().NamelessWs
-			local conn2 = hum:GetPropertyChangedSignal("WalkSpeed"):Connect(function()
-				if loopws and hum.WalkSpeed ~= getgenv().NamelessWs then
-					hum.WalkSpeed = getgenv().NamelessWs
+	local conn = LocalPlayer.CharacterAdded:Connect(function()
+		repeat wait(.1) until getHum()
+		if loopws then
+			getHum().WalkSpeed = getgenv().NamelessWs
+			local conn2 = getHum():GetPropertyChangedSignal("WalkSpeed"):Connect(function()
+				if loopws and getHum().WalkSpeed ~= getgenv().NamelessWs then
+					getHum().WalkSpeed = getgenv().NamelessWs
 				end
 			end)
 			table.insert(WScons, conn2)
@@ -8422,26 +8421,25 @@ cmd.add({"loopjumppower", "loopjp", "ljp"}, {"loopjumppower <number> (loopjp,ljp
 			getHum().JumpHeight = getgenv().NamelessJP
 		end
 	end
-	local conn3 = LocalPlayer.CharacterAdded:Connect(function(character)
-		wait(0.1)
-		local hum = character:FindFirstChildOfClass("Humanoid")
-		if hum and loopjp then
-			if hum.UseJumpPower then
-				hum.JumpPower = getgenv().NamelessJP
+	local conn3 = LocalPlayer.CharacterAdded:Connect(function()
+		repeat wait(.1) until getHum()
+		if loopjp then
+			if getHum().UseJumpPower then
+				getHum().JumpPower = getgenv().NamelessJP
 			else
-				hum.JumpHeight = getgenv().NamelessJP
+				getHum().JumpHeight = getgenv().NamelessJP
 			end
-			local conn4 = hum:GetPropertyChangedSignal("JumpPower"):Connect(function()
-				if loopjp and hum.UseJumpPower then
-					if hum.JumpPower ~= getgenv().NamelessJP then
-						hum.JumpPower = getgenv().NamelessJP
+			local conn4 = getHum():GetPropertyChangedSignal("JumpPower"):Connect(function()
+				if loopjp and getHum().UseJumpPower then
+					if getHum().JumpPower ~= getgenv().NamelessJP then
+						getHum().JumpPower = getgenv().NamelessJP
 					end
 				end
 			end)
-			local conn5 = hum:GetPropertyChangedSignal("JumpHeight"):Connect(function()
-				if loopjp and not hum.UseJumpPower then
-					if hum.JumpHeight ~= getgenv().NamelessJP then
-						hum.JumpHeight = getgenv().NamelessJP
+			local conn5 = getHum():GetPropertyChangedSignal("JumpHeight"):Connect(function()
+				if loopjp and not getHum().UseJumpPower then
+					if getHum().JumpHeight ~= getgenv().NamelessJP then
+						getHum().JumpHeight = getgenv().NamelessJP
 					end
 				end
 			end)
