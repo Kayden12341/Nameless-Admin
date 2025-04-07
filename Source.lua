@@ -6679,8 +6679,8 @@ cmd.add({"freecam","fc","fcam"},{"freecam [speed] (fc,fcam)","Enable free camera
 		if dir.a then x=-1*speed end
 		if dir.s then z=1*speed end
 		if dir.d then x=1*speed end
-		if dir.q then y=1*speed end
-		if dir.e then y=-1*speed end
+		if dir.q then y=-1*speed end
+		if dir.e then y=1*speed end
 	
 		if IsOnMobile then
 			local direction = ctrlModule:GetMoveVector()
