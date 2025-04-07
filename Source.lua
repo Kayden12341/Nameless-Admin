@@ -3026,7 +3026,7 @@ cmd.add({"commandcount","cc"},{"commandcount (cc)","Counds how many commands NA 
 	DoNotif(adminName.." currently has "..commandcount.." commands")
 end)
 
-cmd.add({"flyfling"}, {"flyfling", "makes you fly and fling"}, function()
+cmd.add({"flyfling","ff"}, {"flyfling", "makes you fly and fling"}, function()
 	cmd.run({'unwalkfling'})
 	if IsOnMobile then
 		unmobilefly()
@@ -3042,7 +3042,7 @@ cmd.add({"flyfling"}, {"flyfling", "makes you fly and fling"}, function()
 	end
 end)
 
-cmd.add({"unflyfling"}, {"unflyfling", "stops fly and fling"}, function()
+cmd.add({"unflyfling","unff"}, {"unflyfling", "stops fly and fling"}, function()
 	cmd.run({'unwalkfling'})
 	if IsOnMobile then
 		unmobilefly()
@@ -3054,7 +3054,7 @@ end)
 hiddenfling = false
 flingConnection = nil
 
-cmd.add({"walkfling", "wfling"}, {"walkfling (wfling)", "probably the best fling lol"}, function()
+cmd.add({"walkfling", "wfling","wf"}, {"walkfling (wfling)", "probably the best fling lol"}, function()
 	if hiddenfling then return end
 
 	DoNotif("Walkfling enabled")
@@ -3103,7 +3103,7 @@ cmd.add({"walkfling", "wfling"}, {"walkfling (wfling)", "probably the best fling
 	end)
 end)
 
-cmd.add({"unwalkfling", "unwfling"}, {"unwalkfling (unwfling)", "stop the walkfling command"}, function()
+cmd.add({"unwalkfling", "unwfling","unwf"}, {"unwalkfling (unwfling)", "stop the walkfling command"}, function()
 	if not hiddenfling then return end
 
 	DoNotif("Walkfling disabled")
