@@ -8231,20 +8231,13 @@ cmd.add({"headsit"}, {"headsit <player>", "Head sit."}, function(p)
 		alignPos.RigidityEnabled = true
 		alignPos.MaxForce = 100000
 		alignPos.Responsiveness = 200
-		local alignOri = charRoot:FindFirstChildOfClass("AlignOrientation") or Instance.new("AlignOrientation", charRoot)
-		alignOri.Attachment0 = charRoot:FindFirstChild("RootAttachment")
-		alignOri.Attachment1 = plrHead:FindFirstChild("HeadAttachment")
-		alignOri.RigidityEnabled = true
-		alignOri.MaxTorque = 100000
-		alignOri.Responsiveness = 200
 		headSit = RunService.Heartbeat:Connect(function()
 			if not SafeGetService("Players"):FindFirstChild(plr.Name) or not plr.Character or not plr.Character:FindFirstChild("Head") or hum.Sit == false then
 				alignPos:Destroy()
-				alignOri:Destroy()
 				headSit:Disconnect()
 				headSit = nil
 			else
-				alignPos.Attachment1.Position = Vector3.new(0, 0.5, 0)
+				alignPos.Attachment1.Position = Vector3.new(0, 1.6, 0)
 			end
 		end)
 	end
@@ -8267,7 +8260,7 @@ cmd.add({"unheadsit"}, {"unheadsit", "Stop the headsit command."}, function()
 	local charRoot = getRoot(char)
 	if charRoot then
 		for _, child in ipairs(charRoot:GetChildren()) do
-			if child:IsA("AlignPosition") or child:IsA("AlignOrientation") then
+			if child:IsA("AlignPosition") then
 				child:Destroy()
 			end
 		end
