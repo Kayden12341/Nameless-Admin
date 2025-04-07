@@ -109,7 +109,7 @@ Notepad.ResetOnSpawn = false
 
 Main.Name = "Main"
 Main.Parent = Notepad
-Main.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+Main.BackgroundColor3 = Color3.fromRGB(24, 25, 35)
 Main.BorderSizePixel = 0
 Main.ClipsDescendants = true
 Main.Position = UDim2.new(0.308, 0, 1.262, 0)
@@ -118,30 +118,32 @@ Main.Active = true
 Main.Draggable = true
 
 UIStroke.Parent = Main
-UIStroke.Color = Color3.fromRGB(80, 80, 255)
+UIStroke.Color = Color3.fromRGB(100, 100, 255)
 UIStroke.Thickness = 1.5
-UIStroke.Transparency = 0.2
+UIStroke.Transparency = 0.1
 UIStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
 Container.Name = "Container"
 Container.Parent = Main
 Container.AnchorPoint = Vector2.new(0.5, 1)
-Container.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+Container.BackgroundColor3 = Color3.fromRGB(28, 28, 40)
 Container.BorderSizePixel = 0
 Container.ClipsDescendants = true
 Container.Position = UDim2.new(0.5, 0, 0.996, -5)
 Container.Size = UDim2.new(1, -10, 0.9, -30)
 
-UICorner.CornerRadius = UDim.new(0, 9)
+UICorner.CornerRadius = UDim.new(0, 10)
 UICorner.Parent = Container
 
-UIGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(20, 20, 30)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(30, 30, 40))}
+UIGradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0.00, Color3.fromRGB(28, 28, 40)),
+    ColorSequenceKeypoint.new(1.00, Color3.fromRGB(34, 36, 50))
+}
 UIGradient.Parent = Container
 
 ScrollingFrame.Parent = Container
 ScrollingFrame.Active = true
-ScrollingFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-ScrollingFrame.BackgroundTransparency = 1.000
+ScrollingFrame.BackgroundTransparency = 1
 ScrollingFrame.BorderSizePixel = 0
 ScrollingFrame.Position = UDim2.new(0, 5, 0, 5)
 ScrollingFrame.Size = UDim2.new(1, -10, 1, -45)
@@ -149,26 +151,25 @@ ScrollingFrame.ScrollBarThickness = 4
 ScrollingFrame.ScrollBarImageColor3 = Color3.fromRGB(100, 100, 255)
 
 TextBox.Parent = ScrollingFrame
-TextBox.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-TextBox.BackgroundTransparency = 1.000
+TextBox.BackgroundTransparency = 1
 TextBox.Position = UDim2.new(0, 5, 0, 0)
 TextBox.Size = UDim2.new(1, -15, 0, 200)
 TextBox.ClearTextOnFocus = false
-TextBox.Font = Enum.Font.SourceSans
+TextBox.Font = Enum.Font.Gotham
 TextBox.MultiLine = true
 TextBox.PlaceholderText = "Enter your text here..."
-TextBox.PlaceholderColor3 = Color3.fromRGB(150, 150, 150)
+TextBox.PlaceholderColor3 = Color3.fromRGB(160, 160, 180)
 TextBox.Text = ""
 TextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-TextBox.TextSize = 18.000
+TextBox.TextSize = 18
 TextBox.TextXAlignment = Enum.TextXAlignment.Left
 TextBox.TextYAlignment = Enum.TextYAlignment.Top
 TextBox.TextWrapped = true
 
 ButtonsFrame.Name = "ButtonsFrame"
 ButtonsFrame.Parent = Container
-ButtonsFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
-ButtonsFrame.BackgroundTransparency = 0.5
+ButtonsFrame.BackgroundColor3 = Color3.fromRGB(34, 36, 50)
+ButtonsFrame.BackgroundTransparency = 0.2
 ButtonsFrame.BorderSizePixel = 0
 ButtonsFrame.Position = UDim2.new(0, 5, 1, -35)
 ButtonsFrame.Size = UDim2.new(1, -10, 0, 30)
@@ -179,11 +180,10 @@ ClearButton.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
 ClearButton.BorderSizePixel = 0
 ClearButton.Position = UDim2.new(0, 5, 0, 2)
 ClearButton.Size = UDim2.new(0, 80, 0, 26)
-ClearButton.Font = Enum.Font.SourceSansBold
+ClearButton.Font = Enum.Font.GothamBold
 ClearButton.Text = "Clear"
 ClearButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-ClearButton.TextSize = 16.000
-ClearButton.AutoButtonColor = true
+ClearButton.TextSize = 16
 
 CopyButton.Name = "CopyButton"
 CopyButton.Parent = ButtonsFrame
@@ -191,60 +191,56 @@ CopyButton.BackgroundColor3 = Color3.fromRGB(60, 180, 60)
 CopyButton.BorderSizePixel = 0
 CopyButton.Position = UDim2.new(0, 95, 0, 2)
 CopyButton.Size = UDim2.new(0, 80, 0, 26)
-CopyButton.Font = Enum.Font.SourceSansBold
+CopyButton.Font = Enum.Font.GothamBold
 CopyButton.Text = "Copy"
 CopyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-CopyButton.TextSize = 16.000
-CopyButton.AutoButtonColor = true
+CopyButton.TextSize = 16
 
 StatusLabel.Name = "StatusLabel"
 StatusLabel.Parent = ButtonsFrame
-StatusLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-StatusLabel.BackgroundTransparency = 1.000
+StatusLabel.BackgroundTransparency = 1
 StatusLabel.Position = UDim2.new(0, 185, 0, 2)
 StatusLabel.Size = UDim2.new(1, -190, 0, 26)
-StatusLabel.Font = Enum.Font.SourceSans
+StatusLabel.Font = Enum.Font.Gotham
 StatusLabel.Text = ""
 StatusLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-StatusLabel.TextSize = 14.000
+StatusLabel.TextSize = 14
 
 CharCount.Name = "CharCount"
 CharCount.Parent = Container
-CharCount.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-CharCount.BackgroundTransparency = 1.000
+CharCount.BackgroundTransparency = 1
 CharCount.Position = UDim2.new(0, 5, 1, -55)
 CharCount.Size = UDim2.new(1, -10, 0, 20)
-CharCount.Font = Enum.Font.SourceSans
+CharCount.Font = Enum.Font.Gotham
 CharCount.Text = "Characters: 0"
 CharCount.TextColor3 = Color3.fromRGB(200, 200, 200)
-CharCount.TextSize = 14.000
+CharCount.TextSize = 14
 CharCount.TextXAlignment = Enum.TextXAlignment.Right
 
 Topbar.Name = "Topbar"
 Topbar.Parent = Main
-Topbar.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+Topbar.BackgroundColor3 = Color3.fromRGB(30, 32, 45)
 Topbar.BorderSizePixel = 0
 Topbar.Size = UDim2.new(1, 0, 0, 30)
 
 Icon.Name = "Icon"
 Icon.Parent = Topbar
 Icon.AnchorPoint = Vector2.new(0, 0.5)
-Icon.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-Icon.BackgroundTransparency = 1.000
+Icon.BackgroundTransparency = 1
 Icon.Position = UDim2.new(0, 10, 0.5, 0)
 Icon.Size = UDim2.new(0, 16, 0, 16)
 Icon.Image = "rbxassetid://7733658504"
 
 Exit.Name = "Exit"
 Exit.Parent = Topbar
-Exit.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
+Exit.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
 Exit.BorderSizePixel = 0
 Exit.Position = UDim2.new(1, -30, 0, 5)
 Exit.Size = UDim2.new(0, 20, 0, 20)
 Exit.Font = Enum.Font.GothamBold
 Exit.Text = "X"
 Exit.TextColor3 = Color3.fromRGB(255, 255, 255)
-Exit.TextSize = 14.000
+Exit.TextSize = 14
 
 Minimize.Name = "Minimize"
 Minimize.Parent = Topbar
@@ -255,28 +251,24 @@ Minimize.Size = UDim2.new(0, 20, 0, 20)
 Minimize.Font = Enum.Font.GothamBold
 Minimize.Text = "-"
 Minimize.TextColor3 = Color3.fromRGB(255, 255, 255)
-Minimize.TextSize = 18.000
+Minimize.TextSize = 18
 
 TopBar.Name = "TopBar"
 TopBar.Parent = Topbar
-TopBar.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
-TopBar.BorderSizePixel = 0
+TopBar.BackgroundTransparency = 1
 TopBar.Position = UDim2.new(0, 30, 0, 0)
 TopBar.Size = UDim2.new(1, -100, 1, 0)
 
 Title.Name = "Title"
 Title.Parent = TopBar
-Title.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-Title.BackgroundTransparency = 1.000
-Title.BorderSizePixel = 0
-Title.Position = UDim2.new(0, 0, 0, 0)
+Title.BackgroundTransparency = 1
 Title.Size = UDim2.new(1, 0, 1, 0)
 Title.Font = Enum.Font.GothamSemibold
 Title.Text = "Nameless Admin Notepad"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.TextSize = 16.000
+Title.TextSize = 18
 
-UICorner_2.CornerRadius = UDim.new(0, 9)
+UICorner_2.CornerRadius = UDim.new(0, 10)
 UICorner_2.Parent = Main
 
 local isMinimized = false

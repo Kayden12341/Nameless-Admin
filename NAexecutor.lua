@@ -5,7 +5,6 @@ local d = Instance.new("Frame")
 local c2 = Instance.new("UICorner")
 local s = Instance.new("ScrollingFrame")
 local ln = Instance.new("TextLabel")
-local hl = Instance.new("Frame")
 local t = Instance.new("TextBox")
 local bf = Instance.new("Frame")
 local gl = Instance.new("UIGridLayout")
@@ -113,20 +112,20 @@ e.ResetOnSpawn = false
 m.Name = "Main"
 m.Parent = e
 m.Active = true
-m.BackgroundColor3 = Color3.fromRGB(30, 30, 45)
-m.BackgroundTransparency = 0.1
+m.BackgroundColor3 = Color3.fromRGB(24, 25, 35)
+m.BackgroundTransparency = 0
 m.ClipsDescendants = true
 m.Position = UDim2.new(0.308, 0, 0.262, 0)
-m.Size = UDim2.new(0, 500, 0, 350)
+m.Size = UDim2.new(0, 520, 0, 360)
 
-c1.CornerRadius = UDim.new(0, 8)
+c1.CornerRadius = UDim.new(0, 10)
 c1.Parent = m
 
 d.Name = "Down"
 d.Parent = m
-d.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
-d.BackgroundTransparency = 0.3
-d.Position = UDim2.new(0, 0, 0, 344)
+d.BackgroundColor3 = Color3.fromRGB(34, 36, 50)
+d.BackgroundTransparency = 0
+d.Position = UDim2.new(0, 0, 0, 354)
 d.Size = UDim2.new(1, 0, 0, 6)
 
 c2.Parent = d
@@ -134,46 +133,39 @@ c2.Parent = d
 s.Name = "Scroll"
 s.Parent = m
 s.Active = true
-s.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
-s.BackgroundTransparency = 0.4
+s.BackgroundColor3 = Color3.fromRGB(28, 28, 40)
+s.BackgroundTransparency = 0.2
 s.BorderSizePixel = 0
 s.Position = UDim2.new(0, 10, 0, 50)
-s.Size = UDim2.new(0, 480, 0, 230)
+s.Size = UDim2.new(0, 500, 0, 230)
 s.ScrollBarThickness = 5
+s.ScrollBarImageColor3 = Color3.fromRGB(100, 100, 255)
 s.ClipsDescendants = true
 
 ln.Name = "LineNum"
 ln.Parent = s
-ln.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
-ln.BackgroundTransparency = 0.7
+ln.BackgroundColor3 = Color3.fromRGB(28, 28, 40)
+ln.BackgroundTransparency = 0.5
 ln.BorderSizePixel = 0
 ln.Position = UDim2.new(0, 0, 0, 0)
 ln.Size = UDim2.new(0, 30, 1, 0)
-ln.Font = Enum.Font.Code
+ln.Font = Enum.Font.Gotham
 ln.Text = "1"
-ln.TextColor3 = Color3.fromRGB(150, 150, 150)
-ln.TextSize = 16
+ln.TextColor3 = Color3.fromRGB(140, 140, 160)
+ln.TextSize = 14
 ln.TextYAlignment = Enum.TextYAlignment.Top
-
-hl.Name = "Highlight"
-hl.Parent = s
-hl.BackgroundTransparency = 1
-hl.BorderSizePixel = 0
-hl.Position = UDim2.new(0, 35, 0, 0)
-hl.Size = UDim2.new(0, 440, 0, 230)
-hl.ZIndex = 1
-hl.ClipsDescendants = true
 
 t.Name = "Text"
 t.Parent = s
-t.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-t.BackgroundTransparency = 1
+t.BackgroundColor3 = Color3.fromRGB(60, 60, 90)
+t.BackgroundTransparency = 0.7
 t.Position = UDim2.new(0, 35, 0, 0)
 t.Size = UDim2.new(0, 440, 0, 230)
 t.ClearTextOnFocus = false
-t.Font = Enum.Font.Code
+t.Font = Enum.Font.Gotham
 t.MultiLine = true
 t.PlaceholderText = "-- Script here"
+t.PlaceholderColor3 = Color3.fromRGB(170, 170, 190)
 t.Text = ""
 t.TextColor3 = Color3.fromRGB(255, 255, 255)
 t.TextSize = 16
@@ -181,64 +173,53 @@ t.TextWrapped = true
 t.TextXAlignment = Enum.TextXAlignment.Left
 t.TextYAlignment = Enum.TextYAlignment.Top
 t.ZIndex = 2
-t.TextTransparency = 0.1
+t.TextTransparency = 0
 
 bf.Name = "Buttons"
 bf.Parent = m
-bf.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-bf.BackgroundTransparency = 1
+bf.BackgroundColor3 = Color3.fromRGB(26, 26, 36)
+bf.BackgroundTransparency = 0
 bf.Position = UDim2.new(0, 10, 0, 290)
-bf.Size = UDim2.new(0, 480, 0, 45)
+bf.Size = UDim2.new(0, 500, 0, 45)
 
 gl.Parent = bf
 gl.SortOrder = Enum.SortOrder.LayoutOrder
 gl.CellPadding = UDim2.new(0, 10, 0, 10)
-gl.CellSize = UDim2.new(0, 150, 0, 35)
+gl.CellSize = UDim2.new(0, 150, 0, 40)
 
+local function applyButtonStyle(btn, bgColor)
+    btn.BackgroundColor3 = bgColor
+    btn.BorderSizePixel = 0
+    btn.Font = Enum.Font.GothamSemibold
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.TextSize = 16
+    local corner = Instance.new("UICorner", btn)
+    corner.CornerRadius = UDim.new(0, 8)
+end
+
+applyButtonStyle(ex, Color3.fromRGB(59, 130, 246))
 ex.Name = "Exec"
-ex.Parent = bf
-ex.BackgroundColor3 = Color3.fromRGB(59, 130, 246)
-ex.BorderSizePixel = 0
-ex.Font = Enum.Font.GothamSemibold
 ex.Text = "Execute"
-ex.TextColor3 = Color3.fromRGB(255, 255, 255)
-ex.TextSize = 16
+ex.Parent = bf
 
-c5.CornerRadius = UDim.new(0, 6)
-c5.Parent = ex
-
+applyButtonStyle(cl, Color3.fromRGB(120, 120, 140))
 cl.Name = "Clear"
-cl.Parent = bf
-cl.BackgroundColor3 = Color3.fromRGB(100, 100, 120)
-cl.BorderSizePixel = 0
-cl.Font = Enum.Font.GothamSemibold
 cl.Text = "Clear"
-cl.TextColor3 = Color3.fromRGB(255, 255, 255)
-cl.TextSize = 16
+cl.Parent = bf
 
-c3.CornerRadius = UDim.new(0, 6)
-c3.Parent = cl
-
+applyButtonStyle(cp, Color3.fromRGB(120, 120, 140))
 cp.Name = "Copy"
-cp.Parent = bf
-cp.BackgroundColor3 = Color3.fromRGB(100, 100, 120)
-cp.BorderSizePixel = 0
-cp.Font = Enum.Font.GothamSemibold
 cp.Text = "Copy"
-cp.TextColor3 = Color3.fromRGB(255, 255, 255)
-cp.TextSize = 16
-
-c4.CornerRadius = UDim.new(0, 6)
-c4.Parent = cp
+cp.Parent = bf
 
 tb.Name = "TopBar"
 tb.Parent = m
-tb.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+tb.BackgroundColor3 = Color3.fromRGB(30, 32, 45)
 tb.BorderSizePixel = 0
 tb.Position = UDim2.new(0, 0, 0, 0)
 tb.Size = UDim2.new(1, 0, 0, 40)
 
-c6.CornerRadius = UDim.new(0, 8)
+c6.CornerRadius = UDim.new(0, 10)
 c6.Parent = tb
 
 tt.Name = "Title"
@@ -249,7 +230,7 @@ tt.Size = UDim2.new(0, 200, 1, 0)
 tt.Font = Enum.Font.GothamBold
 tt.Text = "Executor"
 tt.TextColor3 = Color3.fromRGB(255, 255, 255)
-tt.TextSize = 18
+tt.TextSize = 20
 tt.TextXAlignment = Enum.TextXAlignment.Left
 
 xt.Name = "Exit"
@@ -259,7 +240,7 @@ xt.Position = UDim2.new(1, -40, 0, 0)
 xt.Size = UDim2.new(0, 40, 1, 0)
 xt.Font = Enum.Font.GothamBold
 xt.Text = "X"
-xt.TextColor3 = Color3.fromRGB(255, 255, 255)
+xt.TextColor3 = Color3.fromRGB(255, 100, 100)
 xt.TextSize = 18
 
 mn.Name = "Min"
@@ -269,8 +250,8 @@ mn.Position = UDim2.new(1, -80, 0, 0)
 mn.Size = UDim2.new(0, 40, 1, 0)
 mn.Font = Enum.Font.GothamBold
 mn.Text = "-"
-mn.TextColor3 = Color3.fromRGB(255, 255, 255)
-mn.TextSize = 24
+mn.TextColor3 = Color3.fromRGB(120, 120, 255)
+mn.TextSize = 20
 
 sb.Name = "Status"
 sb.Parent = m
@@ -279,158 +260,35 @@ sb.Position = UDim2.new(0, 10, 0, 335)
 sb.Size = UDim2.new(1, -20, 0, 20)
 sb.Font = Enum.Font.Gotham
 sb.Text = "Ready"
-sb.TextColor3 = Color3.fromRGB(100, 255, 100)
+sb.TextColor3 = Color3.fromRGB(120, 255, 120)
 sb.TextSize = 14
 sb.TextXAlignment = Enum.TextXAlignment.Left
 
-local function highlightSyntax(text)
-    local keywords = {
-        ["and"] = true, ["break"] = true, ["do"] = true, ["else"] = true,
-        ["elseif"] = true, ["end"] = true, ["false"] = true, ["for"] = true,
-        ["function"] = true, ["if"] = true, ["in"] = true, ["local"] = true,
-        ["nil"] = true, ["not"] = true, ["or"] = true, ["repeat"] = true,
-        ["return"] = true, ["then"] = true, ["true"] = true, ["until"] = true,
-        ["while"] = true
-    }
-
-    local globals = {
-        ["print"] = true, ["warn"] = true, ["error"] = true, ["Instance"] = true,
-        ["Vector2"] = true, ["Vector3"] = true, ["CFrame"] = true, ["Color3"] = true,
-        ["UDim2"] = true, ["Enum"] = true, ["task"] = true, ["wait"] = true,
-        ["spawn"] = true, ["pcall"] = true, ["xpcall"] = true, ["loadstring"] = true,
-        ["require"] = true, ["game"] = true, ["workspace"] = true, ["script"] = true,
-        ["pairs"] = true, ["ipairs"] = true, ["next"] = true, ["type"] = true,
-        ["assert"] = true, ["tonumber"] = true, ["tostring"] = true
-    }
-
-    local parts = {}
-    local len = #text
-    local i = 1
-    local inString = false
-    local stringChar = nil
-    local inComment = false
-    local inBlockComment = false
-    local inBlockString = false
-
-    while i <= len do
-        local char = text:sub(i, i)
-        local nextTwo = text:sub(i, i+1)
-
-        if inBlockComment then
-            if text:sub(i, i+1) == "]]" then
-                table.insert(parts, '<font color="rgb(100,100,100)">]]</font>')
-                inBlockComment = false
-                i = i + 2
-            else
-                table.insert(parts, '<font color="rgb(100,100,100)">'..char..'</font>')
-                i = i + 1
-            end
-        elseif inBlockString then
-            if text:sub(i, i+1) == "]]" then
-                table.insert(parts, '<font color="rgb(230,180,80)">]]</font>')
-                inBlockString = false
-                i = i + 2
-            else
-                table.insert(parts, '<font color="rgb(230,180,80)">'..char..'</font>')
-                i = i + 1
-            end
-        elseif inComment then
-            if char == "\n" then
-                table.insert(parts, '<font color="rgb(100,100,100)">'..char..'</font>')
-                inComment = false
-            else
-                table.insert(parts, '<font color="rgb(100,100,100)">'..char..'</font>')
-            end
-            i = i + 1
-        elseif inString then
-            if char == stringChar and text:sub(i-1, i-1) ~= "\\" then
-                table.insert(parts, '<font color="rgb(230,180,80)">'..char..'</font>')
-                inString = false
-            else
-                table.insert(parts, '<font color="rgb(230,180,80)">'..char..'</font>')
-            end
-            i = i + 1
-        elseif nextTwo == "--" then
-            if text:sub(i+2, i+3) == "[[" then
-                table.insert(parts, '<font color="rgb(100,100,100)">--[[</font>')
-                inBlockComment = true
-                i = i + 4
-            else
-                table.insert(parts, '<font color="rgb(100,100,100)">--</font>')
-                inComment = true
-                i = i + 2
-            end
-        elseif char == "[" and text:sub(i, i+1) == "[[" then
-            table.insert(parts, '<font color="rgb(230,180,80)">[[</font>')
-            inBlockString = true
-            i = i + 2
-        elseif char == "'" or char == '"' then
-            table.insert(parts, '<font color="rgb(230,180,80)">'..char..'</font>')
-            inString = true
-            stringChar = char
-            i = i + 1
-        elseif char:match("%w") then
-            local j = i
-            local word = ""
-            while j <= len and text:sub(j, j):match("[%w_]") do
-                word = word..text:sub(j, j)
-                j = j + 1
-            end
-
-            if keywords[word] then
-                table.insert(parts, '<font color="rgb(180,100,200)">'..word..'</font>')
-            elseif globals[word] then
-                table.insert(parts, '<font color="rgb(100,180,255)">'..word..'</font>')
-            elseif tonumber(word) then
-                table.insert(parts, '<font color="rgb(180,180,100)">'..word..'</font>')
-            else
-                table.insert(parts, word)
-            end
-            i = j
-        else
-            table.insert(parts, char)
-            i = i + 1
-        end
-    end
-
-    return table.concat(parts)
-end
-
-local function updateSyntax(editor, highlightFrame)
-    local text = editor.Text
-    local highlightedText = highlightSyntax(text)
-    
-    local highlightLabel = highlightFrame:FindFirstChild("HighlightLabel")
-    if not highlightLabel then
-        highlightLabel = Instance.new("TextLabel")
-        highlightLabel.Name = "HighlightLabel"
-        highlightLabel.BackgroundTransparency = 1
-        highlightLabel.Size = UDim2.new(1, 0, 1, 0)
-        highlightLabel.TextXAlignment = Enum.TextXAlignment.Left
-        highlightLabel.TextYAlignment = Enum.TextYAlignment.Top
-        highlightLabel.TextSize = 16
-        highlightLabel.RichText = true
-        highlightLabel.Font = Enum.Font.Code
-        highlightLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-        highlightLabel.Parent = highlightFrame
-    end
-    
-    highlightLabel.Text = highlightedText
-end
-
 local function updateEditorSize()
+    local padding = 20
+    local fixedTextWidth = 440
+    local leftMargin = 35
     local text = t.Text
+    if text == "" then text = " " end
+
     local textSize = game:GetService("TextService"):GetTextSize(
-        text,
-        t.TextSize,
-        t.Font,
-        Vector2.new(math.huge, math.huge)
+        text, t.TextSize, t.Font, Vector2.new(fixedTextWidth, math.huge)
     )
-    local newWidth = math.min(math.max(440, textSize.X + 100), 1000)
-    local newHeight = math.min(math.max(230, textSize.Y + 100), 1000)
-    t.Size = UDim2.new(0, newWidth, 0, newHeight)
-    s.CanvasSize = UDim2.new(0, newWidth, 0, newHeight)
-    hl.Size = t.Size
+    
+    local newHeight = math.max(230, textSize.Y + padding)
+    
+    t.Size = UDim2.new(0, fixedTextWidth, 0, newHeight)
+    
+    s.CanvasSize = UDim2.new(0, fixedTextWidth + leftMargin, 0, newHeight)
+    
+    local visualLines = math.ceil(textSize.Y / t.TextSize)
+    local lineText = ""
+    for i = 1, visualLines do
+        lineText = lineText .. i .. "\n"
+    end
+    ln.Text = lineText
+
+    ln.Size = UDim2.new(0, 30, 0, newHeight)
 end
 
 local function u()
@@ -497,9 +355,9 @@ local function r()
     
     mn.MouseButton1Click:Connect(function()
         if m.Size.Y.Offset > 40 then
-            m:TweenSize(UDim2.new(0, 500, 0, 40), "Out", "Quad", 0.5, true)
+            m:TweenSize(UDim2.new(0, 520, 0, 40), "Out", "Quad", 0.5, true)
         else
-            m:TweenSize(UDim2.new(0, 500, 0, 350), "Out", "Quad", 0.5, true)
+            m:TweenSize(UDim2.new(0, 520, 0, 350), "Out", "Quad", 0.5, true)
         end
     end)
     
@@ -510,16 +368,8 @@ local function r()
     m:TweenPosition(UDim2.new(0.308, 0, 0.262, 0), "Out", "Quad", 1, true)
 end
 
-t:GetPropertyChangedSignal("Text"):Connect(function()
-    if t.Text ~= "" then
-        t.TextTransparency = 0.7
-    else
-        t.TextTransparency = 0
-    end
-    updateEditorSize()
-    updateSyntax(t, hl)
-end)
+t:GetPropertyChangedSignal("Text"):Connect(updateEditorSize)
+updateEditorSize()
 
-updateSyntax(t, hl)
 r()
 u()
