@@ -335,14 +335,24 @@ ScrollingFrame:GetPropertyChangedSignal("AbsoluteSize"):Connect(updateTextBoxSiz
 Main:TweenPosition(UDim2.new(0.308, 0, 0.262, 0), "Out", "Quint", 1, true)
 
 for _, button in pairs({ClearButton, CopyButton}) do
-	button.AutoButtonColor = false
-	local corner = Instance.new("UICorner", button)
-	corner.CornerRadius = UDim.new(0, 6)
-	
-	local shadow = Instance.new("UIStroke", button)
-	shadow.Color = Color3.fromRGB(0, 0, 0)
-	shadow.Thickness = 0.5
-	shadow.Transparency = 0.7
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0, 8)
+	corner.Parent = button
+
+	local stroke = Instance.new("UIStroke")
+	stroke.Color = Color3.fromRGB(0, 0, 0)
+	stroke.Thickness = 1
+	stroke.Transparency = 0.5
+	stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	stroke.Parent = button
+
+	button.MouseEnter:Connect(function()
+		button.BackgroundTransparency = 0.1
+	end)
+
+	button.MouseLeave:Connect(function()
+		button.BackgroundTransparency = 0
+	end)
 end
 
 updateTextBoxSize()
