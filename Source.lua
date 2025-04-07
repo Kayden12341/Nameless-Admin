@@ -3290,18 +3290,13 @@ end)
 
 --[ LOCALPLAYER ]--
 function respawn()
+	local characterFrame = getRoot(getChar()).CFrame
 	local character = getChar()
-	local humanoid = character:FindFirstChildOfClass("Humanoid")
-	if not humanoid then return end
-	local lastCFrame = getRoot(character).CFrame
-	humanoid:ChangeState(Enum.HumanoidStateType.Dead)
-	humanoid.Health = 0
-	local newCharacter = player.CharacterAdded:Wait()
+	character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
+	character:FindFirstChildOfClass("Humanoid").Health=0
+	player.CharacterAdded:Wait()
 	wait(0.2)
-	local newRoot = getRoot(newCharacter)
-	if newRoot then
-		newRoot.CFrame = lastCFrame
-	end
+	getRoot(character).CFrame = characterFrame
 end
 
 cmd.add({"accountage","accage"},{"accountage <player> (accage)","Tells the account age of a player in the server"},function(...)
@@ -7130,32 +7125,17 @@ end,true)
 
 cmd.add({"fixcam", "fix"}, {"fixcam", "Fix your camera"}, function()
 	local ws = SafeGetService("Workspace")
-	local plrs = SafeGetService("Players")
-	local p = plrs.LocalPlayer
-
-	if ws.CurrentCamera then
-		ws.CurrentCamera:Destroy()
-	end
-
-	repeat Wait() until p.Character and ws.CurrentCamera
-
-	local c = p.Character
+	local plr = Players.LocalPlayer
+	ws.CurrentCamera:Remove()
+	wait(0.1)
+	repeat wait() until plr.Character
 	local cam = ws.CurrentCamera
-	local h = c:FindFirstChildWhichIsA("Humanoid")
-	local head = c:FindFirstChild("Head")
-
-	if h then
-		cam.CameraSubject = h
-	end
-
-	cam.CameraType = Enum.CameraType.Custom
-	p.CameraMinZoomDistance = 0.5
-	p.CameraMaxZoomDistance = math.huge
-	p.CameraMode = Enum.CameraMode.Classic
-
-	if head then
-		head.Anchored = false
-	end
+	cam.CameraSubject = plr.Character:FindFirstChildWhichIsA("Humanoid")
+	cam.CameraType = "Custom"
+	plr.CameraMinZoomDistance = 0.5
+	plr.CameraMaxZoomDistance = math.huge
+	plr.CameraMode = "Classic"
+	plr.Character:FindFirstChild("Head").Anchored = false
 end)
 
 cmd.add({"saw"}, {"saw <challenge>", "shush"}, function(...)
