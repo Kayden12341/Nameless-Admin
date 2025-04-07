@@ -1454,7 +1454,7 @@ function mobilefly(speed, vfly)
 			bv.MaxForce = Vector3.new(9e9, 9e9, 9e9)
 			bg.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
 			if not vfly then
-				humanoid.PlatformStand = true
+				getHum().PlatformStand = true
 			end
 
 			bg.CFrame = camera.CFrame
@@ -1476,7 +1476,7 @@ end
 function unmobilefly()
 	if flyMobile then
 		flyMobile:Destroy()
-		unAntiSit()
+		getHum().PlatformStand = false
 	end
 	if Signal1 then Signal1:Disconnect() end
 	if Signal2 then Signal2:Disconnect() end
@@ -1543,7 +1543,7 @@ function sFLY(vfly)
 		spawn(function()
 			while FLYING do
 				if not vfly then
-					cmdlp.Character:FindFirstChildWhichIsA("Humanoid").PlatformStand = true
+					getHum().PlatformStand = true
 				end
 
 				if CONTROL.L + CONTROL.R ~= 0 or CONTROL.F + CONTROL.B ~= 0 or CONTROL.Q + CONTROL.E ~= 0 then
@@ -1574,7 +1574,7 @@ function sFLY(vfly)
 			SPEED = 0
 			BG:Destroy()
 			BV:Destroy()
-			cmdlp.Character:FindFirstChildWhichIsA("Humanoid").PlatformStand = false
+			getHum().PlatformStand = false
 		end)
 	end
 
@@ -3377,7 +3377,7 @@ function toggleVFly()
 		if IsOnMobile then
 			unmobilefly()
 		else
-			cmdlp.Character:FindFirstChildWhichIsA("Humanoid").PlatformStand = false
+			getHum().PlatformStand = false
 			if goofyFLY then goofyFLY:Destroy() end
 		end
 		vFlyEnabled = false
@@ -3452,7 +3452,7 @@ cmd.add({"vfly", "vehiclefly"}, {"vehiclefly (vfly)", "be able to fly vehicles"}
 					btn.Text = "UnvFly"
 					btn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
 					mobilefly(vFlySpeed, true)
-					cmdlp.Character:FindFirstChildWhichIsA("Humanoid").PlatformStand = false
+					getHum().PlatformStand = false
 				else
 					vOn = false
 					btn.Text = "vFly"
@@ -3465,7 +3465,7 @@ cmd.add({"vfly", "vehiclefly"}, {"vehiclefly (vfly)", "be able to fly vehicles"}
 		gui.draggable(btn)
 	else
 		FLYING = false
-		cmdlp.Character:FindFirstChildWhichIsA("Humanoid").PlatformStand = false
+		getHum().PlatformStand = false
 		wait()
 
 		DoNotif("Vehicle fly enabled. Press '"..vToggleKey:upper().."' to toggle vehicle flying.")
@@ -3480,11 +3480,10 @@ cmd.add({"unvfly", "unvehiclefly"}, {"unvehiclefly (unvfly)", "disable vehicle f
 	if IsOnMobile then
 		DoNotif("Mobile vFly Disabled.")
 		unmobilefly()
-		unAntiSit()
 	else
 		DoNotif("Not flying anymore")
 		FLYING = false
-		unAntiSit()
+		getHum().PlatformStand = false
 		if goofyFLY then goofyFLY:Destroy() end
 	end
 	vOn = false
@@ -4666,7 +4665,7 @@ cmd.add({"hamster"},{"hamster <number>","Hamster ball"},function(...)
 
 	local tc=RunService.RenderStepped:Connect(function(delta)
 		ball.CanCollide=true
-		humanoid.PlatformStand=true
+		getHum().PlatformStand=true
 		if UserInputService:GetFocusedTextBox() then return end
 		if UserInputService:IsKeyDown("W") then
 			ball.RotVelocity-=Camera.CFrame.RightVector*delta*SPEED_MULTIPLIER
@@ -6159,7 +6158,7 @@ function toggleFly()
 		if IsOnMobile then
 			unmobilefly()
 		else
-			cmdlp.Character:FindFirstChildWhichIsA("Humanoid").PlatformStand = false
+			getHum().PlatformStand = false
 			if goofyFLY then goofyFLY:Destroy() end
 		end
 		flyEnabled = false
@@ -6246,7 +6245,7 @@ cmd.add({"fly"}, {"fly [speed]", "Enable flight"}, function(...)
 		gui.draggable(btn)
 	else
 		FLYING = false
-		cmdlp.Character:FindFirstChildWhichIsA("Humanoid").PlatformStand = false
+		getHum().PlatformStand = false
 		wait()
 
 		DoNotif("Fly enabled. Press '"..toggleKey:upper().."' to toggle flying.")
@@ -6264,7 +6263,7 @@ cmd.add({"unfly"}, {"unfly", "Disable flight"}, function()
 	else
 		DoNotif("Not flying anymore")
 		FLYING = false
-		cmdlp.Character:FindFirstChildWhichIsA("Humanoid").PlatformStand = false
+		getHum().PlatformStand = false
 		if goofyFLY then goofyFLY:Destroy() end
 	end
 	mOn = false
@@ -8251,7 +8250,6 @@ cmd.add({"headsit"}, {"headsit <player>", "Head sit."}, function(p)
 		alignPos.RigidityEnabled = true
 		alignPos.MaxForce = 100000
 		alignPos.Responsiveness = 200
-		alignPos.Attachment1.Position = Vector3.new(0, 1.6, 0.4)
 		local alignOri = charRoot:FindFirstChildOfClass("AlignOrientation") or Instance.new("AlignOrientation", charRoot)
 		alignOri.Attachment0 = charRoot:FindFirstChild("RootAttachment")
 		alignOri.Attachment1 = plrRoot:FindFirstChild("RootAttachment")
@@ -8264,6 +8262,8 @@ cmd.add({"headsit"}, {"headsit <player>", "Head sit."}, function(p)
 				alignOri:Destroy()
 				headSit:Disconnect()
 				headSit = nil
+			else
+				alignPos.Attachment1.Position = Vector3.new(0, 1.6, 0.4)
 			end
 		end)
 	end
@@ -8358,85 +8358,125 @@ cmd.add({"unheadstand"}, {"unheadstand", "Stop the headstand command."}, functio
 end)
 
 loopws = false
---wsLoop = nil
-wsSignal = nil
+WScons = {}
 getgenv().NamelessWs = nil
+
 cmd.add({"loopwalkspeed", "loopws", "lws"}, {"loopwalkspeed <number> (loopws,lws)", "Loop walkspeed"}, function(...)
 	val = {...}
 	getgenv().NamelessWs = (val[1] or 16)
 	loopws = true
-	--if wsLoop then wsLoop:Disconnect() wsLoop = nil end
-	if wsSignal then wsSignal:Disconnect() wsSignal = nil end
-
+	for i, conn in ipairs(WScons) do
+		conn:Disconnect()
+	end
+	WScons = {}
 	if getHum() then
-		wsSignal = getHum():GetPropertyChangedSignal("WalkSpeed"):Connect(function()
+		local conn = getHum():GetPropertyChangedSignal("WalkSpeed"):Connect(function()
 			if loopws then
 				if getHum().WalkSpeed ~= getgenv().NamelessWs then
 					getHum().WalkSpeed = getgenv().NamelessWs
 				end
 			end
 		end)
+		table.insert(WScons, conn)
 	end
-
-	--wsLoop = RunService.RenderStepped:Connect(function()
 	if loopws and getHum() then
 		getHum().WalkSpeed = getgenv().NamelessWs
 	end
-	--end)
-end,true)
+	local conn = LocalPlayer.CharacterAdded:Connect(function(character)
+		wait(0.1)
+		local hum = character:FindFirstChildOfClass("Humanoid")
+		if hum and loopws then
+			hum.WalkSpeed = getgenv().NamelessWs
+			local conn2 = hum:GetPropertyChangedSignal("WalkSpeed"):Connect(function()
+				if loopws and hum.WalkSpeed ~= getgenv().NamelessWs then
+					hum.WalkSpeed = getgenv().NamelessWs
+				end
+			end)
+			table.insert(WScons, conn2)
+		end
+	end)
+	table.insert(WScons, conn)
+end, true)
 
 cmd.add({"unloopwalkspeed", "unloopws", "unlws"}, {"unloopwalkspeed <number> (unloopws,unlws)", "Disable loop walkspeed"}, function()
 	loopws = false
-	--if wsLoop then wsLoop:Disconnect() wsLoop = nil end
-	if wsSignal then wsSignal:Disconnect() wsSignal = nil end
+	for i, conn in ipairs(WScons) do
+		conn:Disconnect()
+	end
+	WScons = {}
 end)
 
 loopjp = false
---jpLoop = nil
-jpSignalPower = nil
-jpSignalHeight = nil
+JPcons = {}
 getgenv().NamelessJP = nil
+
 cmd.add({"loopjumppower", "loopjp", "ljp"}, {"loopjumppower <number> (loopjp,ljp)", "Loop JumpPower"}, function(...)
 	val = {...}
 	getgenv().NamelessJP = (val[1] or 50)
 	loopjp = true
-	--if jpLoop then jpLoop:Disconnect() jpLoop = nil end
-	if jpSignalPower then jpSignalPower:Disconnect() jpSignalPower = nil end
-	if jpSignalHeight then jpSignalHeight:Disconnect() jpSignalHeight = nil end
-
+	for i, conn in ipairs(JPcons) do
+		conn:Disconnect()
+	end
+	JPcons = {}
 	if getHum() then
-		jpSignalPower = getHum():GetPropertyChangedSignal("JumpPower"):Connect(function()
+		local conn1 = getHum():GetPropertyChangedSignal("JumpPower"):Connect(function()
 			if loopjp and getHum().UseJumpPower then
 				if getHum().JumpPower ~= getgenv().NamelessJP then
 					getHum().JumpPower = getgenv().NamelessJP
 				end
 			end
 		end)
-		jpSignalHeight = getHum():GetPropertyChangedSignal("JumpHeight"):Connect(function()
+		local conn2 = getHum():GetPropertyChangedSignal("JumpHeight"):Connect(function()
 			if loopjp and not getHum().UseJumpPower then
 				if getHum().JumpHeight ~= getgenv().NamelessJP then
 					getHum().JumpHeight = getgenv().NamelessJP
 				end
 			end
 		end)
-	end
-
-	--jpLoop = RunService.RenderStepped:Connect(function()
-	if loopjp and getHum() then
+		table.insert(JPcons, conn1)
+		table.insert(JPcons, conn2)
 		if getHum().UseJumpPower then
 			getHum().JumpPower = getgenv().NamelessJP
 		else
 			getHum().JumpHeight = getgenv().NamelessJP
 		end
 	end
-	--end)
-end,true)
+	local conn3 = LocalPlayer.CharacterAdded:Connect(function(character)
+		wait(0.1)
+		local hum = character:FindFirstChildOfClass("Humanoid")
+		if hum and loopjp then
+			if hum.UseJumpPower then
+				hum.JumpPower = getgenv().NamelessJP
+			else
+				hum.JumpHeight = getgenv().NamelessJP
+			end
+			local conn4 = hum:GetPropertyChangedSignal("JumpPower"):Connect(function()
+				if loopjp and hum.UseJumpPower then
+					if hum.JumpPower ~= getgenv().NamelessJP then
+						hum.JumpPower = getgenv().NamelessJP
+					end
+				end
+			end)
+			local conn5 = hum:GetPropertyChangedSignal("JumpHeight"):Connect(function()
+				if loopjp and not hum.UseJumpPower then
+					if hum.JumpHeight ~= getgenv().NamelessJP then
+						hum.JumpHeight = getgenv().NamelessJP
+					end
+				end
+			end)
+			table.insert(JPcons, conn4)
+			table.insert(JPcons, conn5)
+		end
+	end)
+	table.insert(JPcons, conn3)
+end, true)
 
-cmd.add({"unloopjumppower", "unloopjp", "unljp"}, {"unloopjumppower <number> (unloopjp,unljp)", "Disable loop walkspeed"}, function()
+cmd.add({"unloopjumppower", "unloopjp", "unljp"}, {"unloopjumppower <number> (unloopjp,unljp)", "Disable loop jump power"}, function()
 	loopjp = false
-	--if jpLoop then jpLoop:Disconnect() jpLoop = nil end
-	if jpSignalPower then jpSignalPower:Disconnect() jpSignalPower = nil end
-	if jpSignalHeight then jpSignalHeight:Disconnect() jpSignalHeight = nil end
+	for i, conn in ipairs(JPcons) do
+		conn:Disconnect()
+	end
+	JPcons = {}
 end)
 
 cmd.add({"stopanimations","stopanims","stopanim","noanim"},{"stopanimations (stopanims,stopanim,noanim)","Stops running animations"},function()
