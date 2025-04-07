@@ -3071,67 +3071,76 @@ cmd.add({"unflyfling","unff"}, {"unflyfling", "stops fly and fling"}, function()
 end)
 
 hiddenfling = false
-flingConnection = nil
+walkFLINGER = nil
+connFIXER = nil
 
-cmd.add({"walkfling", "wfling","wf"}, {"walkfling (wfling)", "probably the best fling lol"}, function()
-	if hiddenfling then return end
+cmd.add({"walkfling", "wfling", "wf"}, {"walkfling (wfling)", "probably the best fling lol"}, function()
+    if hiddenfling then return end
 
-	DoNotif("Walkfling enabled")
-	hiddenfling = true
+    DoNotif("Walkfling enabled",2)
+    hiddenfling = true
 
-	if not NA_storage:FindFirstChild("juisdfj0i32i0eidsuf0iok") then
-		local detection = Instance.new("Decal")
-		detection.Name = "juisdfj0i32i0eidsuf0iok"
-		detection.Parent = NA_storage
-	end
+    if not NA_storage:FindFirstChild("juisdfj0i32i0eidsuf0iok") then
+        local detection = Instance.new("Decal")
+        detection.Name = "juisdfj0i32i0eidsuf0iok"
+        detection.Parent = NA_storage
+    end
 
-	if flingConnection then
-		flingConnection:Disconnect()
-	end
+    if walkFLINGER then
+        walkFLINGER:Disconnect()
+    end
 
-	flingConnection = RunService.Heartbeat:Connect(function()
-		if not hiddenfling then
-			return
-		end
+    walkFLINGER = RunService.Heartbeat:Connect(function()
+        if not hiddenfling then return end
 
-		local lp = Players.LocalPlayer
-		local character = lp.Character
-		local hrp = getRoot(character)
+        local lp = Players.LocalPlayer
+        local character = lp and lp.Character
+        local hrp = character and getRoot(character)
+        if character and hrp then
+            local originalVelocity = hrp.Velocity
+            hrp.Velocity = originalVelocity * 10000 + Vector3.new(0, 10000, 0)
 
-		if character and hrp then
-			local originalVelocity = hrp.Velocity
-			hrp.Velocity = originalVelocity * 10000 + Vector3.new(0, 10000, 0)
+            RunService.RenderStepped:Wait()
+            if character and hrp then
+                hrp.Velocity = originalVelocity
+            end
 
-			RunService.RenderStepped:Wait()
-			if character and hrp then
-				hrp.Velocity = originalVelocity
-			end
+            RunService.Stepped:Wait()
+            if character and hrp then
+                hrp.Velocity = originalVelocity + Vector3.new(0, 0.1, 0)
+            end
+        end
+    end)
 
-			RunService.Stepped:Wait()
-			if character and hrp then
-				hrp.Velocity = originalVelocity + Vector3.new(0, 0.1, 0)
-			end
-		end
-	end)
+    local lp = Players.LocalPlayer
+    if lp then
+        if connFIXER then
+            connFIXER:Disconnect()
+        end
 
-	local lp = Players.LocalPlayer
-	lp.CharacterAdded:Connect(function()
-		if hiddenfling then
-			DoNotif("Re-enabling Walkfling")
-		end
-	end)
+        connFIXER = lp.CharacterAdded:Connect(function()
+            if hiddenfling then
+                DoNotif("Re-enabling Walkfling")
+            end
+        end)
+    end
 end)
 
-cmd.add({"unwalkfling", "unwfling","unwf"}, {"unwalkfling (unwfling)", "stop the walkfling command"}, function()
-	if not hiddenfling then return end
+cmd.add({"unwalkfling", "unwfling", "unwf"}, {"unwalkfling (unwfling)", "stop the walkfling command"}, function()
+    if not hiddenfling then return end
 
-	DoNotif("Walkfling disabled")
-	hiddenfling = false
+    DoNotif("Walkfling disabled",2)
+    hiddenfling = false
 
-	if flingConnection then
-		flingConnection:Disconnect()
-		flingConnection = nil
-	end
+    if walkFLINGER then
+        walkFLINGER:Disconnect()
+        walkFLINGER = nil
+    end
+
+    if connFIXER then
+        connFIXER:Disconnect()
+        connFIXER = nil
+    end
 end)
 
 cmd.add({"rjre", "rejoinrefresh"}, {"rjre (rejoinrefresh)", "Rejoins and teleports you to your previous position"}, function()
@@ -6878,10 +6887,10 @@ cmd.add({"unfreecam","unfc","unfcam"},{"unfreecam (unfc,unfcam)","Disable free c
 	if fcBTNTOGGLE then fcBTNTOGGLE:Destroy() fcBTNTOGGLE = nil end
 end)
 
-cmd.add({"drophats"},{"drophats","Drop all of your hats"},function()
+cmd.add({"nohats","drophats"},{"nohats (drophats)","Drop all of your hats"},function()
 	for _,hat in pairs(character:GetChildren()) do
 		if hat:IsA("Accoutrement") then
-			hat.Parent=SafeGetService("Workspace")
+			hat:FindFirstChildWhichIsA("Weld",true):Destroy()
 		end
 	end
 end)
@@ -7388,15 +7397,14 @@ cmd.add({"jend"}, {"jend", "nil"}, function()
 	_G.SawFinish = true
 end)
 
+attachedPart=nil
+
 cmd.add({"fling"}, {"fling <player>", "Fling the given player"}, function(plr)
 	local player = LocalPlayer
 	local mouse = player:GetMouse()
 	local Targets = {plr}
-
 	local Player = Players.LocalPlayer
-
 	local AllBool = false
-
 	local GetPlayer = function(Name)
 		Name = Name:lower()
 		if Name == "all" or Name == "others" then
@@ -7404,15 +7412,15 @@ cmd.add({"fling"}, {"fling <player>", "Fling the given player"}, function(plr)
 			return
 		elseif Name == "random" then
 			local GetPlayers = Players:GetPlayers()
-			if Discover(GetPlayers,Player) then table.remove(GetPlayers,Discover(GetPlayers,Player)) end
+			if Discover(GetPlayers, Player) then table.remove(GetPlayers, Discover(GetPlayers, Player)) end
 			return GetPlayers[math.random(#GetPlayers)]
 		elseif Name ~= "random" and Name ~= "all" and Name ~= "others" then
-			for _,x in next, Players:GetPlayers() do
+			for _, x in next, Players:GetPlayers() do
 				if x ~= Player then
 					if x.Name:lower():match("^"..Name) then
-						return x;
+						return x
 					elseif x.DisplayName:lower():match("^"..Name) then
-						return x;
+						return x
 					end
 				end
 			end
@@ -7420,25 +7428,38 @@ cmd.add({"fling"}, {"fling <player>", "Fling the given player"}, function(plr)
 			return
 		end
 	end
-
 	local Message = function(_Title, _Text, Time)
 		print(_Title)
 		print(_Text)
 		print(Time)
 	end
-
 	local SkidFling = function(TargetPlayer)
+		if attachedPart then attachedPart:Destroy() attachedPart=nil end
 		local Character = Player.Character
 		local Humanoid = Character and Character:FindFirstChildOfClass("Humanoid")
-		local RootPart = Humanoid and Humanoid.RootPart
-
+		local HRP = Humanoid and Humanoid.RootPart
+		local camera = SafeGetService("Workspace").CurrentCamera
+		attachedPart = Instance.new("Part")
+		attachedPart.Name = randomString()
+		attachedPart.Size = Vector3.new(1, 1, 1)
+		attachedPart.Transparency = 1
+		attachedPart.CanCollide = false
+		attachedPart.Anchored = false
+		attachedPart.Parent = camera
+		local weld = Instance.new("WeldConstraint")
+		weld.Name = randomString()
+		weld.Part0 = HRP
+		weld.Part1 = attachedPart
+		weld.Parent = attachedPart
+		local bodyGyro = Instance.new("BodyGyro")
+		bodyGyro.Name = randomString()
+		bodyGyro.MaxTorque = Vector3.new(400000, 400000, 400000)
+		bodyGyro.D = 1000
+		bodyGyro.P = 2000
+		bodyGyro.Parent = attachedPart
+		local RootPart = HRP
 		local TCharacter = TargetPlayer.Character
-		local THumanoid
-		local TRootPart
-		local THead
-		local Accessory
-		local Handle
-
+		local THumanoid, TRootPart, THead, Accessory, Handle
 		if TCharacter:FindFirstChildOfClass("Humanoid") then
 			THumanoid = TCharacter:FindFirstChildOfClass("Humanoid")
 		end
@@ -7454,8 +7475,7 @@ cmd.add({"fling"}, {"fling <player>", "Fling the given player"}, function(plr)
 		if Accessoy and Accessory:FindFirstChild("Handle") then
 			Handle = Accessory.Handle
 		end
-
-		if Character and Humanoid and RootPart then
+		if Character and Humanoid and HRP then
 			if RootPart.Velocity.Magnitude < 50 then
 				getgenv().OldPos = RootPart.CFrame
 			end
@@ -7471,69 +7491,51 @@ cmd.add({"fling"}, {"fling <player>", "Fling the given player"}, function(plr)
 			if not TCharacter:FindFirstChildWhichIsA("BasePart") then
 				return
 			end
-
 			local FPos = function(BasePart, Pos, Ang)
 				RootPart.CFrame = CFrame.new(BasePart.Position) * Pos * Ang
 				Character:SetPrimaryPartCFrame(CFrame.new(BasePart.Position) * Pos * Ang)
 				RootPart.Velocity = Vector3.new(9e7, 9e7 * 10, 9e7)
 				RootPart.RotVelocity = Vector3.new(9e8, 9e8, 9e8)
 			end
-
 			local SFBasePart = function(BasePart)
 				local TimeToWait = 2
 				local Time = tick()
 				local Angle = 0
-
 				repeat
 					if RootPart and THumanoid then
 						if BasePart.Velocity.Magnitude < 50 then
 							Angle = Angle + 100
-
-							FPos(BasePart, CFrame.new(0, 1.5, 0) + THumanoid.MoveDirection * BasePart.Velocity.Magnitude / 1.25, CFrame.Angles(math.rad(Angle),0 ,0))
+							FPos(BasePart, CFrame.new(0, 1.5, 0) + THumanoid.MoveDirection * BasePart.Velocity.Magnitude / 1.25, CFrame.Angles(math.rad(Angle), 0, 0))
 							Wait()
-
 							FPos(BasePart, CFrame.new(0, -1.5, 0) + THumanoid.MoveDirection * BasePart.Velocity.Magnitude / 1.25, CFrame.Angles(math.rad(Angle), 0, 0))
 							Wait()
-
 							FPos(BasePart, CFrame.new(2.25, 1.5, -2.25) + THumanoid.MoveDirection * BasePart.Velocity.Magnitude / 1.25, CFrame.Angles(math.rad(Angle), 0, 0))
 							Wait()
-
 							FPos(BasePart, CFrame.new(-2.25, -1.5, 2.25) + THumanoid.MoveDirection * BasePart.Velocity.Magnitude / 1.25, CFrame.Angles(math.rad(Angle), 0, 0))
 							Wait()
-
-							FPos(BasePart, CFrame.new(0, 1.5, 0) + THumanoid.MoveDirection,CFrame.Angles(math.rad(Angle), 0, 0))
+							FPos(BasePart, CFrame.new(0, 1.5, 0) + THumanoid.MoveDirection, CFrame.Angles(math.rad(Angle), 0, 0))
 							Wait()
-
-							FPos(BasePart, CFrame.new(0, -1.5, 0) + THumanoid.MoveDirection,CFrame.Angles(math.rad(Angle), 0, 0))
+							FPos(BasePart, CFrame.new(0, -1.5, 0) + THumanoid.MoveDirection, CFrame.Angles(math.rad(Angle), 0, 0))
 							Wait()
 						else
 							FPos(BasePart, CFrame.new(0, 1.5, THumanoid.WalkSpeed), CFrame.Angles(math.rad(90), 0, 0))
 							Wait()
-
 							FPos(BasePart, CFrame.new(0, -1.5, -THumanoid.WalkSpeed), CFrame.Angles(0, 0, 0))
 							Wait()
-
 							FPos(BasePart, CFrame.new(0, 1.5, THumanoid.WalkSpeed), CFrame.Angles(math.rad(90), 0, 0))
 							Wait()
-
 							FPos(BasePart, CFrame.new(0, 1.5, TRootPart.Velocity.Magnitude / 1.25), CFrame.Angles(math.rad(90), 0, 0))
 							Wait()
-
 							FPos(BasePart, CFrame.new(0, -1.5, -TRootPart.Velocity.Magnitude / 1.25), CFrame.Angles(0, 0, 0))
 							Wait()
-
 							FPos(BasePart, CFrame.new(0, 1.5, TRootPart.Velocity.Magnitude / 1.25), CFrame.Angles(math.rad(90), 0, 0))
 							Wait()
-
 							FPos(BasePart, CFrame.new(0, -1.5, 0), CFrame.Angles(math.rad(90), 0, 0))
 							Wait()
-
 							FPos(BasePart, CFrame.new(0, -1.5, 0), CFrame.Angles(0, 0, 0))
 							Wait()
-
-							FPos(BasePart, CFrame.new(0, -1.5 ,0), CFrame.Angles(math.rad(-90), 0, 0))
+							FPos(BasePart, CFrame.new(0, -1.5, 0), CFrame.Angles(math.rad(-90), 0, 0))
 							Wait()
-
 							FPos(BasePart, CFrame.new(0, -1.5, 0), CFrame.Angles(0, 0, 0))
 							Wait()
 						end
@@ -7541,18 +7543,10 @@ cmd.add({"fling"}, {"fling <player>", "Fling the given player"}, function(plr)
 						break
 					end
 				until BasePart.Velocity.Magnitude > 500 or BasePart.Parent ~= TargetPlayer.Character or TargetPlayer.Parent ~= Players or not TargetPlayer.Character == TCharacter or THumanoid.Sit or Humanoid.Health <= 0 or tick() > Time + TimeToWait
+				if attachedPart then attachedPart:Destroy() attachedPart=nil end
 			end
-
 			SafeGetService("Workspace").FallenPartsDestroyHeight = 0/0
-
-			local BV = Instance.new("BodyVelocity")
-			BV.Name = "EpixVel"
-			BV.Parent = RootPart
-			BV.Velocity = Vector3.new(9e8, 9e8, 9e8)
-			BV.MaxForce = Vector3.new(1/0, 1/0, 1/0)
-
 			Humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated, false)
-
 			if TRootPart and THead then
 				if (TRootPart.CFrame.p - THead.CFrame.p).Magnitude > 5 then
 					SFBasePart(THead)
@@ -7565,16 +7559,12 @@ cmd.add({"fling"}, {"fling <player>", "Fling the given player"}, function(plr)
 				SFBasePart(THead)
 			elseif not TRootPart and not THead and Accessory and Handle then
 				SFBasePart(Handle)
-			else
 			end
-
-			BV:Destroy()
 			Humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated, true)
 			SafeGetService("Workspace").CurrentCamera.CameraSubject = Humanoid
-
 			repeat
-				RootPart.CFrame = getgenv().OldPos * CFrame.new(0, .5, 0)
-				Character:SetPrimaryPartCFrame(getgenv().OldPos * CFrame.new(0, .5, 0))
+				RootPart.CFrame = getgenv().OldPos * CFrame.new(0, 0.5, 0)
+				Character:SetPrimaryPartCFrame(getgenv().OldPos * CFrame.new(0, 0.5, 0))
 				Humanoid:ChangeState("GettingUp")
 				table.foreach(Character:GetChildren(), function(_, x)
 					if x:IsA("BasePart") then
@@ -7584,32 +7574,27 @@ cmd.add({"fling"}, {"fling <player>", "Fling the given player"}, function(plr)
 				Wait()
 			until (RootPart.Position - getgenv().OldPos.p).Magnitude < 25
 			SafeGetService("Workspace").FallenPartsDestroyHeight = getgenv().FPDH
-		else
+			attachedPart:Destroy()
 		end
 	end
-
 	getgenv().Welcome = true
-	if Targets[1] then for _,x in next, Targets do GetPlayer(x) end else return end
-
+	if Targets[1] then for _, x in next, Targets do GetPlayer(x) end else return end
 	if AllBool then
-		for _,x in next, Players:GetPlayers() do
+		for _, x in next, Players:GetPlayers() do
 			SkidFling(x)
 		end
 	end
-
-	for _,x in next, Targets do
+	for _, x in next, Targets do
 		if GetPlayer(x) and GetPlayer(x) ~= Player then
 			if GetPlayer(x).UserId ~= 1414978355 then
 				local TPlayer = GetPlayer(x)
 				if TPlayer then
 					SkidFling(TPlayer)
 				end
-			else
 			end
-		elseif not GetPlayer(x) and not AllBool then
 		end
 	end
-end,true)
+end, true)
 
 --[[cmd.add({"commitoof","suicide","kys"},{"commitoof (suicide,kys)","FE KILL YOURSELF SCRIPT this will be bad when taken out of context"},function()
 	local A_1="Okay.. i will do it."
@@ -8169,17 +8154,16 @@ cmd.add({"firekey","fkey"},{"firekey <key> (fkey)","makes you fire a keybind usi
 	end
 end,true)
 
-cmd.add({"loopfling"},{"loopfling <player>","Loop voids a player"},function(plr)
-	local Targets={plr}
+LOOPPROTECT = nil
 
-	Loopvoid=true
+cmd.add({"loopfling"}, {"loopfling <player>", "Loop voids a player"}, function(plr)
+	local Targets = {plr}
+	Loopvoid = true
 	repeat wait()
-		local player=LocalPlayer
-		local mouse=player:GetMouse()
-		local Player=LocalPlayer
-
-		local AllBool=false
-
+		local player = LocalPlayer
+		local mouse = player:GetMouse()
+		local Player = LocalPlayer
+		local AllBool = false
 		local GetPlayer = function(Name)
 			Name = Name:lower()
 			if Name == "all" or Name == "others" then
@@ -8187,15 +8171,15 @@ cmd.add({"loopfling"},{"loopfling <player>","Loop voids a player"},function(plr)
 				return
 			elseif Name == "random" then
 				local GetPlayers = Players:GetPlayers()
-				if Discover(GetPlayers,Player) then table.remove(GetPlayers,Discover(GetPlayers,Player)) end
+				if Discover(GetPlayers, Player) then table.remove(GetPlayers, Discover(GetPlayers, Player)) end
 				return GetPlayers[math.random(#GetPlayers)]
 			elseif Name ~= "random" and Name ~= "all" and Name ~= "others" then
-				for _,x in next, Players:GetPlayers() do
+				for _, x in next, Players:GetPlayers() do
 					if x ~= Player then
 						if x.Name:lower():match("^"..Name) then
-							return x;
+							return x
 						elseif x.DisplayName:lower():match("^"..Name) then
-							return x;
+							return x
 						end
 					end
 				end
@@ -8203,136 +8187,129 @@ cmd.add({"loopfling"},{"loopfling <player>","Loop voids a player"},function(plr)
 				return
 			end
 		end
-
-		local SkidFling=function(TargetPlayer)
-			local Character=Player.Character
-			local Humanoid=Character and Character:FindFirstChildOfClass("Humanoid")
-			local RootPart=Humanoid and Humanoid.RootPart
-
-			local TCharacter=TargetPlayer.Character
-			local THumanoid
-			local TRootPart
-			local THead
-			local Accessory
-			local Handle
-
+		local SkidFling = function(TargetPlayer)
+			if LOOPPROTECT then LOOPPROTECT:Destroy() LOOPPROTECT = nil end
+			local Character = Player.Character
+			local Humanoid = Character and Character:FindFirstChildOfClass("Humanoid")
+			local HRP = Humanoid and Humanoid.RootPart
+			local camera = SafeGetService("Workspace").CurrentCamera
+			LOOPPROTECT = Instance.new("Part")
+			LOOPPROTECT.Name = randomString()
+			LOOPPROTECT.Size = Vector3.new(1, 1, 1)
+			LOOPPROTECT.Transparency = 1
+			LOOPPROTECT.CanCollide = false
+			LOOPPROTECT.Anchored = false
+			LOOPPROTECT.Parent = camera
+			local weld = Instance.new("WeldConstraint")
+			weld.Name = randomString()
+			weld.Part0 = HRP
+			weld.Part1 = LOOPPROTECT
+			weld.Parent = LOOPPROTECT
+			local bodyGyro = Instance.new("BodyGyro")
+			bodyGyro.Name = randomString()
+			bodyGyro.MaxTorque = Vector3.new(400000, 400000, 400000)
+			bodyGyro.D = 1000
+			bodyGyro.P = 2000
+			bodyGyro.Parent = LOOPPROTECT
+			local RootPart = HRP
+			local TCharacter = TargetPlayer.Character
+			local THumanoid, TRootPart, THead, Accessory, Handle
+			if not TCharacter then if LOOPPROTECT then LOOPPROTECT:Destroy() LOOPPROTECT = nil end return end
 			if TCharacter:FindFirstChildOfClass("Humanoid") then
-				THumanoid=TCharacter:FindFirstChildOfClass("Humanoid")
+				THumanoid = TCharacter:FindFirstChildOfClass("Humanoid")
 			end
 			if THumanoid and THumanoid.RootPart then
-				TRootPart=THumanoid.RootPart
+				TRootPart = THumanoid.RootPart
 			end
 			if TCharacter:FindFirstChild("Head") then
-				THead=TCharacter:FindFirstChild("Head")
+				THead = TCharacter:FindFirstChild("Head")
 			end
 			if TCharacter:FindFirstChildOfClass("Accessory") then
-				Accessory=TCharacter:FindFirstChildOfClass("Accessory")
+				Accessory = TCharacter:FindFirstChildOfClass("Accessory")
 			end
 			if Accessoy and Accessory:FindFirstChild("Handle") then
-				Handle=Accessory.Handle
+				Handle = Accessory.Handle
 			end
-
-			if Character and Humanoid and RootPart then
-				if RootPart.Velocity.Magnitude<50 then
-					getgenv().OldPos=RootPart.CFrame
+			if Character and Humanoid and HRP then
+				if RootPart.Velocity.Magnitude < 50 then
+					getgenv().OldPos = RootPart.CFrame
 				end
 				if THumanoid and THumanoid.Sit and not AllBool then
 					return
 				end
 				if THead then
-					SafeGetService("Workspace").CurrentCamera.CameraSubject=THead
+					SafeGetService("Workspace").CurrentCamera.CameraSubject = THead
 				elseif not THead and Handle then
-					SafeGetService("Workspace").CurrentCamera.CameraSubject=Handle
+					SafeGetService("Workspace").CurrentCamera.CameraSubject = Handle
 				elseif THumanoid and TRootPart then
-					SafeGetService("Workspace").CurrentCamera.CameraSubject=THumanoid
+					SafeGetService("Workspace").CurrentCamera.CameraSubject = THumanoid
 				end
 				if not TCharacter:FindFirstChildWhichIsA("BasePart") then
 					return
 				end
-
-				local FPos=function(BasePart,Pos,Ang)
-					RootPart.CFrame=CFrame.new(BasePart.Position)*Pos*Ang
-					Character:SetPrimaryPartCFrame(CFrame.new(BasePart.Position)*Pos*Ang)
-					RootPart.Velocity=Vector3.new(9e7,9e7*10,9e7)
-					RootPart.RotVelocity=Vector3.new(9e8,9e8,9e8)
+				local FPos = function(BasePart, Pos, Ang)
+					RootPart.CFrame = CFrame.new(BasePart.Position) * Pos * Ang
+					Character:SetPrimaryPartCFrame(CFrame.new(BasePart.Position) * Pos * Ang)
+					RootPart.Velocity = Vector3.new(9e7, 9e7 * 10, 9e7)
+					RootPart.RotVelocity = Vector3.new(9e8, 9e8, 9e8)
 				end
-
-				local SFBasePart=function(BasePart)
-					local TimeToWait=2
-					local Time=tick()
-					local Angle=0
-
+				local SFBasePart = function(BasePart)
+					local TimeToWait = 2
+					local Time = tick()
+					local Angle = 0
 					repeat
 						if RootPart and THumanoid then
-							if BasePart.Velocity.Magnitude<50 then
-								Angle=Angle+100
-
-								FPos(BasePart,CFrame.new(0,1.5,0)+THumanoid.MoveDirection*BasePart.Velocity.Magnitude / 1.25,CFrame.Angles(math.rad(Angle),0,0))
+							if BasePart.Velocity.Magnitude < 50 then
+								Angle = Angle + 100
+								FPos(BasePart, CFrame.new(0, 1.5, 0) + THumanoid.MoveDirection * BasePart.Velocity.Magnitude / 1.25, CFrame.Angles(math.rad(Angle), 0, 0))
 								Wait()
-
-								FPos(BasePart,CFrame.new(0,-1.5,0)+THumanoid.MoveDirection*BasePart.Velocity.Magnitude / 1.25,CFrame.Angles(math.rad(Angle),0,0))
+								FPos(BasePart, CFrame.new(0, -1.5, 0) + THumanoid.MoveDirection * BasePart.Velocity.Magnitude / 1.25, CFrame.Angles(math.rad(Angle), 0, 0))
 								Wait()
-
-								FPos(BasePart,CFrame.new(2.25,1.5,-2.25)+THumanoid.MoveDirection*BasePart.Velocity.Magnitude / 1.25,CFrame.Angles(math.rad(Angle),0,0))
+								FPos(BasePart, CFrame.new(2.25, 1.5, -2.25) + THumanoid.MoveDirection * BasePart.Velocity.Magnitude / 1.25, CFrame.Angles(math.rad(Angle), 0, 0))
 								Wait()
-
-								FPos(BasePart,CFrame.new(-2.25,-1.5,2.25)+THumanoid.MoveDirection*BasePart.Velocity.Magnitude / 1.25,CFrame.Angles(math.rad(Angle),0,0))
+								FPos(BasePart, CFrame.new(-2.25, -1.5, 2.25) + THumanoid.MoveDirection * BasePart.Velocity.Magnitude / 1.25, CFrame.Angles(math.rad(Angle), 0, 0))
 								Wait()
-
-								FPos(BasePart,CFrame.new(0,1.5,0)+THumanoid.MoveDirection,CFrame.Angles(math.rad(Angle),0,0))
+								FPos(BasePart, CFrame.new(0, 1.5, 0) + THumanoid.MoveDirection, CFrame.Angles(math.rad(Angle), 0, 0))
 								Wait()
-
-								FPos(BasePart,CFrame.new(0,-1.5,0)+THumanoid.MoveDirection,CFrame.Angles(math.rad(Angle),0,0))
+								FPos(BasePart, CFrame.new(0, -1.5, 0) + THumanoid.MoveDirection, CFrame.Angles(math.rad(Angle), 0, 0))
 								Wait()
 							else
-								FPos(BasePart,CFrame.new(0,1.5,THumanoid.WalkSpeed),CFrame.Angles(math.rad(90),0,0))
+								FPos(BasePart, CFrame.new(0, 1.5, THumanoid.WalkSpeed), CFrame.Angles(math.rad(90), 0, 0))
 								Wait()
-
-								FPos(BasePart,CFrame.new(0,-1.5,-THumanoid.WalkSpeed),CFrame.Angles(0,0,0))
+								FPos(BasePart, CFrame.new(0, -1.5, -THumanoid.WalkSpeed), CFrame.Angles(0, 0, 0))
 								Wait()
-
-								FPos(BasePart,CFrame.new(0,1.5,THumanoid.WalkSpeed),CFrame.Angles(math.rad(90),0,0))
+								FPos(BasePart, CFrame.new(0, 1.5, THumanoid.WalkSpeed), CFrame.Angles(math.rad(90), 0, 0))
 								Wait()
-
-								FPos(BasePart,CFrame.new(0,1.5,TRootPart.Velocity.Magnitude / 1.25),CFrame.Angles(math.rad(90),0,0))
+								FPos(BasePart, CFrame.new(0, 1.5, TRootPart.Velocity.Magnitude / 1.25), CFrame.Angles(math.rad(90), 0, 0))
 								Wait()
-
-								FPos(BasePart,CFrame.new(0,-1.5,-TRootPart.Velocity.Magnitude / 1.25),CFrame.Angles(0,0,0))
+								FPos(BasePart, CFrame.new(0, -1.5, -TRootPart.Velocity.Magnitude / 1.25), CFrame.Angles(0, 0, 0))
 								Wait()
-
-								FPos(BasePart,CFrame.new(0,1.5,TRootPart.Velocity.Magnitude / 1.25),CFrame.Angles(math.rad(90),0,0))
+								FPos(BasePart, CFrame.new(0, 1.5, TRootPart.Velocity.Magnitude / 1.25), CFrame.Angles(math.rad(90), 0, 0))
 								Wait()
-
-								FPos(BasePart,CFrame.new(0,-1.5,0),CFrame.Angles(math.rad(90),0,0))
+								FPos(BasePart, CFrame.new(0, -1.5, 0), CFrame.Angles(math.rad(90), 0, 0))
 								Wait()
-
-								FPos(BasePart,CFrame.new(0,-1.5,0),CFrame.Angles(0,0,0))
+								FPos(BasePart, CFrame.new(0, -1.5, 0), CFrame.Angles(0, 0, 0))
 								Wait()
-
-								FPos(BasePart,CFrame.new(0,-1.5,0),CFrame.Angles(math.rad(-90),0,0))
+								FPos(BasePart, CFrame.new(0, -1.5, 0), CFrame.Angles(math.rad(-90), 0, 0))
 								Wait()
-
-								FPos(BasePart,CFrame.new(0,-1.5,0),CFrame.Angles(0,0,0))
+								FPos(BasePart, CFrame.new(0, -1.5, 0), CFrame.Angles(0, 0, 0))
 								Wait()
 							end
 						else
 							break
 						end
-					until BasePart.Velocity.Magnitude>500 or BasePart.Parent~=TargetPlayer.Character or TargetPlayer.Parent~=Players or not TargetPlayer.Character==TCharacter or THumanoid.Sit or Humanoid.Health <=0 or tick()>Time+TimeToWait
+					until BasePart.Velocity.Magnitude > 500 or BasePart.Parent ~= TargetPlayer.Character or TargetPlayer.Parent ~= Players or not TargetPlayer.Character == TCharacter or THumanoid.Sit or Humanoid.Health <= 0 or tick() > Time + TimeToWait
+					if LOOPPROTECT then LOOPPROTECT:Destroy() LOOPPROTECT = nil end
 				end
-
-				SafeGetService("Workspace").FallenPartsDestroyHeight=0/0
-
-				local BV=Instance.new("BodyVelocity")
-				BV.Name="EpixVel"
-				BV.Parent=RootPart
-				BV.Velocity=Vector3.new(9e8,9e8,9e8)
-				BV.MaxForce=Vector3.new(1/0,1/0,1/0)
-
-				Humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated,false)
-
+				SafeGetService("Workspace").FallenPartsDestroyHeight = 0/0
+				local BV = Instance.new("BodyVelocity")
+				BV.Name = "EpixVel"
+				BV.Parent = RootPart
+				BV.Velocity = Vector3.new(9e8, 9e8, 9e8)
+				BV.MaxForce = Vector3.new(1/0, 1/0, 1/0)
+				Humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated, false)
 				if TRootPart and THead then
-					if (TRootPart.CFrame.p-THead.CFrame.p).Magnitude>5 then
+					if (TRootPart.CFrame.p - THead.CFrame.p).Magnitude > 5 then
 						SFBasePart(THead)
 					else
 						SFBasePart(TRootPart)
@@ -8346,50 +8323,52 @@ cmd.add({"loopfling"},{"loopfling <player>","Loop voids a player"},function(plr)
 				else
 					return
 				end
-
 				BV:Destroy()
-				Humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated,true)
-				SafeGetService("Workspace").CurrentCamera.CameraSubject=Humanoid
-
+				Humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated, true)
+				SafeGetService("Workspace").CurrentCamera.CameraSubject = Humanoid
 				repeat
-					RootPart.CFrame=getgenv().OldPos*CFrame.new(0,.5,0)
-					Character:SetPrimaryPartCFrame(getgenv().OldPos*CFrame.new(0,.5,0))
+					RootPart.CFrame = getgenv().OldPos * CFrame.new(0, 0.5, 0)
+					Character:SetPrimaryPartCFrame(getgenv().OldPos * CFrame.new(0, 0.5, 0))
 					Humanoid:ChangeState("GettingUp")
-					table.foreach(Character:GetChildren(),function(_,x)
+					table.foreach(Character:GetChildren(), function(_, x)
 						if x:IsA("BasePart") then
-							x.Velocity,x.RotVelocity=Vector3.new(),Vector3.new()
+							x.Velocity, x.RotVelocity = Vector3.new(), Vector3.new()
 						end
 					end)
 					Wait()
-				until (RootPart.Position-getgenv().OldPos.p).Magnitude<25
-				SafeGetService("Workspace").FallenPartsDestroyHeight=getgenv().FPDH
+				until (RootPart.Position - getgenv().OldPos.p).Magnitude < 25
+				SafeGetService("Workspace").FallenPartsDestroyHeight = getgenv().FPDH
+				if LOOPPROTECT then LOOPPROTECT:Destroy() LOOPPROTECT = nil end
 			else
 				return
 			end
 		end
-
-		if not Welcome then DoNotif("Enjoy!",5,"Script by AnthonyIsntHere") end
-		getgenv().Welcome=true
-		if Targets[1] then for _,x in next,Targets do GetPlayer(x) end else return end
-
+		if not Welcome then DoNotif("Enjoy!", 5, "Script by AnthonyIsntHere") end
+		getgenv().Welcome = true
+		if Targets[1] then for _, x in next, Targets do GetPlayer(x) end else return end
 		if AllBool then
-			for _,x in next,Players:GetPlayers() do
+			for _, x in next, Players:GetPlayers() do
 				SkidFling(x)
 			end
 		end
-
-		for _,x in next,Targets do
-			if GetPlayer(x) and GetPlayer(x)~=Player then
-				if GetPlayer(x).UserId~=1414978355 then
-					local TPlayer=GetPlayer(x)
+		for _, x in next, Targets do
+			if GetPlayer(x) and GetPlayer(x) ~= Player then
+				if GetPlayer(x).UserId ~= 1414978355 then
+					local TPlayer = GetPlayer(x)
 					if TPlayer then
 						SkidFling(TPlayer)
 					end
 				end
-			elseif not GetPlayer(x) and not AllBool then end
+			elseif not GetPlayer(x) and not AllBool then
+			end
 		end
-	until Loopvoid==false
-end,true)
+	until Loopvoid == false
+end, true)
+
+cmd.add({"unloopfling"}, {"unloopfling", "Stops loop flinging a player"}, function()
+	Loopvoid = false
+	repeat wait() if LOOPPROTECT then LOOPPROTECT:Destroy() LOOPPROTECT = nil end until LOOPPROTECT == nil
+end)
 
 cmd.add({"freegamepass", "freegp"}, {"freegamepass (freegp)", "Returns true if the UserOwnsGamePassAsync function gets used"}, function()
 	local Hook
@@ -9317,10 +9296,6 @@ end)
 
 cmd.add({"unequiptools"},{"unequiptools","Unequips every tool you are currently holding at once"},function()
 	Player.Character:FindFirstChildOfClass('Humanoid'):UnequipTools()
-end)
-
-cmd.add({"unloopfling"},{"unloopfling","Stops loop flinging a player"},function()
-	Loopvoid=false
 end)
 
 cmd.add({"removeterrain", "rterrain", "noterrain"},{"removeterrain (rterrain, noterrain)","clears terrain"},function()
@@ -11161,19 +11136,29 @@ cmd.add({"loadtools","ltools"},{"loadtools (ltools)","puts your tools back in th
 	end
 end)
 
-cmd.add({"grabtools","gt"},{"grabtools","Grabs any dropped tools"},function()
-	local p=Players.LocalPlayer
-	local c=p.Character
-	if c and c:FindFirstChild("Humanoid") then
-		for i,v in pairs(SafeGetService("Workspace"):GetDescendants()) do
-			if v:IsA("Tool") then
-				c:FindFirstChild("Humanoid"):EquipTool(v)
-			end
-		end
-	end
-	wait();
+noEQUIP=nil
 
-	DoNotif("Grabbed all tools")
+cmd.add({"preventtools", "noequip", "antiequip"}, {"preventtools (noequip,antiequip)","Prevents any item from being equipped"}, function()
+    local p = Players.LocalPlayer
+    local c = p.Character
+	if noEQUIP then noEQUIP:Disconnect() noEQUIP=nil end
+
+    if c and c:FindFirstChildWhichIsA("Humanoid") then
+        c:FindFirstChildWhichIsA("Humanoid"):UnequipTools()
+        
+        noEQUIP=c.ChildAdded:Connect(function(child)
+            if child:IsA("Tool") then
+				repeat Wait() c:FindFirstChildWhichIsA("Humanoid"):UnequipTools() until child.Parent ~= c or child.Parent == nil
+                DoNotif("Tool "..child.Name.." equip prevented!",2)
+            end
+        end)
+    end
+
+    DoNotif("Anti-tool equip protection activated!",3)
+end)
+
+cmd.add({"unpreventtools", "unnoequip", "unantiequip"}, {"unpreventtools (unnoequip,unantiequip)","self explanatory"}, function()
+    if noEQUIP then noEQUIP:Disconnect() noEQUIP=nil end
 end)
 
 cmd.add({"ws","speed","walkspeed"},{"walkspeed <number> (speed,ws)","Makes your WalkSpeed whatever you want"},function(...)
