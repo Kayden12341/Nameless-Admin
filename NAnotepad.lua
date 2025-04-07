@@ -109,7 +109,7 @@ Notepad.ResetOnSpawn = false
 
 Main.Name = "Main"
 Main.Parent = Notepad
-Main.BackgroundColor3 = Color3.fromRGB(24, 25, 35)
+Main.BackgroundColor3 = Color3.fromRGB(20, 21, 30)
 Main.BorderSizePixel = 0
 Main.ClipsDescendants = true
 Main.Position = UDim2.new(0.308, 0, 1.262, 0)
@@ -118,7 +118,7 @@ Main.Active = true
 Main.Draggable = true
 
 UIStroke.Parent = Main
-UIStroke.Color = Color3.fromRGB(100, 100, 255)
+UIStroke.Color = Color3.fromRGB(85, 85, 255)
 UIStroke.Thickness = 1.5
 UIStroke.Transparency = 0.1
 UIStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
@@ -126,7 +126,7 @@ UIStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 Container.Name = "Container"
 Container.Parent = Main
 Container.AnchorPoint = Vector2.new(0.5, 1)
-Container.BackgroundColor3 = Color3.fromRGB(28, 28, 40)
+Container.BackgroundColor3 = Color3.fromRGB(30, 30, 42)
 Container.BorderSizePixel = 0
 Container.ClipsDescendants = true
 Container.Position = UDim2.new(0.5, 0, 0.996, -5)
@@ -136,8 +136,8 @@ UICorner.CornerRadius = UDim.new(0, 10)
 UICorner.Parent = Container
 
 UIGradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0.00, Color3.fromRGB(28, 28, 40)),
-    ColorSequenceKeypoint.new(1.00, Color3.fromRGB(34, 36, 50))
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(30, 30, 42)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(35, 37, 52))
 }
 UIGradient.Parent = Container
 
@@ -155,12 +155,12 @@ TextBox.BackgroundTransparency = 1
 TextBox.Position = UDim2.new(0, 5, 0, 0)
 TextBox.Size = UDim2.new(1, -15, 0, 200)
 TextBox.ClearTextOnFocus = false
-TextBox.Font = Enum.Font.Gotham
+TextBox.Font = Enum.Font.SourceSans
 TextBox.MultiLine = true
 TextBox.PlaceholderText = "Enter your text here..."
-TextBox.PlaceholderColor3 = Color3.fromRGB(160, 160, 180)
+TextBox.PlaceholderColor3 = Color3.fromRGB(150, 150, 180)
 TextBox.Text = ""
-TextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+TextBox.TextColor3 = Color3.fromRGB(230, 230, 240)
 TextBox.TextSize = 18
 TextBox.TextXAlignment = Enum.TextXAlignment.Left
 TextBox.TextYAlignment = Enum.TextYAlignment.Top
@@ -168,15 +168,15 @@ TextBox.TextWrapped = true
 
 ButtonsFrame.Name = "ButtonsFrame"
 ButtonsFrame.Parent = Container
-ButtonsFrame.BackgroundColor3 = Color3.fromRGB(34, 36, 50)
-ButtonsFrame.BackgroundTransparency = 0.2
+ButtonsFrame.BackgroundColor3 = Color3.fromRGB(30, 32, 48)
+ButtonsFrame.BackgroundTransparency = 0
 ButtonsFrame.BorderSizePixel = 0
 ButtonsFrame.Position = UDim2.new(0, 5, 1, -35)
-ButtonsFrame.Size = UDim2.new(1, -10, 0, 30)
+ButtonsFrame.Size = UDim2.new(1, -10, 0, 34)
 
 ClearButton.Name = "ClearButton"
 ClearButton.Parent = ButtonsFrame
-ClearButton.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
+ClearButton.BackgroundColor3 = Color3.fromRGB(255, 90, 90)
 ClearButton.BorderSizePixel = 0
 ClearButton.Position = UDim2.new(0, 5, 0, 2)
 ClearButton.Size = UDim2.new(0, 80, 0, 26)
@@ -187,7 +187,7 @@ ClearButton.TextSize = 16
 
 CopyButton.Name = "CopyButton"
 CopyButton.Parent = ButtonsFrame
-CopyButton.BackgroundColor3 = Color3.fromRGB(60, 180, 60)
+CopyButton.BackgroundColor3 = Color3.fromRGB(90, 220, 90)
 CopyButton.BorderSizePixel = 0
 CopyButton.Position = UDim2.new(0, 95, 0, 2)
 CopyButton.Size = UDim2.new(0, 80, 0, 26)
@@ -203,7 +203,7 @@ StatusLabel.Position = UDim2.new(0, 185, 0, 2)
 StatusLabel.Size = UDim2.new(1, -190, 0, 26)
 StatusLabel.Font = Enum.Font.Gotham
 StatusLabel.Text = ""
-StatusLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+StatusLabel.TextColor3 = Color3.fromRGB(180, 180, 220)
 StatusLabel.TextSize = 14
 
 CharCount.Name = "CharCount"
@@ -213,13 +213,13 @@ CharCount.Position = UDim2.new(0, 5, 1, -55)
 CharCount.Size = UDim2.new(1, -10, 0, 20)
 CharCount.Font = Enum.Font.Gotham
 CharCount.Text = "Characters: 0"
-CharCount.TextColor3 = Color3.fromRGB(200, 200, 200)
+CharCount.TextColor3 = Color3.fromRGB(170, 170, 190)
 CharCount.TextSize = 14
 CharCount.TextXAlignment = Enum.TextXAlignment.Right
 
 Topbar.Name = "Topbar"
 Topbar.Parent = Main
-Topbar.BackgroundColor3 = Color3.fromRGB(30, 32, 45)
+Topbar.BackgroundColor3 = Color3.fromRGB(26, 27, 38)
 Topbar.BorderSizePixel = 0
 Topbar.Size = UDim2.new(1, 0, 0, 30)
 
@@ -228,12 +228,12 @@ Icon.Parent = Topbar
 Icon.AnchorPoint = Vector2.new(0, 0.5)
 Icon.BackgroundTransparency = 1
 Icon.Position = UDim2.new(0, 10, 0.5, 0)
-Icon.Size = UDim2.new(0, 16, 0, 16)
+Icon.Size = UDim2.new(0, 18, 0, 18)
 Icon.Image = "rbxassetid://7733658504"
 
 Exit.Name = "Exit"
 Exit.Parent = Topbar
-Exit.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
+Exit.BackgroundColor3 = Color3.fromRGB(255, 70, 70)
 Exit.BorderSizePixel = 0
 Exit.Position = UDim2.new(1, -30, 0, 5)
 Exit.Size = UDim2.new(0, 20, 0, 20)
@@ -244,7 +244,7 @@ Exit.TextSize = 14
 
 Minimize.Name = "Minimize"
 Minimize.Parent = Topbar
-Minimize.BackgroundColor3 = Color3.fromRGB(80, 80, 255)
+Minimize.BackgroundColor3 = Color3.fromRGB(70, 70, 255)
 Minimize.BorderSizePixel = 0
 Minimize.Position = UDim2.new(1, -60, 0, 5)
 Minimize.Size = UDim2.new(0, 20, 0, 20)
@@ -265,10 +265,10 @@ Title.BackgroundTransparency = 1
 Title.Size = UDim2.new(1, 0, 1, 0)
 Title.Font = Enum.Font.GothamSemibold
 Title.Text = "Nameless Admin Notepad"
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.TextSize = 18
+Title.TextColor3 = Color3.fromRGB(240, 240, 255)
+Title.TextSize = 17
 
-UICorner_2.CornerRadius = UDim.new(0, 10)
+UICorner_2.CornerRadius = UDim.new(0, 12)
 UICorner_2.Parent = Main
 
 local isMinimized = false
@@ -335,13 +335,14 @@ ScrollingFrame:GetPropertyChangedSignal("AbsoluteSize"):Connect(updateTextBoxSiz
 Main:TweenPosition(UDim2.new(0.308, 0, 0.262, 0), "Out", "Quint", 1, true)
 
 for _, button in pairs({ClearButton, CopyButton}) do
-    button.MouseEnter:Connect(function()
-        game:GetService("TweenService"):Create(button, TweenInfo.new(0.3), {BackgroundTransparency = 0.2}):Play()
-    end)
-    
-    button.MouseLeave:Connect(function()
-        game:GetService("TweenService"):Create(button, TweenInfo.new(0.3), {BackgroundTransparency = 0}):Play()
-    end)
+	button.AutoButtonColor = false
+	local corner = Instance.new("UICorner", button)
+	corner.CornerRadius = UDim.new(0, 6)
+	
+	local shadow = Instance.new("UIStroke", button)
+	shadow.Color = Color3.fromRGB(0, 0, 0)
+	shadow.Thickness = 0.5
+	shadow.Transparency = 0.7
 end
 
 updateTextBoxSize()
