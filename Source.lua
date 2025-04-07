@@ -1435,7 +1435,7 @@ function mobilefly(speed, vfly)
 			bv.MaxForce = Vector3.new(9e9, 9e9, 9e9)
 			bg.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
 			if not vfly then
-				AntiSit()
+				humanoid.PlatformStand = true
 			end
 
 			bg.CFrame = camera.CFrame
@@ -1524,7 +1524,7 @@ function sFLY(vfly)
 		spawn(function()
 			while FLYING do
 				if not vfly then
-					AntiSit()
+					cmdlp.Character:FindFirstChildWhichIsA("Humanoid").PlatformStand = true
 				end
 
 				if CONTROL.L + CONTROL.R ~= 0 or CONTROL.F + CONTROL.B ~= 0 or CONTROL.Q + CONTROL.E ~= 0 then
@@ -1555,7 +1555,7 @@ function sFLY(vfly)
 			SPEED = 0
 			BG:Destroy()
 			BV:Destroy()
-			unAntiSit()
+			cmdlp.Character:FindFirstChildWhichIsA("Humanoid").PlatformStand = false
 		end)
 	end
 
@@ -3358,7 +3358,7 @@ function toggleVFly()
 		if IsOnMobile then
 			unmobilefly()
 		else
-			unAntiSit()
+			cmdlp.Character:FindFirstChildWhichIsA("Humanoid").PlatformStand = false
 			if goofyFLY then goofyFLY:Destroy() end
 		end
 		vFlyEnabled = false
@@ -3433,13 +3433,12 @@ cmd.add({"vfly", "vehiclefly"}, {"vehiclefly (vfly)", "be able to fly vehicles"}
 					btn.Text = "UnvFly"
 					btn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
 					mobilefly(vFlySpeed, true)
-					unAntiSit()
+					cmdlp.Character:FindFirstChildWhichIsA("Humanoid").PlatformStand = false
 				else
 					vOn = false
 					btn.Text = "vFly"
 					btn.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
 					unmobilefly()
-					unAntiSit()
 				end
 			end)
 		end)()
@@ -3447,6 +3446,7 @@ cmd.add({"vfly", "vehiclefly"}, {"vehiclefly (vfly)", "be able to fly vehicles"}
 		gui.draggable(btn)
 	else
 		FLYING = false
+		cmdlp.Character:FindFirstChildWhichIsA("Humanoid").PlatformStand = false
 		wait()
 
 		DoNotif("Vehicle fly enabled. Press '"..vToggleKey:upper().."' to toggle vehicle flying.")
@@ -6139,9 +6139,8 @@ function toggleFly()
 		FLYING = false
 		if IsOnMobile then
 			unmobilefly()
-			unAntiSit()
 		else
-			unAntiSit()
+			cmdlp.Character:FindFirstChildWhichIsA("Humanoid").PlatformStand = false
 			if goofyFLY then goofyFLY:Destroy() end
 		end
 		flyEnabled = false
@@ -6228,7 +6227,7 @@ cmd.add({"fly"}, {"fly [speed]", "Enable flight"}, function(...)
 		gui.draggable(btn)
 	else
 		FLYING = false
-		unAntiSit()
+		cmdlp.Character:FindFirstChildWhichIsA("Humanoid").PlatformStand = false
 		wait()
 
 		DoNotif("Fly enabled. Press '"..toggleKey:upper().."' to toggle flying.")
@@ -6243,11 +6242,10 @@ cmd.add({"unfly"}, {"unfly", "Disable flight"}, function()
 	if IsOnMobile then
 		DoNotif("Mobile Fly Disabled.")
 		unmobilefly()
-		unAntiSit()
 	else
 		DoNotif("Not flying anymore")
 		FLYING = false
-		unAntiSit()
+		cmdlp.Character:FindFirstChildWhichIsA("Humanoid").PlatformStand = false
 		if goofyFLY then goofyFLY:Destroy() end
 	end
 	mOn = false
@@ -6330,7 +6328,7 @@ cmd.add({"tfly", "tweenfly"}, {"tfly [speed] (tweenfly)", "Enables smooth flying
 
 	repeat
 		wait()
-		AntiSit()
+		Humanoid.PlatformStand = true
 		local newPosition = gyro.cframe - gyro.cframe.p + pos.position
 
 		if IsOnPC then
@@ -6362,7 +6360,7 @@ cmd.add({"tfly", "tweenfly"}, {"tfly [speed] (tweenfly)", "Enables smooth flying
 
 	if gyro then gyro:Destroy() end
 	if pos then pos:Destroy() end
-	unAntiSit()
+	Humanoid.PlatformStand = false
 end, true)
 
 cmd.add({"untfly", "untweenfly"}, {"untfly (untweenfly)", "Disables tween flying"}, function()
