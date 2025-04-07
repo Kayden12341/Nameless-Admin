@@ -2782,7 +2782,8 @@ cmd.add({"commands","cmds"},{"commands (cmds)","Open the command list"},function
 	gui.commands()
 end)
 
-local debugUI = nil
+debugUI = nil
+debugChar = nil
 
 cmd.add({"chardebug", "cdebug"}, {"chardebug (cdebug)", "debug your character"}, function()
     local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
@@ -2792,7 +2793,16 @@ cmd.add({"chardebug", "cdebug"}, {"chardebug (cdebug)", "debug your character"},
     
     if debugUI then
         debugUI:Destroy()
+	debugUI = nil
     end
+    if debugChar then
+        debugChar:Disconnect()
+	debugChar = nil
+    end
+    local debugChar = LocalPlayer.CharacterAdded:Connect(function(cc)
+	humanoid=cc:WaitForChild("Humanoid")
+	rootPart=cc:WaitForChild("HumanoidRootPart")
+    end)
     
     debugUI = Instance.new("ScreenGui")
     debugUI.Name = "DebugGui"
@@ -2927,6 +2937,10 @@ cmd.add({"unchardebug", "uncdebug"}, {"unchardebug (uncdebug)", "disable charact
     if debugUI then
         debugUI:Destroy()
         debugUI = nil
+    end
+    if debugChar then
+        debugChar:Disconnect()
+	debugChar = nil
     end
     RunService:UnbindFromRenderStep("UpdateDebugInfo")
 end)
