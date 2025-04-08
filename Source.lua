@@ -82,51 +82,19 @@ end
 
 function NaProtectUI(sGui)
 	local cGUI = SafeGetService("CoreGui")
-	local rPlr = SafeGetService("Players"):FindFirstChildWhichIsA("Player")
-	local cGUIProtect = {}
-	local rService = SafeGetService("RunService")
 	local lPlr = SafeGetService("Players").LocalPlayer
 
-	if (get_hidden_gui or gethui) then
-		local hiddenUI = (get_hidden_gui or gethui)
-		NAProtection(sGui)
-		sGui.Parent = hiddenUI()
-		return sGui
-	elseif (not is_sirhurt_closure) and (syn and syn.protect_gui) then
-		NAProtection(sGui)
-		syn.protect_gui(sGui)
-		sGui.Parent = cGUI
-		return sGui
-	elseif cGUI:FindFirstChildWhichIsA("ScreenGui") then
-		pcall(function()
-			for _, v in pairs(sGui:GetDescendants()) do
-				cGUIProtect[v] = rPlr.Name
-			end
-			sGui.DescendantAdded:Connect(function(v)
-				cGUIProtect[v] = rPlr.Name
-			end)
-			cGUIProtect[sGui] = rPlr.Name
+	if sGui:IsA("ScreenGui") then
+		sGui.ZIndexBehavior = Enum.ZIndexBehavior.Global
+		sGui.DisplayOrder = 999999999
+		sGui.ResetOnSpawn = false
+		sGui.IgnoreGuiInset = true
+	end
 
-			local meta = getrawmetatable(game)
-			local tostr = meta.__tostring
-			setreadonly(meta, false)
-			meta.__tostring = newcclosure(function(t)
-				if cGUIProtect[t] and not checkcaller() then
-					return cGUIProtect[t]
-				end
-				return tostr(t)
-			end)
-		end)
-		if not rService:IsStudio() then
-			local newGui = cGUI:FindFirstChildWhichIsA("ScreenGui")
-			newGui.DescendantAdded:Connect(function(v)
-				cGUIProtect[v] = rPlr.Name
-			end)
-			for _, v in pairs(sGui:GetChildren()) do
-				v.Parent = newGui
-			end
-			sGui = newGui
-		end
+	-- i honestly don't trust gethui that much
+	if cGUI and cGUI:FindFirstChild("RobloxGui") then
+		NAProtection(sGui)
+		sGui.Parent = cGUI:FindFirstChild("RobloxGui")
 		return sGui
 	elseif cGUI then
 		NAProtection(sGui)
@@ -2339,7 +2307,6 @@ cmd.add({"ping"}, {"ping", "Shows your ping"}, function()
 	local function createWindow(position, maxSize, minSize, defaultText)
 		local screenGui = InstanceNew("ScreenGui")
 		NaProtectUI(screenGui)
-		screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 		screenGui.ResetOnSpawn = false
 
 		local window = InstanceNew("TextLabel")
@@ -2466,7 +2433,6 @@ cmd.add({"fps"}, {"fps", "Shows your fps"}, function()
 	local function createWindow(position, maxSize, minSize, defaultText)
 		local screenGui = InstanceNew("ScreenGui")
 		NaProtectUI(screenGui)
-		screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 		screenGui.ResetOnSpawn = false
 
 		local window = InstanceNew("TextLabel")
@@ -2603,7 +2569,6 @@ cmd.add({"stats"}, {"stats", "Shows both FPS and ping"}, function()
 	local function createWindow(position, maxSize, minSize, defaultText)
 		local screenGui = InstanceNew("ScreenGui")
 		NaProtectUI(screenGui)
-		screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 		screenGui.ResetOnSpawn = false
 
 		local window = InstanceNew("TextLabel")
@@ -3371,7 +3336,6 @@ cmd.add({"vfly", "vehiclefly"}, {"vehiclefly (vfly)", "be able to fly vehicles"}
 		local corner3 = InstanceNew("UICorner")
 		local aspect = InstanceNew("UIAspectRatioConstraint")
 		NaProtectUI(vRAHH)
-		vRAHH.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 		vRAHH.ResetOnSpawn = false
 		btn.Parent = vRAHH
 		btn.BackgroundColor3 = Color3.fromRGB(30,30,30)
@@ -5662,7 +5626,6 @@ cmd.add({"functionspy"},{"functionspy","Check console"},function()
 	local UIStroke = InstanceNew("UIStroke")
 
 	NaProtectUI(FunctionSpy)
-	FunctionSpy.ZIndexBehavior=Enum.ZIndexBehavior.Sibling
 
 	Main.Parent=FunctionSpy
 	Main.BackgroundColor3=Color3.fromRGB(33,33,33)
@@ -6184,7 +6147,6 @@ cmd.add({"fly"}, {"fly [speed]", "Enable flight"}, function(...)
 		local corner3 = InstanceNew("UICorner")
 		local aspect = InstanceNew("UIAspectRatioConstraint")
 		NaProtectUI(mFlyBruh)
-		mFlyBruh.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 		mFlyBruh.ResetOnSpawn = false
 		btn.Parent = mFlyBruh
 		btn.BackgroundColor3 = Color3.fromRGB(30,30,30)
@@ -6695,7 +6657,6 @@ cmd.add({"freecam","fc","fcam"},{"freecam [speed] (fc,fcam)","Enable free camera
 		local aspect = InstanceNew("UIAspectRatioConstraint")
 
 		NaProtectUI(fcBTNTOGGLE)
-		fcBTNTOGGLE.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 		fcBTNTOGGLE.ResetOnSpawn = false
 
 		btn.Parent = fcBTNTOGGLE
@@ -9105,14 +9066,14 @@ cmd.add({"airwalk", "float", "aw"}, {"airwalk (float, aw)", "Press space to go u
 	end
 
 	if IsOnMobile then
-		local guiDown = InstanceNew("ScreenGui", COREGUI)
-		guiDown.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+		local guiDown = InstanceNew("ScreenGui")
+		NaProtectUI(guiDown)
 		guiDown.ResetOnSpawn = false
 		airwalk.guis.down = guiDown
 		createButton(guiDown, "DOWN", UDim2.new(0.9, 0, 0.7, 0), function() airwalk.Vars.decrease = true end, function() airwalk.Vars.decrease = false end)
 
-		local guiUp = InstanceNew("ScreenGui", COREGUI)
-		guiUp.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+		local guiUp = InstanceNew("ScreenGui")
+		NaProtectUI(guiUp)
 		guiUp.ResetOnSpawn = false
 		airwalk.guis.up = guiUp
 		createButton(guiUp, "UP", UDim2.new(0.9, 0, 0.5, 0), function() airwalk.Vars.increase = true end, function() airwalk.Vars.increase = false end)

@@ -4712,7 +4712,8 @@ cmd.add({"clicktp", "tptool"}, {"clicktp (tptool)", "Teleport where your mouse i
 
     local clickTpButton = InstanceNew("TextButton")
     clickTpButton.Size = UDim2.new(0, 130, 0, 40)
-    clickTpButton.Position = UDim2.new(0.5, -140, 0, 10)
+	clickTpButton.AnchorPoint = Vector2.new(0.5, 0)
+    clickTpButton.Position = UDim2.new(0.5, 0, 0, 10)
     clickTpButton.Text = "Enable Click TP"
     clickTpButton.TextColor3 = Color3.fromRGB(255, 255, 255)
     clickTpButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
@@ -4725,7 +4726,8 @@ cmd.add({"clicktp", "tptool"}, {"clicktp (tptool)", "Teleport where your mouse i
 
     local tweenTpButton = InstanceNew("TextButton")
     tweenTpButton.Size = UDim2.new(0, 130, 0, 40)
-    tweenTpButton.Position = UDim2.new(0.5, 10, 0, 10)
+	tweenTpButton.AnchorPoint = Vector2.new(0.5, 0)
+    tweenTpButton.Position = UDim2.new(0.5, 0, 0, 10)
     tweenTpButton.Text = "Enable Tween TP"
     tweenTpButton.TextColor3 = Color3.fromRGB(255, 255, 255)
     tweenTpButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
@@ -12357,7 +12359,7 @@ ImageButton.Parent = ScreenGui
 ImageButton.BackgroundTransparency = 1
 ImageButton.AnchorPoint = Vector2.new(0.5, 0)
 ImageButton.BorderSizePixel = 0
-ImageButton.Position = UDim2.new(0.5, 0, 0, 0)
+ImageButton.Position = UDim2.new(0.5, 0, -1, 0)
 ImageButton.Size = UDim2.new(0, 32 * NAScale, 0, 33 * NAScale)
 ImageButton.Image = "rbxassetid://77352376040674"
 ImageButton.ZIndex = 9999
@@ -12412,7 +12414,7 @@ function mainNameless()
 
 		local appearTween = TweenService:Create(ImageButton, TweenInfo.new(1, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
 			Size = UDim2.new(0, 32 * NAScale, 0, 33 * NAScale),
-			Position = UDim2.new(0.5, 0, 0, 0),
+			Position = UDim2.new(0.5, 0, 0.05, 0),
 			ImageTransparency = 0
 		})
 		appearTween:Play()
