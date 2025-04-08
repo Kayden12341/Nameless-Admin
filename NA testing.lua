@@ -3309,13 +3309,19 @@ end)
 
 --[ LOCALPLAYER ]--
 function respawn()
-	local characterFrame = getRoot(getChar()).CFrame
-	local character = getChar()
-	character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
-	character:FindFirstChildOfClass("Humanoid").Health=0
-	player.CharacterAdded:Wait()
+	local pos = getRoot(getChar()).CFrame
+	local old = getChar()
+	local hum = old:FindFirstChildOfClass("Humanoid")
+	hum:ChangeState(Enum.HumanoidStateType.Dead)
+	hum.Health = 0
+	local new = player.CharacterAdded:Wait()
 	wait(0.2)
-	getRoot(character).CFrame = characterFrame
+	local root = getRoot(new)
+	local st = tick()
+	while tick() - st < 1 do
+		root.CFrame = pos
+		wait(0.1)
+	end
 end
 
 cmd.add({"accountage","accage"},{"accountage <player> (accage)","Tells the account age of a player in the server"},function(...)
