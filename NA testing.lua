@@ -1938,7 +1938,7 @@ if IsOnMobile then
 			scaleFrame:Destroy()
 		end)
 
-		gui.draggable(frame)
+		gui.draggablev2(frame)
 	end)
 end
 
@@ -2071,7 +2071,7 @@ cmd.add({"clickfling","mousefling"}, {"clickfling (mousefling)", "Fling a player
 	uiCorner.CornerRadius = UDim.new(0, 8)
 	uiCorner.Parent = toggleButton
 
-	gui.draggable(toggleButton)
+	gui.draggablev2(toggleButton)
 
 	MouseButtonFix(toggleButton, function()
 		clickflingEnabled = not clickflingEnabled
@@ -2415,7 +2415,7 @@ cmd.add({"ping"}, {"ping", "Shows your ping"}, function()
 	end
 
 	local function setupDraggable(guiElements)
-		gui.draggable(guiElements.window)
+		gui.draggablev2(guiElements.window)
 	end
 	local guiElements = createWindow(UDim2.new(0, 0, 0, 48), UDim2.new(0, 201, 0, 35), UDim2.new(0, 201, 0, 20), "Ping: --")
 	setupMinimize(guiElements)
@@ -2541,7 +2541,7 @@ cmd.add({"fps"}, {"fps", "Shows your fps"}, function()
 	end
 
 	local function setupDraggable(guiElements)
-		gui.draggable(guiElements.window)
+		gui.draggablev2(guiElements.window)
 	end
 	local guiElements = createWindow(UDim2.new(0, 0, 0, 6), UDim2.new(0, 201, 0, 35), UDim2.new(0, 201, 0, 20), "FPS: --")
 	setupMinimize(guiElements)
@@ -2677,7 +2677,7 @@ cmd.add({"stats"}, {"stats", "Shows both FPS and ping"}, function()
 	end
 
 	local function setupDraggable(guiElements)
-		gui.draggable(guiElements.window)
+		gui.draggablev2(guiElements.window)
 	end
 	local guiElements = createWindow(UDim2.new(0, 0, 0, 48), UDim2.new(0, 250, 0, 50), UDim2.new(0, 250, 0, 20), "Ping: -- ms | FPS: --")
 	setupMinimize(guiElements)
@@ -2794,7 +2794,7 @@ cmd.add({"chardebug", "cdebug"}, {"chardebug (cdebug)", "debug your character"},
 	minimizeButton.Font = Enum.Font.Code
 	minimizeButton.Parent = header
 
-	gui.draggable(container)
+	gui.draggablev2(container)
 
 	local labelsInfo = {
 		{name = "VelocityLabel", text = "Velocity\nX: 0.00\nY: 0.00\nZ: 0.00"},
@@ -3424,8 +3424,8 @@ cmd.add({"vfly", "vehiclefly"}, {"vehiclefly (vfly)", "be able to fly vehicles"}
 				end
 			end)
 		end)()
-		gui.draggable(btn)
-		gui.draggable(speedBox)
+		gui.draggablev2(btn)
+		gui.draggablev2(speedBox)
 	else
 		FLYING = false
 		getHum().PlatformStand = false
@@ -4797,8 +4797,8 @@ cmd.add({"clicktp", "tptool"}, {"clicktp (tptool)", "Teleport where your mouse i
         end
     end)
 
-    gui.draggable(clickTpButton)
-    gui.draggable(tweenTpButton)
+    gui.draggablev2(clickTpButton)
+    gui.draggablev2(tweenTpButton)
 end)
 
 cmd.add({"unclicktp", "untptool"}, {"unclicktp (untptool)", "Remove teleport buttons"}, function()
@@ -5812,7 +5812,7 @@ cmd.add({"functionspy"},{"functionspy","Check console"},function()
 	addHoverEffect(clear_2)
 	addHoverEffect(copy)
 
-	gui.draggable(Main,Title)
+	gui.draggablev2(Main,Title)
 
 	local shadow = InstanceNew("ImageLabel")
 	shadow.Parent = Main
@@ -6234,8 +6234,8 @@ cmd.add({"fly"}, {"fly [speed]", "Enable flight"}, function(...)
 				end
 			end)
 		end)()
-		gui.draggable(btn)
-		gui.draggable(speedBox)
+		gui.draggablev2(btn)
+		gui.draggablev2(speedBox)
 	else
 		FLYING = false
 		getHum().PlatformStand = false
@@ -6763,8 +6763,8 @@ cmd.add({"freecam","fc","fcam"},{"freecam [speed] (fc,fcam)","Enable free camera
 			end)
 		end)()
 
-		gui.draggable(btn)
-		gui.draggable(speedBox)
+		gui.draggablev2(btn)
+		gui.draggablev2(speedBox)
 	else
 		DoNotif("Freecam is activated, use WASD to move around", 2)
 		runFREECAM()
@@ -7661,7 +7661,7 @@ function createSpecUI()
 		corner.CornerRadius = UDim.new(0, 20)
 		corner.Parent = frame
 
-		gui.draggable(frame)
+		gui.draggablev2(frame)
 
 		local backButton = InstanceNew("TextButton")
 		backButton.Size = UDim2.new(0, 40, 0, 40)
@@ -9079,7 +9079,7 @@ cmd.add({"airwalk", "float", "aw"}, {"airwalk (float, aw)", "Press space to go u
 		button.MouseLeave:Connect(function() hoverEffect(false) end)
 		button.MouseButton1Down:Connect(callbackDown)
 		button.MouseButton1Up:Connect(callbackUp)
-		gui.draggable(button)
+		gui.draggablev2(button)
 
 		return button
 	end
@@ -10999,7 +10999,7 @@ cmd.add({"invisible", "invis"}, {"invisible (invis)", "Sets invisibility to scar
 		UIAspectRatioConstraint.Parent = TextButton
 		UIAspectRatioConstraint.AspectRatio = 1.0
 
-		gui.draggable(TextButton)
+		gui.draggablev2(TextButton)
 
 		MouseButtonFix(TextButton,function()
 			ToggleInvisibility()
@@ -11389,7 +11389,6 @@ repeat wait() until ScreenGui~=nil -- if it loads late then I'll just add this h
 
 NaProtectUI(ScreenGui)
 
-if ScreenGui then ScreenGui.DisplayOrder=999999999 ScreenGui.ResetOnSpawn=false end
 local description=ScreenGui:FindFirstChild("Description");
 local cmdBar=ScreenGui:FindFirstChild("CmdBar");
 local centerBar=cmdBar:FindFirstChild("CenterBar");
@@ -11710,21 +11709,19 @@ gui.draggablev2 = function(ui, dragui)
         local delta = input.Position - dragStart
         local parentSize = screenGui.AbsoluteSize
         local uiSize = ui.AbsoluteSize
-
-        local newXOffset = startPos.X.Offset + delta.X
-        local newYOffset = startPos.Y.Offset + delta.Y
-
-        local newXScale = startPos.X.Scale + (newXOffset / parentSize.X)
-        local newYScale = startPos.Y.Scale + (newYOffset / parentSize.Y)
-
-        local minX = 0
-        local minY = 0
-        local maxX = 1 - (uiSize.X / parentSize.X)
-        local maxY = 1 - (uiSize.Y / parentSize.Y)
-
+        
+        local newXScale = startPos.X.Scale + (delta.X / parentSize.X)
+        local newYScale = startPos.Y.Scale + (delta.Y / parentSize.Y)
+        
+        local anchor = ui.AnchorPoint
+        local minX = anchor.X * (uiSize.X / parentSize.X)
+        local maxX = 1 - (1 - anchor.X) * (uiSize.X / parentSize.X)
+        local minY = anchor.Y * (uiSize.Y / parentSize.Y)
+        local maxY = 1 - (1 - anchor.Y) * (uiSize.Y / parentSize.Y)
+        
         newXScale = math.clamp(newXScale, minX, maxX)
         newYScale = math.clamp(newYScale, minY, maxY)
-
+        
         ui.Position = UDim2.new(newXScale, 0, newYScale, 0)
     end
 
@@ -11759,10 +11756,11 @@ gui.draggablev2 = function(ui, dragui)
         local uiSize = ui.AbsoluteSize
         local currentPos = ui.Position
 
-        local minX = 0
-        local minY = 0
-        local maxX = 1 - (uiSize.X / parentSize.X)
-        local maxY = 1 - (uiSize.Y / parentSize.Y)
+        local anchor = ui.AnchorPoint
+        local minX = anchor.X * (uiSize.X / parentSize.X)
+        local maxX = 1 - (1 - anchor.X) * (uiSize.X / parentSize.X)
+        local minY = anchor.Y * (uiSize.Y / parentSize.Y)
+        local maxY = 1 - (1 - anchor.Y) * (uiSize.Y / parentSize.Y)
 
         local newXScale = math.clamp(currentPos.X.Scale, minX, maxX)
         local newYScale = math.clamp(currentPos.Y.Scale, minY, maxY)
@@ -12356,10 +12354,10 @@ TextLabel.TextWrapped = true
 TextLabel.ZIndex = 9999
 
 ImageButton.Parent = ScreenGui
-ImageButton.AnchorPoint = Vector2.new(0.5, 0)
 ImageButton.BackgroundTransparency = 1
+ImageButton.AnchorPoint = Vector2.new(0.5, 0)
 ImageButton.BorderSizePixel = 0
-ImageButton.Position = UDim2.new(0.5, 0, -0.2, 0)
+ImageButton.Position = UDim2.new(0.5, 0, 0, 0)
 ImageButton.Size = UDim2.new(0, 32 * NAScale, 0, 33 * NAScale)
 ImageButton.Image = "rbxassetid://77352376040674"
 ImageButton.ZIndex = 9999
@@ -12381,7 +12379,7 @@ UIGradient.Color = ColorSequence.new{
 function Swoosh()
 	local targetRotation = isAprilFools() and math.random(1, 1000) or 720
 	TweenService:Create(ImageButton, TweenInfo.new(1.2, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Rotation = targetRotation}):Play()
-	gui.draggable(ImageButton)
+	gui.draggablev2(ImageButton)
 end
 
 function mainNameless()
