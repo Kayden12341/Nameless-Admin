@@ -30,6 +30,7 @@ NACaller(function() getgenv().RealNamelessLoaded=true end)
 NACaller(function() getgenv().NATestingVer=true end)
 
 NAbegin=tick()
+CMDAUTOFILL = {}
 
 local Lower = string.lower;
 local Split = string.split;
@@ -11869,33 +11870,39 @@ gui.menuifyv2 = function(menu)
 	menu.Visible = false
 end
 
-gui.loadCommands=function()
-	for i,v in pairs(cmdAutofill:GetChildren()) do
-		if v.Name~="UIListLayout" then
-			v:Remove()
-		end
-	end
-	local last=nil
-	local i=0
-	for name,tbl in pairs(Commands) do
-		local info=tbl[2]
-		local btn=cmdExample:Clone()
-		btn.Parent=cmdAutofill
-		btn.Name=name
-		btn.Input.Text=info[1]
-		i=i+1
+gui.loadCommands = function()
+    for i, v in pairs(cmdAutofill:GetChildren()) do
+        if v.Name ~= "UIListLayout" then
+            v:Remove()
+        end
+    end
 
-		local size=btn.Size
-		btn.Size=UDim2.new(0,0,0,25)
-		btn.Size=size
-	end
+    CMDAUTOFILL = {}
+
+    local last = nil
+    local i = 0
+    for name, tbl in pairs(Commands) do
+        local info = tbl[2]
+        local btn = cmdExample:Clone()
+        btn.Parent = cmdAutofill
+        btn.Name = name
+        btn.Input.Text = info[1]
+        i = i + 1
+
+        local size = btn.Size
+        btn.Size = UDim2.new(0, 0, 0, 25)
+        btn.Size = size
+        
+        table.insert(CMDAUTOFILL, btn)
+    end
 end
 
 gui.loadCommands()
-for i,v in ipairs(cmdAutofill:GetChildren()) do
-	if v:IsA("Frame") then
-		v.Visible=false
-	end
+
+for i, v in ipairs(CMDAUTOFILL) do
+    if v:IsA("Frame") then
+        v.Visible = false
+    end
 end
 
 gui.barSelect = function(speed)
@@ -11930,144 +11937,144 @@ gui.barDeselect = function(speed)
 end
 
 --[[ AUTOFILL SEARCHER ]]--
+searchedSEARCH=false
 gui.searchCommands = function()
-	local searchTerm = cmdInput.Text:gsub(";", ""):lower()
-	local index = 0
-	local lastFramePos
-	local results = {}
+    local searchTerm = cmdInput.Text:gsub(";", ""):lower()
 
-	for _, frame in ipairs(cmdAutofill:GetChildren()) do
-		if frame:IsA("Frame") then
-			local cmdName = frame.Name:lower()
-			local command = Commands[cmdName]
-
-			if not command then continue end
-
-			local displayName = command[2][1] or ""
-			local score = 999
-			local matchText = displayName
-
-			if cmdName == searchTerm then
-				score = 1
-				matchText = cmdName
-			elseif displayName:lower() == searchTerm then
-				score = 1
-				matchText = displayName
-			elseif Aliases[searchTerm] and Aliases[searchTerm] == cmdName then
-				score = 1
-				matchText = searchTerm
-			end
-
-			if score == 999 and cmdName:sub(1, #searchTerm) == searchTerm then
-				score = 2
-				matchText = cmdName
-			elseif score == 999 and displayName:lower():sub(1, #searchTerm) == searchTerm then
-				score = 3
-				matchText = displayName
-			end
-
-			if score == 999 then
-				for alias, cmd in pairs(Aliases) do
-					if cmd == cmdName and alias:sub(1, #searchTerm) == searchTerm then
-						score = 3
-						matchText = alias
-						break
-					end
-				end
-			end
-
-			if score == 999 and #searchTerm >= 2 then
-				if cmdName:find(searchTerm, 1, true) then
-					score = 4
-					matchText = cmdName
-				elseif displayName:lower():find(searchTerm, 1, true) then
-					score = 5
-					matchText = displayName
-				else
-					for alias, cmd in pairs(Aliases) do
-						if cmd == cmdName and alias:find(searchTerm, 1, true) then
-							score = 5
-							matchText = alias
-							break
-						end
-					end
-				end
-			end
-
-			if score == 999 and #searchTerm >= 2 then
-				local cmdDistance = levenshtein(searchTerm, cmdName)
-				local displayDistance = levenshtein(searchTerm, displayName:lower())
-
-				local bestAlias, bestAliasDistance = "", math.huge
-				for alias, cmd in pairs(Aliases) do
-					if cmd == cmdName then
-						local aliasDistance = levenshtein(searchTerm, alias)
-						if aliasDistance < bestAliasDistance then
-							bestAliasDistance = aliasDistance
-							bestAlias = alias
-						end
-					end
-				end
-
-				if cmdDistance <= math.min(2, #searchTerm - 1) then
-					score = 6 + cmdDistance
-					matchText = cmdName
-				elseif bestAliasDistance <= math.min(2, #searchTerm - 1) then
-					score = 6 + bestAliasDistance
-					matchText = bestAlias
-				elseif displayDistance <= math.min(2, #searchTerm - 1) then
-					score = 9 + displayDistance
-					matchText = displayName
-				end
-			end
-
-			if score < 999 then
-				Insert(results, {
-					frame = frame,
-					score = score,
-					text = matchText,
-					name = cmdName
-				})
-			end
+    if searchTerm:find("%s") then
+		if not searchedSEARCH then
+        	for _, frame in ipairs(CMDAUTOFILL) do
+            	frame.Visible = false
+        	end
+			searchedSEARCH=true
 		end
-	end
+        return
+    end
 
-	table.sort(results, function(a, b)
-		if a.score == b.score then
-			return a.name < b.name
-		end
-		return a.score < b.score
-	end)
+    local index = 0
+    local lastFramePos
+    local results = {}
+    local searchTermLength = #searchTerm
+	searchedSEARCH=false
 
-	for _, frame in ipairs(cmdAutofill:GetChildren()) do
-		if frame:IsA("Frame") then
-			frame.Visible = false
-		end
-	end
+    for _, frame in ipairs(CMDAUTOFILL) do
+        local cmdName = frame.Name:lower()
+        local command = Commands[cmdName]
+        if not command then continue end
 
-	for i, result in ipairs(results) do
-		if i <= 5 then
-			local frame = result.frame
-			if result.text and result.text ~= "" then
-				frame.Input.Text = result.text
-				frame.Visible = true
+        local displayName = command[2][1] or ""
+        local score = 999
+        local matchText = displayName
 
-				local newSize = UDim2.new(0.5, math.sqrt(i) * 125, 0, 25)
-				local newYPos = (i - 1) * 28
-				local newPosition = UDim2.new(0.5, 0, 0, newYPos)
+        if cmdName == searchTerm or displayName:lower() == searchTerm or 
+           (Aliases[searchTerm] and Aliases[searchTerm] == cmdName) then
+            score = 1
+            matchText = cmdName
+        elseif cmdName:sub(1, searchTermLength) == searchTerm then
+            score = 2
+            matchText = cmdName
+        elseif displayName:lower():sub(1, searchTermLength) == searchTerm then
+            score = 3
+            matchText = displayName
+        else
+            for alias, cmd in pairs(Aliases) do
+                if cmd == cmdName and alias:sub(1, searchTermLength) == searchTerm then
+                    score = 3
+                    matchText = alias
+                    break
+                end
+            end
+        end
 
-				gui.tween(frame, "Quint", "Out", 0.3, {
-					Size = newSize,
-					Position = lastFramePos and newPosition or UDim2.new(0.5, 0, 0, newYPos),
-				})
+        if score == 999 and searchTermLength >= 2 then
+            if cmdName:find(searchTerm, 1, true) then
+                score = 4
+                matchText = cmdName
+            elseif displayName:lower():find(searchTerm, 1, true) then
+                score = 5
+                matchText = displayName
+            else
+                for alias, cmd in pairs(Aliases) do
+                    if cmd == cmdName and alias:find(searchTerm, 1, true) then
+                        score = 5
+                        matchText = alias
+                        break
+                    end
+                end
+            end
+        end
 
-				lastFramePos = newPosition
-				index = i
-			else
-				frame.Visible = false
-			end
-		end
-	end
+        if score == 999 and searchTermLength >= 2 then
+            local cmdDistance = levenshtein(searchTerm, cmdName)
+            local displayDistance = levenshtein(searchTerm, displayName:lower())
+
+            local bestAlias, bestAliasDistance = "", math.huge
+            for alias, cmd in pairs(Aliases) do
+                if cmd == cmdName then
+                    local aliasDistance = levenshtein(searchTerm, alias)
+                    if aliasDistance < bestAliasDistance then
+                        bestAliasDistance = aliasDistance
+                        bestAlias = alias
+                    end
+                end
+            end
+
+            local allowedDistance = math.min(2, searchTermLength - 1)
+            if cmdDistance <= allowedDistance then
+                score = 6 + cmdDistance
+                matchText = cmdName
+            elseif bestAliasDistance <= allowedDistance then
+                score = 6 + bestAliasDistance
+                matchText = bestAlias
+            elseif displayDistance <= allowedDistance then
+                score = 9 + displayDistance
+                matchText = displayName
+            end
+        end
+
+        if score < 999 then
+            table.insert(results, {
+                frame = frame,
+                score = score,
+                text = matchText,
+                name = cmdName
+            })
+        end
+    end
+
+    table.sort(results, function(a, b)
+        if a.score == b.score then
+            return a.name < b.name
+        end
+        return a.score < b.score
+    end)
+
+    for _, frame in ipairs(CMDAUTOFILL) do
+        frame.Visible = false
+    end
+
+    for i, result in ipairs(results) do
+        if i <= 5 then
+            local frame = result.frame
+            if result.text and result.text ~= "" then
+                frame.Input.Text = result.text
+                frame.Visible = true
+
+                local newSize = UDim2.new(0.5, math.sqrt(i) * 125, 0, 25)
+                local newYPos = (i - 1) * 28
+                local newPosition = UDim2.new(0.5, 0, 0, newYPos)
+
+                gui.tween(frame, "Quint", "Out", 0.3, {
+                    Size = newSize,
+                    Position = lastFramePos and newPosition or UDim2.new(0.5, 0, 0, newYPos)
+                })
+
+                lastFramePos = newPosition
+            else
+                frame.Visible = false
+            end
+        end
+    end
 end
 
 --[[ OPEN THE COMMAND BAR ]]--
@@ -12091,7 +12098,7 @@ cmdInput.FocusLost:Connect(function(enterPressed)
 end)
 
 cmdInput:GetPropertyChangedSignal("Text"):Connect(function()
-	gui.searchCommands()
+    gui.searchCommands()
 end)
 
 gui.barDeselect(0)
