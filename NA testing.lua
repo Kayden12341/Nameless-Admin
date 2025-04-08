@@ -6229,13 +6229,18 @@ cmd.add({"fly"}, {"fly [speed]", "Enable flight"}, function(...)
 		local corner3 = Instance.new("UICorner")
 		local aspect = Instance.new("UIAspectRatioConstraint")
 		NaProtectUI(mFlyBruh)
+		local container = Instance.new("Frame")
+		container.Parent = mFlyBruh
+		container.Position = UDim2.new(0.9, 0, 0.5, 0)
+		container.Size = UDim2.new(0.2, 0, 0.1, 0)
+		container.BackgroundTransparency = 1
 		mFlyBruh.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 		mFlyBruh.ResetOnSpawn = false
-		btn.Parent = mFlyBruh
+		btn.Parent = container
 		btn.BackgroundColor3 = Color3.fromRGB(30,30,30)
 		btn.BackgroundTransparency = 0.1
-		btn.Position = UDim2.new(0.9,0,0.5,0)
-		btn.Size = UDim2.new(0.08,0,0.1,0)
+		btn.Position = UDim2.new(0, 0, 0, 0)
+		btn.Size = UDim2.new(0.5, 0, 1, 0)
 		btn.Font = Enum.Font.GothamBold
 		btn.Text = "Fly"
 		btn.TextColor3 = Color3.fromRGB(255,255,255)
@@ -6247,11 +6252,11 @@ cmd.add({"fly"}, {"fly [speed]", "Enable flight"}, function(...)
 		corner.Parent = btn
 		aspect.Parent = btn
 		aspect.AspectRatio = 1.0
-		speedBox.Parent = btn
+		speedBox.Parent = container
 		speedBox.BackgroundColor3 = Color3.fromRGB(30,30,30)
 		speedBox.BackgroundTransparency = 0.1
-		speedBox.Position = UDim2.new(0,0,0.9,0)
-		speedBox.Size = UDim2.new(1,0,0.5,0)
+		speedBox.Position = UDim2.new(0.55, 0, 0, 0)
+		speedBox.Size = UDim2.new(0.45, 0, 1, 0)
 		speedBox.Font = Enum.Font.GothamBold
 		speedBox.Text = tostring(flySpeed)
 		speedBox.TextColor3 = Color3.fromRGB(255,255,255)
