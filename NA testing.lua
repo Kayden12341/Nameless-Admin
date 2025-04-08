@@ -6299,6 +6299,7 @@ cmd.add({"fly"}, {"fly [speed]", "Enable flight"}, function(...)
 			end)
 		end)()
 		gui.draggable(btn)
+		gui.draggablev2(speedBox)
 	else
 		FLYING = false
 		getHum().PlatformStand = false
