@@ -4694,7 +4694,7 @@ cmd.add({"clicktp", "tptool"}, {"clicktp (tptool)", "Teleport where your mouse i
     local clickTpButton = InstanceNew("TextButton")
     clickTpButton.Size = UDim2.new(0, 130, 0, 40)
 	clickTpButton.AnchorPoint = Vector2.new(0.5, 0)
-    clickTpButton.Position = UDim2.new(0.5, 0, 0, 10)
+    clickTpButton.Position = UDim2.new(0.45, 0, 0.05, 0)
     clickTpButton.Text = "Enable Click TP"
     clickTpButton.TextColor3 = Color3.fromRGB(255, 255, 255)
     clickTpButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
@@ -4708,7 +4708,7 @@ cmd.add({"clicktp", "tptool"}, {"clicktp (tptool)", "Teleport where your mouse i
     local tweenTpButton = InstanceNew("TextButton")
     tweenTpButton.Size = UDim2.new(0, 130, 0, 40)
 	tweenTpButton.AnchorPoint = Vector2.new(0.5, 0)
-    tweenTpButton.Position = UDim2.new(0.5, 0, 0, 10)
+    tweenTpButton.Position = UDim2.new(0.55, 0, 0.05, 0)
     tweenTpButton.Text = "Enable Tween TP"
     tweenTpButton.TextColor3 = Color3.fromRGB(255, 255, 255)
     tweenTpButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
