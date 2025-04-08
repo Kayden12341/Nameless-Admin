@@ -3,6 +3,12 @@ local RunService = game:GetService("RunService")
 local TextService = game:GetService("TextService")
 local UserInputService = game:GetService("UserInputService")
 
+local cloneref = cloneref or blankfunction
+
+local function SafeGetService(service)
+    return cloneref(game:GetService(service)) or game:GetService(service)
+end
+
 local PADDING = 10
 local TWEEN_TIME = 0.8
 local TWEEN_STYLE = Enum.EasingStyle.Quint
@@ -22,7 +28,7 @@ local NOTIFICATION_COLORS = {
 }
 
 local Player = game:GetService("Players").LocalPlayer
-local search = RunService:IsStudio() and Player.PlayerGui or (game:GetService("CoreGui") or game:GetService("Players").LocalPlayer:FindFirstChildWhichIsA("PlayerGui"))
+local search = RunService:IsStudio() and Player.PlayerGui or (SafeGetService("CoreGui"):FindFirstChild("RobloxGui") or SafeGetService("CoreGui") or SafeGetService("Players").LocalPlayer:FindFirstChildWhichIsA("PlayerGui"))
 local NotifGui, Container
 
 if search:FindFirstChild("EnhancedNotif") and _G.EnhancedNotifs then
@@ -30,9 +36,11 @@ if search:FindFirstChild("EnhancedNotif") and _G.EnhancedNotifs then
 else
 	NotifGui = Instance.new("ScreenGui")
 	NotifGui.Name = "EnhancedNotif"
-	NotifGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 	NotifGui.Parent = search
-	NotifGui.DisplayOrder = 9999
+	NotifGui.ZIndexBehavior = Enum.ZIndexBehavior.Global
+	NotifGui.DisplayOrder = 999999999
+	NotifGui.ResetOnSpawn = false
+	NotifGui.IgnoreGuiInset = true
 	
 	Container = Instance.new("Frame")
 	Container.Name = "Container"
@@ -419,7 +427,7 @@ _G.EnhancedNotifs = {
 		if ButtonCount == 0 then
             local accent = NewNotif:FindFirstChild("AccentBar")
 	        if accent then
-		        TweenService:Create(accent, TweenInfo.new(Duration, Enum.EasingStyle.Linear, Enum.EasingDirection.Out), {Size = UDim2.new(0, 0, 0, 4)}):Play()
+		        TweenService:Create(accent, TweenInfo.new(Duration, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {Size = UDim2.new(0, 0, 0, 4)}):Play()
 	        end
 			FadeOutAfter(NewNotif, Duration)
 		end
