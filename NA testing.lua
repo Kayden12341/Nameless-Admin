@@ -11412,7 +11412,7 @@ repeat wait() until ScreenGui~=nil -- if it loads late then I'll just add this h
 
 NaProtectUI(ScreenGui)
 
-if ScreenGui then ScreenGui.DisplayOrder=9999 ScreenGui.ResetOnSpawn=false end
+if ScreenGui then ScreenGui.DisplayOrder=999999999 ScreenGui.ResetOnSpawn=false end
 local description=ScreenGui:FindFirstChild("Description");
 local cmdBar=ScreenGui:FindFirstChild("CmdBar");
 local centerBar=cmdBar:FindFirstChild("CenterBar");
