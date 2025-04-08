@@ -101,51 +101,19 @@ end
 
 function NaProtectUI(sGui)
 	local cGUI = SafeGetService("CoreGui")
-	local rPlr = SafeGetService("Players"):FindFirstChildWhichIsA("Player")
-	local cGUIProtect = {}
-	local rService = SafeGetService("RunService")
 	local lPlr = SafeGetService("Players").LocalPlayer
 
-	if (get_hidden_gui or gethui) then
-		local hiddenUI = (get_hidden_gui or gethui)
-		NAProtection(sGui)
-		sGui.Parent = hiddenUI()
-		return sGui
-	elseif (not is_sirhurt_closure) and (syn and syn.protect_gui) then
-		NAProtection(sGui)
-		syn.protect_gui(sGui)
-		sGui.Parent = cGUI
-		return sGui
-	elseif cGUI:FindFirstChildWhichIsA("ScreenGui") then
-		pcall(function()
-			for _, v in pairs(sGui:GetDescendants()) do
-				cGUIProtect[v] = rPlr.Name
-			end
-			sGui.DescendantAdded:Connect(function(v)
-				cGUIProtect[v] = rPlr.Name
-			end)
-			cGUIProtect[sGui] = rPlr.Name
+	if sGui:IsA("ScreenGui") then
+		sGui.ZIndexBehavior = Enum.ZIndexBehavior.Global
+		sGui.DisplayOrder = 999999999
+		sGui.ResetOnSpawn = false
+		sGui.IgnoreGuiInset = true
+	end
 
-			local meta = getrawmetatable(game)
-			local tostr = meta.__tostring
-			setreadonly(meta, false)
-			meta.__tostring = newcclosure(function(t)
-				if cGUIProtect[t] and not checkcaller() then
-					return cGUIProtect[t]
-				end
-				return tostr(t)
-			end)
-		end)
-		if not rService:IsStudio() then
-			local newGui = cGUI:FindFirstChildWhichIsA("ScreenGui")
-			newGui.DescendantAdded:Connect(function(v)
-				cGUIProtect[v] = rPlr.Name
-			end)
-			for _, v in pairs(sGui:GetChildren()) do
-				v.Parent = newGui
-			end
-			sGui = newGui
-		end
+	-- i honestly don't trust gethui that much
+	if cGUI and cGUI:FindFirstChild("RobloxGui") then
+		NAProtection(sGui)
+		sGui.Parent = cGUI:FindFirstChild("RobloxGui")
 		return sGui
 	elseif cGUI then
 		NAProtection(sGui)
@@ -2358,7 +2326,6 @@ cmd.add({"ping"}, {"ping", "Shows your ping"}, function()
 	local function createWindow(position, maxSize, minSize, defaultText)
 		local screenGui = InstanceNew("ScreenGui")
 		NaProtectUI(screenGui)
-		screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 		screenGui.ResetOnSpawn = false
 
 		local window = InstanceNew("TextLabel")
@@ -2485,7 +2452,6 @@ cmd.add({"fps"}, {"fps", "Shows your fps"}, function()
 	local function createWindow(position, maxSize, minSize, defaultText)
 		local screenGui = InstanceNew("ScreenGui")
 		NaProtectUI(screenGui)
-		screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 		screenGui.ResetOnSpawn = false
 
 		local window = InstanceNew("TextLabel")
@@ -2622,7 +2588,6 @@ cmd.add({"stats"}, {"stats", "Shows both FPS and ping"}, function()
 	local function createWindow(position, maxSize, minSize, defaultText)
 		local screenGui = InstanceNew("ScreenGui")
 		NaProtectUI(screenGui)
-		screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 		screenGui.ResetOnSpawn = false
 
 		local window = InstanceNew("TextLabel")
@@ -3390,7 +3355,6 @@ cmd.add({"vfly", "vehiclefly"}, {"vehiclefly (vfly)", "be able to fly vehicles"}
 		local corner3 = InstanceNew("UICorner")
 		local aspect = InstanceNew("UIAspectRatioConstraint")
 		NaProtectUI(vRAHH)
-		vRAHH.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 		vRAHH.ResetOnSpawn = false
 		btn.Parent = vRAHH
 		btn.BackgroundColor3 = Color3.fromRGB(30,30,30)
@@ -5681,7 +5645,6 @@ cmd.add({"functionspy"},{"functionspy","Check console"},function()
 	local UIStroke = InstanceNew("UIStroke")
 
 	NaProtectUI(FunctionSpy)
-	FunctionSpy.ZIndexBehavior=Enum.ZIndexBehavior.Sibling
 
 	Main.Parent=FunctionSpy
 	Main.BackgroundColor3=Color3.fromRGB(33,33,33)
@@ -6203,7 +6166,6 @@ cmd.add({"fly"}, {"fly [speed]", "Enable flight"}, function(...)
 		local corner3 = InstanceNew("UICorner")
 		local aspect = InstanceNew("UIAspectRatioConstraint")
 		NaProtectUI(mFlyBruh)
-		mFlyBruh.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 		mFlyBruh.ResetOnSpawn = false
 		btn.Parent = mFlyBruh
 		btn.BackgroundColor3 = Color3.fromRGB(30,30,30)
@@ -6714,7 +6676,6 @@ cmd.add({"freecam","fc","fcam"},{"freecam [speed] (fc,fcam)","Enable free camera
 		local aspect = InstanceNew("UIAspectRatioConstraint")
 
 		NaProtectUI(fcBTNTOGGLE)
-		fcBTNTOGGLE.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 		fcBTNTOGGLE.ResetOnSpawn = false
 
 		btn.Parent = fcBTNTOGGLE
@@ -9124,14 +9085,14 @@ cmd.add({"airwalk", "float", "aw"}, {"airwalk (float, aw)", "Press space to go u
 	end
 
 	if IsOnMobile then
-		local guiDown = InstanceNew("ScreenGui", COREGUI)
-		guiDown.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+		local guiDown = InstanceNew("ScreenGui")
+		NaProtectUI(guiDown)
 		guiDown.ResetOnSpawn = false
 		airwalk.guis.down = guiDown
 		createButton(guiDown, "DOWN", UDim2.new(0.9, 0, 0.7, 0), function() airwalk.Vars.decrease = true end, function() airwalk.Vars.decrease = false end)
 
-		local guiUp = InstanceNew("ScreenGui", COREGUI)
-		guiUp.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+		local guiUp = InstanceNew("ScreenGui")
+		NaProtectUI(guiUp)
 		guiUp.ResetOnSpawn = false
 		airwalk.guis.up = guiUp
 		createButton(guiUp, "UP", UDim2.new(0.9, 0, 0.5, 0), function() airwalk.Vars.increase = true end, function() airwalk.Vars.increase = false end)
@@ -11732,83 +11693,88 @@ gui.draggable=function(ui, dragui)
 	ui.Active = true
 end
 
-gui.draggablev2=function(ui, dragui)
-	if not dragui then dragui = ui end
-	local UserInputService = game:GetService("UserInputService")
+gui.draggablev2 = function(ui, dragui)
+    if not dragui then 
+        dragui = ui 
+    end
+    local UserInputService = game:GetService("UserInputService")
 
-	local dragging
-	local dragInput
-	local dragStart
-	local startPos
+    local screenGui = ui:FindFirstAncestorWhichIsA("ScreenGui") or ui.Parent
 
-	local function update(input)
-		local delta = input.Position - dragStart
-		local parentSize = ui.Parent.AbsoluteSize
-		local uiSize = ui.AbsoluteSize
+    local dragging
+    local dragInput
+    local dragStart
+    local startPos
 
-		local newXOffset = startPos.X.Offset + delta.X
-		local newYOffset = startPos.Y.Offset + delta.Y
+    local function update(input)
+        local delta = input.Position - dragStart
+        local parentSize = screenGui.AbsoluteSize
+        local uiSize = ui.AbsoluteSize
 
-		local newXScale = startPos.X.Scale + (newXOffset / parentSize.X)
-		local newYScale = startPos.Y.Scale + (newYOffset / parentSize.Y)
+        local newXOffset = startPos.X.Offset + delta.X
+        local newYOffset = startPos.Y.Offset + delta.Y
 
-		local minX = 0
-		local minY = 0
-		local maxX = 1 - (uiSize.X / parentSize.X)
-		local maxY = 1 - (uiSize.Y / parentSize.Y)
+        local newXScale = startPos.X.Scale + (newXOffset / parentSize.X)
+        local newYScale = startPos.Y.Scale + (newYOffset / parentSize.Y)
 
-		newXScale = math.clamp(newXScale, minX, maxX)
-		newYScale = math.clamp(newYScale, minY, maxY)
+        local minX = 0
+        local minY = 0
+        local maxX = 1 - (uiSize.X / parentSize.X)
+        local maxY = 1 - (uiSize.Y / parentSize.Y)
 
-		ui.Position = UDim2.new(newXScale, 0, newYScale, 0)
-	end
+        newXScale = math.clamp(newXScale, minX, maxX)
+        newYScale = math.clamp(newYScale, minY, maxY)
 
-	dragui.InputBegan:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-			dragging = true
-			dragStart = input.Position
-			startPos = ui.Position
+        ui.Position = UDim2.new(newXScale, 0, newYScale, 0)
+    end
 
-			input.Changed:Connect(function()
-				if input.UserInputState == Enum.UserInputState.End then
-					dragging = false
-				end
-			end)
-		end
-	end)
+    dragui.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = ui.Position
 
-	dragui.InputChanged:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-			dragInput = input
-		end
-	end)
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
 
-	UserInputService.InputChanged:Connect(function(input)
-		if input == dragInput and dragging then
-			update(input)
-		end
-	end)
+    dragui.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            dragInput = input
+        end
+    end)
 
-	local function onParentSizeChanged()
-		local parentSize = ui.Parent.AbsoluteSize
-		local uiSize = ui.AbsoluteSize
-		local currentPos = ui.Position
+    UserInputService.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            update(input)
+        end
+    end)
 
-		local minX = 0
-		local minY = 0
-		local maxX = 1 - (uiSize.X / parentSize.X)
-		local maxY = 1 - (uiSize.Y / parentSize.Y)
+    local function onScreenSizeChanged()
+        local parentSize = screenGui.AbsoluteSize
+        local uiSize = ui.AbsoluteSize
+        local currentPos = ui.Position
 
-		local newXScale = math.clamp(currentPos.X.Scale, minX, maxX)
-		local newYScale = math.clamp(currentPos.Y.Scale, minY, maxY)
+        local minX = 0
+        local minY = 0
+        local maxX = 1 - (uiSize.X / parentSize.X)
+        local maxY = 1 - (uiSize.Y / parentSize.Y)
 
-		ui.Position = UDim2.new(newXScale, 0, newYScale, 0)
-	end
+        local newXScale = math.clamp(currentPos.X.Scale, minX, maxX)
+        local newYScale = math.clamp(currentPos.Y.Scale, minY, maxY)
 
-	ui.Parent:GetPropertyChangedSignal("AbsoluteSize"):Connect(onParentSizeChanged)
+        ui.Position = UDim2.new(newXScale, 0, newYScale, 0)
+    end
 
-	ui.Active = true
+    screenGui:GetPropertyChangedSignal("AbsoluteSize"):Connect(onScreenSizeChanged)
+
+    ui.Active = true
 end
+
 
 gui.menuify = function(menu)
 	local exitButton = menu:FindFirstChild("Exit", true)
@@ -11842,7 +11808,7 @@ gui.menuify = function(menu)
 	MouseButtonFix(exitButton, function()
 		menu.Visible = false
 	end)
-	gui.draggable(menu, menu.Topbar)
+	gui.draggablev2(menu, menu.Topbar)
 	menu.Visible = false
 end
 
@@ -11899,7 +11865,7 @@ gui.menuifyv2 = function(menu)
 		end)
 	end
 
-	gui.draggable(menu, menu.Topbar)
+	gui.draggablev2(menu, menu.Topbar)
 	menu.Visible = false
 end
 
