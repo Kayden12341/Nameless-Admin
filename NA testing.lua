@@ -161,6 +161,33 @@ function NaProtectUI(sGui)
 	end
 end
 
+function randomString()
+	local length = math.random(10, 20)
+	local result = {}
+	local glitchMarks = {"̶", "̷", "̸", "̹", "̺", "̻"}
+
+	for i = 1, length do
+		local char = string.char(math.random(32, 126))
+		Insert(result, char)
+		if math.random() < 0.5 then
+			local numGlitches = math.random(1, 3)
+			for j = 1, numGlitches do
+				Insert(result, glitchMarks[math.random(#glitchMarks)])
+			end
+		end
+	end
+
+	return table.concat(result)
+end
+
+function InstanceNew(c,p)
+    local inst = Instance.new(c)
+	if p then inst.Parent=p end
+    inst.Name = randomString()
+    return inst
+end
+
+
 --[[ Version ]]--
 local curVer = isAprilFools() and Format("%d.%d.%d", math.random(1, 10), math.random(0, 99), math.random(0, 99)) or "2.3"
 
@@ -295,10 +322,10 @@ end
 
 local GetService=game.GetService
 
-NA_storage=Instance.new("ScreenGui")--Stupid Ahh script removing folders
+NA_storage=InstanceNew("ScreenGui")--Stupid Ahh script removing folders
 
 if not game:IsLoaded() then
-	local waiting=Instance.new("Message")
+	local waiting=InstanceNew("Message")
 	NaProtectUI(waiting)
 	waiting.Text=adminName..' is waiting for the game to load'
 	game.Loaded:Wait()
@@ -670,7 +697,7 @@ function loadedResults(res)
 	end
 
 	local formatted = formatTime()
-	return isNegative and ("-" .. formatted) or formatted
+	return isNegative and ("-"..formatted) or formatted
 end
 
 
@@ -858,28 +885,8 @@ function ParseArguments(input)
 	return args
 end
 
-function randomString()
-	local length = math.random(10, 20)
-	local result = {}
-	local glitchMarks = {"̶", "̷", "̸", "̹", "̺", "̻"}
-
-	for i = 1, length do
-		local char = string.char(math.random(32, 126))
-		Insert(result, char)
-		if math.random() < 0.5 then
-			local numGlitches = math.random(1, 3)
-			for j = 1, numGlitches do
-				Insert(result, glitchMarks[math.random(#glitchMarks)])
-			end
-		end
-	end
-
-	return table.concat(result)
-end
-
 
 --[[ Fully setup Nameless admin storage ]]
-NA_storage.Name=randomString()
 NaProtectUI(NA_storage)
 
 --[[ LIBRARY FUNCTIONS ]]--
@@ -1293,7 +1300,7 @@ function ESP(player)
 
 		local function createESP()
 			if player.Character and player.Name ~= Players.LocalPlayer.Name and not COREGUI:FindFirstChild(player.Name..'_ESP') then
-				local espHolder = Instance.new("Folder")
+				local espHolder = InstanceNew("Folder")
 				espHolder.Name = player.Name..'_ESP'
 				espHolder.Parent = COREGUI
 
@@ -1303,7 +1310,7 @@ function ESP(player)
 
 				for _, part in pairs(player.Character:GetChildren()) do
 					if part:IsA("BasePart") and not part:FindFirstChildOfClass("Accessory") then
-						local boxAdornment = Instance.new("BoxHandleAdornment")
+						local boxAdornment = InstanceNew("BoxHandleAdornment")
 						boxAdornment.Name = player.Name.."_Box"
 						boxAdornment.Parent = espHolder
 						boxAdornment.Adornee = part
@@ -1317,11 +1324,10 @@ function ESP(player)
 				end
 
 				if player.Character:FindFirstChild("Head") then
-					local billboardGui = Instance.new("BillboardGui")
-					local textLabel = Instance.new("TextLabel")
+					local billboardGui = InstanceNew("BillboardGui")
+					local textLabel = InstanceNew("TextLabel")
 
 					billboardGui.Adornee = player.Character:FindFirstChild("Head")
-					billboardGui.Name = player.Name
 					billboardGui.Parent = espHolder
 					billboardGui.Size = UDim2.new(0, 200, 0, 100)
 					billboardGui.StudsOffset = Vector3.new(0, 2, 0)
@@ -1402,24 +1408,20 @@ local flyMobile, MobileWeld = nil, nil
 function mobilefly(speed, vfly)
 	local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 	if flyMobile then flyMobile:Destroy() end
-	flyMobile = Instance.new("Part", SafeGetService("Workspace").CurrentCamera)
-	flyMobile.Name = randomString()
+	flyMobile = InstanceNew("Part", SafeGetService("Workspace").CurrentCamera)
 	flyMobile.Size, flyMobile.CanCollide = Vector3.new(0.05, 0.05, 0.05), false
 	if MobileWeld then MobileWeld:Destroy() end
-	MobileWeld = Instance.new("Weld", flyMobile)
-	MobileWeld.Name = randomString()
+	MobileWeld = InstanceNew("Weld", flyMobile)
 	MobileWeld.Part0, MobileWeld.Part1, MobileWeld.C0 = flyMobile, character:FindFirstChildWhichIsA("Humanoid").RootPart, CFrame.new(0, 0, 0)
 
 	if not flyMobile:FindFirstChildWhichIsA("BodyVelocity") then
-		local bv = Instance.new("BodyVelocity", flyMobile)
-		bv.Name = randomString()
+		local bv = InstanceNew("BodyVelocity", flyMobile)
 		bv.MaxForce = Vector3.new(0, 0, 0)
 		bv.Velocity = Vector3.new(0, 0, 0)
 	end
 
 	if not flyMobile:FindFirstChildWhichIsA("BodyGyro") then
-		local bg = Instance.new("BodyGyro", flyMobile)
-		bg.Name = randomString()
+		local bg = InstanceNew("BodyGyro", flyMobile)
 		bg.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
 		bg.P = 1000
 		bg.D = 50
@@ -1427,23 +1429,20 @@ function mobilefly(speed, vfly)
 
 	Signal1 = LocalPlayer.CharacterAdded:Connect(function(newChar)
 		if not flyMobile:FindFirstChildWhichIsA("BodyVelocity") then
-			local bv = Instance.new("BodyVelocity", flyMobile)
-			bv.Name = randomString()
+			local bv = InstanceNew("BodyVelocity", flyMobile)
 			bv.MaxForce = Vector3.new(0, 0, 0)
 			bv.Velocity = Vector3.new(0, 0, 0)
 		end
 
 		if not flyMobile:FindFirstChildWhichIsA("BodyGyro") then
-			local bg = Instance.new("BodyGyro", flyMobile)
-			bg.Name = randomString()
+			local bg = InstanceNew("BodyGyro", flyMobile)
 			bg.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
 			bg.P = 1000
 			bg.D = 50
 		end
 
 		if not flyMobile:FindFirstChildWhichIsA("Weld") then
-			MobileWeld = Instance.new("Weld", flyMobile)
-			MobileWeld.Name = randomString()
+			MobileWeld = InstanceNew("Weld", flyMobile)
 			MobileWeld.Part0, MobileWeld.Part1, MobileWeld.C0 = flyMobile, newChar:FindFirstChildWhichIsA("Humanoid").RootPart, CFrame.new(0, 0, 0)
 		else
 			MobileWeld.Part0, MobileWeld.Part1, MobileWeld.C0 = flyMobile, newChar:FindFirstChildWhichIsA("Humanoid").RootPart, CFrame.new(0, 0, 0)
@@ -1520,8 +1519,7 @@ function sFLY(vfly)
 
 	if goofyFLY then goofyFLY:Destroy() end
 
-	goofyFLY = Instance.new("Part",SafeGetService("Workspace").CurrentCamera)
-	goofyFLY.Name = randomString()
+	goofyFLY = InstanceNew("Part",SafeGetService("Workspace").CurrentCamera)
 	goofyFLY.Size = Vector3.new(0.05, 0.05, 0.05)
 	goofyFLY.CanCollide = false
 
@@ -1532,13 +1530,10 @@ function sFLY(vfly)
 	local function FLY()
 		FLYING = true
 
-		local BG = Instance.new('BodyGyro', goofyFLY)
-		local BV = Instance.new('BodyVelocity', goofyFLY)
-		local Weld = Instance.new("Weld", goofyFLY)
+		local BG = InstanceNew('BodyGyro', goofyFLY)
+		local BV = InstanceNew('BodyVelocity', goofyFLY)
+		local Weld = InstanceNew("Weld", goofyFLY)
 
-		BG.Name = randomString()
-		BV.Name = randomString()
-		Weld.Name = randomString()
 		Weld.Part0 = goofyFLY
 		Weld.Part1 = cmdlp.Character:FindFirstChildWhichIsA("Humanoid").RootPart
 		Weld.C0 = CFrame.new(0, 0, 0)
@@ -1850,18 +1845,18 @@ if IsOnMobile then
 	local scaleFrame = nil
 	cmd.add({"guiscale", "guisize", "gsize", "gscale"}, {"guiscale (guisize, gsize, gscale)", "Adjust the scale of the "..adminName.." button"}, function()
 		if scaleFrame then scaleFrame:Destroy() scaleFrame=nil end
-		scaleFrame = Instance.new("ScreenGui")
-		local frame = Instance.new("Frame")
-		local frameCorner = Instance.new("UICorner")
-		local slider = Instance.new("Frame")
-		local sliderCorner = Instance.new("UICorner")
-		local progress = Instance.new("Frame")
-		local progressCorner = Instance.new("UICorner")
-		local knob = Instance.new("TextButton")
-		local knobCorner = Instance.new("UICorner")
-		local label = Instance.new("TextLabel")
-		local closeButton = Instance.new("TextButton")
-		local closeCorner = Instance.new("UICorner")
+		scaleFrame = InstanceNew("ScreenGui")
+		local frame = InstanceNew("Frame")
+		local frameCorner = InstanceNew("UICorner")
+		local slider = InstanceNew("Frame")
+		local sliderCorner = InstanceNew("UICorner")
+		local progress = InstanceNew("Frame")
+		local progressCorner = InstanceNew("UICorner")
+		local knob = InstanceNew("TextButton")
+		local knobCorner = InstanceNew("UICorner")
+		local label = InstanceNew("TextLabel")
+		local closeButton = InstanceNew("TextButton")
+		local closeCorner = InstanceNew("UICorner")
 
 		local sizeRange = {0.5, 3}
 		local minSize, maxSize = sizeRange[1], sizeRange[2]
@@ -2090,12 +2085,10 @@ cmd.add({"clickfling","mousefling"}, {"clickfling (mousefling)", "Fling a player
 		end
 	end
 	local Mouse = player:GetMouse()
-	clickflingUI = Instance.new("ScreenGui")
-	clickflingUI.Name = "ClickFlingGui"
+	clickflingUI = InstanceNew("ScreenGui")
 	NaProtectUI(clickflingUI)
 
-	local toggleButton = Instance.new("TextButton")
-	toggleButton.Name = "ToggleButton"
+	local toggleButton = InstanceNew("TextButton")
 	toggleButton.Size = UDim2.new(0, 120, 0, 40)
 	toggleButton.Text = "ClickFling: ON"
 	toggleButton.Position = UDim2.new(0.5, -60, 0, 10)
@@ -2106,7 +2099,7 @@ cmd.add({"clickfling","mousefling"}, {"clickfling (mousefling)", "Fling a player
 	toggleButton.BackgroundTransparency = 0.2
 	toggleButton.Parent = clickflingUI
 
-	local uiCorner = Instance.new("UICorner")
+	local uiCorner = InstanceNew("UICorner")
 	uiCorner.CornerRadius = UDim.new(0, 8)
 	uiCorner.Parent = toggleButton
 
@@ -2282,8 +2275,7 @@ cmd.add({"clickfling","mousefling"}, {"clickfling (mousefling)", "Fling a player
 
 					game:GetService("Workspace").FallenPartsDestroyHeight = 0/0
 
-					local BV = Instance.new("BodyVelocity")
-					BV.Name = "EpixVel"
+					local BV = InstanceNew("BodyVelocity")
 					BV.Parent = RootPart
 					BV.Velocity = Vector3.new(9e8, 9e8, 9e8)
 					BV.MaxForce = Vector3.new(1/0, 1/0, 1/0)
@@ -2363,15 +2355,13 @@ end)
 
 
 cmd.add({"ping"}, {"ping", "Shows your ping"}, function()
-	local function createWindow(name, position, maxSize, minSize, defaultText)
-		local screenGui = Instance.new("ScreenGui")
-		screenGui.Name = name
+	local function createWindow(position, maxSize, minSize, defaultText)
+		local screenGui = InstanceNew("ScreenGui")
 		NaProtectUI(screenGui)
 		screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 		screenGui.ResetOnSpawn = false
 
-		local window = Instance.new("TextLabel")
-		window.Name = name.."Label"
+		local window = InstanceNew("TextLabel")
 		window.Parent = screenGui
 		window.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
 		window.BackgroundTransparency = 0.2
@@ -2384,17 +2374,16 @@ cmd.add({"ping"}, {"ping", "Shows your ping"}, function()
 		window.TextXAlignment = Enum.TextXAlignment.Center
 		window.TextWrapped = true
 
-		local uiCorner = Instance.new("UICorner")
+		local uiCorner = InstanceNew("UICorner")
 		uiCorner.CornerRadius = UDim.new(0, 10)
 		uiCorner.Parent = window
 
-		local uiStroke = Instance.new("UIStroke")
+		local uiStroke = InstanceNew("UIStroke")
 		uiStroke.Color = Color3.fromRGB(100, 100, 255)
 		uiStroke.Thickness = 1.5
 		uiStroke.Parent = window
 
-		local closeButton = Instance.new("TextButton")
-		closeButton.Name = "CloseButton"
+		local closeButton = InstanceNew("TextButton")
 		closeButton.Parent = window
 		closeButton.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
 		closeButton.Position = UDim2.new(1, -25, 0.5, -10)
@@ -2405,12 +2394,11 @@ cmd.add({"ping"}, {"ping", "Shows your ping"}, function()
 		closeButton.TextSize = 14
 		closeButton.ZIndex = 10
 
-		local closeUICorner = Instance.new("UICorner")
+		local closeUICorner = InstanceNew("UICorner")
 		closeUICorner.CornerRadius = UDim.new(0, 10)
 		closeUICorner.Parent = closeButton
 
-		local minimizeButton = Instance.new("TextButton")
-		minimizeButton.Name = "MinimizeButton"
+		local minimizeButton = InstanceNew("TextButton")
 		minimizeButton.Parent = window
 		minimizeButton.BackgroundColor3 = Color3.fromRGB(50, 50, 255)
 		minimizeButton.Position = UDim2.new(1, -50, 0.5, -10)
@@ -2421,7 +2409,7 @@ cmd.add({"ping"}, {"ping", "Shows your ping"}, function()
 		minimizeButton.TextSize = 14
 		minimizeButton.ZIndex = 10
 
-		local minUICorner = Instance.new("UICorner")
+		local minUICorner = InstanceNew("UICorner")
 		minUICorner.CornerRadius = UDim.new(0, 10)
 		minUICorner.Parent = minimizeButton
 
@@ -2462,7 +2450,7 @@ cmd.add({"ping"}, {"ping", "Shows your ping"}, function()
 	local function setupDraggable(guiElements)
 		gui.draggable(guiElements.window)
 	end
-	local guiElements = createWindow("Ping", UDim2.new(0, 0, 0, 48), UDim2.new(0, 201, 0, 35), UDim2.new(0, 201, 0, 20), "Ping: --")
+	local guiElements = createWindow(UDim2.new(0, 0, 0, 48), UDim2.new(0, 201, 0, 35), UDim2.new(0, 201, 0, 20), "Ping: --")
 	setupMinimize(guiElements)
 	setupClose(guiElements)
 	setupDraggable(guiElements)
@@ -2494,15 +2482,13 @@ cmd.add({"ping"}, {"ping", "Shows your ping"}, function()
 end)
 
 cmd.add({"fps"}, {"fps", "Shows your fps"}, function()
-	local function createWindow(name, position, maxSize, minSize, defaultText)
-		local screenGui = Instance.new("ScreenGui")
-		screenGui.Name = name
+	local function createWindow(position, maxSize, minSize, defaultText)
+		local screenGui = InstanceNew("ScreenGui")
 		NaProtectUI(screenGui)
 		screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 		screenGui.ResetOnSpawn = false
 
-		local window = Instance.new("TextLabel")
-		window.Name = name.."Label"
+		local window = InstanceNew("TextLabel")
 		window.Parent = screenGui
 		window.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
 		window.BackgroundTransparency = 0.2
@@ -2515,17 +2501,16 @@ cmd.add({"fps"}, {"fps", "Shows your fps"}, function()
 		window.TextXAlignment = Enum.TextXAlignment.Center
 		window.TextWrapped = true
 
-		local uiCorner = Instance.new("UICorner")
+		local uiCorner = InstanceNew("UICorner")
 		uiCorner.CornerRadius = UDim.new(0, 10)
 		uiCorner.Parent = window
 
-		local uiStroke = Instance.new("UIStroke")
+		local uiStroke = InstanceNew("UIStroke")
 		uiStroke.Color = Color3.fromRGB(100, 100, 255)
 		uiStroke.Thickness = 1.5
 		uiStroke.Parent = window
 
-		local closeButton = Instance.new("TextButton")
-		closeButton.Name = "CloseButton"
+		local closeButton = InstanceNew("TextButton")
 		closeButton.Parent = window
 		closeButton.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
 		closeButton.Position = UDim2.new(1, -25, 0.5, -10)
@@ -2536,12 +2521,11 @@ cmd.add({"fps"}, {"fps", "Shows your fps"}, function()
 		closeButton.TextSize = 14
 		closeButton.ZIndex = 10
 
-		local closeUICorner = Instance.new("UICorner")
+		local closeUICorner = InstanceNew("UICorner")
 		closeUICorner.CornerRadius = UDim.new(0, 10)
 		closeUICorner.Parent = closeButton
 
-		local minimizeButton = Instance.new("TextButton")
-		minimizeButton.Name = "MinimizeButton"
+		local minimizeButton = InstanceNew("TextButton")
 		minimizeButton.Parent = window
 		minimizeButton.BackgroundColor3 = Color3.fromRGB(50, 50, 255)
 		minimizeButton.Position = UDim2.new(1, -50, 0.5, -10)
@@ -2552,7 +2536,7 @@ cmd.add({"fps"}, {"fps", "Shows your fps"}, function()
 		minimizeButton.TextSize = 14
 		minimizeButton.ZIndex = 10
 
-		local minUICorner = Instance.new("UICorner")
+		local minUICorner = InstanceNew("UICorner")
 		minUICorner.CornerRadius = UDim.new(0, 10)
 		minUICorner.Parent = minimizeButton
 
@@ -2593,7 +2577,7 @@ cmd.add({"fps"}, {"fps", "Shows your fps"}, function()
 	local function setupDraggable(guiElements)
 		gui.draggable(guiElements.window)
 	end
-	local guiElements = createWindow("Fps", UDim2.new(0, 0, 0, 6), UDim2.new(0, 201, 0, 35), UDim2.new(0, 201, 0, 20), "FPS: --")
+	local guiElements = createWindow(UDim2.new(0, 0, 0, 6), UDim2.new(0, 201, 0, 35), UDim2.new(0, 201, 0, 20), "FPS: --")
 	setupMinimize(guiElements)
 	setupClose(guiElements)
 	setupDraggable(guiElements)
@@ -2635,15 +2619,13 @@ cmd.add({"fps"}, {"fps", "Shows your fps"}, function()
 end)
 
 cmd.add({"stats"}, {"stats", "Shows both FPS and ping"}, function()
-	local function createWindow(name, position, maxSize, minSize, defaultText)
-		local screenGui = Instance.new("ScreenGui")
-		screenGui.Name = name
+	local function createWindow(position, maxSize, minSize, defaultText)
+		local screenGui = InstanceNew("ScreenGui")
 		NaProtectUI(screenGui)
 		screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 		screenGui.ResetOnSpawn = false
 
-		local window = Instance.new("TextLabel")
-		window.Name = name.."Label"
+		local window = InstanceNew("TextLabel")
 		window.Parent = screenGui
 		window.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
 		window.BackgroundTransparency = 0.2
@@ -2656,17 +2638,16 @@ cmd.add({"stats"}, {"stats", "Shows both FPS and ping"}, function()
 		window.TextXAlignment = Enum.TextXAlignment.Center
 		window.TextWrapped = true
 
-		local uiCorner = Instance.new("UICorner")
+		local uiCorner = InstanceNew("UICorner")
 		uiCorner.CornerRadius = UDim.new(0, 10)
 		uiCorner.Parent = window
 
-		local uiStroke = Instance.new("UIStroke")
+		local uiStroke = InstanceNew("UIStroke")
 		uiStroke.Color = Color3.fromRGB(100, 100, 255)
 		uiStroke.Thickness = 1.5
 		uiStroke.Parent = window
 
-		local closeButton = Instance.new("TextButton")
-		closeButton.Name = "CloseButton"
+		local closeButton = InstanceNew("TextButton")
 		closeButton.Parent = window
 		closeButton.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
 		closeButton.Position = UDim2.new(1, -25, 0.5, -10)
@@ -2677,12 +2658,11 @@ cmd.add({"stats"}, {"stats", "Shows both FPS and ping"}, function()
 		closeButton.TextSize = 14
 		closeButton.ZIndex = 10
 
-		local closeUICorner = Instance.new("UICorner")
+		local closeUICorner = InstanceNew("UICorner")
 		closeUICorner.CornerRadius = UDim.new(0, 10)
 		closeUICorner.Parent = closeButton
 
-		local minimizeButton = Instance.new("TextButton")
-		minimizeButton.Name = "MinimizeButton"
+		local minimizeButton = InstanceNew("TextButton")
 		minimizeButton.Parent = window
 		minimizeButton.BackgroundColor3 = Color3.fromRGB(50, 50, 255)
 		minimizeButton.Position = UDim2.new(1, -50, 0.5, -10)
@@ -2693,7 +2673,7 @@ cmd.add({"stats"}, {"stats", "Shows both FPS and ping"}, function()
 		minimizeButton.TextSize = 14
 		minimizeButton.ZIndex = 10
 
-		local minUICorner = Instance.new("UICorner")
+		local minUICorner = InstanceNew("UICorner")
 		minUICorner.CornerRadius = UDim.new(0, 10)
 		minUICorner.Parent = minimizeButton
 
@@ -2734,7 +2714,7 @@ cmd.add({"stats"}, {"stats", "Shows both FPS and ping"}, function()
 	local function setupDraggable(guiElements)
 		gui.draggable(guiElements.window)
 	end
-	local guiElements = createWindow("PingFPS", UDim2.new(0, 0, 0, 48), UDim2.new(0, 250, 0, 50), UDim2.new(0, 250, 0, 20), "Ping: -- ms | FPS: --")
+	local guiElements = createWindow(UDim2.new(0, 0, 0, 48), UDim2.new(0, 250, 0, 50), UDim2.new(0, 250, 0, 20), "Ping: -- ms | FPS: --")
 	setupMinimize(guiElements)
 	setupClose(guiElements)
 	setupDraggable(guiElements)
@@ -2814,12 +2794,10 @@ cmd.add({"chardebug", "cdebug"}, {"chardebug (cdebug)", "debug your character"},
 		rootPart=cc:WaitForChild("HumanoidRootPart")
 	end)
 
-	debugUI = Instance.new("ScreenGui")
-	debugUI.Name = "DebugGui"
+	debugUI = InstanceNew("ScreenGui")
 	NaProtectUI(debugUI)
 
-	local container = Instance.new("Frame")
-	container.Name = "DebugContainer"
+	local container = InstanceNew("Frame")
 	container.Size = UDim2.new(0, 520, 0, 300)
 	container.Position = UDim2.new(0.5, -260, 0.2, 0)
 	container.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
@@ -2827,12 +2805,11 @@ cmd.add({"chardebug", "cdebug"}, {"chardebug (cdebug)", "debug your character"},
 	container.BorderSizePixel = 0
 	container.Parent = debugUI
 
-	local containerCorner = Instance.new("UICorner")
+	local containerCorner = InstanceNew("UICorner")
 	containerCorner.CornerRadius = UDim.new(0.1, 0)
 	containerCorner.Parent = container
 
-	local header = Instance.new("TextLabel")
-	header.Name = "HeaderLabel"
+	local header = InstanceNew("TextLabel")
 	header.Size = UDim2.new(1, 0, 0, 40)
 	header.BackgroundTransparency = 1
 	header.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
@@ -2842,8 +2819,7 @@ cmd.add({"chardebug", "cdebug"}, {"chardebug (cdebug)", "debug your character"},
 	header.TextScaled = true
 	header.Parent = container
 
-	local minimizeButton = Instance.new("TextButton")
-	minimizeButton.Name = "MinimizeButton"
+	local minimizeButton = InstanceNew("TextButton")
 	minimizeButton.Size = UDim2.new(0, 40, 0, 40)
 	minimizeButton.Position = UDim2.new(1, -40, 0, 0)
 	minimizeButton.BackgroundTransparency = 1
@@ -2877,8 +2853,7 @@ cmd.add({"chardebug", "cdebug"}, {"chardebug (cdebug)", "debug your character"},
 	for i, info in ipairs(labelsInfo) do
 		local column = ((i - 1) % numColumns)
 		local row = math.floor((i - 1) / numColumns)
-		local label = Instance.new("TextLabel")
-		label.Name = info.name
+		local label = InstanceNew("TextLabel")
 		label.Size = UDim2.new(0, labelWidth, 0, labelHeight)
 		label.Position = UDim2.new(0, startX + column * (labelWidth + spacing), 0, startY + row * (labelHeight + spacing))
 		label.BackgroundTransparency = 0.2
@@ -2894,7 +2869,7 @@ cmd.add({"chardebug", "cdebug"}, {"chardebug (cdebug)", "debug your character"},
 		label.Text = info.text
 		label.Parent = container
 
-		local corner = Instance.new("UICorner")
+		local corner = InstanceNew("UICorner")
 		corner.CornerRadius = UDim.new(0.2, 0)
 		corner.Parent = label
 
@@ -2902,7 +2877,7 @@ cmd.add({"chardebug", "cdebug"}, {"chardebug (cdebug)", "debug your character"},
 	end
 
 	local isMinimized = false
-	minimizeButton.MouseButton1Click:Connect(function()
+	MouseButtonFix(minimizeButton,function()
 		isMinimized = not isMinimized
 		if isMinimized then
 			for _, label in pairs(labelObjects) do
@@ -3079,7 +3054,7 @@ cmd.add({"walkfling", "wfling", "wf"}, {"walkfling (wfling,wf)", "probably the b
 	hiddenfling = true
 
 	if not NA_storage:FindFirstChild("juisdfj0i32i0eidsuf0iok") then
-		local detection = Instance.new("Decal")
+		local detection = InstanceNew("Decal")
 		detection.Name = "juisdfj0i32i0eidsuf0iok"
 		detection.Parent = NA_storage
 	end
@@ -3406,14 +3381,14 @@ cmd.add({"vfly", "vehiclefly"}, {"vehiclefly (vfly)", "be able to fly vehicles"}
 			vRAHH = nil
 		end
 		cmd.run({"unfly",''})
-		vRAHH = Instance.new("ScreenGui")
-		local btn = Instance.new("TextButton")
-		local speedBox = Instance.new("TextBox")
-		local toggleBtn = Instance.new("TextButton")
-		local corner = Instance.new("UICorner")
-		local corner2 = Instance.new("UICorner")
-		local corner3 = Instance.new("UICorner")
-		local aspect = Instance.new("UIAspectRatioConstraint")
+		vRAHH = InstanceNew("ScreenGui")
+		local btn = InstanceNew("TextButton")
+		local speedBox = InstanceNew("TextBox")
+		local toggleBtn = InstanceNew("TextButton")
+		local corner = InstanceNew("UICorner")
+		local corner2 = InstanceNew("UICorner")
+		local corner3 = InstanceNew("UICorner")
+		local aspect = InstanceNew("UIAspectRatioConstraint")
 		NaProtectUI(vRAHH)
 		vRAHH.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 		vRAHH.ResetOnSpawn = false
@@ -3433,11 +3408,12 @@ cmd.add({"vfly", "vehiclefly"}, {"vehiclefly (vfly)", "be able to fly vehicles"}
 		corner.Parent = btn
 		aspect.Parent = btn
 		aspect.AspectRatio = 1.0
-		speedBox.Parent = btn
+		speedBox.Parent = vRAHH
 		speedBox.BackgroundColor3 = Color3.fromRGB(30,30,30)
 		speedBox.BackgroundTransparency = 0.1
-		speedBox.Position = UDim2.new(0,0,0.9,0)
-		speedBox.Size = UDim2.new(1,0,0.5,0)
+		speedBox.AnchorPoint = Vector2.new(0.5, 0)
+		speedBox.Position = UDim2.new(0.5, 0, 0, 10)
+		speedBox.Size = UDim2.new(0, 75, 0, 35)
 		speedBox.Font = Enum.Font.GothamBold
 		speedBox.Text = tostring(vFlySpeed)
 		speedBox.TextColor3 = Color3.fromRGB(255,255,255)
@@ -3625,11 +3601,11 @@ cmd.add({"reach", "swordreach"}, {"reach [number] (swordreach)", "Extends sword 
 		end
 	end
 
-	local val = Instance.new("Vector3Value", Tool)
+	local val = InstanceNew("Vector3Value", Tool)
 	val.Name = "OGSize3"
 	val.Value = toolHnld.Size
 
-	local sb = Instance.new("SelectionBox")
+	local sb = InstanceNew("SelectionBox")
 	sb.Adornee = toolHnld
 	sb.Name = "FunTIMES"
 	sb.LineThickness = 0.01
@@ -3661,11 +3637,11 @@ cmd.add({"boxreach", "aura"}, {"boxreach [number] (aura)", "Creates a box-shaped
 		end
 	end
 
-	local val = Instance.new("Vector3Value", Tool)
+	local val = InstanceNew("Vector3Value", Tool)
 	val.Name = "OGSize3"
 	val.Value = toolHnld.Size
 
-	local sb = Instance.new("SelectionBox")
+	local sb = InstanceNew("SelectionBox")
 	sb.Adornee = toolHnld
 	sb.Name = "FunTIMES"
 	sb.LineThickness = 0.01
@@ -4103,7 +4079,7 @@ cmd.add({"localtime", "yourtime"}, {"localtime (yourtime)", "Shows your current 
 end)
 
 cmd.add({"cartornado", "ctornado"}, {"cartornado (ctornado)", "Tornados a car just sit in the car"}, function()
-	local SPart = Instance.new("Part")
+	local SPart = InstanceNew("Part")
 	local Player = Players.LocalPlayer
 	local RunService = RunService
 	local Workspace = SafeGetService("Workspace")
@@ -4131,8 +4107,8 @@ cmd.add({"cartornado", "ctornado"}, {"cartornado (ctornado)", "Tornados a car ju
 	SPart.Touched:Connect(function(hit)
 		if hit:IsA("Seat") then
 			local IsFlying = true
-			local flyv = Instance.new("BodyVelocity")
-			local flyg = Instance.new("BodyGyro")
+			local flyv = InstanceNew("BodyVelocity")
+			local flyg = InstanceNew("BodyGyro")
 			local Speed = 50
 			local LastSpeed = Speed
 			local maxspeed = 100
@@ -4195,8 +4171,7 @@ cmd.add({"cartornado", "ctornado"}, {"cartornado (ctornado)", "Tornados a car ju
 			wait(0.2)
 			Speed = 80
 
-			local Spin = Instance.new("BodyAngularVelocity")
-			Spin.Name = "Spinning"
+			local Spin = InstanceNew("BodyAngularVelocity")
 			Spin.Parent = Character.PrimaryPart
 			Spin.MaxTorque = Vector3.new(0, math.huge, 0)
 			Spin.AngularVelocity = Vector3.new(0, 2000, 0)
@@ -4455,14 +4430,14 @@ end)
 cmd.add({"oldroblox"},{"oldroblox","Old skybox and studs"},function()
 	for i,v in pairs(SafeGetService("Workspace"):GetDescendants()) do
 		if v:IsA("BasePart") then
-			local dec=Instance.new("Texture",v)
+			local dec=InstanceNew("Texture",v)
 			dec.Texture="rbxassetid://48715260"
 			dec.Face="Top"
 			dec.StudsPerTileU="1"
 			dec.StudsPerTileV="1"
 			dec.Transparency=v.Transparency
 			v.Material="Plastic"
-			local dec2=Instance.new("Texture",v)
+			local dec2=InstanceNew("Texture",v)
 			dec2.Texture="rbxassetid://20299774"
 			dec2.Face="Bottom"
 			dec2.StudsPerTileU="1"
@@ -4479,7 +4454,7 @@ cmd.add({"oldroblox"},{"oldroblox","Old skybox and studs"},function()
 			v:Destroy()
 		end
 	end
-	local sky=Instance.new("Sky",Lighting)
+	local sky=InstanceNew("Sky",Lighting)
 	sky.SkyboxBk="rbxassetid://161781263"
 	sky.SkyboxDn="rbxassetid://161781258"
 	sky.SkyboxFt="rbxassetid://161781261"
@@ -4511,12 +4486,10 @@ cmd.add({"triggerbot", "tbot"}, {"triggerbot (tbot)", "Executes a script that au
 	local Mode = "FFA"
 	local LastMode = nil
 
-	local GUI = Instance.new("ScreenGui")
-	local On = Instance.new("TextLabel")
-	local uicorner = Instance.new("UICorner")
-	GUI.Name = "GUI"
+	local GUI = InstanceNew("ScreenGui")
+	local On = InstanceNew("TextLabel")
+	local uicorner = InstanceNew("UICorner")
 	NaProtectUI(GUI)
-	On.Name = "On"
 	On.Parent = GUI
 	On.BackgroundColor3 = Color3.fromRGB(12, 4, 20)
 	On.BackgroundTransparency = 0.14
@@ -4762,11 +4735,10 @@ cmd.add({"clicktp", "tptool"}, {"clicktp (tptool)", "Teleport where your mouse i
 
 	if tpUI then tpUI:Destroy() tpUI = nil end
 
-	tpUI = Instance.new("ScreenGui")
-	tpUI.Name = randomString()
+	tpUI = InstanceNew("ScreenGui")
 	NaProtectUI(tpUI)
 
-	local clickTpButton = Instance.new("TextButton")
+	local clickTpButton = InstanceNew("TextButton")
 	clickTpButton.Size = UDim2.new(0, 130, 0, 40)
 	clickTpButton.Position = UDim2.new(0.5, -140, 0, 10)
 	clickTpButton.Text = "Enable Click TP"
@@ -4775,11 +4747,11 @@ cmd.add({"clicktp", "tptool"}, {"clicktp (tptool)", "Teleport where your mouse i
 	clickTpButton.BorderSizePixel = 0
 	clickTpButton.Parent = tpUI
 
-	local clickTpCorner = Instance.new("UICorner")
+	local clickTpCorner = InstanceNew("UICorner")
 	clickTpCorner.CornerRadius = UDim.new(0, 10)
 	clickTpCorner.Parent = clickTpButton
 
-	local tweenTpButton = Instance.new("TextButton")
+	local tweenTpButton = InstanceNew("TextButton")
 	tweenTpButton.Size = UDim2.new(0, 130, 0, 40)
 	tweenTpButton.Position = UDim2.new(0.5, 10, 0, 10)
 	tweenTpButton.Text = "Enable Tween TP"
@@ -4788,7 +4760,7 @@ cmd.add({"clicktp", "tptool"}, {"clicktp (tptool)", "Teleport where your mouse i
 	tweenTpButton.BorderSizePixel = 0
 	tweenTpButton.Parent = tpUI
 
-	local tweenTpCorner = Instance.new("UICorner")
+	local tweenTpCorner = InstanceNew("UICorner")
 	tweenTpCorner.CornerRadius = UDim.new(0, 10)
 	tweenTpCorner.Parent = tweenTpButton
 
@@ -5676,28 +5648,26 @@ cmd.add({"functionspy"},{"functionspy","Check console"},function()
 		debug.setmetatable;
 	}
 
-	local FunctionSpy=Instance.new("ScreenGui")
-	local Main=Instance.new("Frame")
-	local LeftPanel=Instance.new("ScrollingFrame")
-	local UIListLayout=Instance.new("UIListLayout")
-	local example=Instance.new("TextButton")
-	local name=Instance.new("TextLabel")
-	local UIPadding=Instance.new("UIPadding")
-	local FakeTitle=Instance.new("TextButton")
-	local Title=Instance.new("TextLabel")
-	local clear=Instance.new("ImageButton")
-	local RightPanel=Instance.new("ScrollingFrame")
-	local output=Instance.new("TextLabel")
-	local clear_2=Instance.new("TextButton")
-	local copy=Instance.new("TextButton")
-	local UICorner = Instance.new("UICorner")
-	local UIStroke = Instance.new("UIStroke")
+	local FunctionSpy=InstanceNew("ScreenGui")
+	local Main=InstanceNew("Frame")
+	local LeftPanel=InstanceNew("ScrollingFrame")
+	local UIListLayout=InstanceNew("UIListLayout")
+	local example=InstanceNew("TextButton")
+	local name=InstanceNew("TextLabel")
+	local UIPadding=InstanceNew("UIPadding")
+	local FakeTitle=InstanceNew("TextButton")
+	local Title=InstanceNew("TextLabel")
+	local clear=InstanceNew("ImageButton")
+	local RightPanel=InstanceNew("ScrollingFrame")
+	local output=InstanceNew("TextLabel")
+	local clear_2=InstanceNew("TextButton")
+	local copy=InstanceNew("TextButton")
+	local UICorner = InstanceNew("UICorner")
+	local UIStroke = InstanceNew("UIStroke")
 
-	FunctionSpy.Name="FunctionSpy"
 	NaProtectUI(FunctionSpy)
 	FunctionSpy.ZIndexBehavior=Enum.ZIndexBehavior.Sibling
 
-	Main.Name="Main"
 	Main.Parent=FunctionSpy
 	Main.BackgroundColor3=Color3.fromRGB(33,33,33)
 	Main.BorderSizePixel=0
@@ -5711,17 +5681,16 @@ cmd.add({"functionspy"},{"functionspy","Check console"},function()
 		corner.Parent = instance
 	end
 
-	local function addStroke(instance, color, thickness)
+	local function addStroke(instance, color, thick)
 		local stroke = UIStroke:Clone()
 		stroke.Color = color
-		stroke.Thickness = thickness
+		stroke.Thickness = thick
 		stroke.Parent = instance
 	end
 
 	addRoundedCorners(Main, 10)
 	addStroke(Main, Color3.fromRGB(255, 255, 255), 2)
 
-	LeftPanel.Name="LeftPanel"
 	LeftPanel.Parent=Main
 	LeftPanel.Active=true
 	LeftPanel.BackgroundColor3=Color3.fromRGB(45,45,45)
@@ -5735,7 +5704,6 @@ cmd.add({"functionspy"},{"functionspy","Check console"},function()
 	UIListLayout.SortOrder=Enum.SortOrder.LayoutOrder
 	UIListLayout.Padding=UDim.new(0,7)
 
-	example.Name="example"
 	example.Parent=LeftPanel
 	example.BackgroundColor3=Color3.fromRGB(31,31,31)
 	example.BorderSizePixel=0
@@ -5748,7 +5716,6 @@ cmd.add({"functionspy"},{"functionspy","Check console"},function()
 	example.TextSize=14.000
 	example.TextXAlignment=Enum.TextXAlignment.Left
 
-	name.Name="name"
 	name.Parent=example
 	name.BackgroundColor3=Color3.fromRGB(255,255,255)
 	name.BackgroundTransparency=1.000
@@ -5766,7 +5733,6 @@ cmd.add({"functionspy"},{"functionspy","Check console"},function()
 	UIPadding.PaddingRight=UDim.new(0,7)
 	UIPadding.PaddingTop=UDim.new(0,7)
 
-	FakeTitle.Name="FakeTitle"
 	FakeTitle.Parent=Main
 	FakeTitle.BackgroundColor3=Color3.fromRGB(40,40,40)
 	FakeTitle.BorderSizePixel=0
@@ -5777,7 +5743,6 @@ cmd.add({"functionspy"},{"functionspy","Check console"},function()
 	FakeTitle.TextColor3=Color3.fromRGB(255,255,255)
 	FakeTitle.TextSize=14.000
 
-	Title.Name="Title"
 	Title.Parent=Main
 	Title.BackgroundColor3=Color3.fromRGB(40,40,40)
 	Title.BorderSizePixel=0
@@ -5789,7 +5754,7 @@ cmd.add({"functionspy"},{"functionspy","Check console"},function()
 	Title.TextSize=14.000
 	Title.TextWrapped=true
 
-	local gradient = Instance.new("UIGradient")
+	local gradient = InstanceNew("UIGradient")
 	gradient.Color = ColorSequence.new{
 		ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 0, 255)),
 		ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 255, 255))
@@ -5797,7 +5762,6 @@ cmd.add({"functionspy"},{"functionspy","Check console"},function()
 	gradient.Rotation = 45
 	gradient.Parent = Title
 
-	clear.Name="clear"
 	clear.Parent=Title
 	clear.BackgroundTransparency=1.000
 	clear.Position=UDim2.new(1,-28,0,2)
@@ -5807,13 +5771,12 @@ cmd.add({"functionspy"},{"functionspy","Check console"},function()
 	clear.ImageRectOffset=Vector2.new(924,724)
 	clear.ImageRectSize=Vector2.new(36,36)
 
-	clear.MouseButton1Click:Connect(function()
+	MouseButtonFix(clear,function()
 		if _G.functionspy then
 			_G.functionspy.shutdown()
 		end
 	end)
 
-	RightPanel.Name="RightPanel"
 	RightPanel.Parent=Main
 	RightPanel.Active=true
 	RightPanel.BackgroundColor3=Color3.fromRGB(35,35,35)
@@ -5824,7 +5787,6 @@ cmd.add({"functionspy"},{"functionspy","Check console"},function()
 	RightPanel.HorizontalScrollBarInset=Enum.ScrollBarInset.ScrollBar
 	RightPanel.ScrollBarThickness=3
 
-	output.Name="output"
 	output.Parent=RightPanel
 	output.BackgroundColor3=Color3.fromRGB(255,255,255)
 	output.BackgroundTransparency=1.000
@@ -5840,7 +5802,6 @@ cmd.add({"functionspy"},{"functionspy","Check console"},function()
 	output.TextXAlignment=Enum.TextXAlignment.Left
 	output.TextYAlignment=Enum.TextYAlignment.Top
 
-	clear_2.Name="clear"
 	clear_2.Parent=RightPanel
 	clear_2.BackgroundColor3=Color3.fromRGB(30,30,30)
 	clear_2.BorderSizePixel=0
@@ -5851,7 +5812,6 @@ cmd.add({"functionspy"},{"functionspy","Check console"},function()
 	clear_2.TextColor3=Color3.fromRGB(255,255,255)
 	clear_2.TextSize=14.000
 
-	copy.Name="copy"
 	copy.Parent=RightPanel
 	copy.BackgroundColor3=Color3.fromRGB(30,30,30)
 	copy.BorderSizePixel=0
@@ -5876,8 +5836,7 @@ cmd.add({"functionspy"},{"functionspy","Check console"},function()
 
 	gui.draggable(Main,Title)
 
-	local shadow = Instance.new("ImageLabel")
-	shadow.Name = "Shadow"
+	local shadow = InstanceNew("ImageLabel")
 	shadow.Parent = Main
 	shadow.BackgroundTransparency = 1
 	shadow.Size = UDim2.new(1, 20, 1, 20)
@@ -6128,7 +6087,7 @@ cmd.add({"functionspy"},{"functionspy","Check console"},function()
 	end
 	coroutine.wrap(AKIHDI_fake_script)()
 	function BIPVKVC_fake_script()
-		local script=Instance.new('LocalScript',FakeTitle)
+		local script=InstanceNew('LocalScript',FakeTitle)
 
 		Insert(_G.functionspy.connections,FakeTitle.MouseEnter:Connect(function()
 			if _G.functionspy.logging==true then
@@ -6220,14 +6179,14 @@ cmd.add({"fly"}, {"fly [speed]", "Enable flight"}, function(...)
 			mFlyBruh = nil
 		end
 		cmd.run({"unvfly",''})
-		mFlyBruh = Instance.new("ScreenGui")
-		local btn = Instance.new("TextButton")
-		local speedBox = Instance.new("TextBox")
-		local toggleBtn = Instance.new("TextButton")
-		local corner = Instance.new("UICorner")
-		local corner2 = Instance.new("UICorner")
-		local corner3 = Instance.new("UICorner")
-		local aspect = Instance.new("UIAspectRatioConstraint")
+		mFlyBruh = InstanceNew("ScreenGui")
+		local btn = InstanceNew("TextButton")
+		local speedBox = InstanceNew("TextBox")
+		local toggleBtn = InstanceNew("TextButton")
+		local corner = InstanceNew("UICorner")
+		local corner2 = InstanceNew("UICorner")
+		local corner3 = InstanceNew("UICorner")
+		local aspect = InstanceNew("UIAspectRatioConstraint")
 		NaProtectUI(mFlyBruh)
 		mFlyBruh.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 		mFlyBruh.ResetOnSpawn = false
@@ -6252,7 +6211,7 @@ cmd.add({"fly"}, {"fly [speed]", "Enable flight"}, function(...)
 		speedBox.BackgroundTransparency = 0.1
 		speedBox.AnchorPoint = Vector2.new(0.5, 0)
 		speedBox.Position = UDim2.new(0.5, 0, 0, 10)
-		speedBox.Size = UDim2.new(0, 200, 0, 50)
+		speedBox.Size = UDim2.new(0, 75, 0, 35)
 		speedBox.Font = Enum.Font.GothamBold
 		speedBox.Text = tostring(flySpeed)
 		speedBox.TextColor3 = Color3.fromRGB(255,255,255)
@@ -6299,7 +6258,7 @@ cmd.add({"fly"}, {"fly [speed]", "Enable flight"}, function(...)
 			end)
 		end)()
 		gui.draggable(btn)
-		gui.draggablev2(speedBox)
+		gui.draggable(speedBox)
 	else
 		FLYING = false
 		getHum().PlatformStand = false
@@ -6364,7 +6323,7 @@ cmd.add({"tfly", "tweenfly"}, {"tfly [speed] (tweenfly)", "Enables smooth flying
 	local Humanoid = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
 	local mouse = LocalPlayer:GetMouse()
 
-	tflyCORE = Instance.new("Part", SafeGetService("Workspace").CurrentCamera)
+	tflyCORE = InstanceNew("Part", SafeGetService("Workspace").CurrentCamera)
 	tflyCORE:SetAttribute("tflyPart", true)
 	tflyCORE.Size = Vector3.new(0.05, 0.05, 0.05)
 	tflyCORE.CanCollide = false
@@ -6390,13 +6349,13 @@ cmd.add({"tfly", "tweenfly"}, {"tfly [speed] (tweenfly)", "Enables smooth flying
 		end)
 	end
 
-	local Weld = Instance.new("Weld", tflyCORE)
+	local Weld = InstanceNew("Weld", tflyCORE)
 	Weld.Part0 = tflyCORE
 	Weld.Part1 = Humanoid.RootPart
 	Weld.C0 = CFrame.new(0, 0, 0)
 
-	local pos = Instance.new("BodyPosition", tflyCORE)
-	local gyro = Instance.new("BodyGyro", tflyCORE)
+	local pos = InstanceNew("BodyPosition", tflyCORE)
+	local gyro = InstanceNew("BodyGyro", tflyCORE)
 	pos.maxForce = Vector3.new(math.huge, math.huge, math.huge)
 	pos.position = tflyCORE.Position
 	gyro.maxTorque = Vector3.new(9e9, 9e9, 9e9)
@@ -6501,8 +6460,7 @@ cmd.add({"antibang"}, {"antibang", "prevents users to bang you (still WORK IN PR
 								activationTime = tick()
 								targetPlayer = p
 								SafeGetService("Workspace").FallenPartsDestroyHeight = 0/1/0
-								platformPart = Instance.new("Part")
-								platformPart.Name = randomString()
+								platformPart = InstanceNew("Part")
 								platformPart.Size = Vector3.new(9999, 1, 9999)
 								platformPart.Anchored = true
 								platformPart.CanCollide = true
@@ -6646,8 +6604,8 @@ cmd.add({"freecam","fc","fcam"},{"freecam [speed] (fc,fcam)","Enable free camera
 
 	function runFREECAM()
 		local dir={w=false,a=false,s=false,d=false}
-		local cf=Instance.new("CFrameValue")
-		local camPart=Instance.new("Part")
+		local cf=InstanceNew("CFrameValue")
+		local camPart=InstanceNew("Part")
 		camPart.Transparency=1
 		camPart.Anchored=true
 		camPart.CFrame=camera.CFrame
@@ -6731,14 +6689,14 @@ cmd.add({"freecam","fc","fcam"},{"freecam [speed] (fc,fcam)","Enable free camera
 	if IsOnMobile then
 		if fcBTNTOGGLE then fcBTNTOGGLE:Destroy() fcBTNTOGGLE = nil end
 
-		fcBTNTOGGLE = Instance.new("ScreenGui")
-		local btn = Instance.new("TextButton")
-		local speedBox = Instance.new("TextBox")
-		local toggleBtn = Instance.new("TextButton")
-		local corner = Instance.new("UICorner")
-		local corner2 = Instance.new("UICorner")
-		local corner3 = Instance.new("UICorner")
-		local aspect = Instance.new("UIAspectRatioConstraint")
+		fcBTNTOGGLE = InstanceNew("ScreenGui")
+		local btn = InstanceNew("TextButton")
+		local speedBox = InstanceNew("TextBox")
+		local toggleBtn = InstanceNew("TextButton")
+		local corner = InstanceNew("UICorner")
+		local corner2 = InstanceNew("UICorner")
+		local corner3 = InstanceNew("UICorner")
+		local aspect = InstanceNew("UIAspectRatioConstraint")
 
 		NaProtectUI(fcBTNTOGGLE)
 		fcBTNTOGGLE.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
@@ -6763,14 +6721,15 @@ cmd.add({"freecam","fc","fcam"},{"freecam [speed] (fc,fcam)","Enable free camera
 		aspect.Parent = btn
 		aspect.AspectRatio = 1.0
 
-		speedBox.Parent = btn
-		speedBox.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+		speedBox.Parent = fcBTNTOGGLE
+		speedBox.BackgroundColor3 = Color3.fromRGB(30,30,30)
 		speedBox.BackgroundTransparency = 0.1
-		speedBox.Position = UDim2.new(0, 0, 0.9, 0)
-		speedBox.Size = UDim2.new(1, 0, 0.5, 0)
+		speedBox.AnchorPoint = Vector2.new(0.5, 0)
+		speedBox.Position = UDim2.new(0.5, 0, 0, 10)
+		speedBox.Size = UDim2.new(0, 75, 0, 35)
 		speedBox.Font = Enum.Font.GothamBold
 		speedBox.Text = tostring(speed)
-		speedBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+		speedBox.TextColor3 = Color3.fromRGB(255,255,255)
 		speedBox.TextSize = 18
 		speedBox.TextWrapped = true
 		speedBox.ClearTextOnFocus = false
@@ -6958,12 +6917,12 @@ cmd.add({"dance"},{"dance","Does a random dance"},function()
 	if theanim then
 		theanim:Stop()
 		theanim:Destroy()
-		local animation=Instance.new("Animation")
+		local animation=InstanceNew("Animation")
 		animation.AnimationId="rbxassetid://"..dances[math.random(1,#dances)]
 		theanim=getChar():FindFirstChildOfClass('Humanoid'):LoadAnimation(animation)
 		theanim:Play()
 	else
-		local animation=Instance.new("Animation")
+		local animation=InstanceNew("Animation")
 		animation.AnimationId="rbxassetid://"..dances[math.random(1,#dances)]
 		theanim=getChar():FindFirstChildOfClass('Humanoid'):LoadAnimation(animation)
 		theanim:Play()
@@ -7174,7 +7133,7 @@ cmd.add({"saw"}, {"saw <challenge>", "shush"}, function(...)
 	_G.SawFinish = false
 
 	local function playSound(id, vol)
-		local sfx = Instance.new("Sound")
+		local sfx = InstanceNew("Sound")
 		sfx.Parent = PlrGui
 		sfx.SoundId = "rbxassetid://"..id
 		sfx.Volume = vol or 1
@@ -7185,7 +7144,7 @@ cmd.add({"saw"}, {"saw <challenge>", "shush"}, function(...)
 	end
 
 	local function createUIElement(class, properties, parent)
-		local element = Instance.new(class)
+		local element = InstanceNew(class)
 		for prop, value in pairs(properties) do
 			element[prop] = value
 		end
@@ -7396,20 +7355,17 @@ cmd.add({"fling"}, {"fling <player>", "Fling the given player"}, function(plr)
 		local Humanoid = Character and Character:FindFirstChildOfClass("Humanoid")
 		local HRP = Humanoid and Humanoid.RootPart
 		local camera = SafeGetService("Workspace").CurrentCamera
-		attachedPart = Instance.new("Part")
-		attachedPart.Name = randomString()
+		attachedPart = InstanceNew("Part")
 		attachedPart.Size = Vector3.new(1, 1, 1)
 		attachedPart.Transparency = 1
 		attachedPart.CanCollide = false
 		attachedPart.Anchored = false
 		attachedPart.Parent = camera
-		local weld = Instance.new("WeldConstraint")
-		weld.Name = randomString()
+		local weld = InstanceNew("WeldConstraint")
 		weld.Part0 = HRP
 		weld.Part1 = attachedPart
 		weld.Parent = attachedPart
-		local bodyGyro = Instance.new("BodyGyro")
-		bodyGyro.Name = randomString()
+		local bodyGyro = InstanceNew("BodyGyro")
 		bodyGyro.MaxTorque = Vector3.new(400000, 400000, 400000)
 		bodyGyro.D = 1000
 		bodyGyro.P = 2000
@@ -7713,25 +7669,24 @@ end)
 
 function createSpecUI()
 	if not specGui then
-		specGui = Instance.new("ScreenGui")
-		specGui.Name = "SpectateGui"
+		specGui = InstanceNew("ScreenGui")
 		NaProtectUI(specGui)
 		specGui.ResetOnSpawn = false
 
-		local frame = Instance.new("Frame")
+		local frame = InstanceNew("Frame")
 		frame.Size = UDim2.new(0, 350, 0, 40)
 		frame.Position = UDim2.new(0.5, -175, 1, -160)
 		frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 		frame.BorderSizePixel = 0
 		frame.Parent = specGui
 
-		local corner = Instance.new("UICorner")
+		local corner = InstanceNew("UICorner")
 		corner.CornerRadius = UDim.new(0, 20)
 		corner.Parent = frame
 
 		gui.draggable(frame)
 
-		local backButton = Instance.new("TextButton")
+		local backButton = InstanceNew("TextButton")
 		backButton.Size = UDim2.new(0, 40, 0, 40)
 		backButton.Position = UDim2.new(0, -18, 0, 0)
 		backButton.Text = "<"
@@ -7741,11 +7696,11 @@ function createSpecUI()
 		backButton.TextSize = 24
 		backButton.Parent = frame
 
-		local backCorner = Instance.new("UICorner")
+		local backCorner = InstanceNew("UICorner")
 		backCorner.CornerRadius = UDim.new(0, 10)
 		backCorner.Parent = backButton
 
-		local forwardButton = Instance.new("TextButton")
+		local forwardButton = InstanceNew("TextButton")
 		forwardButton.Size = UDim2.new(0, 40, 0, 40)
 		forwardButton.Position = UDim2.new(1, -22, 0, 0)
 		forwardButton.Text = ">"
@@ -7755,11 +7710,11 @@ function createSpecUI()
 		forwardButton.TextSize = 24
 		forwardButton.Parent = frame
 
-		local forwardCorner = Instance.new("UICorner")
+		local forwardCorner = InstanceNew("UICorner")
 		forwardCorner.CornerRadius = UDim.new(0, 10)
 		forwardCorner.Parent = forwardButton
 
-		local dropdownLabel = Instance.new("TextLabel")
+		local dropdownLabel = InstanceNew("TextLabel")
 		dropdownLabel.Size = UDim2.new(0.76, 0, 1, 0)
 		dropdownLabel.Position = UDim2.new(0.08, 0, 0, 0)
 		dropdownLabel.BackgroundTransparency = 1
@@ -7769,11 +7724,11 @@ function createSpecUI()
 		dropdownLabel.TextScaled = true
 		dropdownLabel.Parent = frame
 
-		local dropCorner = Instance.new("UICorner")
+		local dropCorner = InstanceNew("UICorner")
 		dropCorner.CornerRadius = UDim.new(0, 10)
 		dropCorner.Parent = dropdownLabel
 
-		local closeButton = Instance.new("TextButton")
+		local closeButton = InstanceNew("TextButton")
 		closeButton.Size = UDim2.new(0, 30, 0, 30)
 		closeButton.Position = UDim2.new(1, -55, 0, 5)
 		closeButton.Text = "X"
@@ -7783,15 +7738,15 @@ function createSpecUI()
 		closeButton.TextSize = 18
 		closeButton.Parent = frame
 
-		local closeCorner = Instance.new("UICorner")
+		local closeCorner = InstanceNew("UICorner")
 		closeCorner.CornerRadius = UDim.new(0, 5)
 		closeCorner.Parent = closeButton
 
-		closeButton.MouseButton1Click:Connect(function()
+		MouseButtonFix(closeButton,function()
 			cleanup()
 		end)
 
-		local toggleDropdownButton = Instance.new("TextButton")
+		local toggleDropdownButton = InstanceNew("TextButton")
 		toggleDropdownButton.Size = UDim2.new(0, 30, 0, 20)
 		toggleDropdownButton.Position = UDim2.new(0.5, -15, 1, 5)
 		toggleDropdownButton.Text = "v"
@@ -7801,7 +7756,7 @@ function createSpecUI()
 		toggleDropdownButton.TextSize = 18
 		toggleDropdownButton.Parent = frame
 
-		local toggleCorner = Instance.new("UICorner")
+		local toggleCorner = InstanceNew("UICorner")
 		toggleCorner.CornerRadius = UDim.new(0, 6)
 		toggleCorner.Parent = toggleDropdownButton
 
@@ -7863,9 +7818,6 @@ function createSpecUI()
 		end)
 
 		MouseButtonFix(toggleDropdownButton,function()
-			local TweenService = game:GetService("TweenService")
-			local toggleTween
-
 			if dropdownOpen then
 				if dropdownList then
 					local closeTween = TweenService:Create(dropdownList, TweenInfo.new(0.25), { Size = UDim2.new(1, 0, 0, 0) })
@@ -7879,7 +7831,7 @@ function createSpecUI()
 				toggleDropdownButton.Text = "v"
 				dropdownOpen = false
 			else
-				dropdownList = Instance.new("ScrollingFrame")
+				dropdownList = InstanceNew("ScrollingFrame")
 				local totalHeight = #playerButtons * 30
 				local listHeight = math.min(totalHeight, 150)
 				dropdownList.Size = UDim2.new(1, 0, 0, 0)
@@ -7891,11 +7843,11 @@ function createSpecUI()
 				dropdownList.ClipsDescendants = true
 				dropdownList.Parent = frame
 
-				local listCorner = Instance.new("UICorner")
+				local listCorner = InstanceNew("UICorner")
 				listCorner.CornerRadius = UDim.new(0, 10)
 				listCorner.Parent = dropdownList
 
-				local listLayout = Instance.new("UIListLayout")
+				local listLayout = InstanceNew("UIListLayout")
 				listLayout.SortOrder = Enum.SortOrder.LayoutOrder
 				listLayout.Parent = dropdownList
 
@@ -7909,7 +7861,7 @@ function createSpecUI()
 				dropdownOpen = true
 
 				for i, player in ipairs(playerButtons) do
-					local playerButton = Instance.new("TextButton")
+					local playerButton = InstanceNew("TextButton")
 					playerButton.Size = UDim2.new(1, 0, 0, 30)
 					playerButton.LayoutOrder = i
 					playerButton.Text = ""
@@ -7919,7 +7871,7 @@ function createSpecUI()
 					playerButton.Parent = dropdownList
 					playerButton:SetAttribute("PlayerIndex", i)
 
-					local headshot = Instance.new("ImageLabel")
+					local headshot = InstanceNew("ImageLabel")
 					headshot.Size = UDim2.new(0, 30, 0, 30)
 					headshot.Position = UDim2.new(0, 0, 0, 0)
 					headshot.BackgroundTransparency = 1
@@ -7928,7 +7880,7 @@ function createSpecUI()
 					local thumbSize = Enum.ThumbnailSize.Size420x420
 					headshot.Image = Players:GetUserThumbnailAsync(player.UserId, thumbType, thumbSize)
 
-					local nameLabel = Instance.new("TextLabel")
+					local nameLabel = InstanceNew("TextLabel")
 					nameLabel.Size = UDim2.new(1, -35, 1, 0)
 					nameLabel.Position = UDim2.new(0, 35, 0, 0)
 					nameLabel.BackgroundTransparency = 1
@@ -7944,13 +7896,13 @@ function createSpecUI()
 					end
 					nameLabel.Parent = playerButton
 
-					playerButton.MouseButton1Click:Connect(function()
+					MouseButtonFix(playerButton,function()
 						currentPlayerIndex = i
 						updateSpectating()
 					end)
 				end
 			end
-		end)		
+		end)
 
 		updateSpectating()
 	end
@@ -8179,20 +8131,17 @@ cmd.add({"loopfling"}, {"loopfling <player>", "Loop voids a player"}, function(p
 			local Humanoid = Character and Character:FindFirstChildOfClass("Humanoid")
 			local HRP = Humanoid and Humanoid.RootPart
 			local camera = SafeGetService("Workspace").CurrentCamera
-			LOOPPROTECT = Instance.new("Part")
-			LOOPPROTECT.Name = randomString()
+			LOOPPROTECT = InstanceNew("Part")
 			LOOPPROTECT.Size = Vector3.new(1, 1, 1)
 			LOOPPROTECT.Transparency = 1
 			LOOPPROTECT.CanCollide = false
 			LOOPPROTECT.Anchored = false
 			LOOPPROTECT.Parent = camera
-			local weld = Instance.new("WeldConstraint")
-			weld.Name = randomString()
+			local weld = InstanceNew("WeldConstraint")
 			weld.Part0 = HRP
 			weld.Part1 = LOOPPROTECT
 			weld.Parent = LOOPPROTECT
-			local bodyGyro = Instance.new("BodyGyro")
-			bodyGyro.Name = randomString()
+			local bodyGyro = InstanceNew("BodyGyro")
 			bodyGyro.MaxTorque = Vector3.new(400000, 400000, 400000)
 			bodyGyro.D = 1000
 			bodyGyro.P = 2000
@@ -8288,8 +8237,7 @@ cmd.add({"loopfling"}, {"loopfling <player>", "Loop voids a player"}, function(p
 					if LOOPPROTECT then LOOPPROTECT:Destroy() LOOPPROTECT = nil end
 				end
 				SafeGetService("Workspace").FallenPartsDestroyHeight = 0/0
-				local BV = Instance.new("BodyVelocity")
-				BV.Name = "EpixVel"
+				local BV = InstanceNew("BodyVelocity")
 				BV.Parent = RootPart
 				BV.Velocity = Vector3.new(9e8, 9e8, 9e8)
 				BV.MaxForce = Vector3.new(1/0, 1/0, 1/0)
@@ -8388,7 +8336,7 @@ cmd.add({"unlockmouse", "unlockm"}, {"unlockmouse (unlockm)", "Unlocks your mous
 	UserInputService.MouseBehavior = Enum.MouseBehavior.Default
 end)
 
-headSit, sitDied = nil, nil
+headSit, sitDied, platformParts = nil, nil, {}
 
 cmd.add({"headsit"}, {"headsit <player>", "Head sit."}, function(p)
 	local ppp = getPlr(p)
@@ -8397,70 +8345,75 @@ cmd.add({"headsit"}, {"headsit <player>", "Head sit."}, function(p)
 		local char = getChar()
 		local hum = char and char:FindFirstChildOfClass("Humanoid")
 		if not hum then return end
-		if headSit then
-			headSit:Disconnect()
-			headSit = nil
-		end
-		if sitDied then
-			sitDied:Disconnect()
-			sitDied = nil
-		end
+		if headSit then headSit:Disconnect() headSit = nil end
+		if sitDied then sitDied:Disconnect() sitDied = nil end
 		local charRoot = getRoot(char)
-		local plrRoot = getRoot(plr.Character)
-		if not charRoot or not plrRoot then return end
+		local target = plr.Character
+		if not charRoot or not target then return end
 		hum.Sit = true
 		sitDied = hum.Died:Connect(function()
-			if headSit then
-				headSit:Disconnect()
-				headSit = nil
+			if headSit then headSit:Disconnect() headSit = nil end
+			for _, part in pairs(platformParts) do
+				part:Destroy()
 			end
+			platformParts = {}
+			if sitDied then sitDied:Disconnect() sitDied = nil end
 		end)
-		local alignPos = charRoot:FindFirstChildOfClass("AlignPosition") or Instance.new("AlignPosition", charRoot)
-		alignPos.Attachment0 = charRoot:FindFirstChild("RootAttachment") or Instance.new("Attachment", charRoot)
-		alignPos.Attachment1 = plrRoot:FindFirstChild("RootAttachment") or Instance.new("Attachment", plrRoot)
-		alignPos.RigidityEnabled = true
-		alignPos.MaxForce = 100000
-		alignPos.Responsiveness = 200
-		local alignOri = charRoot:FindFirstChildOfClass("AlignOrientation") or Instance.new("AlignOrientation", charRoot)
-		alignOri.Attachment0 = charRoot:FindFirstChild("RootAttachment")
-		alignOri.Attachment1 = plrRoot:FindFirstChild("RootAttachment")
-		alignOri.RigidityEnabled = true
-		alignOri.MaxTorque = 100000
-		alignOri.Responsiveness = 200
+		for _, part in pairs(platformParts) do
+			part:Destroy()
+		end
+		platformParts = {}
+		local thick = 1
+		local halfWidth = 2
+		local halfDepth = 2
+		local halfHeight = 3
+		local walls = {
+			{offset = CFrame.new(0, 0, halfDepth + thick/500), size = Vector3.new(4, 6, thick)},
+			{offset = CFrame.new(0, 0, -(halfDepth + thick/500)), size = Vector3.new(4, 6, thick)},
+			{offset = CFrame.new(halfWidth + thick/500, 0, 0), size = Vector3.new(thick, 6, 4)},
+			{offset = CFrame.new(-(halfWidth + thick/500), 0, 0), size = Vector3.new(thick, 6, 4)},
+			{offset = CFrame.new(0, halfHeight + thick/500, 0), size = Vector3.new(4, thick, 4)},
+			{offset = CFrame.new(0, -(halfHeight + thick/500), 0), size = Vector3.new(4, thick, 4)}
+		}
+		for i, wall in ipairs(walls) do
+			local part = InstanceNew("Part")
+			part.Size = wall.size
+			part.Anchored = true
+			part.CanCollide = true
+			part.Transparency = 1
+			part.Parent = SafeGetService("Workspace").CurrentCamera
+			Insert(platformParts, part)
+		end
 		headSit = RunService.Heartbeat:Connect(function()
-			if not SafeGetService("Players"):FindFirstChild(plr.Name) or not plr.Character or not plr.Character:FindFirstChild("HumanoidRootPart") or hum.Sit == false then
-				alignPos:Destroy()
-				alignOri:Destroy()
-				headSit:Disconnect()
-				headSit = nil
+			if not SafeGetService("Players"):FindFirstChild(plr.Name) or not plr.Character or not plr.Character:FindFirstChild("Head") or hum.Sit == false then
+				if headSit then headSit:Disconnect() headSit = nil end
+				if sitDied then sitDied:Disconnect() sitDied = nil end
+				for _, part in pairs(platformParts) do
+					part:Destroy()
+				end
+				platformParts = {}
 			else
-				alignPos.Attachment1.Position = Vector3.new(0, 1.6, 0.4)
+				local targetHead = plr.Character:FindFirstChild("Head")
+				charRoot.CFrame = targetHead.CFrame * CFrame.new(0, 1.6, 0.4)
+				for i, wall in ipairs(walls) do
+					platformParts[i].CFrame = charRoot.CFrame * wall.offset
+				end
 			end
 		end)
 	end
 end, true)
 
 cmd.add({"unheadsit"}, {"unheadsit", "Stop the headsit command."}, function()
-	if headSit then
-		headSit:Disconnect()
-		headSit = nil
+	if headSit then headSit:Disconnect() headSit = nil end
+	if sitDied then sitDied:Disconnect() sitDied = nil end
+	for _, part in pairs(platformParts) do
+		part:Destroy()
 	end
-	if sitDied then
-		sitDied:Disconnect()
-		sitDied = nil
-	end
+	platformParts = {}
 	local char = getChar()
 	local hum = char and char:FindFirstChildOfClass("Humanoid")
 	if hum then
 		hum:ChangeState(Enum.HumanoidStateType.Jumping)
-	end
-	local charRoot = getRoot(char)
-	if charRoot then
-		for _, child in ipairs(charRoot:GetChildren()) do
-			if child:IsA("AlignPosition") or child:IsA("AlignOrientation") then
-				child:Destroy()
-			end
-		end
 	end
 end)
 
@@ -8484,13 +8437,10 @@ cmd.add({"unloopjump","unbhop"}, {"unloopjump (unbhop)", "Stop continuous jumpin
 	if jL then jL:Disconnect() jL = nil end
 end)
 
-headStand, standDied = nil, nil
+headStand, standDied, standParts = nil, nil, {}
 
 cmd.add({"headstand"}, {"headstand <player>", "Stand on someone's head."}, function(p)
-	if headStand then
-		headStand:Disconnect()
-		headStand = nil
-	end
+	if headStand then headStand:Disconnect() headStand = nil end
 	local targets = getPlr(p)
 	if #targets == 0 then return end
 	local plr = targets[1]
@@ -8499,33 +8449,64 @@ cmd.add({"headstand"}, {"headstand <player>", "Stand on someone's head."}, funct
 	local hum = char:FindFirstChildOfClass("Humanoid")
 	if not hum then return end
 	standDied = hum.Died:Connect(function()
-		if headStand then
-			headStand:Disconnect()
-			headStand = nil
+		if headStand then headStand:Disconnect() headStand = nil end
+		for _, part in pairs(standParts) do
+			part:Destroy()
 		end
+		standParts = {}
+		if standDied then standDied:Disconnect() standDied = nil end
 	end)
+	for _, part in pairs(standParts) do
+		part:Destroy()
+	end
+	standParts = {}
+	local thick = 1
+	local halfWidth = 2
+	local halfDepth = 2
+	local halfHeight = 3
+	local walls = {
+		{offset = CFrame.new(0, 0, halfDepth + thick/500), size = Vector3.new(4, 6, thick)},
+		{offset = CFrame.new(0, 0, -(halfDepth + thick/500)), size = Vector3.new(4, 6, thick)},
+		{offset = CFrame.new(halfWidth + thick/500, 0, 0), size = Vector3.new(thick, 6, 4)},
+		{offset = CFrame.new(-(halfWidth + thick/500), 0, 0), size = Vector3.new(thick, 6, 4)},
+		{offset = CFrame.new(0, halfHeight + thick/500, 0), size = Vector3.new(4, thick, 4)},
+		{offset = CFrame.new(0, -(halfHeight + thick/500), 0), size = Vector3.new(4, thick, 4)}
+	}
+	for i, wall in ipairs(walls) do
+		local part = InstanceNew("Part")
+		part.Size = wall.size
+		part.Anchored = true
+		part.CanCollide = true
+		part.Transparency = 1
+		part.Parent = SafeGetService("Workspace").CurrentCamera
+		Insert(standParts, part)
+	end
 	headStand = RunService.Heartbeat:Connect(function()
 		local plrCharacter = plr.Character
 		if Players:FindFirstChild(plr.Name) and plrCharacter and getRoot(plrCharacter) and getRoot(char) then
-			getRoot(char).CFrame = getRoot(plrCharacter).CFrame * CFrame.new(0, 4.6, 0.4)
-		else
-			if headStand then
-				headStand:Disconnect()
-				headStand = nil
+			local charRoot = getRoot(char)
+			charRoot.CFrame = getRoot(plrCharacter).CFrame * CFrame.new(0, 4.6, 0.4)
+			for i, wall in ipairs(walls) do
+				standParts[i].CFrame = charRoot.CFrame * wall.offset
 			end
+		else
+			if headStand then headStand:Disconnect() headStand = nil end
+			if standDied then standDied:Disconnect() standDied = nil end
+			for _, part in pairs(standParts) do
+				part:Destroy()
+			end
+			standParts = {}
 		end
 	end)
 end, true)
 
 cmd.add({"unheadstand"}, {"unheadstand", "Stop the headstand command."}, function()
-	if headStand then
-		headStand:Disconnect()
-		headStand = nil
+	if headStand then headStand:Disconnect() headStand = nil end
+	if standDied then standDied:Disconnect() standDied = nil end
+	for _, part in pairs(standParts) do
+		part:Destroy()
 	end
-	if standDied then
-		standDied:Disconnect()
-		standDied = nil
-	end
+	standParts = {}
 end)
 
 loopws = false
@@ -8669,7 +8650,7 @@ cmd.add({"loopwaveat", "loopwat"}, {"loopwaveat <player> (loopwat)", "Wave to a 
 		repeat
 			wait(0.2)
 			local targetCFrame = getRoot(plr.Character).CFrame
-			local waveAnim = Instance.new("Animation")
+			local waveAnim = InstanceNew("Animation")
 			if char:FindFirstChildOfClass("Humanoid").RigType == Enum.HumanoidRigType.R15 then
 				waveAnim.AnimationId = "rbxassetid://507770239"
 			else
@@ -8727,7 +8708,7 @@ cmd.add({"waveat", "wat"}, {"waveat <player> (wat)", "Wave to a player"}, functi
 			local newCFrame = CFrame.new(charPos, Vector3.new(targetHRP.Position.X, charPos.Y, targetHRP.Position.Z))
 			Players.LocalPlayer.Character:SetPrimaryPartCFrame(newCFrame)
 		end
-		local waveAnim = Instance.new("Animation")
+		local waveAnim = InstanceNew("Animation")
 		if humanoid.RigType == Enum.HumanoidRigType.R15 then
 			waveAnim.AnimationId = "rbxassetid://507770239"
 		else
@@ -8741,15 +8722,15 @@ cmd.add({"waveat", "wat"}, {"waveat <player> (wat)", "Wave to a player"}, functi
 	end
 end, true)
 
-bang, bangAnim, bangLoop, bangDied = nil, nil, nil, nil
+bang, bangAnim, bangLoop, bangDied, bangParts = nil, nil, nil, nil, {}
 
-cmd.add({"headbang", "mouthbang", "hb", "mb"}, {"headbang <player> (mouthbang,hb,mb)", "Bang them in the mouth because you are gay"}, function(h, d)
+cmd.add({"headbang", "mouthbang", "headfuck", "mouthfuck", "hb", "mb"}, {"headbang <player> (mouthbang,headfuck,mouthfuck,hb,mb)", "Bang them in the mouth because you are gay"}, function(h, d)
 	local speed = d or 10
 	local username = h
 	local players = getPlr(username)
 	if #players == 0 then return end
 	local plr = players[1]
-	bangAnim = Instance.new("Animation")
+	bangAnim = InstanceNew("Animation")
 	if not IsR15(Players.LocalPlayer) then
 		bangAnim.AnimationId = "rbxassetid://148840371"
 	else
@@ -8768,7 +8749,36 @@ cmd.add({"headbang", "mouthbang", "hb", "mb"}, {"headbang <player> (mouthbang,hb
 		bang:Stop()
 		bangAnim:Destroy()
 		bangDied:Disconnect()
+		for _, part in pairs(bangParts) do
+			part:Destroy()
+		end
+		bangParts = {}
 	end)
+	for _, part in pairs(bangParts) do
+		part:Destroy()
+	end
+	bangParts = {}
+	local thick = 1
+	local halfWidth = 2
+	local halfDepth = 2
+	local halfHeight = 3
+	local walls = {
+		{offset = CFrame.new(0, 0, halfDepth + thick/500), size = Vector3.new(4, 6, thick)},
+		{offset = CFrame.new(0, 0, -(halfDepth + thick/500)), size = Vector3.new(4, 6, thick)},
+		{offset = CFrame.new(halfWidth + thick/500, 0, 0), size = Vector3.new(thick, 6, 4)},
+		{offset = CFrame.new(-(halfWidth + thick/500), 0, 0), size = Vector3.new(thick, 6, 4)},
+		{offset = CFrame.new(0, halfHeight + thick/500, 0), size = Vector3.new(4, thick, 4)},
+		{offset = CFrame.new(0, -(halfHeight + thick/500), 0), size = Vector3.new(4, thick, 4)}
+	}
+	for i, wall in ipairs(walls) do
+		local part = InstanceNew("Part")
+		part.Size = wall.size
+		part.Anchored = true
+		part.CanCollide = true
+		part.Transparency = 1
+		part.Parent = SafeGetService("Workspace").CurrentCamera
+		Insert(bangParts, part)
+	end
 	local bangOffset = CFrame.new(0, 1, -1.1)
 	bangLoop = RunService.Stepped:Connect(function()
 		pcall(function()
@@ -8785,6 +8795,9 @@ cmd.add({"headbang", "mouthbang", "hb", "mb"}, {"headbang <player> (mouthbang,hb
 					local newCFrame = CFrame.new(charPos, Vector3.new(targetRoot.Position.X, charPos.Y, targetRoot.Position.Z))
 					Players.LocalPlayer.Character:SetPrimaryPartCFrame(newCFrame)
 				end
+				for i, wall in ipairs(walls) do
+					bangParts[i].CFrame = localRoot.CFrame * wall.offset
+				end
 			end
 		end)
 	end)
@@ -8797,6 +8810,10 @@ cmd.add({"unheadbang", "unmouthbang", "unhb", "unmb"}, {"unheadbang (unmouthbang
 		bangAnim:Destroy()
 		bangDied:Disconnect()
 	end
+	for _, part in pairs(bangParts) do
+		part:Destroy()
+	end
+	bangParts = {}
 end)
 
 cmd.add({"improvetextures"},{"improvetextures","Switches Textures"},function()
@@ -8895,7 +8912,7 @@ cmd.add({"bang", "fuck"}, {"bang <player> <number> (fuck)", "fucks the player by
 	local targets = getPlr(username)
 	if #targets == 0 then return end
 	local plr = targets[1]
-	bangAnim = Instance.new("Animation")
+	bangAnim = InstanceNew("Animation")
 	if not IsR15(Players.LocalPlayer) then
 		bangAnim.AnimationId = "rbxassetid://148840371"
 	else
@@ -9057,7 +9074,7 @@ cmd.add({"airwalk", "float", "aw"}, {"airwalk (float, aw)", "Press space to go u
 	if awPart then awPart:Destroy() awPart = nil end
 
 	function createButton(parent, text, position, callbackDown, callbackUp)
-		local button = Instance.new("TextButton")
+		local button = InstanceNew("TextButton")
 		button.Parent = parent
 		button.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
 		button.BackgroundTransparency = 0
@@ -9070,10 +9087,10 @@ cmd.add({"airwalk", "float", "aw"}, {"airwalk (float, aw)", "Press space to go u
 		button.TextScaled = true
 		button.AutoButtonColor = false
 
-		local corner = Instance.new("UICorner", button)
+		local corner = InstanceNew("UICorner", button)
 		corner.CornerRadius = UDim.new(0.2, 0)
 
-		local stroke = Instance.new("UIStroke", button)
+		local stroke = InstanceNew("UIStroke", button)
 		stroke.Color = Color3.fromRGB(255, 255, 255)
 		stroke.Thickness = 2
 
@@ -9091,13 +9108,13 @@ cmd.add({"airwalk", "float", "aw"}, {"airwalk (float, aw)", "Press space to go u
 	end
 
 	if IsOnMobile then
-		local guiDown = Instance.new("ScreenGui", COREGUI)
+		local guiDown = InstanceNew("ScreenGui", COREGUI)
 		guiDown.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 		guiDown.ResetOnSpawn = false
 		airwalk.guis.down = guiDown
 		createButton(guiDown, "DOWN", UDim2.new(0.9, 0, 0.7, 0), function() airwalk.Vars.decrease = true end, function() airwalk.Vars.decrease = false end)
 
-		local guiUp = Instance.new("ScreenGui", COREGUI)
+		local guiUp = InstanceNew("ScreenGui", COREGUI)
 		guiUp.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 		guiUp.ResetOnSpawn = false
 		airwalk.guis.up = guiUp
@@ -9113,7 +9130,7 @@ cmd.add({"airwalk", "float", "aw"}, {"airwalk (float, aw)", "Press space to go u
 		end)
 	end
 
-	awPart = Instance.new("Part", SafeGetService("Workspace"))
+	awPart = InstanceNew("Part", SafeGetService("Workspace"))
 	awPart.Size = Vector3.new(7, 2, 3)
 	awPart.CFrame = getRoot(getChar()).CFrame - Vector3.new(0, 4, 0)
 	awPart.Transparency = 1
@@ -9366,8 +9383,7 @@ cmd.add({"spin"}, {"spin {amount}", "Makes your character spin as fast as you wa
 		spinPart = nil
 	end
 
-	spinPart = Instance.new("Part")
-	spinPart.Name = randomString()
+	spinPart = InstanceNew("Part")
 	spinPart.Anchored = false
 	spinPart.CanCollide = false
 	spinPart.Transparency = 1
@@ -9375,13 +9391,12 @@ cmd.add({"spin"}, {"spin {amount}", "Makes your character spin as fast as you wa
 	spinPart.Parent = workspace.CurrentCamera
 	spinPart.CFrame = getRoot(LocalPlayer.Character).CFrame
 
-	spinThingy = Instance.new("BodyAngularVelocity")
-	spinThingy.Name = randomString()
+	spinThingy = InstanceNew("BodyAngularVelocity")
 	spinThingy.Parent = spinPart
 	spinThingy.MaxTorque = Vector3.new(0, math.huge, 0)
 	spinThingy.AngularVelocity = Vector3.new(0, spinSpeed, 0)
 
-	local weld = Instance.new("WeldConstraint")
+	local weld = InstanceNew("WeldConstraint")
 	weld.Part0 = spinPart
 	weld.Part1 = getRoot(LocalPlayer.Character)
 	weld.Parent = spinPart
@@ -9508,7 +9523,7 @@ cmd.add({"light"}, {"light <range> <brightness>", "Gives your player dynamic lig
 	range = tonumber(range) or 30
 	brightness = tonumber(brightness) or 1
 
-	local light = Instance.new("PointLight")
+	local light = InstanceNew("PointLight")
 	light.Parent = getRoot(Player.Character)
 	light.Range = range
 	light.Brightness = brightness
@@ -9893,7 +9908,7 @@ local partTrigger = nil
 local espTriggers = {}
 
 function createBox(part, color, transparency)
-	local box = Instance.new("BoxHandleAdornment")
+	local box = InstanceNew("BoxHandleAdornment")
 	box.Name = part.Name:lower().."_ESP"
 	box.Parent = part
 	box.Adornee = part
@@ -10111,9 +10126,9 @@ cmd.add({"breakcars", "bcars"}, {"breakcars (bcars)", "Breaks any car"}, functio
 	local UserInputService = UserInputService
 	local Mouse = Players.LocalPlayer:GetMouse()
 	local Workspace = SafeGetService("Workspace")
-	local Folder = Instance.new("Folder", Workspace)
-	local Part = Instance.new("Part", Folder)
-	local Attachment1 = Instance.new("Attachment", Part)
+	local Folder = InstanceNew("Folder", Workspace)
+	local Part = InstanceNew("Part", Folder)
+	local Attachment1 = InstanceNew("Attachment", Part)
 
 	Part.Anchored = true
 	Part.CanCollide = false
@@ -10159,11 +10174,11 @@ cmd.add({"breakcars", "bcars"}, {"breakcars (bcars)", "Breaks any car"}, functio
 
 			part.CanCollide = false
 
-			local torque = Instance.new("Torque", part)
+			local torque = InstanceNew("Torque", part)
 			torque.Torque = Vector3.new(100000, 100000, 100000)
 
-			local alignPosition = Instance.new("AlignPosition", part)
-			local attachment2 = Instance.new("Attachment", part)
+			local alignPosition = InstanceNew("AlignPosition", part)
+			local attachment2 = InstanceNew("Attachment", part)
 
 			torque.Attachment0 = attachment2
 			alignPosition.MaxForce = math.huge
@@ -10775,7 +10790,7 @@ cmd.add({"toolinvisible", "tinvis"}, {"toolinvisible (tinvis)", "Be invisible wh
 		end
 	end
 
-	local tool = Instance.new("Tool", Players.LocalPlayer.Backpack)
+	local tool = InstanceNew("Tool", Players.LocalPlayer.Backpack)
 	tool.Name = "Turn Invisible"
 	tool.RequiresHandle = false
 	tool.CanBeDropped = false
@@ -10793,13 +10808,13 @@ cmd.add({"toolinvisible", "tinvis"}, {"toolinvisible (tinvis)", "Be invisible wh
 				weld:Destroy()
 			end
 
-			handle = Instance.new("Part", SafeGetService("Workspace"))
+			handle = InstanceNew("Part", SafeGetService("Workspace"))
 			handle.Name = "Handle"
 			handle.Transparency = 1
 			handle.CanCollide = false
 			handle.Size = Vector3.new(2, 1, 1)
 
-			weld = Instance.new("Weld", handle)
+			weld = InstanceNew("Weld", handle)
 			weld.Part0 = handle
 			weld.Part1 = getRoot(getChar())
 			weld.C0 = CFrame.new(0, offset - 1.5, 0)
@@ -10982,10 +10997,10 @@ cmd.add({"invisible", "invis"}, {"invisible (invis)", "Sets invisibility to scar
 
 	if IsOnMobile then
 		if invisBtnlol then invisBtnlol:Destroy() invisBtnlol = nil end
-		invisBtnlol = Instance.new("ScreenGui")
-		local TextButton = Instance.new("TextButton")
-		local UICorner = Instance.new("UICorner")
-		local UIAspectRatioConstraint = Instance.new("UIAspectRatioConstraint")
+		invisBtnlol = InstanceNew("ScreenGui")
+		local TextButton = InstanceNew("TextButton")
+		local UICorner = InstanceNew("UICorner")
+		local UIAspectRatioConstraint = InstanceNew("UIAspectRatioConstraint")
 
 		NaProtectUI(invisBtnlol)
 		invisBtnlol.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
@@ -11784,8 +11799,8 @@ gui.menuify = function(menu)
 	local minimizeButton = menu:FindFirstChild("Minimize", true)
 	local minimized = false
 	local isAnimating = false
-	local sizeX = Instance.new("IntValue", menu)
-	local sizeY = Instance.new("IntValue", menu)
+	local sizeX = InstanceNew("IntValue", menu)
+	local sizeY = InstanceNew("IntValue", menu)
 
 	local function toggleMinimize()
 		if isAnimating then return end
@@ -11821,8 +11836,8 @@ gui.menuifyv2 = function(menu)
 	local clearButton = menu:FindFirstChild("Clear", true)
 	local minimized = false
 	local isAnimating = false
-	local sizeX = Instance.new("IntValue", menu)
-	local sizeY = Instance.new("IntValue", menu)
+	local sizeX = InstanceNew("IntValue", menu)
+	local sizeY = InstanceNew("IntValue", menu)
 
 	local function toggleMinimize()
 		if isAnimating then return end
@@ -12339,14 +12354,13 @@ NACaller(function()
 end)
 
 --[[ COMMAND BAR BUTTON ]]--
-local TextLabel = Instance.new("TextLabel")
-local UICorner = Instance.new("UICorner")
-local ImageButton = Instance.new("ImageButton")
-local UICorner2 = Instance.new("UICorner")
-local UIGradient = Instance.new("UIGradient")
+local TextLabel = InstanceNew("TextLabel")
+local UICorner = InstanceNew("UICorner")
+local ImageButton = InstanceNew("ImageButton")
+local UICorner2 = InstanceNew("UICorner")
+local UIGradient = InstanceNew("UIGradient")
 
 TextLabel.Parent = ScreenGui
-TextLabel.Name = randomString()
 TextLabel.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 TextLabel.BackgroundTransparency = 0.2
 TextLabel.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -12360,7 +12374,6 @@ TextLabel.TextWrapped = true
 TextLabel.ZIndex = 9999
 
 ImageButton.Parent = ScreenGui
-ImageButton.Name = randomString()
 ImageButton.AnchorPoint = Vector2.new(0.5, 0)
 ImageButton.BackgroundTransparency = 1
 ImageButton.BorderSizePixel = 0
