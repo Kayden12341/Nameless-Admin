@@ -12091,9 +12091,11 @@ gui.menuify(UpdLogsFrame)
 --[[ GUI RESIZE FUNCTION ]]--
 
 --Discover({Enum.Platform.IOS,Enum.Platform.Android},UserInputService:GetPlatform()) | searches if the player is on mobile.
-gui.resizeable(chatLogsFrame)
-gui.resizeable(commandsFrame)
-gui.resizeable(UpdLogsFrame)
+if IsOnPC then
+	gui.resizeable(chatLogsFrame)
+	gui.resizeable(commandsFrame)
+	gui.resizeable(UpdLogsFrame)
+end
 
 --[[ CMDS COMMANDS SEARCH FUNCTION ]]--
 commandsFilter.Changed:Connect(function(p)
