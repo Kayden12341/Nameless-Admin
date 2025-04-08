@@ -3311,15 +3311,19 @@ end)
 function respawn()
 	local pos = getRoot(getChar()).CFrame
 	local old = getChar()
-	local hum = old:FindFirstChildOfClass("Humanoid")
-	hum:ChangeState(Enum.HumanoidStateType.Dead)
-	hum.Health = 0
+	local h = old:FindFirstChildOfClass("Humanoid")
+	h:ChangeState(Enum.HumanoidStateType.Dead)
+	h.Health = 0
 	local new = player.CharacterAdded:Wait()
 	wait(0.2)
-	local root = getRoot(new)
-	local st = tick()
-	while tick() - st < 1 do
-		root.CFrame = pos
+	local r = getRoot(new)
+	local lg = tick()
+	local thr = 1
+	while tick() - lg < 1 do
+		if (r.Position - pos.p).Magnitude > thr then
+			r.CFrame = pos
+			lg = tick()
+		end
 		wait(0.1)
 	end
 end
