@@ -6250,8 +6250,9 @@ cmd.add({"fly"}, {"fly [speed]", "Enable flight"}, function(...)
 		speedBox.Parent = mFlyBruh
 		speedBox.BackgroundColor3 = Color3.fromRGB(30,30,30)
 		speedBox.BackgroundTransparency = 0.1
-		speedBox.Position = UDim2.new(0.99, 0, 0.5, 0)
-		speedBox.Size = UDim2.new(0.08, 0, 0.1, 0)
+		speedBox.AnchorPoint = Vector2.new(0.5, 0)
+		speedBox.Position = UDim2.new(0.5, 0, 0, 10)
+		speedBox.Size = UDim2.new(0, 200, 0, 50)
 		speedBox.Font = Enum.Font.GothamBold
 		speedBox.Text = tostring(flySpeed)
 		speedBox.TextColor3 = Color3.fromRGB(255,255,255)
