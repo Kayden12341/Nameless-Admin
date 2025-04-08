@@ -3442,6 +3442,7 @@ cmd.add({"vfly", "vehiclefly"}, {"vehiclefly (vfly)", "be able to fly vehicles"}
 			end)
 		end)()
 		gui.draggable(btn)
+		gui.draggable(speedBox)
 	else
 		FLYING = false
 		getHum().PlatformStand = false
@@ -6769,6 +6770,7 @@ cmd.add({"freecam","fc","fcam"},{"freecam [speed] (fc,fcam)","Enable free camera
 		end)()
 
 		gui.draggable(btn)
+		gui.draggable(speedBox)
 	else
 		DoNotif("Freecam is activated, use WASD to move around", 2)
 		runFREECAM()
