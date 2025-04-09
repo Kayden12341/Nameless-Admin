@@ -158,7 +158,7 @@ end
 
 
 --[[ Version ]]--
-local curVer = isAprilFools() and Format("%d.%d.%d", math.random(1, 10), math.random(0, 99), math.random(0, 99)) or "2.3"
+local curVer = isAprilFools() and Format("%d.%d.%d", math.random(1, 10), math.random(0, 99), math.random(0, 99)) or "2.4"
 
 --[[ Brand ]]--
 local mainName = 'Nameless Admin'
@@ -334,6 +334,7 @@ until Notification~=nil --waits for the module to load (cause loadstring takes a
 local Notify=Notification.Notify;
 
 function DoNotif(txt,dur,naem)
+	if not txt then txt='something' end
 	if not dur then dur=5 end
 	if not naem then naem=adminName end
 	Notify({
@@ -342,8 +343,6 @@ function DoNotif(txt,dur,naem)
 		Duration=dur;
 	});
 end
-
-wait();--added wait due to the Http being a bit delayed on returning (should fix the issue where Nameless Admin wouldn't load sometimes)
 
 --Custom file functions checker checker
 local CustomFunctionSupport=isfile and isfolder and writefile and readfile and listfiles;
@@ -465,9 +464,9 @@ _G.NAadminsLol={
 	144324719; --Cosmic
 	1844177730; --glexinator
 	2624269701; --Akim
-	2502806181; -- null
-	1594235217; -- Purple
-	1620986547; -- pc alt
+	2502806181; --null
+	1594235217; --Purple
+	1620986547; --pc alt
 }
 
 if UserInputService.TouchEnabled then
@@ -909,7 +908,8 @@ function getChar()
 end
 
 function getPlrChar(plr)
-	return plr and plr.Character or nil
+	local fix=plr:IsA("Player") and (plr and plr.Character) or plr or nil
+	return fix
 end
 
 function getBp()
@@ -1194,6 +1194,7 @@ end)
 
 local ESPenabled=false
 local chamsEnabled=false
+espCONS = {}
 
 
 function round(num,numDecimalPlaces)
@@ -1240,135 +1241,161 @@ function placeCreator()
 	return GaemInfo.Creator.Name
 end
 
+function storeESP(p, cType, conn)
+    if not espCONS[p.Name] then
+        espCONS[p.Name] = {}
+    end
+    Insert(espCONS[p.Name], {type = cType, connection = conn})
+end
+
+function discPlrESP(player)
+    if espCONS[player.Name] then
+        for _, entry in ipairs(espCONS[player.Name]) do
+            if entry.connection then
+                entry.connection:Disconnect()
+            end
+        end
+        espCONS[player.Name] = nil
+    end
+    removeESPonLEAVE(player)
+end
+
+function removeAllESP()
+    for _, child in pairs(COREGUI:GetChildren()) do
+        if Sub(child.Name, -4) == '_ESP' then
+            child:Destroy()
+        end
+    end
+    for playerName, _ in pairs(espCONS) do
+        espCONS[playerName] = nil
+    end
+end
+
 function removeESPonLEAVE(plr)
-	if plr then
-		for _, child in pairs(COREGUI:GetChildren()) do
-			if child.Name == plr.Name..'_ESP' then
-				child:Destroy()
-			end
-		end
-	end
+    if plr then
+        for _, child in pairs(COREGUI:GetChildren()) do
+            if child.Name == plr.Name..'_ESP' then
+                child:Destroy()
+            end
+        end
+    end
 end
 
-function removeESP()
-	for _, child in pairs(COREGUI:GetChildren()) do
-		if Sub(child.Name, -4) == '_ESP' then
-			child:Destroy()
-		end
-	end
-end
+function ESP(player, persistent)
+    persistent = persistent or false
+    Spawn(function()
+        discPlrESP(player)
+        
+        for _, child in pairs(COREGUI:GetChildren()) do
+            if child.Name == player.Name..'_ESP' then
+                child:Destroy()
+            end
+        end
+        Wait()
 
-function ESP(player)
-	Spawn(function()
-		for _, child in pairs(COREGUI:GetChildren()) do
-			if child.Name == player.Name..'_ESP' then
-				child:Destroy()
-			end
-		end
-		Wait()
+        local function createESP()
+            if player.Character and player.Name ~= Players.LocalPlayer.Name and not COREGUI:FindFirstChild(player.Name..'_ESP') then
+                local espHolder = InstanceNew("Folder")
+                espHolder.Name = player.Name..'_ESP'
+                espHolder.Parent = COREGUI
 
-		local function createESP()
-			if player.Character and player.Name ~= Players.LocalPlayer.Name and not COREGUI:FindFirstChild(player.Name..'_ESP') then
-				local espHolder = InstanceNew("Folder")
-				espHolder.Name = player.Name..'_ESP'
-				espHolder.Parent = COREGUI
+                repeat Wait(1) until player.Character and getRoot(player.Character) and player.Character:FindFirstChildOfClass("Humanoid")
 
-				repeat Wait(1) until player.Character and getRoot(player.Character) and player.Character:FindFirstChildOfClass("Humanoid")
+                local adornments = {}
 
-				local adornments = {}
+                for _, part in pairs(player.Character:GetChildren()) do
+                    if part:IsA("BasePart") and not part:FindFirstChildOfClass("Accessory") then
+                        local boxAdornment = InstanceNew("BoxHandleAdornment")
+                        boxAdornment.Name = player.Name.."_Box"
+                        boxAdornment.Parent = espHolder
+                        boxAdornment.Adornee = part
+                        boxAdornment.AlwaysOnTop = true
+                        boxAdornment.ZIndex = 0
+                        boxAdornment.Size = part.Size
+                        boxAdornment.Color3 = Color3.fromRGB(0, 255, 0)
+                        boxAdornment.Transparency = 0.45
+                        Insert(adornments, boxAdornment)
+                    end
+                end
 
-				for _, part in pairs(player.Character:GetChildren()) do
-					if part:IsA("BasePart") and not part:FindFirstChildOfClass("Accessory") then
-						local boxAdornment = InstanceNew("BoxHandleAdornment")
-						boxAdornment.Name = player.Name.."_Box"
-						boxAdornment.Parent = espHolder
-						boxAdornment.Adornee = part
-						boxAdornment.AlwaysOnTop = true
-						boxAdornment.ZIndex = 0
-						boxAdornment.Size = part.Size
-						boxAdornment.Color3 = Color3.fromRGB(0, 255, 0)
-						boxAdornment.Transparency = 0.45
-						Insert(adornments, boxAdornment)
-					end
-				end
+                if player.Character:FindFirstChild("Head") then
+                    local billboardGui = InstanceNew("BillboardGui")
+                    local textLabel = InstanceNew("TextLabel")
 
-				if player.Character:FindFirstChild("Head") then
-					local billboardGui = InstanceNew("BillboardGui")
-					local textLabel = InstanceNew("TextLabel")
+                    billboardGui.Adornee = player.Character:FindFirstChild("Head")
+                    billboardGui.Parent = espHolder
+                    billboardGui.Size = UDim2.new(0, 200, 0, 100)
+                    billboardGui.StudsOffset = Vector3.new(0, 2, 0)
+                    billboardGui.AlwaysOnTop = true
 
-					billboardGui.Adornee = player.Character:FindFirstChild("Head")
-					billboardGui.Parent = espHolder
-					billboardGui.Size = UDim2.new(0, 200, 0, 100)
-					billboardGui.StudsOffset = Vector3.new(0, 2, 0)
-					billboardGui.AlwaysOnTop = true
+                    textLabel.Parent = billboardGui
+                    textLabel.BackgroundTransparency = 1
+                    textLabel.Size = UDim2.new(1, 0, 1, 0)
+                    textLabel.Font = Enum.Font.GothamBold
+                    textLabel.TextSize = 14
+                    textLabel.TextStrokeTransparency = 0.2
+                    textLabel.TextYAlignment = Enum.TextYAlignment.Center
+                    textLabel.Visible = not chamsEnabled
 
-					textLabel.Parent = billboardGui
-					textLabel.BackgroundTransparency = 1
-					textLabel.Size = UDim2.new(1, 0, 1, 0)
-					textLabel.Font = Enum.Font.GothamBold
-					textLabel.TextSize = 14
-					textLabel.TextStrokeTransparency = 0.2
-					textLabel.TextYAlignment = Enum.TextYAlignment.Center
-					textLabel.Visible = not chamsEnabled
+                    local espLoop
+                    espLoop = RunService.RenderStepped:Connect(function()
+                        if COREGUI:FindFirstChild(player.Name..'_ESP') then
+                            if player.Character and getRoot(player.Character) and player.Character:FindFirstChildOfClass("Humanoid") then
+                                local health = math.floor(player.Character:FindFirstChildOfClass("Humanoid").Health)
+                                local maxHealth = math.floor(player.Character:FindFirstChildOfClass("Humanoid").MaxHealth)
+                                local teamColor = player.Team and player.Team.TeamColor.Color or Color3.fromRGB(255, 255, 255)
 
-					local espLoop
-					espLoop = RunService.RenderStepped:Connect(function()
-						if COREGUI:FindFirstChild(player.Name..'_ESP') then
-							if player.Character and getRoot(player.Character) and player.Character:FindFirstChildOfClass("Humanoid") then
-								local health = math.floor(player.Character:FindFirstChildOfClass("Humanoid").Health)
-								local maxHealth = math.floor(player.Character:FindFirstChildOfClass("Humanoid").MaxHealth)
-								local teamColor = player.Team and player.Team.TeamColor.Color or Color3.fromRGB(255, 255, 255)
+                                local displayName = nameChecker(player)
 
-								local displayName = nameChecker(player)
+                                if Players.LocalPlayer.Character and getRoot(Players.LocalPlayer.Character) and Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
+                                    local distance = math.floor((getRoot(Players.LocalPlayer.Character).Position - getRoot(player.Character).Position).magnitude)
+                                    if player.Team then
+                                        textLabel.Text = Format("%s | Health: %d/%d | Studs: %d | Team: %s", displayName, health, maxHealth, distance, player.Team.Name)
+                                    else
+                                        textLabel.Text = Format("%s | Health: %d/%d | Studs: %d", displayName, health, maxHealth, distance)
+                                    end
+                                    textLabel.TextColor3 = distance < 50 and Color3.fromRGB(255, 0, 0) or distance < 100 and Color3.fromRGB(255, 165, 0) or Color3.fromRGB(0, 255, 0)
+                                else
+                                    if player.Team then
+                                        textLabel.Text = Format("%s | Health: %d/%d | Team: %s", displayName, health, maxHealth, player.Team.Name)
+                                    else
+                                        textLabel.Text = Format("%s | Health: %d/%d", displayName, health, maxHealth)
+                                    end
+                                    textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+                                end
 
-								if Players.LocalPlayer.Character and getRoot(Players.LocalPlayer.Character) and Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
-									local distance = math.floor((getRoot(Players.LocalPlayer.Character).Position - getRoot(player.Character).Position).magnitude)
-									if player.Team then
-										textLabel.Text = Format("%s | Health: %d/%d | Studs: %d | Team: %s", displayName, health, maxHealth, distance, player.Team.Name)
-									else
-										textLabel.Text = Format("%s | Health: %d/%d | Studs: %d", displayName, health, maxHealth, distance)
-									end
-									textLabel.TextColor3 = distance < 50 and Color3.fromRGB(255, 0, 0) or distance < 100 and Color3.fromRGB(255, 165, 0) or Color3.fromRGB(0, 255, 0)
-								else
-									if player.Team then
-										textLabel.Text = Format("%s | Health: %d/%d | Team: %s", displayName, health, maxHealth, player.Team.Name)
-									else
-										textLabel.Text = Format("%s | Health: %d/%d", displayName, health, maxHealth)
-									end
-									textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-								end
+                                for _, adornment in pairs(adornments) do
+                                    adornment.Color3 = teamColor
+                                end
+                            end
+                        else
+                            espLoop:Disconnect()
+                        end
+                    end)
+                    storeESP(player, "renderStepped", espLoop)
+                end
+            end
+        end
 
-								for _, adornment in pairs(adornments) do
-									adornment.Color3 = teamColor
-								end
-							end
-						else
-							espLoop:Disconnect()
-						end
-					end)
-				end
-			end
-		end
+        createESP()
 
-		createESP()
+        local characterAddedConnection
+        characterAddedConnection = player.CharacterAdded:Connect(function()
+            if not ESPenabled and not persistent then
+                characterAddedConnection:Disconnect()
+                return
+            end
 
-		local characterAddedConnection
-		characterAddedConnection = player.CharacterAdded:Connect(function()
-			if not ESPenabled then
-				characterAddedConnection:Disconnect()
-				return
-			end
-
-			for _, child in pairs(COREGUI:GetChildren()) do
-				if child.Name == player.Name..'_ESP' then
-					child:Destroy()
-				end
-			end
-
-			Wait(1)
-			createESP()
-		end)
-	end)
+            for _, child in pairs(COREGUI:GetChildren()) do
+                if child.Name == player.Name..'_ESP' then
+                    child:Destroy()
+                end
+            end
+            Wait(1)
+            createESP()
+        end)
+        storeESP(player, "characterAdded", characterAddedConnection)
+    end)
 end
 
 local Signal1, Signal2 = nil, nil
@@ -4762,7 +4789,7 @@ cmd.add({"clicktp", "tptool"}, {"clicktp (tptool)", "Teleport where your mouse i
         local downConn = mouse.Button1Down:Connect(function()
             initialMousePosition = Vector2.new(mouse.X, mouse.Y)
         end)
-        table.insert(tpConnections, downConn)
+        Insert(tpConnections, downConn)
 
         local upConn = mouse.Button1Up:Connect(function()
             if initialMousePosition then
@@ -4774,7 +4801,7 @@ cmd.add({"clicktp", "tptool"}, {"clicktp (tptool)", "Teleport where your mouse i
             end
             initialMousePosition = nil
         end)
-        table.insert(tpConnections, upConn)
+        Insert(tpConnections, upConn)
     end
 
     CustomClick(function(mouse)
@@ -5088,7 +5115,7 @@ cmd.add({"unshiftlock","unsl"},{"unshiftlock (unsl)","Disables shiftlock"},funct
 	end
 end)
 
--- if you're ready this use the command 'cmdloop enable' to enable the command loop
+-- if you're reading this use the command 'cmdloop enable' to enable the command loop
 -- example 'cmdloop enable shiftlock hidden' (hides notification to display) or set hidden to just anything as long as argument 2 is not empty 💀
 
 cmd.add({"enable"}, {"enable", "Enables a specific CoreGui"}, function(...)
@@ -5237,61 +5264,70 @@ cmd.add({"cam", "camera", "cameratype"}, {"cam (camera, cameratype)", "Manage ca
 end)
 
 cmd.add({"esp"}, {"esp", "locate where the players are"}, function()
-	ESPenabled = true
-	chamsEnabled = false
-	for _, player in pairs(Players:GetPlayers()) do
-		if player.Name ~= Players.LocalPlayer.Name then
-			ESP(player)
-		end
-	end
+    ESPenabled = true
+    chamsEnabled = false
+    for _, player in pairs(Players:GetPlayers()) do
+        if player.Name ~= Players.LocalPlayer.Name then
+            ESP(player)
+        end
+    end
 
-	if not _G.ESPJoinConnection then
-		_G.ESPJoinConnection = Players.PlayerAdded:Connect(function(player)
-			if ESPenabled and player.Name ~= Players.LocalPlayer.Name then
-				ESP(player)
-			end
-		end)
-	end
+    if not _G.ESPJoinConnection then
+        _G.ESPJoinConnection = Players.PlayerAdded:Connect(function(player)
+            if ESPenabled and player.Name ~= Players.LocalPlayer.Name then
+                ESP(player)
+            end
+        end)
+    end
 end)
 
 cmd.add({"chams"}, {"chams", "ESP but without the text :shock:"}, function()
-	ESPenabled = true
-	chamsEnabled = true
-	for _, player in pairs(Players:GetPlayers()) do
-		if player.Name ~= Players.LocalPlayer.Name then
-			ESP(player)
-		end
-	end
+    ESPenabled = true
+    chamsEnabled = true
+    for _, player in pairs(Players:GetPlayers()) do
+        if player.Name ~= Players.LocalPlayer.Name then
+            ESP(player)
+        end
+    end
 
-	if not _G.ESPJoinConnection then
-		_G.ESPJoinConnection = Players.PlayerAdded:Connect(function(player)
-			if ESPenabled and player.Name ~= Players.LocalPlayer.Name then
-				ESP(player)
-			end
-		end)
-	end
+    if not _G.ESPJoinConnection then
+        _G.ESPJoinConnection = Players.PlayerAdded:Connect(function(player)
+            if ESPenabled and player.Name ~= Players.LocalPlayer.Name then
+                ESP(player)
+            end
+        end)
+    end
 end)
 
 cmd.add({"locate"}, {"locate <username>", "locate where the players are"}, function(...)
-	local username = (...)
-	local target = getPlr(username)
-	for _, plr in next, target do
-		if plr then
-			ESP(plr)
-		end
-	end
+    local username = (...)
+    local target = getPlr(username)
+    for _, plr in next, target do
+        if plr then
+            ESP(plr, true)
+        end
+    end
 end, true)
 
-cmd.add({"unesp", "unlocate", "unchams"}, {"unesp (unlocate, unchams)", "Disables esp/chams"}, function()
-	ESPenabled = false
-	chamsEnabled = false
-	removeESP()
+cmd.add({"unesp", "unchams"}, {"unesp (unchams)", "Disables esp/chams"}, function()
+    ESPenabled = false
+    chamsEnabled = false
+    removeAllESP()
 
-	if _G.ESPJoinConnection then
-		_G.ESPJoinConnection:Disconnect()
-		_G.ESPJoinConnection = nil
-	end
+    if _G.ESPJoinConnection then
+        _G.ESPJoinConnection:Disconnect()
+        _G.ESPJoinConnection = nil
+    end
 end)
+
+cmd.add({"unlocate"}, {"unlocate <player>"}, function(username)
+    local target = getPlr(username)
+    for _, plr in next, target do
+        if plr then
+            discPlrESP(plr)
+        end
+    end
+end, true)
 
 cmd.add({"crash"},{"crash","crashes ur client lol"},function()
 	while true do end
@@ -8923,7 +8959,7 @@ cmd.add({"bang", "fuck"}, {"bang <player> <number> (fuck)", "fucks the player by
 	end)
 end, true)
 
-cmd.add({"unbang","unfuck"},{"unbang","Unbangs the player"},function()
+cmd.add({"unbang","unfuck"},{"unbang (unfuck)","Unbangs the player"},function()
 	if bangLoop then
 		bangLoop:Disconnect()
 	end
@@ -8936,6 +8972,155 @@ cmd.add({"unbang","unfuck"},{"unbang","Unbangs the player"},function()
 	if bangDied then
 		bangDied:Disconnect()
 	end
+end)
+
+hugConnections = {}
+hugUI = nil
+currentHugTracks = {}
+currentHugTarget = nil
+hugFromFront = false
+hugModeEnabled = false
+
+cmd.add({"hug", "clickhug"}, {"hug (clickhug", "huggies time (click on a target to hug)"}, function()
+    local mouse = LocalPlayer:GetMouse()
+    
+    for _, conn in pairs(hugConnections) do
+        if conn then conn:Disconnect() end
+    end
+    for _, track in pairs(currentHugTracks) do
+        pcall(function() track:Stop() end)
+    end
+    currentHugTracks = {}
+    hugConnections = {}
+    if hugUI then
+        hugUI:Destroy()
+    end
+    hugFromFront = false
+    hugUI = InstanceNew("ScreenGui")
+    hugUI.Name = "HugModeUI"
+    NaProtectUI(hugUI)
+    
+    local toggleHugButton = InstanceNew("TextButton")
+	toggleHugButton.AnchorPoint = Vector2.new(0.5,0)
+    toggleHugButton.Size = UDim2.new(0, 150, 0, 50)
+    toggleHugButton.Position = UDim2.new(0.45, 0, 0.05, 0)
+    toggleHugButton.Text = "Hug Mode: OFF"
+	toggleHugButton.TextSize = 14
+    toggleHugButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    toggleHugButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    toggleHugButton.Parent = hugUI
+
+    local sideToggleButton = InstanceNew("TextButton")
+	sideToggleButton.AnchorPoint = Vector2.new(0.5,0)
+    sideToggleButton.Size = UDim2.new(0, 150, 0, 50)
+    sideToggleButton.Position = UDim2.new(0.55, 0, 0.05, 0)
+    sideToggleButton.Text = "Hug Side: Back"
+	sideToggleButton.TextSize = 14
+    sideToggleButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    sideToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    sideToggleButton.Parent = hugUI
+
+    local uiCorner = InstanceNew("UICorner")
+    uiCorner.CornerRadius = UDim.new(0, 8)
+    uiCorner.Parent = toggleHugButton
+
+    local sideUICorner = InstanceNew("UICorner")
+    sideUICorner.CornerRadius = UDim.new(0, 8)
+    sideUICorner.Parent = sideToggleButton
+
+    gui.draggablev2(toggleHugButton)
+    gui.draggablev2(sideToggleButton)
+
+    hugModeEnabled = false
+
+    local function performHug(targetCharacter)
+        local offsetDistance = 1.5
+        local targetHRP = getRoot(targetCharacter)
+        local localCharacter = LocalPlayer.Character
+        if not localCharacter then return end
+        local localHRP = getRoot(localCharacter)
+        if targetHRP and localHRP then
+            local offset = (hugFromFront and (targetHRP.CFrame.LookVector * offsetDistance)) or (-(targetHRP.CFrame.LookVector * offsetDistance))
+            local initialHugPos = targetHRP.Position + offset
+            localHRP.CFrame = CFrame.new(initialHugPos, targetHRP.Position)
+            local humanoid = getPlrHum(localCharacter)
+            if humanoid then
+                local anim1 = InstanceNew("Animation")
+                anim1.AnimationId = "rbxassetid://283545583"
+                local track1 = humanoid:LoadAnimation(anim1)
+                local anim2 = InstanceNew("Animation")
+                anim2.AnimationId = "rbxassetid://225975820"
+                local track2 = humanoid:LoadAnimation(anim2)
+                Insert(currentHugTracks, track1)
+                Insert(currentHugTracks, track2)
+                track1:Play()
+                track2:Play()
+                currentHugTarget = targetCharacter
+                Spawn(function()
+                    while hugModeEnabled and targetCharacter and targetCharacter:FindFirstChild("HumanoidRootPart") and (currentHugTarget == targetCharacter) do
+                        targetHRP = getRoot(targetCharacter)
+                        offset = (hugFromFront and (targetHRP.CFrame.LookVector * offsetDistance)) or (-(targetHRP.CFrame.LookVector * offsetDistance))
+                        local newHugPos = targetHRP.Position + offset
+                        if localHRP then
+                            localHRP.CFrame = CFrame.new(newHugPos, targetHRP.Position)
+                        end
+                        Wait()
+                    end
+                end)
+            end
+        end
+    end
+
+    local conn1 = MouseButtonFix(toggleHugButton, function()
+        hugModeEnabled = not hugModeEnabled
+        if hugModeEnabled then
+            toggleHugButton.Text = "Hug Mode: ON"
+        else
+            toggleHugButton.Text = "Hug Mode: OFF"
+            for _, track in pairs(currentHugTracks) do
+                pcall(function() track:Stop() end)
+            end
+            currentHugTracks = {}
+            currentHugTarget = nil
+        end
+    end)
+    Insert(hugConnections, conn1)
+
+    local conn2 = MouseButtonFix(sideToggleButton, function()
+        hugFromFront = not hugFromFront
+        sideToggleButton.Text = (hugFromFront and "Hug Side: Front") or "Hug Side: Back"
+    end)
+    Insert(hugConnections, conn2)
+
+    local conn3 = LocalPlayer:GetMouse().Button1Down:Connect(function()
+        if not hugModeEnabled then return end
+        local target = mouse.Target
+        if target and target.Parent then
+            local targetPlayer = Players:GetPlayerFromCharacter(target.Parent)
+            if targetPlayer and targetPlayer ~= LocalPlayer and targetPlayer.Character then
+                performHug(targetPlayer.Character)
+            end
+        end
+    end)
+    Insert(hugConnections, conn3)
+end)
+
+cmd.add({"unhug"}, {"unhug", "no huggies :("}, function()
+    for _, conn in pairs(hugConnections) do
+        if conn then conn:Disconnect() end
+    end
+    for _, track in pairs(currentHugTracks) do
+        pcall(function() track:Stop() end)
+    end
+    currentHugTracks = {}
+    hugConnections = {}
+    currentHugTarget = nil
+    hugFromFront = false
+    hugModeEnabled = false
+    if hugUI then
+        hugUI:Destroy()
+        hugUI = nil
+    end
 end)
 
 glueloop = {}
@@ -11893,7 +12078,7 @@ gui.loadCommands = function()
         btn.Size = UDim2.new(0, 0, 0, 25)
         btn.Size = size
         
-        table.insert(CMDAUTOFILL, btn)
+        Insert(CMDAUTOFILL, btn)
     end
 end
 
@@ -12033,7 +12218,7 @@ gui.searchCommands = function()
         end
 
         if score < 999 then
-            table.insert(results, {
+            Insert(results, {
                 frame = frame,
                 score = score,
                 text = matchText,
