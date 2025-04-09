@@ -865,26 +865,6 @@ end
 
 local wrap=lib.wrap
 
-function IsR15(plr)
-	plr=(plr or Players.LocalPlayer)
-	if plr then
-		if plr.Character:FindFirstChildOfClass('Humanoid').RigType==Enum.HumanoidRigType.R15 then
-			return true
-		end
-	end
-	return false
-end
-
-function IsR6(Player)
-	Player=(Player or Players.LocalPlayer)
-	if Player then
-		if Player.Character.Humanoid.RigType==Enum.HumanoidRigType.R6 then
-			return true
-		end
-	end
-	return false
-end
-
 function rngMsg()
 	return msg[math.random(1,#msg)]
 end
@@ -931,6 +911,26 @@ function isNumber(str)
 	if tonumber(str)~=nil or str=='inf' then
 		return true
 	end
+end
+
+function IsR15(plr)
+	plr=(plr or Players.LocalPlayer)
+	if plr then
+		if getPlrHum(plr).RigType==Enum.HumanoidRigType.R15 then
+			return true
+		end
+	end
+	return false
+end
+
+function IsR6(plr)
+	plr=(plr or Players.LocalPlayer)
+	if plr then
+		if getPlrHum(plr).RigType==Enum.HumanoidRigType.R6 then
+			return true
+		end
+	end
+	return false
 end
 
 Foreach = function(Table, Func, Loop)
