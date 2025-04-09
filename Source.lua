@@ -8890,71 +8890,117 @@ bangLoop = nil
 bangAnim = nil
 bangDied = nil
 doBang = nil
+BANGPARTS = {}
 
 cmd.add({"bang", "fuck"}, {"bang <player> <number> (fuck)", "fucks the player by attaching to them"}, function(h, d)
-	if bangLoop then
-		bangLoop:Disconnect()
-	end
-	if doBang then
-		doBang:Stop()
-	end
-	if bangAnim then
-		bangAnim:Destroy()
-	end
-	if bangDied then
-		bangDied:Disconnect()
-	end
-	local speed = d or 10
-	local username = h
-	local targets = getPlr(username)
-	if #targets == 0 then return end
-	local plr = targets[1]
-	bangAnim = InstanceNew("Animation")
-	if not IsR15(Players.LocalPlayer) then
-		bangAnim.AnimationId = "rbxassetid://148840371"
-	else
-		bangAnim.AnimationId = "rbxassetid://5918726674"
-	end
-	local hum = getChar():FindFirstChildOfClass("Humanoid")
-	doBang = hum:LoadAnimation(bangAnim)
-	doBang:Play(0.1, 1, 1)
-	doBang:AdjustSpeed(speed)
-	local bangplr = plr.Name
-	local bangDied = hum.Died:Connect(function()
-		if bangLoop then
-			bangLoop:Disconnect()
-		end
-		doBang:Stop()
-		bangAnim:Destroy()
-		bangDied:Disconnect()
-	end)
-	local bangOffset = CFrame.new(0, 0, 1.1)
-	bangLoop = RunService.Stepped:Connect(function()
-		pcall(function()
-			local otherRoot = getRoot(Players[bangplr].Character)
-			local localRoot = getRoot(getChar())
-			if otherRoot and localRoot then
-				localRoot.CFrame = otherRoot.CFrame * bangOffset
-			end
-		end)
-	end)
+    if bangLoop then
+        bangLoop:Disconnect()
+    end
+    if doBang then
+        doBang:Stop()
+    end
+    if bangAnim then
+        bangAnim:Destroy()
+    end
+    if bangDied then
+        bangDied:Disconnect()
+    end
+    for _, p in pairs(BANGPARTS) do
+        p:Destroy()
+    end
+    BANGPARTS = {}
+    
+    local speed = d or 10
+    local username = h
+    local targets = getPlr(username)
+    if #targets == 0 then return end
+    local plr = targets[1]
+    
+    bangAnim = InstanceNew("Animation")
+    if not IsR15(Players.LocalPlayer) then
+        bangAnim.AnimationId = "rbxassetid://148840371"
+    else
+        bangAnim.AnimationId = "rbxassetid://5918726674"
+    end
+    local hum = getChar():FindFirstChildOfClass("Humanoid")
+    doBang = hum:LoadAnimation(bangAnim)
+    doBang:Play(0.1, 1, 1)
+    doBang:AdjustSpeed(speed)
+    
+    local bangplr = plr.Name
+    bangDied = hum.Died:Connect(function()
+        if bangLoop then
+            bangLoop:Disconnect()
+        end
+        doBang:Stop()
+        bangAnim:Destroy()
+        if bangDied then
+            bangDied:Disconnect()
+        end
+        for _, part in pairs(BANGPARTS) do
+            part:Destroy()
+        end
+        BANGPARTS = {}
+    end)
+    
+    local thick = 0.5
+    local halfWidth = 2
+    local halfDepth = 2
+    local halfHeight = 3
+    local walls = {
+        {offset = CFrame.new(0, 0, halfDepth + thick/500), size = Vector3.new(4, 6, thick)},
+        {offset = CFrame.new(0, 0, -(halfDepth + thick/500)), size = Vector3.new(4, 6, thick)},
+        {offset = CFrame.new(halfWidth + thick/500, 0, 0), size = Vector3.new(thick, 6, 4)},
+        {offset = CFrame.new(-(halfWidth + thick/500), 0, 0), size = Vector3.new(thick, 6, 4)},
+        {offset = CFrame.new(0, halfHeight + thick/500, 0), size = Vector3.new(4, thick, 4)},
+        {offset = CFrame.new(0, -(halfHeight + thick/500), 0), size = Vector3.new(4, thick, 4)}
+    }
+    for i, wall in ipairs(walls) do
+        local part = InstanceNew("Part")
+        part.Size = wall.size
+        part.Anchored = true
+        part.CanCollide = true
+        part.Transparency = 1
+        part.Parent = SafeGetService("Workspace").CurrentCamera
+        table.insert(BANGPARTS, part)
+    end
+
+    local bangOffset = CFrame.new(0, 0, 1.1)
+    bangLoop = RunService.Stepped:Connect(function()
+        pcall(function()
+            local targetRoot = getRoot(Players[bangplr].Character)
+            local localRoot = getRoot(getChar())
+            if targetRoot and localRoot then
+                localRoot.CFrame = targetRoot.CFrame * bangOffset
+                for i, wall in ipairs(walls) do
+                    BANGPARTS[i].CFrame = localRoot.CFrame * wall.offset
+                end
+            end
+        end)
+    end)
 end, true)
 
-cmd.add({"unbang","unfuck"},{"unbang (unfuck)","Unbangs the player"},function()
-	if bangLoop then
-		bangLoop:Disconnect()
-	end
-	if doBang then
-		doBang:Stop()
-	end
-	if bangAnim then
-		bangAnim:Destroy()
-	end
-	if bangDied then
-		bangDied:Disconnect()
-	end
+cmd.add({"unbang", "unfuck"}, {"unbang (unfuck)", "Unbangs the player"}, function()
+    if bangLoop then
+        bangLoop:Disconnect()
+    end
+    if doBang then
+        doBang:Stop()
+    end
+    if bangAnim then
+        bangAnim:Destroy()
+    end
+    if bangDied then
+        bangDied:Disconnect()
+    end
+    for _, p in pairs(BANGPARTS) do
+        p:Destroy()
+    end
+    BANGPARTS = {}
 end)
 
+huggiePARTS = {}
+platCON = nil
 hugConnections = {}
 hugUI = nil
 currentHugTracks = {}
@@ -8966,26 +9012,25 @@ cmd.add({"hug", "clickhug"}, {"hug (clickhug", "huggies time (click on a target 
 	if IsR6() then
 		local mouse = LocalPlayer:GetMouse()
 
-		for _, conn in pairs(hugConnections) do
-			if conn then conn:Disconnect() end
-		end
-		for _, track in pairs(currentHugTracks) do
-			pcall(function() track:Stop() end)
-		end
+		for _, conn in pairs(hugConnections) do if conn then conn:Disconnect() end end
+		for _, track in pairs(currentHugTracks) do pcall(function() track:Stop() end) end
 		currentHugTracks = {}
 		hugConnections = {}
-		if hugUI then
-			hugUI:Destroy()
-		end
+		if hugUI then hugUI:Destroy() end
 		hugFromFront = false
+		currentHugTarget = nil
+		if platCON then platCON:Disconnect() platCON = nil end
+		for _, part in pairs(huggiePARTS) do part:Destroy() end
+		huggiePARTS = {}
+
 		hugUI = InstanceNew("ScreenGui")
 		hugUI.Name = "HugModeUI"
 		NaProtectUI(hugUI)
 
 		local toggleHugButton = InstanceNew("TextButton")
-		toggleHugButton.AnchorPoint = Vector2.new(0.5,0)
+		toggleHugButton.AnchorPoint = Vector2.new(0.5, 0)
 		toggleHugButton.Size = UDim2.new(0, 150, 0, 50)
-		toggleHugButton.Position = UDim2.new(0.45, 0, 0.1, 0)
+		toggleHugButton.Position = UDim2.new(0.4, 0, 0.1, 0)
 		toggleHugButton.Text = "Hug Mode: OFF"
 		toggleHugButton.TextSize = 14
 		toggleHugButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
@@ -8993,9 +9038,9 @@ cmd.add({"hug", "clickhug"}, {"hug (clickhug", "huggies time (click on a target 
 		toggleHugButton.Parent = hugUI
 
 		local sideToggleButton = InstanceNew("TextButton")
-		sideToggleButton.AnchorPoint = Vector2.new(0.5,0)
+		sideToggleButton.AnchorPoint = Vector2.new(0.5, 0)
 		sideToggleButton.Size = UDim2.new(0, 150, 0, 50)
-		sideToggleButton.Position = UDim2.new(0.55, 0, 0.1, 0)
+		sideToggleButton.Position = UDim2.new(0.6, 0, 0.1, 0)
 		sideToggleButton.Text = "Hug Side: Back"
 		sideToggleButton.TextSize = 14
 		sideToggleButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
@@ -9016,6 +9061,8 @@ cmd.add({"hug", "clickhug"}, {"hug (clickhug", "huggies time (click on a target 
 		hugModeEnabled = false
 
 		local function performHug(targetCharacter)
+			currentHugTarget = targetCharacter
+
 			local offsetDistance = 1.5
 			local targetHRP = getRoot(targetCharacter)
 			local localCharacter = LocalPlayer.Character
@@ -9037,7 +9084,40 @@ cmd.add({"hug", "clickhug"}, {"hug (clickhug", "huggies time (click on a target 
 					Insert(currentHugTracks, track2)
 					track1:Play()
 					track2:Play()
-					currentHugTarget = targetCharacter
+
+					if #huggiePARTS == 0 then
+						local thick = 0.2
+						local halfWidth = 2
+						local halfDepth = 2
+						local halfHeight = 3
+						local walls = {
+							{offset = CFrame.new(0, 0, halfDepth + thick/500), size = Vector3.new(4, 6, thick)},
+							{offset = CFrame.new(0, 0, -(halfDepth + thick/500)), size = Vector3.new(4, 6, thick)},
+							{offset = CFrame.new(halfWidth + thick/500, 0, 0), size = Vector3.new(thick, 6, 4)},
+							{offset = CFrame.new(-(halfWidth + thick/500), 0, 0), size = Vector3.new(thick, 6, 4)},
+							{offset = CFrame.new(0, halfHeight + thick/500, 0), size = Vector3.new(4, thick, 4)},
+							{offset = CFrame.new(0, -(halfHeight + thick/500), 0), size = Vector3.new(4, thick, 4)}
+						}
+						for i, wall in ipairs(walls) do
+							local part = InstanceNew("Part")
+							part.Size = wall.size
+							part.Anchored = true
+							part.CanCollide = true
+							part.Transparency = 1
+							part.Parent = SafeGetService("Workspace").CurrentCamera
+							Insert(huggiePARTS, part)
+						end
+						platCON = RunService.Heartbeat:Connect(function()
+							local charRoot = getRoot(LocalPlayer.Character)
+							if charRoot then
+								for i, wall in ipairs(walls) do
+									huggiePARTS[i].CFrame = charRoot.CFrame * wall.offset
+								end
+							end
+						end)
+						Insert(hugConnections, platCON)
+					end
+
 					Spawn(function()
 						while hugModeEnabled and targetCharacter and targetCharacter:FindFirstChild("HumanoidRootPart") and (currentHugTarget == targetCharacter) do
 							targetHRP = getRoot(targetCharacter)
@@ -9059,11 +9139,12 @@ cmd.add({"hug", "clickhug"}, {"hug (clickhug", "huggies time (click on a target 
 				toggleHugButton.Text = "Hug Mode: ON"
 			else
 				toggleHugButton.Text = "Hug Mode: OFF"
-				for _, track in pairs(currentHugTracks) do
-					pcall(function() track:Stop() end)
-				end
+				for _, track in pairs(currentHugTracks) do pcall(function() track:Stop() end) end
 				currentHugTracks = {}
 				currentHugTarget = nil
+				for _, part in pairs(huggiePARTS) do part:Destroy() end
+				huggiePARTS = {}
+				if platCON then platCON:Disconnect() platCON = nil end
 			end
 		end)
 		Insert(hugConnections, conn1)
@@ -9091,21 +9172,17 @@ cmd.add({"hug", "clickhug"}, {"hug (clickhug", "huggies time (click on a target 
 end)
 
 cmd.add({"unhug"}, {"unhug", "no huggies :("}, function()
-	for _, conn in pairs(hugConnections) do
-		if conn then conn:Disconnect() end
-	end
-	for _, track in pairs(currentHugTracks) do
-		pcall(function() track:Stop() end)
-	end
+	for _, conn in pairs(hugConnections) do if conn then conn:Disconnect() end end
+	for _, track in pairs(currentHugTracks) do pcall(function() track:Stop() end) end
 	currentHugTracks = {}
 	hugConnections = {}
 	currentHugTarget = nil
 	hugFromFront = false
 	hugModeEnabled = false
-	if hugUI then
-		hugUI:Destroy()
-		hugUI = nil
-	end
+	if platCON then platCON:Disconnect() platCON = nil end
+	for _, part in pairs(huggiePARTS) do part:Destroy() end
+	huggiePARTS = {}
+	if hugUI then hugUI:Destroy() hugUI = nil end
 end)
 
 glueloop = {}
