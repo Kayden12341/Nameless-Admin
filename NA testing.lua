@@ -150,10 +150,10 @@ function randomString()
 end
 
 function InstanceNew(c,p)
-    local inst = Instance.new(c)
+	local inst = Instance.new(c)
 	if p then inst.Parent=p end
-    inst.Name = randomString()
-    return inst
+	inst.Name = randomString()
+	return inst
 end
 
 
@@ -1242,160 +1242,160 @@ function placeCreator()
 end
 
 function storeESP(p, cType, conn)
-    if not espCONS[p.Name] then
-        espCONS[p.Name] = {}
-    end
-    Insert(espCONS[p.Name], {type = cType, connection = conn})
+	if not espCONS[p.Name] then
+		espCONS[p.Name] = {}
+	end
+	Insert(espCONS[p.Name], {type = cType, connection = conn})
 end
 
 function discPlrESP(player)
-    if espCONS[player.Name] then
-        for _, entry in ipairs(espCONS[player.Name]) do
-            if entry.connection then
-                entry.connection:Disconnect()
-            end
-        end
-        espCONS[player.Name] = nil
-    end
-    removeESPonLEAVE(player)
+	if espCONS[player.Name] then
+		for _, entry in ipairs(espCONS[player.Name]) do
+			if entry.connection then
+				entry.connection:Disconnect()
+			end
+		end
+		espCONS[player.Name] = nil
+	end
+	removeESPonLEAVE(player)
 end
 
 function removeAllESP()
-    for _, child in pairs(COREGUI:GetChildren()) do
-        if Sub(child.Name, -4) == '_ESP' then
-            child:Destroy()
-        end
-    end
-    for playerName, _ in pairs(espCONS) do
-        espCONS[playerName] = nil
-    end
+	for _, child in pairs(COREGUI:GetChildren()) do
+		if Sub(child.Name, -4) == '_ESP' then
+			child:Destroy()
+		end
+	end
+	for playerName, _ in pairs(espCONS) do
+		espCONS[playerName] = nil
+	end
 end
 
 function removeESPonLEAVE(plr)
-    if plr then
-        for _, child in pairs(COREGUI:GetChildren()) do
-            if child.Name == plr.Name..'_ESP' then
-                child:Destroy()
-            end
-        end
-    end
+	if plr then
+		for _, child in pairs(COREGUI:GetChildren()) do
+			if child.Name == plr.Name..'_ESP' then
+				child:Destroy()
+			end
+		end
+	end
 end
 
 function ESP(player, persistent)
-    persistent = persistent or false
-    Spawn(function()
-        discPlrESP(player)
-        
-        for _, child in pairs(COREGUI:GetChildren()) do
-            if child.Name == player.Name..'_ESP' then
-                child:Destroy()
-            end
-        end
-        Wait()
+	persistent = persistent or false
+	Spawn(function()
+		discPlrESP(player)
 
-        local function createESP()
-            if player.Character and player.Name ~= Players.LocalPlayer.Name and not COREGUI:FindFirstChild(player.Name..'_ESP') then
-                local espHolder = InstanceNew("Folder")
-                espHolder.Name = player.Name..'_ESP'
-                espHolder.Parent = COREGUI
+		for _, child in pairs(COREGUI:GetChildren()) do
+			if child.Name == player.Name..'_ESP' then
+				child:Destroy()
+			end
+		end
+		Wait()
 
-                repeat Wait(1) until player.Character and getRoot(player.Character) and player.Character:FindFirstChildOfClass("Humanoid")
+		local function createESP()
+			if player.Character and player.Name ~= Players.LocalPlayer.Name and not COREGUI:FindFirstChild(player.Name..'_ESP') then
+				local espHolder = InstanceNew("Folder")
+				espHolder.Name = player.Name..'_ESP'
+				espHolder.Parent = COREGUI
 
-                local adornments = {}
+				repeat Wait(1) until player.Character and getRoot(player.Character) and player.Character:FindFirstChildOfClass("Humanoid")
 
-                for _, part in pairs(player.Character:GetChildren()) do
-                    if part:IsA("BasePart") and not part:FindFirstChildOfClass("Accessory") then
-                        local boxAdornment = InstanceNew("BoxHandleAdornment")
-                        boxAdornment.Name = player.Name.."_Box"
-                        boxAdornment.Parent = espHolder
-                        boxAdornment.Adornee = part
-                        boxAdornment.AlwaysOnTop = true
-                        boxAdornment.ZIndex = 0
-                        boxAdornment.Size = part.Size
-                        boxAdornment.Color3 = Color3.fromRGB(0, 255, 0)
-                        boxAdornment.Transparency = 0.45
-                        Insert(adornments, boxAdornment)
-                    end
-                end
+				local adornments = {}
 
-                if player.Character:FindFirstChild("Head") then
-                    local billboardGui = InstanceNew("BillboardGui")
-                    local textLabel = InstanceNew("TextLabel")
+				for _, part in pairs(player.Character:GetChildren()) do
+					if part:IsA("BasePart") and not part:FindFirstChildOfClass("Accessory") then
+						local boxAdornment = InstanceNew("BoxHandleAdornment")
+						boxAdornment.Name = player.Name.."_Box"
+						boxAdornment.Parent = espHolder
+						boxAdornment.Adornee = part
+						boxAdornment.AlwaysOnTop = true
+						boxAdornment.ZIndex = 0
+						boxAdornment.Size = part.Size
+						boxAdornment.Color3 = Color3.fromRGB(0, 255, 0)
+						boxAdornment.Transparency = 0.45
+						Insert(adornments, boxAdornment)
+					end
+				end
 
-                    billboardGui.Adornee = player.Character:FindFirstChild("Head")
-                    billboardGui.Parent = espHolder
-                    billboardGui.Size = UDim2.new(0, 200, 0, 100)
-                    billboardGui.StudsOffset = Vector3.new(0, 2, 0)
-                    billboardGui.AlwaysOnTop = true
+				if player.Character:FindFirstChild("Head") then
+					local billboardGui = InstanceNew("BillboardGui")
+					local textLabel = InstanceNew("TextLabel")
 
-                    textLabel.Parent = billboardGui
-                    textLabel.BackgroundTransparency = 1
-                    textLabel.Size = UDim2.new(1, 0, 1, 0)
-                    textLabel.Font = Enum.Font.GothamBold
-                    textLabel.TextSize = 14
-                    textLabel.TextStrokeTransparency = 0.2
-                    textLabel.TextYAlignment = Enum.TextYAlignment.Center
-                    textLabel.Visible = not chamsEnabled
+					billboardGui.Adornee = player.Character:FindFirstChild("Head")
+					billboardGui.Parent = espHolder
+					billboardGui.Size = UDim2.new(0, 200, 0, 100)
+					billboardGui.StudsOffset = Vector3.new(0, 2, 0)
+					billboardGui.AlwaysOnTop = true
 
-                    local espLoop
-                    espLoop = RunService.RenderStepped:Connect(function()
-                        if COREGUI:FindFirstChild(player.Name..'_ESP') then
-                            if player.Character and getRoot(player.Character) and player.Character:FindFirstChildOfClass("Humanoid") then
-                                local health = math.floor(player.Character:FindFirstChildOfClass("Humanoid").Health)
-                                local maxHealth = math.floor(player.Character:FindFirstChildOfClass("Humanoid").MaxHealth)
-                                local teamColor = player.Team and player.Team.TeamColor.Color or Color3.fromRGB(255, 255, 255)
+					textLabel.Parent = billboardGui
+					textLabel.BackgroundTransparency = 1
+					textLabel.Size = UDim2.new(1, 0, 1, 0)
+					textLabel.Font = Enum.Font.GothamBold
+					textLabel.TextSize = 14
+					textLabel.TextStrokeTransparency = 0.2
+					textLabel.TextYAlignment = Enum.TextYAlignment.Center
+					textLabel.Visible = not chamsEnabled
 
-                                local displayName = nameChecker(player)
+					local espLoop
+					espLoop = RunService.RenderStepped:Connect(function()
+						if COREGUI:FindFirstChild(player.Name..'_ESP') then
+							if player.Character and getRoot(player.Character) and player.Character:FindFirstChildOfClass("Humanoid") then
+								local health = math.floor(player.Character:FindFirstChildOfClass("Humanoid").Health)
+								local maxHealth = math.floor(player.Character:FindFirstChildOfClass("Humanoid").MaxHealth)
+								local teamColor = player.Team and player.Team.TeamColor.Color or Color3.fromRGB(255, 255, 255)
 
-                                if Players.LocalPlayer.Character and getRoot(Players.LocalPlayer.Character) and Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
-                                    local distance = math.floor((getRoot(Players.LocalPlayer.Character).Position - getRoot(player.Character).Position).magnitude)
-                                    if player.Team then
-                                        textLabel.Text = Format("%s | Health: %d/%d | Studs: %d | Team: %s", displayName, health, maxHealth, distance, player.Team.Name)
-                                    else
-                                        textLabel.Text = Format("%s | Health: %d/%d | Studs: %d", displayName, health, maxHealth, distance)
-                                    end
-                                    textLabel.TextColor3 = distance < 50 and Color3.fromRGB(255, 0, 0) or distance < 100 and Color3.fromRGB(255, 165, 0) or Color3.fromRGB(0, 255, 0)
-                                else
-                                    if player.Team then
-                                        textLabel.Text = Format("%s | Health: %d/%d | Team: %s", displayName, health, maxHealth, player.Team.Name)
-                                    else
-                                        textLabel.Text = Format("%s | Health: %d/%d", displayName, health, maxHealth)
-                                    end
-                                    textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-                                end
+								local displayName = nameChecker(player)
 
-                                for _, adornment in pairs(adornments) do
-                                    adornment.Color3 = teamColor
-                                end
-                            end
-                        else
-                            espLoop:Disconnect()
-                        end
-                    end)
-                    storeESP(player, "renderStepped", espLoop)
-                end
-            end
-        end
+								if Players.LocalPlayer.Character and getRoot(Players.LocalPlayer.Character) and Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
+									local distance = math.floor((getRoot(Players.LocalPlayer.Character).Position - getRoot(player.Character).Position).magnitude)
+									if player.Team then
+										textLabel.Text = Format("%s | Health: %d/%d | Studs: %d | Team: %s", displayName, health, maxHealth, distance, player.Team.Name)
+									else
+										textLabel.Text = Format("%s | Health: %d/%d | Studs: %d", displayName, health, maxHealth, distance)
+									end
+									textLabel.TextColor3 = distance < 50 and Color3.fromRGB(255, 0, 0) or distance < 100 and Color3.fromRGB(255, 165, 0) or Color3.fromRGB(0, 255, 0)
+								else
+									if player.Team then
+										textLabel.Text = Format("%s | Health: %d/%d | Team: %s", displayName, health, maxHealth, player.Team.Name)
+									else
+										textLabel.Text = Format("%s | Health: %d/%d", displayName, health, maxHealth)
+									end
+									textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+								end
 
-        createESP()
+								for _, adornment in pairs(adornments) do
+									adornment.Color3 = teamColor
+								end
+							end
+						else
+							espLoop:Disconnect()
+						end
+					end)
+					storeESP(player, "renderStepped", espLoop)
+				end
+			end
+		end
 
-        local characterAddedConnection
-        characterAddedConnection = player.CharacterAdded:Connect(function()
-            if not ESPenabled and not persistent then
-                characterAddedConnection:Disconnect()
-                return
-            end
+		createESP()
 
-            for _, child in pairs(COREGUI:GetChildren()) do
-                if child.Name == player.Name..'_ESP' then
-                    child:Destroy()
-                end
-            end
-            Wait(1)
-            createESP()
-        end)
-        storeESP(player, "characterAdded", characterAddedConnection)
-    end)
+		local characterAddedConnection
+		characterAddedConnection = player.CharacterAdded:Connect(function()
+			if not ESPenabled and not persistent then
+				characterAddedConnection:Disconnect()
+				return
+			end
+
+			for _, child in pairs(COREGUI:GetChildren()) do
+				if child.Name == player.Name..'_ESP' then
+					child:Destroy()
+				end
+			end
+			Wait(1)
+			createESP()
+		end)
+		storeESP(player, "characterAdded", characterAddedConnection)
+	end)
 end
 
 local Signal1, Signal2 = nil, nil
@@ -4722,124 +4722,124 @@ local tpUI = nil
 tpConnections = {}
 
 cmd.add({"clicktp", "tptool"}, {"clicktp (tptool)", "Teleport where your mouse is"}, function()
-    local Players = SafeGetService("Players")
-    local TweenService = SafeGetService("TweenService")
-    local player = Players.LocalPlayer
-    local mouse = player:GetMouse()
-    if tpUI then
-        tpUI:Destroy()
-        tpUI = nil
-        for _, conn in ipairs(tpConnections) do
-            conn:Disconnect()
-        end
-        tpConnections = {}
-    end
+	local Players = SafeGetService("Players")
+	local TweenService = SafeGetService("TweenService")
+	local player = Players.LocalPlayer
+	local mouse = player:GetMouse()
+	if tpUI then
+		tpUI:Destroy()
+		tpUI = nil
+		for _, conn in ipairs(tpConnections) do
+			conn:Disconnect()
+		end
+		tpConnections = {}
+	end
 
-    tpUI = InstanceNew("ScreenGui")
-    NaProtectUI(tpUI)
+	tpUI = InstanceNew("ScreenGui")
+	NaProtectUI(tpUI)
 
-    local clickTpButton = InstanceNew("TextButton")
-    clickTpButton.Size = UDim2.new(0, 130, 0, 40)
+	local clickTpButton = InstanceNew("TextButton")
+	clickTpButton.Size = UDim2.new(0, 130, 0, 40)
 	clickTpButton.AnchorPoint = Vector2.new(0.5, 0)
-    clickTpButton.Position = UDim2.new(0.45, 0, 0.05, 0)
-    clickTpButton.Text = "Enable Click TP"
-    clickTpButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    clickTpButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-    clickTpButton.BorderSizePixel = 0
-    clickTpButton.Parent = tpUI
+	clickTpButton.Position = UDim2.new(0.45, 0, 0.1, 0)
+	clickTpButton.Text = "Enable Click TP"
+	clickTpButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+	clickTpButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+	clickTpButton.BorderSizePixel = 0
+	clickTpButton.Parent = tpUI
 
-    local clickTpCorner = InstanceNew("UICorner")
-    clickTpCorner.CornerRadius = UDim.new(0, 10)
-    clickTpCorner.Parent = clickTpButton
+	local clickTpCorner = InstanceNew("UICorner")
+	clickTpCorner.CornerRadius = UDim.new(0, 10)
+	clickTpCorner.Parent = clickTpButton
 
-    local tweenTpButton = InstanceNew("TextButton")
-    tweenTpButton.Size = UDim2.new(0, 130, 0, 40)
+	local tweenTpButton = InstanceNew("TextButton")
+	tweenTpButton.Size = UDim2.new(0, 130, 0, 40)
 	tweenTpButton.AnchorPoint = Vector2.new(0.5, 0)
-    tweenTpButton.Position = UDim2.new(0.55, 0, 0.05, 0)
-    tweenTpButton.Text = "Enable Tween TP"
-    tweenTpButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    tweenTpButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-    tweenTpButton.BorderSizePixel = 0
-    tweenTpButton.Parent = tpUI
+	tweenTpButton.Position = UDim2.new(0.55, 0, 0.1, 0)
+	tweenTpButton.Text = "Enable Tween TP"
+	tweenTpButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+	tweenTpButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+	tweenTpButton.BorderSizePixel = 0
+	tweenTpButton.Parent = tpUI
 
-    local tweenTpCorner = InstanceNew("UICorner")
-    tweenTpCorner.CornerRadius = UDim.new(0, 10)
-    tweenTpCorner.Parent = tweenTpButton
+	local tweenTpCorner = InstanceNew("UICorner")
+	tweenTpCorner.CornerRadius = UDim.new(0, 10)
+	tweenTpCorner.Parent = tweenTpButton
 
-    local clickTpEnabled = false
-    local tweenTpEnabled = false
+	local clickTpEnabled = false
+	local tweenTpEnabled = false
 
-    MouseButtonFix(clickTpButton, function()
-        clickTpEnabled = not clickTpEnabled
-        tweenTpEnabled = false
-        tweenTpButton.Text = "Enable Tween TP"
-        clickTpButton.Text = clickTpEnabled and "Disable Click TP" or "Enable Click TP"
-    end)
+	MouseButtonFix(clickTpButton, function()
+		clickTpEnabled = not clickTpEnabled
+		tweenTpEnabled = false
+		tweenTpButton.Text = "Enable Tween TP"
+		clickTpButton.Text = clickTpEnabled and "Disable Click TP" or "Enable Click TP"
+	end)
 
-    MouseButtonFix(tweenTpButton, function()
-        tweenTpEnabled = not tweenTpEnabled
-        clickTpEnabled = false
-        clickTpButton.Text = "Enable Click TP"
-        tweenTpButton.Text = tweenTpEnabled and "Disable Tween TP" or "Enable Tween TP"
-    end)
+	MouseButtonFix(tweenTpButton, function()
+		tweenTpEnabled = not tweenTpEnabled
+		clickTpEnabled = false
+		clickTpButton.Text = "Enable Click TP"
+		tweenTpButton.Text = tweenTpEnabled and "Disable Tween TP" or "Enable Tween TP"
+	end)
 
-    local function CustomClick(onClick)
-        local initialMousePosition = nil
-        local dragThreshold = 10
-        local downConn = mouse.Button1Down:Connect(function()
-            initialMousePosition = Vector2.new(mouse.X, mouse.Y)
-        end)
-        Insert(tpConnections, downConn)
+	local function CustomClick(onClick)
+		local initialMousePosition = nil
+		local dragThreshold = 10
+		local downConn = mouse.Button1Down:Connect(function()
+			initialMousePosition = Vector2.new(mouse.X, mouse.Y)
+		end)
+		Insert(tpConnections, downConn)
 
-        local upConn = mouse.Button1Up:Connect(function()
-            if initialMousePosition then
-                local currentMousePosition = Vector2.new(mouse.X, mouse.Y)
-                local distance = (currentMousePosition - initialMousePosition).Magnitude
-                if distance <= dragThreshold then
-                    onClick(mouse)
-                end
-            end
-            initialMousePosition = nil
-        end)
-        Insert(tpConnections, upConn)
-    end
+		local upConn = mouse.Button1Up:Connect(function()
+			if initialMousePosition then
+				local currentMousePosition = Vector2.new(mouse.X, mouse.Y)
+				local distance = (currentMousePosition - initialMousePosition).Magnitude
+				if distance <= dragThreshold then
+					onClick(mouse)
+				end
+			end
+			initialMousePosition = nil
+		end)
+		Insert(tpConnections, upConn)
+	end
 
-    CustomClick(function(mouse)
-        if clickTpEnabled then
-            local pos = mouse.Hit + Vector3.new(0, 2.5, 0)
-            local targetCFrame = CFrame.new(pos.X, pos.Y, pos.Z)
-            getRoot(player.Character).CFrame = targetCFrame
-        elseif tweenTpEnabled then
-            local pos = mouse.Hit + Vector3.new(0, 2.5, 0)
-            local humanoidRootPart = getRoot(player.Character)
-            local tweenInfo = TweenInfo.new(
-                1,
-                Enum.EasingStyle.Quad,
-                Enum.EasingDirection.Out,
-                0,
-                false,
-                0
-            )
-            local tween = TweenService:Create(humanoidRootPart, tweenInfo, {
-                CFrame = CFrame.new(pos.X, pos.Y, pos.Z)
-            })
-            tween:Play()
-        end
-    end)
+	CustomClick(function(mouse)
+		if clickTpEnabled then
+			local pos = mouse.Hit + Vector3.new(0, 2.5, 0)
+			local targetCFrame = CFrame.new(pos.X, pos.Y, pos.Z)
+			getRoot(player.Character).CFrame = targetCFrame
+		elseif tweenTpEnabled then
+			local pos = mouse.Hit + Vector3.new(0, 2.5, 0)
+			local humanoidRootPart = getRoot(player.Character)
+			local tweenInfo = TweenInfo.new(
+				1,
+				Enum.EasingStyle.Quad,
+				Enum.EasingDirection.Out,
+				0,
+				false,
+				0
+			)
+			local tween = TweenService:Create(humanoidRootPart, tweenInfo, {
+				CFrame = CFrame.new(pos.X, pos.Y, pos.Z)
+			})
+			tween:Play()
+		end
+	end)
 
-    gui.draggablev2(clickTpButton)
-    gui.draggablev2(tweenTpButton)
+	gui.draggablev2(clickTpButton)
+	gui.draggablev2(tweenTpButton)
 end)
 
 cmd.add({"unclicktp", "untptool"}, {"unclicktp (untptool)", "Remove teleport buttons"}, function()
-    if tpUI then
-        tpUI:Destroy()
-        tpUI = nil
-    end
-    for _, conn in ipairs(tpConnections) do
-        conn:Disconnect()
-    end
-    tpConnections = {}
+	if tpUI then
+		tpUI:Destroy()
+		tpUI = nil
+	end
+	for _, conn in ipairs(tpConnections) do
+		conn:Disconnect()
+	end
+	tpConnections = {}
 end)
 
 cmd.add({"dex"},{"dex","Using this you can see the parts / guis / scripts etc with this. A really good and helpful script."},function()
@@ -5264,69 +5264,69 @@ cmd.add({"cam", "camera", "cameratype"}, {"cam (camera, cameratype)", "Manage ca
 end)
 
 cmd.add({"esp"}, {"esp", "locate where the players are"}, function()
-    ESPenabled = true
-    chamsEnabled = false
-    for _, player in pairs(Players:GetPlayers()) do
-        if player.Name ~= Players.LocalPlayer.Name then
-            ESP(player)
-        end
-    end
+	ESPenabled = true
+	chamsEnabled = false
+	for _, player in pairs(Players:GetPlayers()) do
+		if player.Name ~= Players.LocalPlayer.Name then
+			ESP(player)
+		end
+	end
 
-    if not _G.ESPJoinConnection then
-        _G.ESPJoinConnection = Players.PlayerAdded:Connect(function(player)
-            if ESPenabled and player.Name ~= Players.LocalPlayer.Name then
-                ESP(player)
-            end
-        end)
-    end
+	if not _G.ESPJoinConnection then
+		_G.ESPJoinConnection = Players.PlayerAdded:Connect(function(player)
+			if ESPenabled and player.Name ~= Players.LocalPlayer.Name then
+				ESP(player)
+			end
+		end)
+	end
 end)
 
 cmd.add({"chams"}, {"chams", "ESP but without the text :shock:"}, function()
-    ESPenabled = true
-    chamsEnabled = true
-    for _, player in pairs(Players:GetPlayers()) do
-        if player.Name ~= Players.LocalPlayer.Name then
-            ESP(player)
-        end
-    end
+	ESPenabled = true
+	chamsEnabled = true
+	for _, player in pairs(Players:GetPlayers()) do
+		if player.Name ~= Players.LocalPlayer.Name then
+			ESP(player)
+		end
+	end
 
-    if not _G.ESPJoinConnection then
-        _G.ESPJoinConnection = Players.PlayerAdded:Connect(function(player)
-            if ESPenabled and player.Name ~= Players.LocalPlayer.Name then
-                ESP(player)
-            end
-        end)
-    end
+	if not _G.ESPJoinConnection then
+		_G.ESPJoinConnection = Players.PlayerAdded:Connect(function(player)
+			if ESPenabled and player.Name ~= Players.LocalPlayer.Name then
+				ESP(player)
+			end
+		end)
+	end
 end)
 
 cmd.add({"locate"}, {"locate <username>", "locate where the players are"}, function(...)
-    local username = (...)
-    local target = getPlr(username)
-    for _, plr in next, target do
-        if plr then
-            ESP(plr, true)
-        end
-    end
+	local username = (...)
+	local target = getPlr(username)
+	for _, plr in next, target do
+		if plr then
+			ESP(plr, true)
+		end
+	end
 end, true)
 
 cmd.add({"unesp", "unchams"}, {"unesp (unchams)", "Disables esp/chams"}, function()
-    ESPenabled = false
-    chamsEnabled = false
-    removeAllESP()
+	ESPenabled = false
+	chamsEnabled = false
+	removeAllESP()
 
-    if _G.ESPJoinConnection then
-        _G.ESPJoinConnection:Disconnect()
-        _G.ESPJoinConnection = nil
-    end
+	if _G.ESPJoinConnection then
+		_G.ESPJoinConnection:Disconnect()
+		_G.ESPJoinConnection = nil
+	end
 end)
 
 cmd.add({"unlocate"}, {"unlocate <player>"}, function(username)
-    local target = getPlr(username)
-    for _, plr in next, target do
-        if plr then
-            discPlrESP(plr)
-        end
-    end
+	local target = getPlr(username)
+	for _, plr in next, target do
+		if plr then
+			discPlrESP(plr)
+		end
+	end
 end, true)
 
 cmd.add({"crash"},{"crash","crashes ur client lol"},function()
@@ -6853,9 +6853,9 @@ cmd.add({"fakelag", "flag"}, {"fakelag (flag)", "fake lag"}, function()
 		local root = getRoot(getChar())
 		if root then
 			root.Anchored = true
-			wait(0.05)
+			Wait(0.05)
 			root.Anchored = false
-			wait(0.05)
+			Wait(0.05)
 		else
 			FakeLag = false
 		end
@@ -6870,7 +6870,7 @@ local r=math.rad
 local center=CFrame.new(1.5,0.5,-1.5)
 
 cmd.add({"hide", "unshow"}, {"hide <player> (unshow)", "places the selected player to lighting"}, function(...)
-	wait()
+	Wait()
 	DoNotif("Hid the player")
 	local Username = (...)
 	local target = getPlr(Username)
@@ -8982,145 +8982,149 @@ hugFromFront = false
 hugModeEnabled = false
 
 cmd.add({"hug", "clickhug"}, {"hug (clickhug", "huggies time (click on a target to hug)"}, function()
-    local mouse = LocalPlayer:GetMouse()
-    
-    for _, conn in pairs(hugConnections) do
-        if conn then conn:Disconnect() end
-    end
-    for _, track in pairs(currentHugTracks) do
-        pcall(function() track:Stop() end)
-    end
-    currentHugTracks = {}
-    hugConnections = {}
-    if hugUI then
-        hugUI:Destroy()
-    end
-    hugFromFront = false
-    hugUI = InstanceNew("ScreenGui")
-    hugUI.Name = "HugModeUI"
-    NaProtectUI(hugUI)
-    
-    local toggleHugButton = InstanceNew("TextButton")
-	toggleHugButton.AnchorPoint = Vector2.new(0.5,0)
-    toggleHugButton.Size = UDim2.new(0, 150, 0, 50)
-    toggleHugButton.Position = UDim2.new(0.45, 0, 0.05, 0)
-    toggleHugButton.Text = "Hug Mode: OFF"
-	toggleHugButton.TextSize = 14
-    toggleHugButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    toggleHugButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    toggleHugButton.Parent = hugUI
+	if IsR6() then
+		local mouse = LocalPlayer:GetMouse()
 
-    local sideToggleButton = InstanceNew("TextButton")
-	sideToggleButton.AnchorPoint = Vector2.new(0.5,0)
-    sideToggleButton.Size = UDim2.new(0, 150, 0, 50)
-    sideToggleButton.Position = UDim2.new(0.55, 0, 0.05, 0)
-    sideToggleButton.Text = "Hug Side: Back"
-	sideToggleButton.TextSize = 14
-    sideToggleButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    sideToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    sideToggleButton.Parent = hugUI
+		for _, conn in pairs(hugConnections) do
+			if conn then conn:Disconnect() end
+		end
+		for _, track in pairs(currentHugTracks) do
+			pcall(function() track:Stop() end)
+		end
+		currentHugTracks = {}
+		hugConnections = {}
+		if hugUI then
+			hugUI:Destroy()
+		end
+		hugFromFront = false
+		hugUI = InstanceNew("ScreenGui")
+		hugUI.Name = "HugModeUI"
+		NaProtectUI(hugUI)
 
-    local uiCorner = InstanceNew("UICorner")
-    uiCorner.CornerRadius = UDim.new(0, 8)
-    uiCorner.Parent = toggleHugButton
+		local toggleHugButton = InstanceNew("TextButton")
+		toggleHugButton.AnchorPoint = Vector2.new(0.5,0)
+		toggleHugButton.Size = UDim2.new(0, 150, 0, 50)
+		toggleHugButton.Position = UDim2.new(0.45, 0, 0.1, 0)
+		toggleHugButton.Text = "Hug Mode: OFF"
+		toggleHugButton.TextSize = 14
+		toggleHugButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+		toggleHugButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+		toggleHugButton.Parent = hugUI
 
-    local sideUICorner = InstanceNew("UICorner")
-    sideUICorner.CornerRadius = UDim.new(0, 8)
-    sideUICorner.Parent = sideToggleButton
+		local sideToggleButton = InstanceNew("TextButton")
+		sideToggleButton.AnchorPoint = Vector2.new(0.5,0)
+		sideToggleButton.Size = UDim2.new(0, 150, 0, 50)
+		sideToggleButton.Position = UDim2.new(0.55, 0, 0.1, 0)
+		sideToggleButton.Text = "Hug Side: Back"
+		sideToggleButton.TextSize = 14
+		sideToggleButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+		sideToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+		sideToggleButton.Parent = hugUI
 
-    gui.draggablev2(toggleHugButton)
-    gui.draggablev2(sideToggleButton)
+		local uiCorner = InstanceNew("UICorner")
+		uiCorner.CornerRadius = UDim.new(0, 8)
+		uiCorner.Parent = toggleHugButton
 
-    hugModeEnabled = false
+		local sideUICorner = InstanceNew("UICorner")
+		sideUICorner.CornerRadius = UDim.new(0, 8)
+		sideUICorner.Parent = sideToggleButton
 
-    local function performHug(targetCharacter)
-        local offsetDistance = 1.5
-        local targetHRP = getRoot(targetCharacter)
-        local localCharacter = LocalPlayer.Character
-        if not localCharacter then return end
-        local localHRP = getRoot(localCharacter)
-        if targetHRP and localHRP then
-            local offset = (hugFromFront and (targetHRP.CFrame.LookVector * offsetDistance)) or (-(targetHRP.CFrame.LookVector * offsetDistance))
-            local initialHugPos = targetHRP.Position + offset
-            localHRP.CFrame = CFrame.new(initialHugPos, targetHRP.Position)
-            local humanoid = getPlrHum(localCharacter)
-            if humanoid then
-                local anim1 = InstanceNew("Animation")
-                anim1.AnimationId = "rbxassetid://283545583"
-                local track1 = humanoid:LoadAnimation(anim1)
-                local anim2 = InstanceNew("Animation")
-                anim2.AnimationId = "rbxassetid://225975820"
-                local track2 = humanoid:LoadAnimation(anim2)
-                Insert(currentHugTracks, track1)
-                Insert(currentHugTracks, track2)
-                track1:Play()
-                track2:Play()
-                currentHugTarget = targetCharacter
-                Spawn(function()
-                    while hugModeEnabled and targetCharacter and targetCharacter:FindFirstChild("HumanoidRootPart") and (currentHugTarget == targetCharacter) do
-                        targetHRP = getRoot(targetCharacter)
-                        offset = (hugFromFront and (targetHRP.CFrame.LookVector * offsetDistance)) or (-(targetHRP.CFrame.LookVector * offsetDistance))
-                        local newHugPos = targetHRP.Position + offset
-                        if localHRP then
-                            localHRP.CFrame = CFrame.new(newHugPos, targetHRP.Position)
-                        end
-                        Wait()
-                    end
-                end)
-            end
-        end
-    end
+		gui.draggablev2(toggleHugButton)
+		gui.draggablev2(sideToggleButton)
 
-    local conn1 = MouseButtonFix(toggleHugButton, function()
-        hugModeEnabled = not hugModeEnabled
-        if hugModeEnabled then
-            toggleHugButton.Text = "Hug Mode: ON"
-        else
-            toggleHugButton.Text = "Hug Mode: OFF"
-            for _, track in pairs(currentHugTracks) do
-                pcall(function() track:Stop() end)
-            end
-            currentHugTracks = {}
-            currentHugTarget = nil
-        end
-    end)
-    Insert(hugConnections, conn1)
+		hugModeEnabled = false
 
-    local conn2 = MouseButtonFix(sideToggleButton, function()
-        hugFromFront = not hugFromFront
-        sideToggleButton.Text = (hugFromFront and "Hug Side: Front") or "Hug Side: Back"
-    end)
-    Insert(hugConnections, conn2)
+		local function performHug(targetCharacter)
+			local offsetDistance = 1.5
+			local targetHRP = getRoot(targetCharacter)
+			local localCharacter = LocalPlayer.Character
+			if not localCharacter then return end
+			local localHRP = getRoot(localCharacter)
+			if targetHRP and localHRP then
+				local offset = (hugFromFront and (targetHRP.CFrame.LookVector * offsetDistance)) or (-(targetHRP.CFrame.LookVector * offsetDistance))
+				local initialHugPos = targetHRP.Position + offset
+				localHRP.CFrame = CFrame.new(initialHugPos, targetHRP.Position)
+				local humanoid = getPlrHum(localCharacter)
+				if humanoid then
+					local anim1 = InstanceNew("Animation")
+					anim1.AnimationId = "rbxassetid://283545583"
+					local track1 = humanoid:LoadAnimation(anim1)
+					local anim2 = InstanceNew("Animation")
+					anim2.AnimationId = "rbxassetid://225975820"
+					local track2 = humanoid:LoadAnimation(anim2)
+					Insert(currentHugTracks, track1)
+					Insert(currentHugTracks, track2)
+					track1:Play()
+					track2:Play()
+					currentHugTarget = targetCharacter
+					Spawn(function()
+						while hugModeEnabled and targetCharacter and targetCharacter:FindFirstChild("HumanoidRootPart") and (currentHugTarget == targetCharacter) do
+							targetHRP = getRoot(targetCharacter)
+							offset = (hugFromFront and (targetHRP.CFrame.LookVector * offsetDistance)) or (-(targetHRP.CFrame.LookVector * offsetDistance))
+							local newHugPos = targetHRP.Position + offset
+							if localHRP then
+								localHRP.CFrame = CFrame.new(newHugPos, targetHRP.Position)
+							end
+							Wait()
+						end
+					end)
+				end
+			end
+		end
 
-    local conn3 = LocalPlayer:GetMouse().Button1Down:Connect(function()
-        if not hugModeEnabled then return end
-        local target = mouse.Target
-        if target and target.Parent then
-            local targetPlayer = Players:GetPlayerFromCharacter(target.Parent)
-            if targetPlayer and targetPlayer ~= LocalPlayer and targetPlayer.Character then
-                performHug(targetPlayer.Character)
-            end
-        end
-    end)
-    Insert(hugConnections, conn3)
+		local conn1 = MouseButtonFix(toggleHugButton, function()
+			hugModeEnabled = not hugModeEnabled
+			if hugModeEnabled then
+				toggleHugButton.Text = "Hug Mode: ON"
+			else
+				toggleHugButton.Text = "Hug Mode: OFF"
+				for _, track in pairs(currentHugTracks) do
+					pcall(function() track:Stop() end)
+				end
+				currentHugTracks = {}
+				currentHugTarget = nil
+			end
+		end)
+		Insert(hugConnections, conn1)
+
+		local conn2 = MouseButtonFix(sideToggleButton, function()
+			hugFromFront = not hugFromFront
+			sideToggleButton.Text = (hugFromFront and "Hug Side: Front") or "Hug Side: Back"
+		end)
+		Insert(hugConnections, conn2)
+
+		local conn3 = LocalPlayer:GetMouse().Button1Down:Connect(function()
+			if not hugModeEnabled then return end
+			local target = mouse.Target
+			if target and target.Parent then
+				local targetPlayer = Players:GetPlayerFromCharacter(target.Parent)
+				if targetPlayer and targetPlayer ~= LocalPlayer and targetPlayer.Character then
+					performHug(targetPlayer.Character)
+				end
+			end
+		end)
+		Insert(hugConnections, conn3)
+	else
+		DoNotif("command requires R6")
+	end
 end)
 
 cmd.add({"unhug"}, {"unhug", "no huggies :("}, function()
-    for _, conn in pairs(hugConnections) do
-        if conn then conn:Disconnect() end
-    end
-    for _, track in pairs(currentHugTracks) do
-        pcall(function() track:Stop() end)
-    end
-    currentHugTracks = {}
-    hugConnections = {}
-    currentHugTarget = nil
-    hugFromFront = false
-    hugModeEnabled = false
-    if hugUI then
-        hugUI:Destroy()
-        hugUI = nil
-    end
+	for _, conn in pairs(hugConnections) do
+		if conn then conn:Disconnect() end
+	end
+	for _, track in pairs(currentHugTracks) do
+		pcall(function() track:Stop() end)
+	end
+	currentHugTracks = {}
+	hugConnections = {}
+	currentHugTarget = nil
+	hugFromFront = false
+	hugModeEnabled = false
+	if hugUI then
+		hugUI:Destroy()
+		hugUI = nil
+	end
 end)
 
 glueloop = {}
@@ -11881,84 +11885,84 @@ gui.draggable=function(ui, dragui)
 end
 
 gui.draggablev2 = function(ui, dragui)
-    if not dragui then 
-        dragui = ui 
-    end
-    local UserInputService = game:GetService("UserInputService")
+	if not dragui then 
+		dragui = ui 
+	end
+	local UserInputService = game:GetService("UserInputService")
 
-    local screenGui = ui:FindFirstAncestorWhichIsA("ScreenGui") or ui.Parent
+	local screenGui = ui:FindFirstAncestorWhichIsA("ScreenGui") or ui.Parent
 
-    local dragging
-    local dragInput
-    local dragStart
-    local startPos
+	local dragging
+	local dragInput
+	local dragStart
+	local startPos
 
-    local function update(input)
-        local delta = input.Position - dragStart
-        local parentSize = screenGui.AbsoluteSize
-        local uiSize = ui.AbsoluteSize
-        
-        local newXScale = startPos.X.Scale + (delta.X / parentSize.X)
-        local newYScale = startPos.Y.Scale + (delta.Y / parentSize.Y)
-        
-        local anchor = ui.AnchorPoint
-        local minX = anchor.X * (uiSize.X / parentSize.X)
-        local maxX = 1 - (1 - anchor.X) * (uiSize.X / parentSize.X)
-        local minY = anchor.Y * (uiSize.Y / parentSize.Y)
-        local maxY = 1 - (1 - anchor.Y) * (uiSize.Y / parentSize.Y)
-        
-        newXScale = math.clamp(newXScale, minX, maxX)
-        newYScale = math.clamp(newYScale, minY, maxY)
-        
-        ui.Position = UDim2.new(newXScale, 0, newYScale, 0)
-    end
+	local function update(input)
+		local delta = input.Position - dragStart
+		local parentSize = screenGui.AbsoluteSize
+		local uiSize = ui.AbsoluteSize
 
-    dragui.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            dragging = true
-            dragStart = input.Position
-            startPos = ui.Position
+		local newXScale = startPos.X.Scale + (delta.X / parentSize.X)
+		local newYScale = startPos.Y.Scale + (delta.Y / parentSize.Y)
 
-            input.Changed:Connect(function()
-                if input.UserInputState == Enum.UserInputState.End then
-                    dragging = false
-                end
-            end)
-        end
-    end)
+		local anchor = ui.AnchorPoint
+		local minX = anchor.X * (uiSize.X / parentSize.X)
+		local maxX = 1 - (1 - anchor.X) * (uiSize.X / parentSize.X)
+		local minY = anchor.Y * (uiSize.Y / parentSize.Y)
+		local maxY = 1 - (1 - anchor.Y) * (uiSize.Y / parentSize.Y)
 
-    dragui.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-            dragInput = input
-        end
-    end)
+		newXScale = math.clamp(newXScale, minX, maxX)
+		newYScale = math.clamp(newYScale, minY, maxY)
 
-    UserInputService.InputChanged:Connect(function(input)
-        if input == dragInput and dragging then
-            update(input)
-        end
-    end)
+		ui.Position = UDim2.new(newXScale, 0, newYScale, 0)
+	end
 
-    local function onScreenSizeChanged()
-        local parentSize = screenGui.AbsoluteSize
-        local uiSize = ui.AbsoluteSize
-        local currentPos = ui.Position
+	dragui.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			dragging = true
+			dragStart = input.Position
+			startPos = ui.Position
 
-        local anchor = ui.AnchorPoint
-        local minX = anchor.X * (uiSize.X / parentSize.X)
-        local maxX = 1 - (1 - anchor.X) * (uiSize.X / parentSize.X)
-        local minY = anchor.Y * (uiSize.Y / parentSize.Y)
-        local maxY = 1 - (1 - anchor.Y) * (uiSize.Y / parentSize.Y)
+			input.Changed:Connect(function()
+				if input.UserInputState == Enum.UserInputState.End then
+					dragging = false
+				end
+			end)
+		end
+	end)
 
-        local newXScale = math.clamp(currentPos.X.Scale, minX, maxX)
-        local newYScale = math.clamp(currentPos.Y.Scale, minY, maxY)
+	dragui.InputChanged:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+			dragInput = input
+		end
+	end)
 
-        ui.Position = UDim2.new(newXScale, 0, newYScale, 0)
-    end
+	UserInputService.InputChanged:Connect(function(input)
+		if input == dragInput and dragging then
+			update(input)
+		end
+	end)
 
-    screenGui:GetPropertyChangedSignal("AbsoluteSize"):Connect(onScreenSizeChanged)
+	local function onScreenSizeChanged()
+		local parentSize = screenGui.AbsoluteSize
+		local uiSize = ui.AbsoluteSize
+		local currentPos = ui.Position
 
-    ui.Active = true
+		local anchor = ui.AnchorPoint
+		local minX = anchor.X * (uiSize.X / parentSize.X)
+		local maxX = 1 - (1 - anchor.X) * (uiSize.X / parentSize.X)
+		local minY = anchor.Y * (uiSize.Y / parentSize.Y)
+		local maxY = 1 - (1 - anchor.Y) * (uiSize.Y / parentSize.Y)
+
+		local newXScale = math.clamp(currentPos.X.Scale, minX, maxX)
+		local newYScale = math.clamp(currentPos.Y.Scale, minY, maxY)
+
+		ui.Position = UDim2.new(newXScale, 0, newYScale, 0)
+	end
+
+	screenGui:GetPropertyChangedSignal("AbsoluteSize"):Connect(onScreenSizeChanged)
+
+	ui.Active = true
 end
 
 
@@ -12056,38 +12060,38 @@ gui.menuifyv2 = function(menu)
 end
 
 gui.loadCommands = function()
-    for i, v in pairs(cmdAutofill:GetChildren()) do
-        if v.Name ~= "UIListLayout" then
-            v:Remove()
-        end
-    end
+	for i, v in pairs(cmdAutofill:GetChildren()) do
+		if v.Name ~= "UIListLayout" then
+			v:Remove()
+		end
+	end
 
-    CMDAUTOFILL = {}
+	CMDAUTOFILL = {}
 
-    local last = nil
-    local i = 0
-    for name, tbl in pairs(Commands) do
-        local info = tbl[2]
-        local btn = cmdExample:Clone()
-        btn.Parent = cmdAutofill
-        btn.Name = name
-        btn.Input.Text = info[1]
-        i = i + 1
+	local last = nil
+	local i = 0
+	for name, tbl in pairs(Commands) do
+		local info = tbl[2]
+		local btn = cmdExample:Clone()
+		btn.Parent = cmdAutofill
+		btn.Name = name
+		btn.Input.Text = info[1]
+		i = i + 1
 
-        local size = btn.Size
-        btn.Size = UDim2.new(0, 0, 0, 25)
-        btn.Size = size
-        
-        Insert(CMDAUTOFILL, btn)
-    end
+		local size = btn.Size
+		btn.Size = UDim2.new(0, 0, 0, 25)
+		btn.Size = size
+
+		Insert(CMDAUTOFILL, btn)
+	end
 end
 
 gui.loadCommands()
 
 for i, v in ipairs(CMDAUTOFILL) do
-    if v:IsA("Frame") then
-        v.Visible = false
-    end
+	if v:IsA("Frame") then
+		v.Visible = false
+	end
 end
 
 gui.barSelect = function(speed)
@@ -12124,142 +12128,142 @@ end
 --[[ AUTOFILL SEARCHER ]]--
 searchedSEARCH=false
 gui.searchCommands = function()
-    local searchTerm = cmdInput.Text:gsub(";", ""):lower()
+	local searchTerm = cmdInput.Text:gsub(";", ""):lower()
 
-    if searchTerm:find("%s") then
+	if searchTerm:find("%s") then
 		if not searchedSEARCH then
-        	for _, frame in ipairs(CMDAUTOFILL) do
-            	frame.Visible = false
-        	end
+			for _, frame in ipairs(CMDAUTOFILL) do
+				frame.Visible = false
+			end
 			searchedSEARCH=true
 		end
-        return
-    end
+		return
+	end
 
-    local index = 0
-    local lastFramePos
-    local results = {}
-    local searchTermLength = #searchTerm
+	local index = 0
+	local lastFramePos
+	local results = {}
+	local searchTermLength = #searchTerm
 	searchedSEARCH=false
 
-    for _, frame in ipairs(CMDAUTOFILL) do
-        local cmdName = frame.Name:lower()
-        local command = Commands[cmdName]
-        if not command then continue end
+	for _, frame in ipairs(CMDAUTOFILL) do
+		local cmdName = frame.Name:lower()
+		local command = Commands[cmdName]
+		if not command then continue end
 
-        local displayName = command[2][1] or ""
-        local score = 999
-        local matchText = displayName
+		local displayName = command[2][1] or ""
+		local score = 999
+		local matchText = displayName
 
-        if cmdName == searchTerm or displayName:lower() == searchTerm or 
-           (Aliases[searchTerm] and Aliases[searchTerm] == cmdName) then
-            score = 1
-            matchText = cmdName
-        elseif cmdName:sub(1, searchTermLength) == searchTerm then
-            score = 2
-            matchText = cmdName
-        elseif displayName:lower():sub(1, searchTermLength) == searchTerm then
-            score = 3
-            matchText = displayName
-        else
-            for alias, cmd in pairs(Aliases) do
-                if cmd == cmdName and alias:sub(1, searchTermLength) == searchTerm then
-                    score = 3
-                    matchText = alias
-                    break
-                end
-            end
-        end
+		if cmdName == searchTerm or displayName:lower() == searchTerm or 
+			(Aliases[searchTerm] and Aliases[searchTerm] == cmdName) then
+			score = 1
+			matchText = cmdName
+		elseif cmdName:sub(1, searchTermLength) == searchTerm then
+			score = 2
+			matchText = cmdName
+		elseif displayName:lower():sub(1, searchTermLength) == searchTerm then
+			score = 3
+			matchText = displayName
+		else
+			for alias, cmd in pairs(Aliases) do
+				if cmd == cmdName and alias:sub(1, searchTermLength) == searchTerm then
+					score = 3
+					matchText = alias
+					break
+				end
+			end
+		end
 
-        if score == 999 and searchTermLength >= 2 then
-            if cmdName:find(searchTerm, 1, true) then
-                score = 4
-                matchText = cmdName
-            elseif displayName:lower():find(searchTerm, 1, true) then
-                score = 5
-                matchText = displayName
-            else
-                for alias, cmd in pairs(Aliases) do
-                    if cmd == cmdName and alias:find(searchTerm, 1, true) then
-                        score = 5
-                        matchText = alias
-                        break
-                    end
-                end
-            end
-        end
+		if score == 999 and searchTermLength >= 2 then
+			if cmdName:find(searchTerm, 1, true) then
+				score = 4
+				matchText = cmdName
+			elseif displayName:lower():find(searchTerm, 1, true) then
+				score = 5
+				matchText = displayName
+			else
+				for alias, cmd in pairs(Aliases) do
+					if cmd == cmdName and alias:find(searchTerm, 1, true) then
+						score = 5
+						matchText = alias
+						break
+					end
+				end
+			end
+		end
 
-        if score == 999 and searchTermLength >= 2 then
-            local cmdDistance = levenshtein(searchTerm, cmdName)
-            local displayDistance = levenshtein(searchTerm, displayName:lower())
+		if score == 999 and searchTermLength >= 2 then
+			local cmdDistance = levenshtein(searchTerm, cmdName)
+			local displayDistance = levenshtein(searchTerm, displayName:lower())
 
-            local bestAlias, bestAliasDistance = "", math.huge
-            for alias, cmd in pairs(Aliases) do
-                if cmd == cmdName then
-                    local aliasDistance = levenshtein(searchTerm, alias)
-                    if aliasDistance < bestAliasDistance then
-                        bestAliasDistance = aliasDistance
-                        bestAlias = alias
-                    end
-                end
-            end
+			local bestAlias, bestAliasDistance = "", math.huge
+			for alias, cmd in pairs(Aliases) do
+				if cmd == cmdName then
+					local aliasDistance = levenshtein(searchTerm, alias)
+					if aliasDistance < bestAliasDistance then
+						bestAliasDistance = aliasDistance
+						bestAlias = alias
+					end
+				end
+			end
 
-            local allowedDistance = math.min(2, searchTermLength - 1)
-            if cmdDistance <= allowedDistance then
-                score = 6 + cmdDistance
-                matchText = cmdName
-            elseif bestAliasDistance <= allowedDistance then
-                score = 6 + bestAliasDistance
-                matchText = bestAlias
-            elseif displayDistance <= allowedDistance then
-                score = 9 + displayDistance
-                matchText = displayName
-            end
-        end
+			local allowedDistance = math.min(2, searchTermLength - 1)
+			if cmdDistance <= allowedDistance then
+				score = 6 + cmdDistance
+				matchText = cmdName
+			elseif bestAliasDistance <= allowedDistance then
+				score = 6 + bestAliasDistance
+				matchText = bestAlias
+			elseif displayDistance <= allowedDistance then
+				score = 9 + displayDistance
+				matchText = displayName
+			end
+		end
 
-        if score < 999 then
-            Insert(results, {
-                frame = frame,
-                score = score,
-                text = matchText,
-                name = cmdName
-            })
-        end
-    end
+		if score < 999 then
+			Insert(results, {
+				frame = frame,
+				score = score,
+				text = matchText,
+				name = cmdName
+			})
+		end
+	end
 
-    table.sort(results, function(a, b)
-        if a.score == b.score then
-            return a.name < b.name
-        end
-        return a.score < b.score
-    end)
+	table.sort(results, function(a, b)
+		if a.score == b.score then
+			return a.name < b.name
+		end
+		return a.score < b.score
+	end)
 
-    for _, frame in ipairs(CMDAUTOFILL) do
-        frame.Visible = false
-    end
+	for _, frame in ipairs(CMDAUTOFILL) do
+		frame.Visible = false
+	end
 
-    for i, result in ipairs(results) do
-        if i <= 5 then
-            local frame = result.frame
-            if result.text and result.text ~= "" then
-                frame.Input.Text = result.text
-                frame.Visible = true
+	for i, result in ipairs(results) do
+		if i <= 5 then
+			local frame = result.frame
+			if result.text and result.text ~= "" then
+				frame.Input.Text = result.text
+				frame.Visible = true
 
-                local newSize = UDim2.new(0.5, math.sqrt(i) * 125, 0, 25)
-                local newYPos = (i - 1) * 28
-                local newPosition = UDim2.new(0.5, 0, 0, newYPos)
+				local newSize = UDim2.new(0.5, math.sqrt(i) * 125, 0, 25)
+				local newYPos = (i - 1) * 28
+				local newPosition = UDim2.new(0.5, 0, 0, newYPos)
 
-                gui.tween(frame, "Quint", "Out", 0.3, {
-                    Size = newSize,
-                    Position = lastFramePos and newPosition or UDim2.new(0.5, 0, 0, newYPos)
-                })
+				gui.tween(frame, "Quint", "Out", 0.3, {
+					Size = newSize,
+					Position = lastFramePos and newPosition or UDim2.new(0.5, 0, 0, newYPos)
+				})
 
-                lastFramePos = newPosition
-            else
-                frame.Visible = false
-            end
-        end
-    end
+				lastFramePos = newPosition
+			else
+				frame.Visible = false
+			end
+		end
+	end
 end
 
 --[[ OPEN THE COMMAND BAR ]]--
@@ -12283,7 +12287,7 @@ cmdInput.FocusLost:Connect(function(enterPressed)
 end)
 
 cmdInput:GetPropertyChangedSignal("Text"):Connect(function()
-    gui.searchCommands()
+	gui.searchCommands()
 end)
 
 gui.barDeselect(0)
@@ -12603,12 +12607,12 @@ function mainNameless()
 
 	if IsOnMobile then
 		ImageButton.Size = UDim2.new(0, 0, 0, 0)
-		ImageButton.Position = UDim2.new(0.5, 0, -0.05, -20)
+		ImageButton.Position = UDim2.new(0.5, 0, -0.1, -20)
 		ImageButton.ImageTransparency = 1
 
 		local appearTween = TweenService:Create(ImageButton, TweenInfo.new(1, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
 			Size = UDim2.new(0, 32 * NAScale, 0, 33 * NAScale),
-			Position = UDim2.new(0.5, 0, 0.05, 0),
+			Position = UDim2.new(0.5, 0, 0.1, 0),
 			ImageTransparency = 0
 		})
 		appearTween:Play()
