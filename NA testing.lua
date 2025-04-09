@@ -12501,7 +12501,7 @@ end)
 function bindToChat(plr, msg)
 	local chatMsg = chatExample:Clone()
 
-	for i, v in pairs(chatLogs:GetChildren()) do
+	for _, v in pairs(chatLogs:GetChildren()) do
 		if v:IsA("TextLabel") then
 			v.LayoutOrder = v.LayoutOrder + 1
 		end
@@ -12540,6 +12540,24 @@ function bindToChat(plr, msg)
 
 	local txtSize = gui.txtSize(chatMsg, chatMsg.AbsoluteSize.X, 100)
 	chatMsg.Size = UDim2.new(1, -5, 0, txtSize.Y)
+
+	local MAX_MESSAGES = 50
+	local chatFrames = {}
+	for _, v in pairs(chatLogs:GetChildren()) do
+		if v:IsA("TextLabel") then
+			table.insert(chatFrames, v)
+		end
+	end
+
+	table.sort(chatFrames, function(a, b)
+		return a.LayoutOrder < b.LayoutOrder
+	end)
+
+	if #chatFrames > MAX_MESSAGES then
+		for i = MAX_MESSAGES + 1, #chatFrames do
+			chatFrames[i]:Destroy()
+		end
+	end
 end
 
 function setupPlayer(plr)
