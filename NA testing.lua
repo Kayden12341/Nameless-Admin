@@ -8981,7 +8981,7 @@ cmd.add({"bang", "fuck"}, {"bang <player> <number> (fuck)", "fucks the player by
         part.CanCollide = true
         part.Transparency = 1
         part.Parent = SafeGetService("Workspace").CurrentCamera
-        table.insert(BANGPARTS, part)
+        Insert(BANGPARTS, part)
     end
 
     local bangOffset = CFrame.new(0, 0, 1.1)
@@ -9016,6 +9016,204 @@ cmd.add({"unbang", "unfuck"}, {"unbang (unfuck)", "Unbangs the player"}, functio
         p:Destroy()
     end
     BANGPARTS = {}
+end)
+
+inversebangLoop = nil
+inversebangAnim = nil
+inversebangDied = nil
+doInversebang = nil
+INVERSEBANGPARTS = {}
+
+cmd.add({"inversebang", "ibang", "inverseb"}, {"inversebang <player> <number> (inversebang/inverseb)", "you're the one getting fucked today ;)"}, function(h, d)
+    if inversebangLoop then
+        inversebangLoop = nil
+    end
+    if doInversebang then
+        doInversebang:Stop()
+    end
+    if inversebangAnim then
+        inversebangAnim:Destroy()
+    end
+    if inversebangDied then
+        inversebangDied:Disconnect()
+    end
+    for _, p in pairs(INVERSEBANGPARTS) do
+        p:Destroy()
+    end
+    INVERSEBANGPARTS = {}
+    
+    local speed = d or 10
+    local username = h
+    local targets = getPlr(username)
+    if #targets == 0 then return end
+    local plr = targets[1]
+    
+    inversebangAnim = Instance.new("Animation")
+    if not IsR15(Players.LocalPlayer) then
+        inversebangAnim.AnimationId = "rbxassetid://189854234"
+    else
+        inversebangAnim.AnimationId = "rbxassetid://10714360343"
+    end
+    local hum = getChar():FindFirstChildOfClass("Humanoid")
+    doInversebang = hum:LoadAnimation(inversebangAnim)
+    doInversebang:Play(0.1, 1, 1)
+    doInversebang:AdjustSpeed(speed)
+    
+    inversebangDied = hum.Died:Connect(function()
+        if inversebangLoop then
+            inversebangLoop = nil
+        end
+        doInversebang:Stop()
+        inversebangAnim:Destroy()
+        if inversebangDied then
+            inversebangDied:Disconnect()
+        end
+        for _, part in pairs(INVERSEBANGPARTS) do
+            part:Destroy()
+        end
+        INVERSEBANGPARTS = {}
+    end)
+    
+    local thick = 0.5
+    local halfWidth = 2
+    local halfDepth = 2
+    local halfHeight = 3
+    local walls = {
+        {offset = CFrame.new(0, 0, halfDepth + thick/500), size = Vector3.new(4, 6, thick)},
+        {offset = CFrame.new(0, 0, -(halfDepth + thick/500)), size = Vector3.new(4, 6, thick)},
+        {offset = CFrame.new(halfWidth + thick/500, 0, 0), size = Vector3.new(thick, 6, 4)},
+        {offset = CFrame.new(-(halfWidth + thick/500), 0, 0), size = Vector3.new(thick, 6, 4)},
+        {offset = CFrame.new(0, halfHeight + thick/500, 0), size = Vector3.new(4, thick, 4)},
+        {offset = CFrame.new(0, -(halfHeight + thick/500), 0), size = Vector3.new(4, thick, 4)}
+    }
+    for i, wall in ipairs(walls) do
+        local part = Instance.new("Part")
+        part.Size = wall.size
+        part.Anchored = true
+        part.CanCollide = true
+        part.Transparency = 1
+        part.Parent = SafeGetService("Workspace").CurrentCamera
+        Insert(INVERSEBANGPARTS, part)
+    end
+
+    local bangOffset = CFrame.new(0, 0, 1.1)
+    
+    inversebangLoop = coroutine.wrap(function()
+        while true do
+            local targetCharacter = plr.Character
+            local localCharacter = getChar()
+            if targetCharacter and targetCharacter:FindFirstChild("HumanoidRootPart") and localCharacter and localCharacter:FindFirstChild("HumanoidRootPart") then
+                local targetHRP = targetCharacter.HumanoidRootPart
+                local localHRP = localCharacter.HumanoidRootPart
+                local forwardCFrame = targetHRP.CFrame * CFrame.new(0, 0, -2.5)
+                local backwardCFrame = targetHRP.CFrame * CFrame.new(0, 0, -1.3)
+                local tweenForward = TweenService:Create(
+                    localHRP,
+                    TweenInfo.new(0.15, Enum.EasingStyle.Linear, Enum.EasingDirection.Out),
+                    {CFrame = forwardCFrame}
+                )
+                tweenForward:Play()
+                tweenForward.Completed:Wait()
+                local tweenBackward = TweenService:Create(
+                    localHRP,
+                    TweenInfo.new(0.15, Enum.EasingStyle.Linear, Enum.EasingDirection.Out),
+                    {CFrame = backwardCFrame}
+                )
+                tweenBackward:Play()
+                tweenBackward.Completed:Wait()
+                for i, wall in ipairs(walls) do
+                    INVERSEBANGPARTS[i].CFrame = localHRP.CFrame * wall.offset
+                end
+            else
+                break
+            end
+        end
+    end)
+    inversebangLoop()
+end, true)
+
+cmd.add({"uninversebang", "unibang", "uninverseb"}, {"uninversebang (unibang)", "no more fun"}, function()
+    if inversebangLoop then
+        inversebangLoop = nil
+    end
+    if doInversebang then
+        doInversebang:Stop()
+    end
+    if inversebangAnim then
+        inversebangAnim:Destroy()
+    end
+    if inversebangDied then
+        inversebangDied:Disconnect()
+    end
+    for _, p in pairs(INVERSEBANGPARTS) do
+        p:Destroy()
+    end
+    INVERSEBANGPARTS = {}
+end)
+
+cmd.add({"jerk", "jork"}, {"jerk (jork)", "jorking it"}, function()
+    local tool = Instance.new("Tool")
+    tool.Name = "Jerking: OFF"
+    tool.ToolTip = "i am jorking it"
+    tool.RequiresHandle = false
+    tool.Parent = LocalPlayer:FindFirstChildWhichIsA("Backpack")
+
+    local jorkin = false
+    local track = nil
+
+    local humanoid = getChar():FindFirstChildOfClass("Humanoid")
+    local function updateHumanoid()
+        humanoid = getChar():FindFirstChildOfClass("Humanoid")
+    end
+    if not humanoid then updateHumanoid() end
+
+    local function stopTomfoolery()
+        jorkin = false
+        if track then
+            pcall(function()
+                track:Stop()
+            end)
+            track = nil
+        end
+    end
+
+    local function playAnimation()
+        if not jorkin then return end
+        local isR15Model = IsR15()
+        if not track then
+            local anim = Instance.new("Animation")
+			if not IsR15(Players.LocalPlayer) then
+				anim.AnimationId = "rbxassetid://72042024"
+			else
+				anim.AnimationId = "rbxassetid://698251653"
+			end
+            track = humanoid:LoadAnimation(anim)
+			track.Looped=true
+        end
+        if track then
+            track:Play(0.1, 1, 1)
+            track:AdjustSpeed(isR15Model and 0.7 or 0.65)
+        end
+    end
+
+    tool.Equipped:Connect(function()
+        jorkin = true
+        tool.Name = "Jerking: ON"
+        playAnimation()
+    end)
+
+    tool.Unequipped:Connect(function()
+        tool.Name = "Jerking: OFF"
+        stopTomfoolery()
+    end)
+
+    LocalPlayer.CharacterAdded:Connect(updateHumanoid)
+
+    if humanoid then
+        humanoid.Died:Connect(function()
+            stopTomfoolery()
+        end)
+    end
 end)
 
 huggiePARTS = {}
@@ -12545,7 +12743,7 @@ function bindToChat(plr, msg)
 	local chatFrames = {}
 	for _, v in pairs(chatLogs:GetChildren()) do
 		if v:IsA("TextLabel") then
-			table.insert(chatFrames, v)
+			Insert(chatFrames, v)
 		end
 	end
 
