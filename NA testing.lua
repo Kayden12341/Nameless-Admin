@@ -4983,26 +4983,51 @@ cmd.add({"synapsedex","sdex"},{"synapsedex (sdex)","Loads SynapseX's dex explore
 	Load(Dex)
 end)
 
-local antifling = nil
+local aFLING = {on = false, c = {}}
+function addFLINGER(c) Insert(aFLING.c, c) end
 
-cmd.add({"antifling"},{"antifling","makes other players non-collidable with you"},function()
-	if antifling then antifling:Disconnect() antifling=nil end
-	antifling=RunService.Stepped:Connect(function()
-		for _,plr in ipairs(Players:GetPlayers()) do
-			if plr~=LocalPlayer and plr.Character then
-				for _,p in ipairs(plr.Character:GetDescendants()) do
-					if p:IsA("BasePart") then
-						p.CanCollide=false
-					end
+cmd.add({"antifling"}, {"antifling", "makes other players non-collidable with you"}, function()
+	if aFLING.on then for _, cn in ipairs(aFLING.c) do cn:Disconnect() end aFLING.c = {} end
+	aFLING.on = true
+	addFLINGER(RunService.Stepped:Connect(function()
+		for _, pl in ipairs(Players:GetPlayers()) do
+			if pl ~= LocalPlayer and pl.Character then
+				for _, p in ipairs(pl.Character:GetDescendants()) do
+					if p:IsA("BasePart") then p.CanCollide = false end
 				end
 			end
 		end
-	end)
+	end))
+	local function setNo(p)
+		if p:IsA("BasePart") then
+			p.CanCollide = false
+			addFLINGER(p:GetPropertyChangedSignal("CanCollide"):Connect(function()
+				if p.CanCollide then p.CanCollide = false end
+			end))
+		end
+	end
+	local function hook(c)
+		for _, p in ipairs(c:GetDescendants()) do setNo(p) end
+		addFLINGER(c.DescendantAdded:Connect(setNo))
+	end
+	for _, pl in ipairs(Players:GetPlayers()) do
+		if pl ~= LocalPlayer then
+			if pl.Character then hook(pl.Character) end
+			addFLINGER(pl.CharacterAdded:Connect(hook))
+		end
+	end
+	addFLINGER(Players.PlayerAdded:Connect(function(pl)
+		if pl ~= LocalPlayer then addFLINGER(pl.CharacterAdded:Connect(hook)) end
+	end))
 	DoNotif("Antifling Enabled")
 end)
 
 cmd.add({"unantifling"}, {"unantifling", "restores collision for other players"}, function()
-	if antifling then antifling:Disconnect() antifling = nil end
+	if aFLING.on then
+		for _, cn in ipairs(aFLING.c) do cn:Disconnect() end
+		aFLING.c = {}
+		aFLING.on = false
+	end
 	DoNotif("Antifling Disabled")
 end)
 
