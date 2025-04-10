@@ -2049,7 +2049,7 @@ cmd.add({"updatelog","updlog","updates"},{"updatelog (updlog,updates)","show the
 	gui.updateLogs()
 end)
 
-cmd.add({"discord"}, {"discord", "Copy an invite link to the official Nameless Admin Discord server"}, function()
+cmd.add({"discord", "invite"}, {"discord (invite)", "Copy an invite link to the official Nameless Admin Discord server"}, function()
 	local inviteLink = "https://discord.gg/zS7TpV3p64"
 
 	if setclipboard then
@@ -2192,11 +2192,11 @@ cmd.add({"clickfling","mousefling"}, {"clickfling (mousefling)", "Fling a player
 					if THumanoid and THumanoid.Sit and not AllBool then
 					end
 					if THead then
-						game:GetService("Workspace").CurrentCamera.CameraSubject = THead
+						SafeGetService("Workspace").CurrentCamera.CameraSubject = THead
 					elseif not THead and Handle then
-						game:GetService("Workspace").CurrentCamera.CameraSubject = Handle
+						SafeGetService("Workspace").CurrentCamera.CameraSubject = Handle
 					elseif THumanoid and TRootPart then
-						game:GetService("Workspace").CurrentCamera.CameraSubject = THumanoid
+						SafeGetService("Workspace").CurrentCamera.CameraSubject = THumanoid
 					end
 					if not TCharacter:FindFirstChildWhichIsA("BasePart") then
 						return
@@ -2273,7 +2273,7 @@ cmd.add({"clickfling","mousefling"}, {"clickfling (mousefling)", "Fling a player
 						until BasePart.Velocity.Magnitude > 500 or BasePart.Parent ~= TargetPlayer.Character or TargetPlayer.Parent ~= Players or not TargetPlayer.Character == TCharacter or THumanoid.Sit or Humanoid.Health <= 0 or tick() > Time + TimeToWait
 					end
 
-					game:GetService("Workspace").FallenPartsDestroyHeight = 0/0
+					SafeGetService("Workspace").FallenPartsDestroyHeight = 0/0
 
 					local BV = InstanceNew("BodyVelocity")
 					BV.Parent = RootPart
@@ -2298,7 +2298,7 @@ cmd.add({"clickfling","mousefling"}, {"clickfling (mousefling)", "Fling a player
 
 					BV:Destroy()
 					Humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated, true)
-					game:GetService("Workspace").CurrentCamera.CameraSubject = Humanoid
+					SafeGetService("Workspace").CurrentCamera.CameraSubject = Humanoid
 
 					repeat
 						RootPart.CFrame = getgenv().OldPos * CFrame.new(0, .5, 0)
@@ -2311,7 +2311,7 @@ cmd.add({"clickfling","mousefling"}, {"clickfling (mousefling)", "Fling a player
 						end)
 						Wait()
 					until (RootPart.Position - getgenv().OldPos.p).Magnitude < 25
-					game:GetService("Workspace").FallenPartsDestroyHeight = getgenv().FPDH
+					SafeGetService("Workspace").FallenPartsDestroyHeight = getgenv().FPDH
 				else
 				end
 			end
@@ -3426,9 +3426,9 @@ cmd.add({"vfly", "vehiclefly"}, {"vehiclefly (vfly)", "be able to fly vehicles"}
 		toggleBtn.Position = UDim2.new(0.8,0,-0.1,0)
 		toggleBtn.Size = UDim2.new(0.4,0,0.4,0)
 		toggleBtn.Font = Enum.Font.SourceSans
-		toggleBtn.Text = "S"
+		toggleBtn.Text = "+"
 		toggleBtn.TextColor3 = Color3.fromRGB(255,255,255)
-		toggleBtn.TextSize = 14
+		toggleBtn.TextScaled = true
 		toggleBtn.TextWrapped = true
 		toggleBtn.Active = true
 		toggleBtn.AutoButtonColor = true
@@ -3436,6 +3436,7 @@ cmd.add({"vfly", "vehiclefly"}, {"vehiclefly (vfly)", "be able to fly vehicles"}
 		corner3.Parent = toggleBtn
 		MouseButtonFix(toggleBtn, function()
 			speedBox.Visible = not speedBox.Visible
+			toggleBtn.Text = speedBox.Visible and "-" or "+"
 		end)
 		coroutine.wrap(function()
 			MouseButtonFix(btn, function()
@@ -5246,7 +5247,7 @@ cmd.add({"disable"}, {"disable", "Disables a specific CoreGui"}, function(...)
 			Buttons = buttons
 		})
 	end
-end)
+end,true)
 
 cmd.add({"reverb", "reverbcontrol"}, {"reverb (reverbcontrol)", "Manage sound reverb settings"}, function()
 	local reverbButtons = {}
@@ -6273,9 +6274,9 @@ cmd.add({"fly"}, {"fly [speed]", "Enable flight"}, function(...)
 		toggleBtn.Position = UDim2.new(0.8,0,-0.1,0)
 		toggleBtn.Size = UDim2.new(0.4,0,0.4,0)
 		toggleBtn.Font = Enum.Font.SourceSans
-		toggleBtn.Text = "S"
+		toggleBtn.Text = "+"
 		toggleBtn.TextColor3 = Color3.fromRGB(255,255,255)
-		toggleBtn.TextSize = 14
+		toggleBtn.TextScaled = true
 		toggleBtn.TextWrapped = true
 		toggleBtn.Active = true
 		toggleBtn.AutoButtonColor = true
@@ -6283,6 +6284,7 @@ cmd.add({"fly"}, {"fly [speed]", "Enable flight"}, function(...)
 		corner3.Parent = toggleBtn
 		MouseButtonFix(toggleBtn, function()
 			speedBox.Visible = not speedBox.Visible
+			toggleBtn.Text = speedBox.Visible and "-" or "+"
 		end)
 		coroutine.wrap(function()
 			MouseButtonFix(btn, function()
@@ -6482,7 +6484,7 @@ cmd.add({"antibang"}, {"antibang", "prevents users to bang you (still WORK IN PR
 	if not root then return end
 	originalPos = root.CFrame
 	local orgHeight = SafeGetService("Workspace").FallenPartsDestroyHeight
-	local anims = {"rbxassetid://5918726674", "rbxassetid://148840371", "rbxassetid://698251653", "rbxassetid://72042024"}
+	local anims = {"rbxassetid://5918726674", "rbxassetid://148840371", "rbxassetid://698251653", "rbxassetid://72042024", "rbxassetid://189854234", "rbxassetid://106772613", "rbxassetid://10714360343"}
 	local inVoid = false
 	local targetPlayer = nil
 	local toldNotif = false
@@ -6622,7 +6624,7 @@ cmd.add({"freezewalk"},{"freezewalk","Freezes your character on the server but l
 	local Character=getChar()
 	local Root=getRoot(Character)
 
-	if IsR6(plr) then
+	if IsR6() then
 		local Clone=Root:Clone()
 		Root:Destroy()
 		Clone.Parent=Character
@@ -6789,7 +6791,7 @@ cmd.add({"freecam","fc","fcam"},{"freecam [speed] (fc,fcam)","Enable free camera
 		toggleBtn.Position = UDim2.new(0.9, 0, -0.1, 0)
 		toggleBtn.Size = UDim2.new(0.4, 0, 0.4, 0)
 		toggleBtn.Font = Enum.Font.SourceSans
-		toggleBtn.Text = "S"
+		toggleBtn.Text = "+"
 		toggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 		toggleBtn.TextSize = 14
 		toggleBtn.TextWrapped = true
@@ -6801,6 +6803,7 @@ cmd.add({"freecam","fc","fcam"},{"freecam [speed] (fc,fcam)","Enable free camera
 
 		MouseButtonFix(toggleBtn, function()
 			speedBox.Visible = not speedBox.Visible
+			toggleBtn.Text = speedBox.Visible and "-" or "+"
 		end)
 
 		coroutine.wrap(function()
@@ -9049,11 +9052,13 @@ end)
 
 inversebangLoop = nil
 inversebangAnim = nil
+inversebangAnim2 = nil
 inversebangDied = nil
 doInversebang = nil
+doInversebang2 = nil
 INVERSEBANGPARTS = {}
 
-cmd.add({"inversebang", "ibang", "inverseb"}, {"inversebang <player> <number> (inversebang/inverseb)", "you're the one getting fucked today ;)"}, function(h, d)
+cmd.add({"inversebang", "ibang", "inverseb"}, {"inversebang <player> <number> (inversebang/inverseb)", "you're the one getting fucked today ;)"},function(h, d)
     if inversebangLoop then
         inversebangLoop = nil
     end
@@ -9062,6 +9067,9 @@ cmd.add({"inversebang", "ibang", "inverseb"}, {"inversebang <player> <number> (i
     end
     if inversebangAnim then
         inversebangAnim:Destroy()
+    end
+    if inversebangAnim2 then
+        inversebangAnim2:Destroy()
     end
     if inversebangDied then
         inversebangDied:Disconnect()
@@ -9078,21 +9086,33 @@ cmd.add({"inversebang", "ibang", "inverseb"}, {"inversebang <player> <number> (i
     local plr = targets[1]
     
     inversebangAnim = Instance.new("Animation")
-    if not IsR15(Players.LocalPlayer) then
+    local isR15 = IsR15(Players.LocalPlayer)
+    if not isR15 then
         inversebangAnim.AnimationId = "rbxassetid://189854234"
+        inversebangAnim2 = Instance.new("Animation")
+        inversebangAnim2.AnimationId = "rbxassetid://106772613"
     else
         inversebangAnim.AnimationId = "rbxassetid://10714360343"
+        inversebangAnim2 = nil
     end
     local hum = getChar():FindFirstChildOfClass("Humanoid")
     doInversebang = hum:LoadAnimation(inversebangAnim)
     doInversebang:Play(0.1, 1, 1)
     doInversebang:AdjustSpeed(speed)
+    if not isR15 and inversebangAnim2 then
+        doInversebang2 = hum:LoadAnimation(inversebangAnim2)
+        doInversebang2:Play(0.1, 1, 1)
+        doInversebang2:AdjustSpeed(speed)
+    end
     
     inversebangDied = hum.Died:Connect(function()
         if inversebangLoop then
             inversebangLoop = nil
         end
         doInversebang:Stop()
+        if doInversebang2 then
+            doInversebang2:Stop()
+        end
         inversebangAnim:Destroy()
         if inversebangDied then
             inversebangDied:Disconnect()
@@ -9168,6 +9188,9 @@ cmd.add({"uninversebang", "unibang", "uninverseb"}, {"uninversebang (unibang)", 
     if doInversebang then
         doInversebang:Stop()
     end
+    if doInversebang2 then
+        doInversebang2:Stop()
+    end
     if inversebangAnim then
         inversebangAnim:Destroy()
     end
@@ -9178,6 +9201,67 @@ cmd.add({"uninversebang", "unibang", "uninverseb"}, {"uninversebang (unibang)", 
         p:Destroy()
     end
     INVERSEBANGPARTS = {}
+end)
+
+susAssetId = "rbxassetid://106772613"
+sussyTRACK = nil
+sitCHECK = nil
+
+cmd.add({"suslay", "laysus"}, {"suslay (laysus)", "lay down in the most sussy way possible"}, function() -- honestly i suck at making command descriptions
+    if IsR6() then
+        if sussyTRACK then
+            sussyTRACK:Stop()
+            sussyTRACK = nil
+        end
+
+        if sitCHECK then
+            sitCHECK:Disconnect()
+            sitCHECK = nil
+        end
+
+        getHum().Sit = true
+        Wait(0.1)
+
+        getHum().RootPart.CFrame = getHum().RootPart.CFrame * CFrame.Angles(math.pi * 0.5, 0, 0)
+
+        for _, v in ipairs(getHum():GetPlayingAnimationTracks()) do
+            v:Stop()
+        end
+
+        local anim = Instance.new("Animation")
+        anim.AnimationId = susAssetId
+
+        sussyTRACK = getHum():LoadAnimation(anim)
+        sussyTRACK:Play()
+
+        sitCHECK = getHum():GetPropertyChangedSignal("Jump"):Connect(function()
+            if sussyTRACK then
+                sussyTRACK:Stop()
+                sussyTRACK = nil
+            end
+
+            if sitCHECK then
+                sitCHECK:Disconnect()
+                sitCHECK = nil
+            end
+        end)
+	else
+		DoNotif("command requires R6")
+    end
+end)
+
+cmd.add({"unsuslay"}, {"unsuslay", "stand back up from being sus"}, function()
+    getHum():ChangeState(Enum.HumanoidStateType.Jumping)
+
+    if sussyTRACK then
+        sussyTRACK:Stop()
+        sussyTRACK = nil
+    end
+
+    if sitCHECK then
+        sitCHECK:Disconnect()
+        sitCHECK = nil
+    end
 end)
 
 cmd.add({"jerk", "jork"}, {"jerk (jork)", "jorking it"}, function()
@@ -9254,7 +9338,7 @@ currentHugTarget = nil
 hugFromFront = false
 hugModeEnabled = false
 
-cmd.add({"hug", "clickhug"}, {"hug (clickhug", "huggies time (click on a target to hug)"}, function()
+cmd.add({"hug", "clickhug"}, {"hug (clickhug)", "huggies time (click on a target to hug)"}, function()
 	if IsR6() then
 		local mouse = LocalPlayer:GetMouse()
 
