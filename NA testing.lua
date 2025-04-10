@@ -8772,7 +8772,7 @@ end, true)
 
 bang, bangAnim, bangLoop, bangDied, bangParts = nil, nil, nil, nil, {}
 
-cmd.add({"headbang", "mouthbang", "headfuck", "mouthfuck", "hb", "mb"}, {"headbang <player> (mouthbang,headfuck,mouthfuck,hb,mb)", "Bang them in the mouth because you are gay"}, function(h, d)
+cmd.add({"headbang", "mouthbang", "headfuck", "mouthfuck", "facebang", "facefuck", "hb", "mb"}, {"headbang <player> (mouthbang,headfuck,mouthfuck,facebang,facefuck,hb,mb)", "Bang them in the mouth because you are gay"}, function(h, d)
 	local speed = d or 10
 	local username = h
 	local players = getPlr(username)
@@ -8862,6 +8862,140 @@ cmd.add({"unheadbang", "unmouthbang", "unhb", "unmb"}, {"unheadbang (unmouthbang
 		part:Destroy()
 	end
 	bangParts = {}
+end)
+
+suckLOOP = nil
+suckANIM = nil
+suckDIED = nil
+doSUCKING = nil
+SUCKYSUCKY = {}
+
+cmd.add({"suck", "dicksuck"}, {"suck <player> <number> (dicksuck)", "suck it"}, function(h, d)
+    if suckLOOP then
+        suckLOOP = nil
+    end
+    if doSUCKING then
+        doSUCKING:Stop()
+    end
+    if suckANIM then
+        suckANIM:Destroy()
+    end
+    if suckDIED then
+        suckDIED:Disconnect()
+    end
+    for _, p in pairs(SUCKYSUCKY) do
+        p:Destroy()
+    end
+    SUCKYSUCKY = {}
+    
+    local speed = d or 10
+    local tweenDuration = 1 / speed
+    local tweenInfo = TweenInfo.new(tweenDuration, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
+    local username = h
+    local targets = getPlr(username)
+    if #targets == 0 then return end
+    local plr = targets[1]
+    
+    suckANIM = Instance.new("Animation")
+    local isR15 = IsR15(Players.LocalPlayer)
+    if not isR15 then
+        suckANIM.AnimationId = "rbxassetid://189854234"
+    else
+        suckANIM.AnimationId = "rbxassetid://5918726674"
+    end
+    local hum = getChar():FindFirstChildOfClass("Humanoid")
+    doSUCKING = hum:LoadAnimation(suckANIM)
+    doSUCKING:Play(0.1, 1, 1)
+    doSUCKING:AdjustSpeed(speed)
+    
+    suckDIED = hum.Died:Connect(function()
+        if suckLOOP then
+            suckLOOP = nil
+        end
+        doSUCKING:Stop()
+        suckANIM:Destroy()
+        if suckDIED then
+            suckDIED:Disconnect()
+        end
+        for _, part in pairs(SUCKYSUCKY) do
+            part:Destroy()
+        end
+        SUCKYSUCKY = {}
+    end)
+    
+    local thick = 0.5
+    local halfWidth = 2
+    local halfDepth = 2
+    local halfHeight = 3
+    local walls = {
+        {offset = CFrame.new(0, 0, halfDepth + thick/500), size = Vector3.new(4, 6, thick)},
+        {offset = CFrame.new(0, 0, -(halfDepth + thick/500)), size = Vector3.new(4, 6, thick)},
+        {offset = CFrame.new(halfWidth + thick/500, 0, 0), size = Vector3.new(thick, 6, 4)},
+        {offset = CFrame.new(-(halfWidth + thick/500), 0, 0), size = Vector3.new(thick, 6, 4)},
+        {offset = CFrame.new(0, halfHeight + thick/500, 0), size = Vector3.new(4, thick, 4)},
+        {offset = CFrame.new(0, -(halfHeight + thick/500), 0), size = Vector3.new(4, thick, 4)}
+    }
+    for i, wall in ipairs(walls) do
+        local part = Instance.new("Part")
+        part.Size = wall.size
+        part.Anchored = true
+        part.CanCollide = true
+        part.Transparency = 1
+        part.Parent = SafeGetService("Workspace").CurrentCamera
+        Insert(SUCKYSUCKY, part)
+    end
+    
+    suckLOOP = coroutine.wrap(function()
+        while true do
+            local targetCharacter = plr.Character
+            local localCharacter = getChar()
+            if targetCharacter and targetCharacter:FindFirstChild("HumanoidRootPart") and localCharacter and localCharacter:FindFirstChild("HumanoidRootPart") then
+                local targetHRP = targetCharacter.HumanoidRootPart
+                local localHRP = localCharacter.HumanoidRootPart
+                local forwardCFrame = targetHRP.CFrame * CFrame.new(0, -2.3, -2.5) * CFrame.Angles(0, math.pi, 0)
+                local backwardCFrame = targetHRP.CFrame * CFrame.new(0, -2.3, -1.3) * CFrame.Angles(0, math.pi, 0)
+                local tweenForward = TweenService:Create(
+                    localHRP,
+                    TweenInfo.new(0.15, Enum.EasingStyle.Linear, Enum.EasingDirection.Out),
+                    {CFrame = forwardCFrame}
+                )
+                tweenForward:Play()
+                tweenForward.Completed:Wait()
+                local tweenBackward = TweenService:Create(
+                    localHRP,
+                    TweenInfo.new(0.15, Enum.EasingStyle.Linear, Enum.EasingDirection.Out),
+                    {CFrame = backwardCFrame}
+                )
+                tweenBackward:Play()
+                tweenBackward.Completed:Wait()
+                for i, wall in ipairs(walls) do
+                    SUCKYSUCKY[i].CFrame = localHRP.CFrame * wall.offset
+                end
+            else
+                break
+            end
+        end
+    end)
+    suckLOOP()
+end, true)
+
+cmd.add({"unsuck", "undicksuck"}, {"unsuck (undicksuck)", "no more fun"}, function()
+    if suckLOOP then
+        suckLOOP = nil
+    end
+    if doSUCKING then
+        doSUCKING:Stop()
+    end
+    if suckANIM then
+        suckANIM:Destroy()
+    end
+    if suckDIED then
+        suckDIED:Disconnect()
+    end
+    for _, p in pairs(SUCKYSUCKY) do
+        p:Destroy()
+    end
+    SUCKYSUCKY = {}
 end)
 
 cmd.add({"improvetextures"},{"improvetextures","Switches Textures"},function()
