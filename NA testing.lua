@@ -8806,7 +8806,7 @@ cmd.add({"headbang", "mouthbang", "headfuck", "mouthfuck", "facebang", "facefuck
 		part:Destroy()
 	end
 	bangParts = {}
-	local thick = 1
+	local thick = 0.2
 	local halfWidth = 2
 	local halfDepth = 2
 	local halfHeight = 3
@@ -8923,7 +8923,7 @@ cmd.add({"suck", "dicksuck"}, {"suck <player> <number> (dicksuck)", "suck it"}, 
         SUCKYSUCKY = {}
     end)
     
-    local thick = 0.5
+    local thick = 0.2
     local halfWidth = 2
     local halfDepth = 2
     local halfHeight = 3
@@ -9128,7 +9128,7 @@ cmd.add({"bang", "fuck"}, {"bang <player> <number> (fuck)", "fucks the player by
         BANGPARTS = {}
     end)
     
-    local thick = 0.5
+    local thick = 0.2
     local halfWidth = 2
     local halfDepth = 2
     local halfHeight = 3
@@ -9257,7 +9257,7 @@ cmd.add({"inversebang", "ibang", "inverseb"}, {"inversebang <player> <number> (i
         INVERSEBANGPARTS = {}
     end)
     
-    local thick = 0.5
+    local thick = 0.2
     local halfWidth = 2
     local halfDepth = 2
     local halfHeight = 3
