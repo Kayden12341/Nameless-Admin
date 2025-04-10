@@ -12213,13 +12213,13 @@ gui.commands = function()
 	end
 
 	cList.CanvasSize = UDim2.new(0, 0, 0, yOffset)
-	cFrame.Position = UDim2.new(0.5, -283/2, 0.5, -260/2)
+	cFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
 end
 gui.chatlogs=function()
 	if not chatLogsFrame.Visible then
 		chatLogsFrame.Visible=true
 	end
-	chatLogsFrame.Position=UDim2.new(0.5,-283/2+5,0.5,-260/2+5)
+	chatLogsFrame.Position=UDim2.new(0.5,0,0.5,0)
 end
 gui.updateLogs=function()
 	if not UpdLogsFrame.Visible and next(updLogs) then
@@ -12229,7 +12229,7 @@ gui.updateLogs=function()
 	else
 		warn("huh?")
 	end
-	UpdLogsFrame.Position=UDim2.new(0.5,-283/2+5,0.5,-260/2+5)
+	UpdLogsFrame.Position=UDim2.new(0.5,0,0.5,0)
 end
 
 gui.tween = function(obj, style, direction, duration, goal, callback)
@@ -12489,6 +12489,7 @@ end
 
 
 gui.menuify = function(menu)
+	if menu:IsA("Frame") then menu.AnchorPoint=Vector2.new(0.5,0) end
 	local exitButton = menu:FindFirstChild("Exit", true)
 	local minimizeButton = menu:FindFirstChild("Minimize", true)
 	local minimized = false
@@ -12525,6 +12526,7 @@ gui.menuify = function(menu)
 end
 
 gui.menuifyv2 = function(menu)
+	if menu:IsA("Frame") then menu.AnchorPoint=Vector2.new(0.5,0) end
 	local exitButton = menu:FindFirstChild("Exit", true)
 	local minimizeButton = menu:FindFirstChild("Minimize", true)
 	local clearButton = menu:FindFirstChild("Clear", true)
