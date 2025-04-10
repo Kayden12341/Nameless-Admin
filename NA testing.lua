@@ -111,8 +111,12 @@ function NaProtectUI(sGui)
 		sGui.IgnoreGuiInset = true
 	end
 
-	-- i honestly don't trust gethui that much
-	if cGUI and cGUI:FindFirstChild("RobloxGui") then
+
+	if gethui then
+		NAProtection(sGui)
+		sGui.Parent = gethui()
+		return sGui
+	elseif cGUI and cGUI:FindFirstChild("RobloxGui") then
 		NAProtection(sGui)
 		sGui.Parent = cGUI:FindFirstChild("RobloxGui")
 		return sGui
