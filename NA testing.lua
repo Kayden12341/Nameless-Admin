@@ -1552,7 +1552,7 @@ local cmdm=plr:GetMouse()
 goofyFLY=nil
 function sFLY(vfly)
 	while not cmdlp or not cmdlp.Character or not cmdlp.Character:FindFirstChild('HumanoidRootPart') or not cmdlp.Character:FindFirstChild('Humanoid') or not cmdm do
-		wait()
+		Wait()
 	end
 
 	if goofyFLY then goofyFLY:Destroy() end
@@ -1607,7 +1607,7 @@ function sFLY(vfly)
 				end
 
 				BG.cframe = game:GetService("Workspace").CurrentCamera.CoordinateFrame
-				wait()
+				Wait()
 			end
 
 			CONTROL = { F = 0, B = 0, L = 0, R = 0, Q = 0, E = 0 }
@@ -1659,7 +1659,7 @@ end
 
 local tool=nil
 spawn(function()
-	repeat wait() until getChar()
+	repeat Wait() until getChar()
 	tool=getBp():FindFirstChildOfClass("Tool") or getChar():FindFirstChildOfClass("Tool") or nil
 end)
 
@@ -2091,7 +2091,7 @@ cmd.add({"gotocampos","tocampos","tcp"},{"gotocampos (tocampos,tcp)","Teleports 
 		character:SetPrimaryPartCFrame(CFrame.new(cameraPosition))
 	end
 	local camera=game:GetService("Workspace").CurrentCamera
-	repeat wait() until camera.CFrame~=CFrame.new()
+	repeat Wait() until camera.CFrame~=CFrame.new()
 
 	teleportPlayer()
 end)
@@ -3249,7 +3249,7 @@ cmd.add({"rejoin", "rj"}, {"rejoin (rj)", "Rejoin the game"}, function()
 
 	if #plrs:GetPlayers() <= 1 then
 		lp:Kick("Rejoining...")
-		wait()
+		Wait()
 		tp:TeleportCancel()
 		local success, err = pcall(function()
 			tp:Teleport(PlaceId)
@@ -3267,7 +3267,7 @@ cmd.add({"rejoin", "rj"}, {"rejoin (rj)", "Rejoin the game"}, function()
 		end
 	end
 
-	wait()
+	Wait()
 	DoNotif("Rejoining...")
 end)
 
@@ -3379,7 +3379,7 @@ cmd.add({"accountage","accage"},{"accountage <player> (accage)","Tells the accou
 		teller=plr.AccountAge
 		accountage="The account age of "..nameChecker(plr).." is "..teller
 
-		wait();
+		Wait();
 
 		DoNotif(accountage)
 	end
@@ -3438,7 +3438,7 @@ cmd.add({"vfly", "vehiclefly"}, {"vehiclefly (vfly)", "be able to fly vehicles"}
 	connectVFlyKey()
 	vFlyEnabled = true
 	if IsOnMobile then
-		wait()
+		Wait()
 		DoNotif(adminName.." detected mobile. vFly button added for easier use.",2)
 		if vRAHH then
 			vRAHH:Destroy()
@@ -3529,7 +3529,7 @@ cmd.add({"vfly", "vehiclefly"}, {"vehiclefly (vfly)", "be able to fly vehicles"}
 	else
 		FLYING = false
 		getHum().PlatformStand = false
-		wait()
+		Wait()
 		DoNotif("Vehicle fly enabled. Press '"..vToggleKey:upper().."' to toggle vehicle flying.")
 		sFLY(true)
 		speedofthevfly = vFlySpeed
@@ -3538,7 +3538,7 @@ cmd.add({"vfly", "vehiclefly"}, {"vehiclefly (vfly)", "be able to fly vehicles"}
 end, true)
 
 cmd.add({"unvfly", "unvehiclefly"}, {"unvehiclefly (unvfly)", "disable vehicle fly"}, function(bool)
-	wait()
+	Wait()
 	if IsOnMobile then
 		if not bool then
 			DoNotif("Mobile vFly Disabled.",2)
@@ -3778,7 +3778,7 @@ cmd.add({"droptools"},{"dropalltools","Drop all of your tools"},function()
 			end
 		end
 	end
-	wait()
+	Wait()
 	for _,tool in pairs(character:GetChildren()) do
 		if tool:IsA("Tool") then
 			tool.Parent=game:GetService("Workspace")
@@ -3801,7 +3801,7 @@ end)
 
 cmd.add({"breaklayeredclothing","blc"},{"breaklayeredclothing (blc)","Streches your layered clothing"},function()
 	--its literally just leg resize with swim
-	wait();
+	Wait();
 
 	DoNotif("Break layered clothing executed,if you havent already equip shirt,jacket,pants and shoes (Layered Clothing ones)")
 	local swimming=false
@@ -5277,7 +5277,7 @@ cmd.add({"unantifling"}, {"unantifling", "restores collision for other players"}
 end)
 
 cmd.add({"gravitygun"},{"gravitygun","Probably the best gravity gun script thats fe"},function()
-	wait();
+	Wait();
 	DoNotif("Wait a few seconds for it to load")
 	loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/Nameless-Admin/main/gravity%20gun"))()
 end)
@@ -5630,7 +5630,7 @@ cmd.add({"creep", "scare"}, {"creep <player> (scare)", "Teleports from a player 
 	end
 
 	root.CFrame = target.Character.Humanoid.RootPart.CFrame * CFrame.new(0, -10, 4)
-	wait()
+	Wait()
 
 	if connections and connections["noclip"] then
 		lib.disconnect("noclip")
@@ -5645,10 +5645,10 @@ cmd.add({"creep", "scare"}, {"creep <player> (scare)", "Teleports from a player 
 			end
 		end
 	end))
-	wait()
+	Wait()
 
 	root.Anchored = true
-	wait()
+	Wait()
 
 	local tweenService = TweenService
 	local tweenInfo = TweenInfo.new(1000, Enum.EasingStyle.Linear)
@@ -5658,7 +5658,7 @@ cmd.add({"creep", "scare"}, {"creep <player> (scare)", "Teleports from a player 
 	tween:Pause()
 
 	root.Anchored = false
-	wait()
+	Wait()
 
 	lib.disconnect("noclip")
 end, true)
@@ -5672,7 +5672,7 @@ cmd.add({"netless","net"},{"netless (net)","Executes netless which makes scripts
 		end
 	end
 
-	wait();
+	Wait();
 
 	DoNotif("Netless has been activated,re-run this script if you die")
 end)
@@ -5759,7 +5759,7 @@ end)]]
 cmd.add({"jobid"},{"jobid","Copies your job id"},function()
 	if setclipboard then
 		setclipboard(tostring(JobId))
-		wait();
+		Wait();
 
 		DoNotif("Copied your jobid ("..JobId..")")
 	else
@@ -5774,7 +5774,7 @@ cmd.add({"joinjobid","joinjid","jjobid","jjid"},{"joinjobid <jobid> (joinjid,jjo
 end,true)
 
 cmd.add({"serverhop","shop"},{"serverhop (shop)","serverhop"},function()
-	wait();
+	Wait();
 
 	DoNotif("Searching")
 	local Number=0
@@ -5796,7 +5796,7 @@ cmd.add({"serverhop","shop"},{"serverhop (shop)","serverhop"},function()
 end)
 
 cmd.add({"smallserverhop","sshop"},{"smallserverhop (sshop)","serverhop to a small server"},function()
-	wait();
+	Wait();
 
 	DoNotif("Searching")
 
@@ -5821,7 +5821,7 @@ cmd.add({"smallserverhop","sshop"},{"smallserverhop (sshop)","serverhop to a sma
 end)
 
 cmd.add({"pingserverhop","pshop"},{"pingserverhop (pshop)","serverhop to a server with the best ping"},function()
-	wait();
+	Wait();
 
 	DoNotif("Searching for server with best ping")
 
@@ -5860,7 +5860,7 @@ cmd.add({"autorejoin", "autorj"}, {"autorejoin", "Rejoins the server if you get 
 	local function handleRejoin()
 		if #Players:GetPlayers() <= 1 then
 			Players.LocalPlayer:Kick("Rejoining...")
-			wait()
+			Wait()
 			TeleportService:Teleport(PlaceId, Players.LocalPlayer)
 		else
 			TeleportService:TeleportToPlaceInstance(PlaceId, JobId, Players.LocalPlayer)
@@ -6459,7 +6459,7 @@ cmd.add({"fly"}, {"fly [speed]", "Enable flight"}, function(...)
 	connectFlyKey()
 	flyEnabled = true
 	if IsOnMobile then
-		wait()
+		Wait()
 		DoNotif(adminName.." detected mobile. Fly button added for easier use.",2)
 		if mFlyBruh then
 			mFlyBruh:Destroy()
@@ -6549,7 +6549,7 @@ cmd.add({"fly"}, {"fly [speed]", "Enable flight"}, function(...)
 	else
 		FLYING = false
 		getHum().PlatformStand = false
-		wait()
+		Wait()
 		DoNotif("Fly enabled. Press '"..toggleKey:upper().."' to toggle flying.")
 		sFLY()
 		speedofthevfly = flySpeed
@@ -6558,7 +6558,7 @@ cmd.add({"fly"}, {"fly [speed]", "Enable flight"}, function(...)
 end, true)
 
 cmd.add({"unfly"}, {"unfly", "Disable flight"}, function(bool)
-	wait()
+	Wait()
 	if IsOnMobile then
 		if not bool then
 			DoNotif("Mobile Fly Disabled.",2)
@@ -6649,7 +6649,7 @@ cmd.add({"tfly", "tweenfly"}, {"tfly [speed] (tweenfly)", "Enables smooth flying
 	gyro.cframe = tflyCORE.CFrame
 
 	repeat
-		wait()
+		Wait()
 		Humanoid.PlatformStand = true
 		local newPosition = gyro.cframe - gyro.cframe.p + pos.position
 
@@ -7157,7 +7157,7 @@ cmd.add({"hide", "unshow"}, {"hide <player> (unshow)", "places the selected play
 end, true)
 
 cmd.add({"unhide", "show"}, {"show <player> (unhide)", "places the selected player back to workspace"}, function(...)
-	wait()
+	Wait()
 	DoNotif("Unhid the player")
 	local Username = (...)
 	local target = getPlr(Username)
@@ -7280,7 +7280,7 @@ end)
 cmd.add({"placeid","pid"},{"placeid (pid)","Copies the PlaceId of the game you're in"},function()
 	setclipboard(tostring(PlaceId))
 
-	wait();
+	Wait();
 
 	DoNotif("Copied the game's PlaceId: "..PlaceId)
 end)
@@ -7288,7 +7288,7 @@ end)
 cmd.add({"gameid","universeid","gid"},{"gameid (universeid,gid)","Copies the GameId/Universe Id of the game you're in"},function()
 	setclipboard(tostring(GameId))
 
-	wait();
+	Wait();
 
 	DoNotif("Copied the game's GameId: "..GameId)
 end)
@@ -7297,7 +7297,7 @@ cmd.add({"placename","pname"},{"placename (pname)","Copies the game's place name
 	placeNaem = placeName()
 	setclipboard(placeNaem)
 
-	wait();
+	Wait();
 
 	DoNotif("Copied the game's place name: "..placeNaem)
 end)
@@ -7312,7 +7312,7 @@ cmd.add({"copyname", "cname"}, {"copyname <player> (cname)", "Copies the usernam
 
 	for _, plr in next, tgt do
 		setclipboard(tostring(plr.Name))
-		wait()
+		Wait()
 		DoNotif("Copied the username of "..nameChecker(plr))
 	end
 end, true)
@@ -7323,7 +7323,7 @@ cmd.add({"copydisplay", "cdisplay"}, {"copydisplay <player> (cdisplay)", "Copies
 
 	for _, plr in next, tgt do
 		setclipboard(tostring(plr.DisplayName))
-		wait()
+		Wait()
 		DoNotif("Copied the display name of "..nameChecker(plr))
 	end
 end, true)
@@ -7334,7 +7334,7 @@ cmd.add({"copyid", "id"}, {"copyid <player> (id)", "Copies the UserId of the tar
 
 	for _, plr in next, tgt do
 		setclipboard(tostring(plr.UserId))
-		wait()
+		Wait()
 		DoNotif("Copied the UserId of "..nameChecker(plr))
 	end
 end, true)
@@ -7364,7 +7364,7 @@ cmd.add({"height","hipheight","hh"},{"height <number> (hipheight,hh)","Changes y
 end,true)
 
 cmd.add({"netbypass", "netb"}, {"netbypass (netb)", "Net bypass"}, function()
-	wait()
+	Wait()
 	DoNotif("Netbypass enabled")
 	local fenv = getfenv()
 	local shp = fenv.sethiddenproperty or fenv.set_hidden_property or fenv.sethiddenprop or fenv.set_hidden_prop
@@ -7406,7 +7406,7 @@ cmd.add({"fixcam", "fix"}, {"fixcam", "Fix your camera"}, function()
 	local plr = Players.LocalPlayer
 	ws.CurrentCamera:Remove()
 	wait(0.1)
-	repeat wait() until plr.Character
+	repeat Wait() until plr.Character
 	local cam = ws.CurrentCamera
 	cam.CameraSubject = plr.Character:FindFirstChildWhichIsA("Humanoid")
 	cam.CameraType = "Custom"
@@ -7918,7 +7918,7 @@ function spectatePlayer(targetPlayer)
 	end
 
 	conn = targetPlayer.CharacterAdded:Connect(function(character)
-		repeat wait() until character:FindFirstChildWhichIsA("Humanoid")
+		repeat Wait() until character:FindFirstChildWhichIsA("Humanoid")
 		game:GetService("Workspace").CurrentCamera.CameraSubject = character:FindFirstChildWhichIsA("Humanoid")
 	end)
 
@@ -7934,7 +7934,7 @@ function spectatePlayer(targetPlayer)
 			if targetPlayer.Character and targetPlayer.Character:FindFirstChildWhichIsA("Humanoid") then
 				game:GetService("Workspace").CurrentCamera.CameraSubject = targetPlayer.Character:FindFirstChildWhichIsA("Humanoid")
 			end
-			wait()
+			Wait()
 		end
 	end)
 
@@ -8206,7 +8206,7 @@ cmd.add({"unwatch2", "unview2"}, {"unwatch2 (unview2)", "Stop spectating with GU
 end)
 
 cmd.add({"stealaudio", "getaudio", "steal", "logaudio"}, {"stealaudio <player> (getaudio,logaudio,steal)", "Save all sounds a player is playing to a file -Cyrus"}, function(p)
-	wait()
+	Wait()
 	local players = getPlr(p)
 	for _, plr in next, players do
 		if not plr then
@@ -8337,7 +8337,7 @@ end)
 
 cmd.add({"hatresize"},{"hatresize","Makes your hats very big r15 only"},function()
 
-	wait();
+	Wait();
 
 	DoNotif("Hat resize loaded, rthro needed")
 
@@ -8588,7 +8588,7 @@ end, true)
 
 cmd.add({"unloopfling"}, {"unloopfling", "Stops loop flinging a player"}, function()
 	Loopvoid = false
-	repeat wait() if LOOPPROTECT then LOOPPROTECT:Destroy() LOOPPROTECT = nil end until LOOPPROTECT == nil
+	repeat Wait() if LOOPPROTECT then LOOPPROTECT:Destroy() LOOPPROTECT = nil end until LOOPPROTECT == nil
 end)
 
 cmd.add({"freegamepass", "freegp"},{"freegamepass (freegp)", "Returns true if the UserOwnsGamePassAsync function gets used"},function()
@@ -8980,7 +8980,7 @@ cmd.add({"tools", "gears"}, {"tools <player> (gears)", "Copies tools from Replic
 	copyTools(Lighting)
 	copyTools(ReplicatedStorage)
 
-	wait()
+	Wait()
 	DoNotif("Copied tools from ReplicatedStorage and Lighting", 3)
 end)
 
@@ -10237,7 +10237,7 @@ cmd.add({"getmass"},{"getmass <player>","Get your mass"},function(...)
 	target=getPlr(...)
 	for _, plr in next, target do
 		local mass=getRoot(plr.Character).AssemblyMass 
-		wait();
+		Wait();
 
 		DoNotif(plr.Name.."'s mass is "..mass)
 	end
@@ -10279,7 +10279,7 @@ cmd.add({"inspect"}, {"inspect", "checks a user's items"}, function(args)
 end, true)
 
 cmd.add({"noprompt","nopurchaseprompts","noprompts"},{"noprompt (nopurchaseprompts,noprompts)","remove the stupid purchase prompt"},function()
-	wait();
+	Wait();
 
 	COREGUI.PurchasePrompt.Enabled=false
 
@@ -10287,7 +10287,7 @@ cmd.add({"noprompt","nopurchaseprompts","noprompts"},{"noprompt (nopurchasepromp
 end)
 
 cmd.add({"prompt","purchaseprompts","showprompts","showpurchaseprompts"},{"prompt (purchaseprompts,showprompts,showpurchaseprompts)","allows the stupid purchase prompt"},function()
-	wait();
+	Wait();
 
 	COREGUI.PurchasePrompt.Enabled=true
 
@@ -10322,7 +10322,7 @@ spinThingy = nil
 spinPart = nil
 
 cmd.add({"spin"}, {"spin {amount}", "Makes your character spin as fast as you want"}, function(...)
-	wait()
+	Wait()
 
 	local spinSpeed = (...)
 	if not spinSpeed then spinSpeed = 20 end
@@ -10359,7 +10359,7 @@ cmd.add({"spin"}, {"spin {amount}", "Makes your character spin as fast as you wa
 end, true)
 
 cmd.add({"unspin"}, {"unspin", "Makes your character unspin"}, function()
-	wait()
+	Wait()
 
 	if spinThingy then
 		spinThingy:Destroy()
@@ -10431,7 +10431,7 @@ cmd.add({"fireclickdetectors","fcd","firecd"},{"fireclickdetectors (fcd,firecd)"
 		end
 	end
 
-	wait();
+	Wait();
 
 	DoNotif("Fired "..ccamount.." amount of click detectors")
 end)
@@ -10532,7 +10532,7 @@ cmd.add({"tweengotocampos","tweentocampos","tweentcp"},{"tweengotocampos (tweent
 
 
 	local camera=game:GetService("Workspace").CurrentCamera
-	repeat wait() until camera.CFrame~=CFrame.new()
+	repeat Wait() until camera.CFrame~=CFrame.new()
 
 	teleportPlayer()
 
@@ -10550,7 +10550,7 @@ cmd.add({"delete", "remove", "del"}, {"delete {partname} (remove, del)", "Remove
 		end
 	end
 
-	wait()
+	Wait()
 
 	if deleteCount > 0 then
 		DoNotif("Deleted "..deleteCount.." instance(s) of '"..targetName.."'", 2.5)
@@ -10565,7 +10565,7 @@ autoRemoveConnection = nil
 function handleDescendantAdd(part)
 	if #autoRemover > 0 then
 		if FindInTable(autoRemover, part.Name:lower()) then
-			wait()
+			Wait()
 			part:Destroy()
 		end
 	else
@@ -10593,7 +10593,7 @@ cmd.add({"autodelete", "autoremove", "autodel"}, {"autodelete {partname} (autore
 		autoRemoveConnection = game:GetService("Workspace").DescendantAdded:Connect(handleDescendantAdd)
 	end
 
-	wait()
+	Wait()
 	DoNotif("Auto deleting instances with name: "..targetName, 2.5)
 end, true)
 
@@ -10617,7 +10617,7 @@ cmd.add({"deleteclass", "removeclass", "dc"}, {"deleteclass {ClassName} (removec
 		end
 	end
 
-	wait()
+	Wait()
 	if deleteCount > 0 then
 		DoNotif("Deleted "..deleteCount.." instance(s) of class: "..targetClass, 2.5)
 	else
@@ -10631,7 +10631,7 @@ local autoClassConnection = nil
 function handleClassDescendantAdd(part)
 	if #autoClassRemover > 0 then
 		if FindInTable(autoClassRemover, part.ClassName:lower()) then
-			wait()
+			Wait()
 			part:Destroy()
 		end
 	else
@@ -10659,7 +10659,7 @@ cmd.add({"autodeleteclass", "autoremoveclass", "autodc"}, {"autodeleteclass {Cla
 		autoClassConnection = game:GetService("Workspace").DescendantAdded:Connect(handleClassDescendantAdd)
 	end
 
-	wait()
+	Wait()
 	DoNotif("Auto deleting instances with class: "..targetClass, 2.5)
 end, true)
 
@@ -10683,7 +10683,7 @@ cmd.add({"chardelete", "charremove", "chardel", "cdelete", "cremove", "cdel"}, {
 		end
 	end
 
-	wait()
+	Wait()
 	if deleteCount > 0 then
 		DoNotif("Deleted "..deleteCount.." instance(s) of '"..targetName.."' inside the character", 2.5)
 	else
@@ -10703,7 +10703,7 @@ cmd.add({"chardeleteclass", "charremoveclass", "chardeleteclassname", "cdc"}, {"
 		end
 	end
 
-	wait()
+	Wait()
 	if deleteCount > 0 then
 		DoNotif("Deleted "..deleteCount.." instance(s) of class: "..targetClass.." inside the character", 2.5)
 	else
@@ -10858,6 +10858,9 @@ cmd.add({"unswim"}, {"unswim", "Stops the swim script"}, function()
 end)
 
 local espList = {}
+touchESPList = {}
+proximityESPList = {}
+clickESPList = {}
 local partTrigger = nil
 local espTriggers = {}
 
@@ -10896,12 +10899,15 @@ function onPartAdded(part)
 	end
 end
 
-function enableEsp(objType, color)
+function enableEsp(objType, color, list)
 	for _, obj in pairs(game:GetService("Workspace"):GetDescendants()) do
 		if obj:IsA(objType) then
 			local parent = obj.Parent
-			if parent and parent:IsA("BasePart") or parent:IsA("Model") then
-				createBox(parent, color, 0.45)
+			if parent and (parent:IsA("BasePart") or parent:IsA("Model")) then
+				if not Discover(list, parent) then
+					Insert(list, parent)
+					createBox(parent, color, 0.45)
+				end
 			end
 		end
 	end
@@ -10910,15 +10916,18 @@ function enableEsp(objType, color)
 		espTriggers[objType] = game:GetService("Workspace").DescendantAdded:Connect(function(obj)
 			if obj:IsA(objType) then
 				local parent = obj.Parent
-				if parent and parent:IsA("BasePart") or parent:IsA("Model") then
-					createBox(parent, color, 0.45)
+				if parent and (parent:IsA("BasePart") or parent:IsA("Model")) then
+					if not Discover(list, parent) then
+						Insert(list, parent)
+						createBox(parent, color, 0.45)
+					end
 				end
 			end
 		end)
 	end
 end
 
-function disableEsp(objType)
+function disableEsp(objType, list)
 	if espTriggers[objType] then
 		espTriggers[objType]:Disconnect()
 		espTriggers[objType] = nil
@@ -10927,11 +10936,13 @@ function disableEsp(objType)
 	for _, obj in pairs(game:GetService("Workspace"):GetDescendants()) do
 		if obj:IsA("BoxHandleAdornment") and obj.Name:sub(-4) == "_ESP" then
 			local adornee = obj.Adornee
-			if adornee and adornee:FindFirstChildOfClass(objType) then
+			if adornee and Discover(list, adornee) then
 				obj:Destroy()
 			end
 		end
 	end
+
+	table.clear(list)
 end
 
 cmd.add({"pesp", "esppart", "partesp"}, {"pesp {partname} (esppart, partesp)", "Highlights specific parts by name"}, function(...)
@@ -10974,27 +10985,27 @@ cmd.add({"unpesp", "unesppart", "unpartesp"}, {"unpesp (unesppart, unpartesp)", 
 end)
 
 cmd.add({"touchesp", "tesp"}, {"touchesp (tesp)", "Highlights parts with TouchTransmitter"}, function()
-	enableEsp("TouchTransmitter", Color3.fromRGB(255, 0, 0))
+	enableEsp("TouchTransmitter", Color3.fromRGB(255, 0, 0), touchESPList)
 end)
 
 cmd.add({"untouchesp", "untesp"}, {"untouchesp (untesp)", "Removes ESP from parts with TouchTransmitter"}, function()
-	disableEsp("TouchTransmitter")
+	disableEsp("TouchTransmitter", touchESPList)
 end)
 
 cmd.add({"proximityesp", "prxesp", "proxiesp"}, {"proximityesp (prxesp, proxiesp)", "Highlights parts with ProximityPrompt"}, function()
-	enableEsp("ProximityPrompt", Color3.fromRGB(0, 0, 255))
+	enableEsp("ProximityPrompt", Color3.fromRGB(0, 0, 255), proximityESPList)
 end)
 
 cmd.add({"unproximityesp", "unprxesp", "unproxiesp"}, {"unproximityesp (unprxesp, unproxiesp)", "Removes ESP from parts with ProximityPrompt"}, function()
-	disableEsp("ProximityPrompt")
+	disableEsp("ProximityPrompt", proximityESPList)
 end)
 
 cmd.add({"clickesp", "cesp"}, {"clickesp (cesp)", "Highlights parts with ClickDetector"}, function()
-	enableEsp("ClickDetector", Color3.fromRGB(255, 165, 0))
+	enableEsp("ClickDetector", Color3.fromRGB(255, 165, 0), clickESPList)
 end)
 
 cmd.add({"unclickesp", "uncesp"}, {"unclickesp (uncesp)", "Removes ESP from parts with ClickDetector"}, function()
-	disableEsp("ClickDetector")
+	disableEsp("ClickDetector", clickESPList)
 end)
 
 cmd.add({"viewpart", "viewp", "vpart"}, {"viewpart {partName} (viewp, vpart)", "Focuses camera on a part, model, or folder"},function(...)
@@ -11226,7 +11237,7 @@ local infJump = nil
 local jumpFixy = nil
 
 cmd.add({"infjump", "infinitejump"}, {"infjump (infinitejump)", "Makes you be able to jump infinitely"}, function()
-	wait()
+	Wait()
 
 	DoNotif("Infinite Jump Enabled")
 
@@ -11264,7 +11275,7 @@ cmd.add({"infjump", "infinitejump"}, {"infjump (infinitejump)", "Makes you be ab
 end)
 
 cmd.add({"uninfjump", "uninfinitejump"}, {"uninfjump (uninfinitejump)", "Makes you NOT be able to infinitely jump"}, function()
-	wait()
+	Wait()
 
 	DoNotif("Infinite Jump Disabled", 3)
 
@@ -11283,7 +11294,7 @@ local flyjump=nil
 
 cmd.add({"flyjump"},{"flyjump","Allows you to hold space to fly up"},function()
 
-	wait();
+	Wait();
 
 	DoNotif("FlyJump Enabled",3)
 
@@ -11296,7 +11307,7 @@ end)
 
 cmd.add({"unflyjump","noflyjump"},{"unflyjump (noflyjump)","Disables flyjump"},function()
 
-	wait();
+	Wait();
 
 	DoNotif("FlyJump Disabled",3)
 
@@ -11305,21 +11316,21 @@ cmd.add({"unflyjump","noflyjump"},{"unflyjump (noflyjump)","Disables flyjump"},f
 end)
 
 cmd.add({"xray","xrayon"},{"xray (xrayon)","Makes you be able to see through walls"},function()
-	wait();
+	Wait();
 
 	DoNotif("Xray enabled")
 	x(true)
 end)
 
 cmd.add({"unxray","xrayoff"},{"unxray (xrayoff)","Makes you not be able to see through walls"},function()
-	wait();
+	Wait();
 
 	DoNotif("Xray disabled")
 	x(false)
 end)
 
 cmd.add({"pastebinscraper","pastebinscrape"},{"pastebinscraper (pastebinscrape)","Scrapes paste bin posts"},function()
-	wait();
+	Wait();
 
 	loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/Nameless-Admin/main/trash(paste)bin%20scrapper"))()
 	COREGUI.Scraper["Pastebin Scraper"].BackgroundTransparency=0.5
@@ -11347,7 +11358,7 @@ cmd.add({"fullbright","fullb","fb"},{"fullbright (fullb,fb)","Makes games that a
 				_G.NormalLightingSettings.Brightness=Lighting.Brightness
 				if not _G.FullBrightEnabled then
 					repeat
-						wait()
+						Wait()
 					until _G.FullBrightEnabled
 				end
 				Lighting.Brightness=1
@@ -11359,7 +11370,7 @@ cmd.add({"fullbright","fullb","fb"},{"fullbright (fullb,fb)","Makes games that a
 				_G.NormalLightingSettings.ClockTime=Lighting.ClockTime
 				if not _G.FullBrightEnabled then
 					repeat
-						wait()
+						Wait()
 					until _G.FullBrightEnabled
 				end
 				Lighting.ClockTime=12
@@ -11371,7 +11382,7 @@ cmd.add({"fullbright","fullb","fb"},{"fullbright (fullb,fb)","Makes games that a
 				_G.NormalLightingSettings.FogEnd=Lighting.FogEnd
 				if not _G.FullBrightEnabled then
 					repeat
-						wait()
+						Wait()
 					until _G.FullBrightEnabled
 				end
 				Lighting.FogEnd=786543
@@ -11383,7 +11394,7 @@ cmd.add({"fullbright","fullb","fb"},{"fullbright (fullb,fb)","Makes games that a
 				_G.NormalLightingSettings.GlobalShadows=Lighting.GlobalShadows
 				if not _G.FullBrightEnabled then
 					repeat
-						wait()
+						Wait()
 					until _G.FullBrightEnabled
 				end
 				Lighting.GlobalShadows=false
@@ -11395,7 +11406,7 @@ cmd.add({"fullbright","fullb","fb"},{"fullbright (fullb,fb)","Makes games that a
 				_G.NormalLightingSettings.Ambient=Lighting.Ambient
 				if not _G.FullBrightEnabled then
 					repeat
-						wait()
+						Wait()
 					until _G.FullBrightEnabled
 				end
 				Lighting.Ambient=Color3.fromRGB(178,178,178)
@@ -11411,9 +11422,9 @@ cmd.add({"fullbright","fullb","fb"},{"fullbright (fullb,fb)","Makes games that a
 		local LatestValue=true
 		spawn(function()
 			repeat
-				wait()
+				Wait()
 			until _G.FullBrightEnabled
-			while wait() do
+			while Wait() do
 				if _G.FullBrightEnabled~=LatestValue then
 					if not _G.FullBrightEnabled then
 						Lighting.Brightness=_G.NormalLightingSettings.Brightness
@@ -11618,7 +11629,7 @@ cmd.add({"fireproximityprompts","fpp","firepp"},{"fireproximityprompts (fpp,fire
 	end
 
 
-	wait();
+	Wait();
 
 	DoNotif("Fired "..fppamount.." of proximity prompts")
 end)
@@ -11706,7 +11717,7 @@ cmd.add({"cameranoclip","camnoclip","cnoclip","nccam"},{"cameranoclip (camnoclip
 			end
 		end
 	else
-		wait();
+		Wait();
 
 		DoNotif("Sorry,your exploit does not support cameranoclip")
 	end
@@ -11729,7 +11740,7 @@ cmd.add({"uncameranoclip","uncamnoclip","uncnoclip","unnccam"},{"uncameranoclip 
 			end
 		end
 	else
-		wait();
+		Wait();
 
 		DoNotif("Sorry,your exploit does not support cameranoclip and uncameranoclip")
 	end	
@@ -11739,7 +11750,7 @@ cmd.add({"oganims"},{"oganims","Old animations from 2007"},function()
 
 
 
-	wait();
+	Wait();
 
 	DoNotif("OG animations set")
 	loadstring(game:HttpGet(('https://pastebin.com/raw/6GNkQUu6'),true))()
@@ -11778,7 +11789,7 @@ cmd.add({"toolinvisible", "tinvis"}, {"toolinvisible (tinvis)", "Be invisible wh
 	tool.CanBeDropped = false
 
 	tool.Equipped:Connect(function()
-		wait()
+		Wait()
 		if not invisible then
 			invisible = true
 			tool.Name = "Visible Enabled"
@@ -11855,7 +11866,7 @@ cmd.add({"toolinvisible", "tinvis"}, {"toolinvisible (tinvis)", "Be invisible wh
 	end)
 
 	getChar().ChildAdded:Connect(function(child)
-		wait()
+		Wait()
 		if invisible and child:IsA("Tool") and child ~= heldTool and child ~= tool then
 			heldTool = child
 			local lastGrip = heldTool.Grip
@@ -11878,7 +11889,7 @@ cmd.add({"toolinvisible", "tinvis"}, {"toolinvisible (tinvis)", "Be invisible wh
 			end
 
 			gripChanged = heldTool:GetPropertyChangedSignal("Grip"):Connect(function()
-				wait()
+				Wait()
 				if not invisible then
 					gripChanged:Disconnect()
 				end
@@ -12012,7 +12023,7 @@ cmd.add({"invisible", "invis"}, {"invisible (invis)", "Sets invisibility to scar
 		end)
 	end
 
-	wait()
+	Wait()
 	DoNotif("Invisible loaded, press "..InvisBindLol.Name.." to toggle or use the mobile button.")
 end)
 
@@ -12386,10 +12397,10 @@ local rPlayer=Players:FindFirstChildWhichIsA("Player")
 local coreGuiProtection={}
 if not RunService:IsStudio() then
 else
-	repeat wait() until player:FindFirstChild("AdminUI",true)
+	repeat Wait() until player:FindFirstChild("AdminUI",true)
 	ScreenGui=player:FindFirstChild("AdminUI",true)
 end
-repeat wait() until ScreenGui~=nil -- if it loads late then I'll just add this here
+repeat Wait() until ScreenGui~=nil -- if it loads late then I'll just add this here
 
 NaProtectUI(ScreenGui)
 
