@@ -3359,9 +3359,9 @@ function respawn()
 	local newRoot = getRoot(newChar)
 	if newRoot then
 		local startTime = tick()
-		local teleportThreshold = 1
+		local teleportThreshold = 15
 
-		while tick() - startTime < 1 do
+		while tick() - startTime < 0.4 do
 			if (newRoot.Position - respawnCFrame.Position).Magnitude > teleportThreshold then
 				newRoot.CFrame = respawnCFrame
 				startTime = tick()
@@ -4865,72 +4865,75 @@ cmd.add({"disablespawn", "unsetspawn", "ds"}, {"disablespawn (unsetspawn, ds)", 
 	spawnPosition = CFrame.new()
 end)
 
-cmd.add({"hamster"},{"hamster <number>","Hamster ball"},function(...)
-	--[[ skidded ]]--
-	local UserInputService=UserInputService
-	local RunService=RunService
-	local Camera=game:GetService("Workspace").CurrentCamera
+cmd.add({"hamster"}, {"hamster <number>", "Hamster ball"}, function(...)
+	local UserInputService = game:GetService("UserInputService")
+	local RunService = game:GetService("RunService")
+	local Camera = game:GetService("Workspace").CurrentCamera
 
-	local SPEED_MULTIPLIER=(...)
-	local JUMP_POWER=60
-	local JUMP_GAP=0.3
+	local SPEED_MULTIPLIER = (...) or 30
+	local JUMP_POWER = 60
+	local JUMP_GAP = 0.3
 
-	if (...)==nil then
-		SPEED_MULTIPLIER=30
-	end
+	local character = game:GetService("Players").LocalPlayer.Character
 
-	local character=getChar()
-
-	for i,v in ipairs(character:GetDescendants()) do
+	for i, v in ipairs(character:GetDescendants()) do
 		if v:IsA("BasePart") then
-			v.CanCollide=false
+			v.CanCollide = false
 		end
 	end
 
-	local ball=getRoot(character)
-	ball.Shape=Enum.PartType.Ball
-	ball.Size=Vector3.new(5,5,5)
-	local humanoid=character:WaitForChild("Humanoid")
-	local params=RaycastParams.new()
-	params.FilterType=Enum.RaycastFilterType.Blacklist
-	params.FilterDescendantsInstances={character}
+	local ball = character.HumanoidRootPart
+	ball.Shape = Enum.PartType.Ball
+	ball.Size = Vector3.new(5, 5, 5)
+	local humanoid = character:WaitForChild("Humanoid")
 
-	local tc=RunService.RenderStepped:Connect(function(delta)
-		ball.CanCollide=true
-		getHum().PlatformStand=true
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Blacklist
+	params.FilterDescendantsInstances = {character}
+
+	local tc = RunService.RenderStepped:Connect(function(delta)
+		ball.CanCollide = true
+		humanoid.PlatformStand = true
 		if UserInputService:GetFocusedTextBox() then return end
-		if UserInputService:IsKeyDown("W") then
-			ball.RotVelocity-=Camera.CFrame.RightVector*delta*SPEED_MULTIPLIER
-		end
-		if UserInputService:IsKeyDown("A") then
-			ball.RotVelocity-=Camera.CFrame.LookVector*delta*SPEED_MULTIPLIER
-		end
-		if UserInputService:IsKeyDown("S") then
-			ball.RotVelocity+=Camera.CFrame.RightVector*delta*SPEED_MULTIPLIER
-		end
-		if UserInputService:IsKeyDown("D") then
-			ball.RotVelocity+=Camera.CFrame.LookVector*delta*SPEED_MULTIPLIER
+
+		if IsOnMobile then
+			local direction = ctrlModule:GetMoveVector()
+			if direction.Magnitude > 0 then
+				local right = Camera.CFrame.RightVector
+				local forward = Camera.CFrame.LookVector
+				ball.RotVelocity = ball.RotVelocity + (-right * direction.Z * delta * SPEED_MULTIPLIER)
+				ball.RotVelocity = ball.RotVelocity + (forward * direction.X * delta * SPEED_MULTIPLIER)
+			end
+		else
+			if UserInputService:IsKeyDown("W") then
+				ball.RotVelocity -= Camera.CFrame.RightVector * delta * SPEED_MULTIPLIER
+			end
+			if UserInputService:IsKeyDown("A") then
+				ball.RotVelocity -= Camera.CFrame.LookVector * delta * SPEED_MULTIPLIER
+			end
+			if UserInputService:IsKeyDown("S") then
+				ball.RotVelocity += Camera.CFrame.RightVector * delta * SPEED_MULTIPLIER
+			end
+			if UserInputService:IsKeyDown("D") then
+				ball.RotVelocity += Camera.CFrame.LookVector * delta * SPEED_MULTIPLIER
+			end
 		end
 	end)
 
 	UserInputService.JumpRequest:Connect(function()
-		local result=game:GetService("Workspace"):Raycast(
+		local result = game:GetService("Workspace"):Raycast(
 			ball.Position,
-			Vector3.new(
-				0,
-				-((ball.Size.Y/2)+JUMP_GAP),
-				0
-			),
+			Vector3.new(0, -((ball.Size.Y / 2) + JUMP_GAP), 0),
 			params
 		)
 		if result then
-			ball.Velocity=ball.Velocity+Vector3.new(0,JUMP_POWER,0)
+			ball.Velocity = ball.Velocity + Vector3.new(0, JUMP_POWER, 0)
 		end
 	end)
 
-	Camera.CameraSubject=ball
+	Camera.CameraSubject = ball
 	humanoid.Died:Connect(function() tc:Disconnect() end)
-end,true)
+end, true)
 
 local antiAFKConnection = nil
 
