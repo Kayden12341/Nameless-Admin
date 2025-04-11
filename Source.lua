@@ -444,6 +444,7 @@ local TextChatService = SafeGetService("TextChatService");
 local CaptureService = SafeGetService("CaptureService");
 local MarketplaceService = SafeGetService("MarketplaceService");
 local TextService = SafeGetService("TextService")
+local AvatarEditorService = SafeGetService("AvatarEditorService")
 local IsOnMobile=false--Discover({Enum.Platform.IOS,Enum.Platform.Android},UserInputService:GetPlatform());
 local IsOnPC=false--Discover({Enum.Platform.Windows,Enum.Platform.UWP,Enum.Platform.Linux,Enum.Platform.SteamOS,Enum.Platform.OSX,Enum.Platform.Chromecast,Enum.Platform.WebOS},UserInputService:GetPlatform());
 local sethidden=sethiddenproperty or set_hidden_property or set_hidden_prop
@@ -5832,7 +5833,7 @@ end)
 
 autoRejoinConnection = nil
 
-cmd.add({"autorejoin", "autorj"}, {"autorejoin", "Rejoins the server if you get kicked / disconnected"}, function()
+cmd.add({"autorejoin", "autorj"}, {"autorejoin (autorj)", "Rejoins the server if you get kicked / disconnected"}, function()
 	if autoRejoinConnection then
 		autoRejoinConnection:Disconnect()
 		autoRejoinConnection = nil
@@ -5848,27 +5849,8 @@ cmd.add({"autorejoin", "autorj"}, {"autorejoin", "Rejoins the server if you get 
 		end
 	end
 
-	local promptGui = COREGUI:FindFirstChild("RobloxPromptGui")
-	if not promptGui then
-		DoNotif("Error: RobloxPromptGui not found!")
-		return
-	end
-
-	local promptOverlay = promptGui:FindFirstChild("promptOverlay")
-	if not promptOverlay then
-		DoNotif("Error: promptOverlay not found!")
-		return
-	end
-
-	autoRejoinConnection = promptOverlay.DescendantAdded:Connect(function(descendant)
-		if descendant.Name == "ErrorTitle" and descendant.Text:sub(1, 12) == "Disconnected" then
-			handleRejoin()
-			descendant:GetPropertyChangedSignal("Text"):Connect(function()
-				if descendant.Text:sub(1, 12) == "Disconnected" then
-					handleRejoin()
-				end
-			end)
-		end
+	autoRejoinConnection = GuiService.ErrorMessageChanged:Connect(function()
+		Spawn(handleRejoin)
 	end)
 
 	DoNotif("Auto Rejoin is now enabled!")
@@ -8581,7 +8563,7 @@ cmd.add({"freegamepass", "freegp"},{"freegamepass (freegp)", "Returns true if th
     DoNotif("✅ Free gamepasses enabled! Rejoin to disable. Note: This only works in some games.")
 end)
 
-cmd.add({"freedevproduct", "freedp"},{"freedevproduct (freedp)", "Simulates a successful Developer Product purchase"},function()
+--[[cmd.add({"freedevproduct", "freedp"},{"freedevproduct (freedp)", "Simulates a successful Developer Product purchase"},function()
     hookfunction(MarketplaceService.PromptProductPurchase, newcclosure(function(self, player, productId, ...)
         if player == LocalPlayer then
         DoNotif("✅ Simulated dev product purchase for ProductId: "..tostring(productId))
@@ -8610,7 +8592,7 @@ cmd.add({"freedevproduct", "freedp"},{"freedevproduct (freedp)", "Simulates a su
     end))
 
     DoNotif("🟢 Fake dev product purchase enabled! Use in games with local handlers.")
-end)
+end)]]
 
 cmd.add({"listen"}, {"listen <player>", "Listen to your target's voice chat"}, function(plr)
 	local trg = getPlr(plr)
@@ -10454,6 +10436,103 @@ cmd.add({"uninstantproximityprompts","uninstantpp","unipp"},{"uninstantproximity
 	if doIpp then doIpp:Disconnect() doIpp=nil end
 end)
 
+cmd.add({"r6"},{"r6","Shows a prompt that will switch your character rig type into R6"},function()
+	AvatarEditorService:PromptSaveAvatar(getPlrHum(LocalPlayer).HumanoidDescription,Enum.HumanoidRigType.R6)
+	AvatarEditorService.PromptSaveAvatarCompleted:Wait()
+	Player.Character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
+	Player.Character:FindFirstChildOfClass("Humanoid").Health=0
+end)
+
+cmd.add({"r15"},{"r15","Shows a prompt that will switch your character rig type into R15"},function()
+	AvatarEditorService:PromptSaveAvatar(getPlrHum(LocalPlayer).HumanoidDescription,Enum.HumanoidRigType.R15)
+	AvatarEditorService.PromptSaveAvatarCompleted:Wait()
+	Player.Character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
+	Player.Character:FindFirstChildOfClass("Humanoid").Health=0
+end)
+
+cmd.add({"maxslopeangle", "msa"}, {"maxslopeangle (msa)", "Changes your character's MaxSlopeAngle"}, function(...)
+	local args = {...}
+	local amount = tonumber(args[1]) or 89
+
+	local humanoid = getHum()
+	if humanoid and humanoid:IsA("Humanoid") then
+		humanoid.MaxSlopeAngle = amount
+		DoNotif(Format("Set MaxSlopeAngle to %s", tostring(amount)), 2)
+	else
+		DoNotif("Humanoid not found or invalid.", 2)
+	end
+end,true)
+
+cmd.add({"controllock", "ctrllock"}, {"controllock (ctrllock)", "Sets your Shiftlock keybinds to the control keys"}, function()
+	local player = Players.LocalPlayer
+	local mouseLockController = player:WaitForChild("PlayerScripts"):WaitForChild("PlayerModule"):WaitForChild("CameraModule"):WaitForChild("MouseLockController")
+	local boundKeys = mouseLockController:WaitForChild("BoundKeys")
+
+	boundKeys.Value = "LeftControl,RightControl"
+
+	DoNotif("Set your Shiftlock keybinds to Ctrl")
+end)
+
+cmd.add({"resetlock"}, {"resetlock", "Resets your Shiftlock keybinds to default (LeftShift)"}, function()
+	local player = game.Players.LocalPlayer
+	local mouseLockController = player:WaitForChild("PlayerScripts"):WaitForChild("PlayerModule"):WaitForChild("CameraModule"):WaitForChild("MouseLockController")
+	local boundKeys = mouseLockController:WaitForChild("BoundKeys")
+
+	boundKeys.Value = "LeftShift,RightShift"
+
+	DoNotif("Reset your Shiftlock keybinds to Shift")
+end)
+
+cmd.add({"autoreport"}, {"autoreport", "Automatically reports players to get them banned"}, function()
+	local ReportKeywords = {
+		kid = "Bullying",
+		youtube = "Offsite Links",
+		date = "Dating",
+		hack = "Cheating/Exploiting",
+		idiot = "Bullying",
+		fat = "Bullying",
+		exploit = "Cheating/Exploiting",
+		cheat = "Cheating/Exploiting",
+		noob = "Bullying",
+		clown = "Bullying",
+	}
+
+	local function CheckIfReportable(message)
+		message = message:lower()
+		for keyword, reason in pairs(ReportKeywords) do
+			if message:find(keyword) then
+				return keyword, reason
+			end
+		end
+		return nil, nil
+	end
+
+	local function MonitorPlayerChat(player)
+		if player == LocalPlayer then return end
+
+		player.Chatted:Connect(function(message)
+			local keyword, reason = CheckIfReportable(message)
+			if keyword and reason then
+				DoNotif(Format("Reported %s", nameChecker(player)).." | "..Format("Reason - %s", reason))
+
+				if reportplayer then
+					reportplayer(player, reason, Format("Saying %s", keyword))
+				else
+					game:GetService("Players"):ReportAbuse(player, reason, Format("Saying %s", keyword))
+				end
+			end
+		end)
+	end
+
+	for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
+		MonitorPlayerChat(player)
+	end
+
+	game:GetService("Players").PlayerAdded:Connect(function(player)
+		MonitorPlayerChat(player)
+	end)
+end)
+
 cmd.add({"light"}, {"light <range> <brightness>", "Gives your player dynamic light"}, function(range, brightness)
 	range = tonumber(range) or 30
 	brightness = tonumber(brightness) or 1
@@ -10492,6 +10571,14 @@ cmd.add({"lighting", "lightingcontrol"}, {"lighting (lightingcontrol)", "Manage 
 		Title = "Lighting Technology Options",
 		Buttons = lightingButtons
 	})
+end)
+
+cmd.add({"friend"}, {"friend", "Sends a friend request to your target"}, function(p)
+	local Targets = getPlr(p)
+
+	for Index, Target in next, Targets do
+		LocalPlayer:RequestFriendship(Target)
+	end
 end)
 
 cmd.add({"tweengotocampos","tweentocampos","tweentcp"},{"tweengotocampos (tweentcp)","Another version of goto camera position but bypassing more anti-cheats"},function()
