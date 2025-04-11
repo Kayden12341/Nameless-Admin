@@ -4395,7 +4395,7 @@ cmd.add({"vulnerabilitytest","vulntest"},{"vulnerabilitytest (vulntest)","Test i
 	loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/uuuuuuu/main/VulnTest.lua"))()
 end)
 
-cmd.add({"respawn", "re"}, {"respawn", "Respawn your character"}, function()
+cmd.add({"respawn", "re"}, {"respawn (re)", "Respawn your character"}, function()
 	respawn()
 end)
 
