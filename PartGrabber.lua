@@ -90,9 +90,8 @@ protectUI(screenGui)
 local Main = Instance.new("Frame")
 Main.Name = "Main"
 Main.Size = UDim2.new(0, 420, 0, 230)
-Main.Position = UDim2.new(0.5, -220, 0.5, -140)
-Main.AnchorPoint = Vector2.new(0.5, 0.5)
-Main.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
+Main.Position = UDim2.new(0.5, -180, 0.5, -100)
+Main.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
 Main.BorderSizePixel = 0
 Main.Parent = screenGui
 Main.ClipsDescendants = true
@@ -110,8 +109,8 @@ uiStroke.Parent = Main
 
 local topbar = Instance.new("Frame")
 topbar.Name = "Topbar"
-topbar.Size = UDim2.new(1, 0, 0, 30)
-topbar.BackgroundColor3 = Color3.fromRGB(22, 22, 30)
+topbar.Size = UDim2.new(1, 0, 0, 28)
+topbar.BackgroundColor3 = Color3.fromRGB(15, 15, 25)
 topbar.BorderSizePixel = 0
 topbar.Parent = Main
 
@@ -119,22 +118,22 @@ local Title = Instance.new("TextLabel")
 Title.Name = "Title"
 Title.Text = "🧲 Part Grabber v2.0"
 Title.Font = Enum.Font.GothamBold
-Title.TextColor3 = Color3.fromRGB(220, 220, 255)
-Title.TextSize = 15
+Title.TextColor3 = Color3.fromRGB(200, 200, 255)
+Title.TextSize = 14
 Title.BackgroundTransparency = 1
 Title.Size = UDim2.new(1, -60, 1, 0)
 Title.Position = UDim2.new(0, 10, 0, 0)
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Parent = topbar
 
-local Minimize = createButton("-", Color3.fromRGB(40, 40, 80), topbar, UDim2.new(1, -60, 0, 0), UDim2.new(0, 30, 1, 0))
-local Exit = createButton("X", Color3.fromRGB(180, 40, 40), topbar, UDim2.new(1, -30, 0, 0), UDim2.new(0, 30, 1, 0))
+local Minimize = createButton("-", Color3.fromRGB(40, 40, 80), topbar, UDim2.new(1, -60, 0, 0), UDim2.new(0, 28, 1, 0))
+local Exit = createButton("X", Color3.fromRGB(180, 40, 40), topbar, UDim2.new(1, -30, 0, 0), UDim2.new(0, 28, 1, 0))
 
 local Container = Instance.new("Frame")
 Container.Name = "Container"
 Container.Size = UDim2.new(1, -20, 1, -40)
-Container.Position = UDim2.new(0, 10, 0, 35)
-Container.BackgroundColor3 = Color3.fromRGB(20, 20, 28)
+Container.Position = UDim2.new(0, 10, 0, 30)
+Container.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
 Container.BorderSizePixel = 0
 Container.Parent = Main
 
@@ -152,33 +151,34 @@ local StatusLabel = Instance.new("TextLabel")
 StatusLabel.Name = "StatusLabel"
 StatusLabel.Text = "Click on a part to select it"
 StatusLabel.Font = Enum.Font.GothamSemibold
-StatusLabel.TextColor3 = Color3.fromRGB(200, 200, 255)
-StatusLabel.TextSize = 14
-StatusLabel.Size = UDim2.new(1, 0, 0, 24)
-StatusLabel.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
-StatusLabel.BackgroundTransparency = 0.3
+StatusLabel.Size = UDim2.new(1, 0, 0, 20)
+StatusLabel.TextColor3 = Color3.fromRGB(180, 180, 255)
+StatusLabel.TextSize = 13
+StatusLabel.BackgroundTransparency = 1
 StatusLabel.BorderSizePixel = 0
 StatusLabel.Parent = Container
 
 local Found = Instance.new("TextLabel")
 Found.Name = "Found"
 Found.Text = ". . ."
-Found.TextScaled = true
-Found.TextColor3 = Color3.fromRGB(220, 220, 255)
-Found.Size = UDim2.new(1, 0, 0, 30)
-Found.Position = UDim2.new(0, 0, 0, 34)
+Found.Size = UDim2.new(1, 0, 0, 24)
+Found.Position = UDim2.new(0, 0, 0, 22)
+Found.TextScaled = false
+Found.TextXAlignment = Enum.TextXAlignment.Center
+Found.TextColor3 = Color3.new(1,1,1)
 Found.Font = Enum.Font.Code
+Found.TextSize = 12
 Found.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
 Found.BorderColor3 = Color3.fromRGB(60, 60, 255)
 Found.BorderSizePixel = 1
 Found.Parent = Container
 
-local grab = createButton("Copy Path", Color3.fromRGB(50, 120, 255), Container, UDim2.new(0, 0, 0, 75), UDim2.new(0.3, 0, 0, 35))
-local copy = createButton("Drag Part", Color3.fromRGB(50, 120, 255), Container, UDim2.new(0.35, 0, 0, 75), UDim2.new(0.3, 0, 0, 35))
-local del = createButton("Delete Part", Color3.fromRGB(200, 60, 60), Container, UDim2.new(0.7, 0, 0, 75), UDim2.new(0.3, 0, 0, 35))
+local grab = createButton("Copy Path", Color3.fromRGB(50, 120, 255), Container, UDim2.new(0, 0, 0, 52), UDim2.new(1, 0, 0, 24))
+local copy = createButton("Drag Part", Color3.fromRGB(50, 120, 255), Container, UDim2.new(0, 0, 0, 82), UDim2.new(1, 0, 0, 24))
+local del = createButton("Delete Part", Color3.fromRGB(200, 60, 60), Container, UDim2.new(0, 0, 0, 112), UDim2.new(1, 0, 0, 24))
 
-local rename = createButton("Rename Part", Color3.fromRGB(60, 60, 100), Container, UDim2.new(0, 0, 0, 120), UDim2.new(0.48, 0, 0, 35))
-local bring = createButton("Bring Part", Color3.fromRGB(60, 60, 100), Container, UDim2.new(0.52, 0, 0, 120), UDim2.new(0.48, 0, 0, 35))
+local rename = createButton("Rename Part", Color3.fromRGB(60, 60, 100), Container, UDim2.new(0, 0, 0, 142), UDim2.new(0.48, -5, 0, 24))
+local bring = createButton("Bring Part", Color3.fromRGB(60, 60, 100), Container, UDim2.new(0.52, 5, 0, 142), UDim2.new(0.48, -5, 0, 24))
 
 Main.Position = UDim2.new(0.5, -220, 0.5, -300)
 Main:TweenPosition(UDim2.new(0.5, -220, 0.5, -140), "Out", "Quint", 0.5, true)
@@ -253,40 +253,31 @@ local function enableDragging()
 	local player = game:GetService("Players").LocalPlayer
 	local mouse = player:GetMouse()
 	local camera = workspace.CurrentCamera
+
 	if dragConnection then dragConnection:Disconnect() end
+
 	dragConnection = mouse.Button1Down:Connect(function()
 		if selectedPart and mouse.Target == selectedPart then
-			dragging = true
-			local initialPartCFrame = selectedPart.CFrame
-			local dragPlanePoint = initialPartCFrame.p
-			local dragPlaneNormal = camera.CFrame.lookVector
-			local mouseRay = camera:ScreenPointToRay(mouse.X, mouse.Y)
-			local denom = mouseRay.Direction:Dot(dragPlaneNormal)
-			if math.abs(denom) > 1e-6 then
-				local t = (dragPlanePoint - mouseRay.Origin):Dot(dragPlaneNormal) / denom
-				local intersection = mouseRay.Origin + mouseRay.Direction * t
-				local offset = initialPartCFrame:inverse() * CFrame.new(intersection)
-				local moveConnection
-				moveConnection = mouse.Move:Connect(function()
-					local mouseRay = camera:ScreenPointToRay(mouse.X, mouse.Y)
-					local denom = mouseRay.Direction:Dot(dragPlaneNormal)
-					if math.abs(denom) > 1e-6 then
-						local t = (dragPlanePoint - mouseRay.Origin):Dot(dragPlaneNormal) / denom
-						local intersection = mouseRay.Origin + mouseRay.Direction * t
-						selectedPart.CFrame = CFrame.new(intersection) * offset
-					end
-				end)
-				local releaseConnection
-				releaseConnection = mouse.Button1Up:Connect(function()
-					dragging = false
-					moveConnection:Disconnect()
-					releaseConnection:Disconnect()
-				end)
-			end
+			local startHit = mouse.Hit.Position
+			local offset = selectedPart.CFrame:pointToObjectSpace(startHit)
+
+			local moveConnection
+			local releaseConnection
+
+			moveConnection = mouse.Move:Connect(function()
+				local newHit = mouse.Hit.Position
+				selectedPart.CFrame = CFrame.new(newHit) * CFrame.new(-offset)
+			end)
+
+			releaseConnection = mouse.Button1Up:Connect(function()
+				if moveConnection then moveConnection:Disconnect() end
+				if releaseConnection then releaseConnection:Disconnect() end
+			end)
+
+			StatusLabel.Text = "Dragging part..."
+			StatusLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
 		end
 	end)
-	StatusLabel.Text = "Drag mode enabled! Click & hold to drag."
-	StatusLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
 end
 
 local function disableDragging()
