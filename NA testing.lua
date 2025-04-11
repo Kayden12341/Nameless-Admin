@@ -1393,31 +1393,40 @@ function ESP(player, persistent)
 					espLoop = RunService.RenderStepped:Connect(function()
 						if COREGUI:FindFirstChild(player.Name..'_ESP') then
 							if getPlrChar(player) and getRoot(getPlrChar(player)) and getPlrChar(player):FindFirstChildOfClass("Humanoid") then
-								local health = math.floor(getPlrChar(player):FindFirstChildOfClass("Humanoid").Health)
-								local maxHealth = math.floor(getPlrChar(player):FindFirstChildOfClass("Humanoid").MaxHealth)
-								local teamColor = player.Team and player.Team.TeamColor.Color or Color3.fromRGB(255, 255, 255)
-
-								local displayName = nameChecker(player)
-
+								local humanoid = getPlrChar(player):FindFirstChildOfClass("Humanoid")
+								local health = math.floor(humanoid.Health)
+								local maxHealth = math.floor(humanoid.MaxHealth)
+					
+								local hasTeamColor, teamColor = pcall(function() return player.Team.TeamColor.Color end)
+								local teamColorFinal = hasTeamColor and teamColor or Color3.fromRGB(255, 255, 255)
+					
+								local displayName = player:IsA("Model") and player.Name or nameChecker(player)
+					
 								if getPlrChar(Players.LocalPlayer) and getRoot(getPlrChar(Players.LocalPlayer)) and getPlrChar(Players.LocalPlayer):FindFirstChildOfClass("Humanoid") then
-									local distance = math.floor((getRoot(getPlrChar(Players.LocalPlayer)).Position - getRoot(player.Character).Position).magnitude)
-									if player.Team then
-										textLabel.Text = Format("%s | Health: %d/%d | Studs: %d | Team: %s", displayName, health, maxHealth, distance, player.Team.Name)
+									local distance = math.floor((getRoot(getPlrChar(Players.LocalPlayer)).Position - getRoot(getPlrChar(player)).Position).magnitude)
+					
+									local hasTeamName, teamName = pcall(function() return player.Team.Name end)
+									if hasTeamName then
+										textLabel.Text = Format("%s | Health: %d/%d | Studs: %d | Team: %s", displayName, health, maxHealth, distance, teamName)
 									else
 										textLabel.Text = Format("%s | Health: %d/%d | Studs: %d", displayName, health, maxHealth, distance)
 									end
-									textLabel.TextColor3 = distance < 50 and Color3.fromRGB(255, 0, 0) or distance < 100 and Color3.fromRGB(255, 165, 0) or Color3.fromRGB(0, 255, 0)
+					
+									textLabel.TextColor3 = distance < 50 and Color3.fromRGB(255, 0, 0)
+										or distance < 100 and Color3.fromRGB(255, 165, 0)
+										or Color3.fromRGB(0, 255, 0)
 								else
-									if player.Team then
-										textLabel.Text = Format("%s | Health: %d/%d | Team: %s", displayName, health, maxHealth, player.Team.Name)
+									local hasTeamName, teamName = pcall(function() return player.Team.Name end)
+									if hasTeamName then
+										textLabel.Text = Format("%s | Health: %d/%d | Team: %s", displayName, health, maxHealth, teamName)
 									else
 										textLabel.Text = Format("%s | Health: %d/%d", displayName, health, maxHealth)
 									end
 									textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 								end
-
+					
 								for _, adornment in pairs(adornments) do
-									adornment.Color3 = teamColor
+									adornment.Color3 = teamColorFinal
 								end
 							end
 						else
@@ -1430,7 +1439,7 @@ function ESP(player, persistent)
 		end
 
 		createESP()
-
+		if not player:IsA("Model") then
 		local characterAddedConnection
 		characterAddedConnection = player.CharacterAdded:Connect(function()
 			if not ESPenabled and not persistent then
@@ -1447,6 +1456,7 @@ function ESP(player, persistent)
 			createESP()
 		end)
 		storeESP(player, "characterAdded", characterAddedConnection)
+		end
 	end)
 end
 
