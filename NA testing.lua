@@ -338,32 +338,33 @@ end
 local queueteleport=(syn and syn.queue_on_teleport) or queue_on_teleport or (fluxus and fluxus.queue_on_teleport) or function() end
 
 --Notification library
-local Notification=nil
+local Notification = nil
 
-repeat 
-	local s,r=pcall(function()
+repeat
+	local success, result = pcall(function()
 		return loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/Nameless-Admin/main/NamelessAdminNotifications.lua"))()
-	end);
+	end)
 
-	if s then
-		Notification=r;
+	if success then
+		Notification = result
 	else
-		warn("Couldn't load notification module, retrying...");
-		Wait();
+		warn("Failed to load notification module, retrying...")
+		task.wait(1)
 	end
-until Notification~=nil --waits for the module to load (cause loadstring takes ages)
+until Notification
 
-local Notify=Notification.Notify;
+local Notify = Notification.Notify
 
-function DoNotif(txt,dur,naem)
-	if not txt then txt='something' end
-	if not dur then dur=5 end
-	if not naem then naem=adminName end
+function DoNotif(text, duration, sender)
+	text = text or "something"
+	duration = duration or 5
+	sender = sender or adminName
+
 	Notify({
-		Description=txt;
-		Title=naem;
-		Duration=dur;
-	});
+		Title = sender,
+		Description = text,
+		Duration = duration
+	})
 end
 
 --Custom file functions checker checker
@@ -510,20 +511,20 @@ local mouse=localPlayer:GetMouse()
 local camera=SafeGetService("Workspace").CurrentCamera
 local Commands,Aliases={},{}
 local player,plr,lp=Players.LocalPlayer,Players.LocalPlayer,Players.LocalPlayer
-local ctrlModule = nil
+local ctrlModule
 
 pcall(function()
-	local player = Players.LocalPlayer
-	local plrScripts = player:FindFirstChildOfClass("PlayerScripts")
-	if plrScripts then
-		local plrModule = plrScripts:WaitForChild("PlayerModule", 5)
-		if plrModule then
-			local modell = plrModule:WaitForChild("ControlModule", 5)
-			if modell then
-				ctrlModule = require(modell)
-			end
-		end
-	end
+	local playerScripts = Players.LocalPlayer:FindFirstChildOfClass("PlayerScripts")
+
+	if not playerScripts then return end
+
+	local playerModule = playerScripts:WaitForChild("PlayerModule", 5)
+	if not playerModule then return end
+
+	local controlModule = playerModule:WaitForChild("ControlModule", 5)
+	if not controlModule then return end
+
+	ctrlModule = require(controlModule)
 end)
 
 local bringc={}
@@ -674,29 +675,29 @@ function loadedResults(res)
 	local days = math.floor(sec / 86400)
 	local hours = math.floor((sec % 86400) / 3600)
 	local minutes = math.floor((sec % 3600) / 60)
-
 	local secondsFloat = sec % 60
+
 	local seconds, fractional = math.modf(secondsFloat)
 	local milliseconds = math.floor(fractional * 1000)
 
 	local function formatTime()
 		if days > 0 then
-			return Format("%d:%02d:%02d:%02d.%03d | Days,Hours,Minutes,Seconds.Milliseconds", 
+			return Format("%d:%02d:%02d:%02d.%03d | Days,Hours,Minutes,Seconds.Milliseconds",
 				days, hours, minutes, seconds, milliseconds)
 		elseif hours > 0 then
-			return Format("%d:%02d:%02d.%03d | Hours,Minutes,Seconds.Milliseconds", 
+			return Format("%d:%02d:%02d.%03d | Hours,Minutes,Seconds.Milliseconds",
 				hours, minutes, seconds, milliseconds)
 		elseif minutes > 0 then
-			return Format("%d:%02d.%03d | Minutes,Seconds.Milliseconds", 
+			return Format("%d:%02d.%03d | Minutes,Seconds.Milliseconds",
 				minutes, seconds, milliseconds)
 		else
-			return Format("%d.%03d | Seconds.Milliseconds", 
+			return Format("%d.%03d | Seconds.Milliseconds",
 				seconds, milliseconds)
 		end
 	end
 
 	local formatted = formatTime()
-	return isNegative and ("-"..formatted) or formatted
+	return isNegative and ("-" .. formatted) or formatted
 end
 
 
@@ -790,11 +791,15 @@ cmd.loop = function(commandName, args)
 		return
 	end
 
-	local loopKey = commandName:lower()
+	local function GenerateLoopKey(name, arguments)
+		return name:lower().." "..Concat(arguments or {}, " ")
+	end
 
-	if Loops[loopKey] then
-		DoNotif("A loop for command '"..commandName.."' is already running.", 3)
-		return
+	local function FormatArgs(arguments)
+		if not arguments or #arguments == 0 then
+			return "(no args)"
+		end
+		return Concat(arguments, ", ")
 	end
 
 	Notify({
@@ -806,15 +811,23 @@ cmd.loop = function(commandName, args)
 				Text = "Submit",
 				Callback = function(input)
 					local interval = tonumber(input) or 0
-					if not interval or interval < 0 then
+					if interval < 0 then
 						DoNotif("Invalid delay. Loop not started.", 3)
 						return
 					end
 
+					local loopKey = GenerateLoopKey(commandName, args)
+
+					if Loops[loopKey] then
+						DoNotif("A loop with these arguments is already running for '"..commandName.."'.", 3)
+						return
+					end
+
 					Loops[loopKey] = {
+						commandName = commandName,
 						command = command[1],
-						interval = interval,
 						args = args or {},
+						interval = interval,
 						running = true
 					}
 
@@ -827,7 +840,7 @@ cmd.loop = function(commandName, args)
 						end
 					end)
 
-					DoNotif("Loop started for command: '"..commandName.."' with delay: "..interval.." seconds.", 3)
+					DoNotif("Loop started for '"..commandName.."' with delay: "..interval.."s. Args: "..FormatArgs(args), 3)
 				end
 			},
 			{
@@ -846,14 +859,23 @@ cmd.stopLoop = function()
 		return
 	end
 
+	local function FormatArgs(arguments)
+		if not arguments or #arguments == 0 then
+			return "(no args)"
+		end
+		return Concat(arguments, ", ")
+	end
+
 	local buttons = {}
+
 	for loopKey, loopData in pairs(Loops) do
+		local label = Format("'%s' | Args: %s | Delay: %ss", loopData.commandName, FormatArgs(loopData.args), loopData.interval)
 		Insert(buttons, {
-			Text = "Stop '"..loopKey.."'",
+			Text = label,
 			Callback = function()
-				Loops[loopKey].running = false
+				loopData.running = false
 				Loops[loopKey] = nil
-				DoNotif("Loop '"..loopKey.."' has been stopped.", 3)
+				DoNotif("Stopped loop: '"..loopData.commandName.."' with args: "..FormatArgs(loopData.args), 3)
 			end
 		})
 	end
@@ -1324,16 +1346,16 @@ function ESP(player, persistent)
 		Wait()
 
 		local function createESP()
-			if player.Character and player.Name ~= Players.LocalPlayer.Name and not COREGUI:FindFirstChild(player.Name..'_ESP') then
+			if getPlrChar(player) and player.Name ~= Players.LocalPlayer.Name and not COREGUI:FindFirstChild(player.Name..'_ESP') then
 				local espHolder = InstanceNew("Folder")
 				espHolder.Name = player.Name..'_ESP'
 				espHolder.Parent = COREGUI
 
-				repeat Wait(1) until player.Character and getRoot(player.Character) and player.Character:FindFirstChildOfClass("Humanoid")
+				repeat Wait(1) until getPlrChar(player) and getRoot(getPlrChar(player)) and getPlrChar(player):FindFirstChildOfClass("Humanoid")
 
 				local adornments = {}
 
-				for _, part in pairs(player.Character:GetChildren()) do
+				for _, part in pairs(getPlrChar(player):GetChildren()) do
 					if part:IsA("BasePart") and not part:FindFirstChildOfClass("Accessory") then
 						local boxAdornment = InstanceNew("BoxHandleAdornment")
 						boxAdornment.Name = player.Name.."_Box"
@@ -1348,11 +1370,11 @@ function ESP(player, persistent)
 					end
 				end
 
-				if player.Character:FindFirstChild("Head") then
+				if getPlrChar(player):FindFirstChild("Head") then
 					local billboardGui = InstanceNew("BillboardGui")
 					local textLabel = InstanceNew("TextLabel")
 
-					billboardGui.Adornee = player.Character:FindFirstChild("Head")
+					billboardGui.Adornee = getPlrChar(player):FindFirstChild("Head")
 					billboardGui.Parent = espHolder
 					billboardGui.Size = UDim2.new(0, 200, 0, 100)
 					billboardGui.StudsOffset = Vector3.new(0, 2, 0)
@@ -1370,15 +1392,15 @@ function ESP(player, persistent)
 					local espLoop
 					espLoop = RunService.RenderStepped:Connect(function()
 						if COREGUI:FindFirstChild(player.Name..'_ESP') then
-							if player.Character and getRoot(player.Character) and player.Character:FindFirstChildOfClass("Humanoid") then
-								local health = math.floor(player.Character:FindFirstChildOfClass("Humanoid").Health)
-								local maxHealth = math.floor(player.Character:FindFirstChildOfClass("Humanoid").MaxHealth)
+							if getPlrChar(player) and getRoot(getPlrChar(player)) and getPlrChar(player):FindFirstChildOfClass("Humanoid") then
+								local health = math.floor(getPlrChar(player):FindFirstChildOfClass("Humanoid").Health)
+								local maxHealth = math.floor(getPlrChar(player):FindFirstChildOfClass("Humanoid").MaxHealth)
 								local teamColor = player.Team and player.Team.TeamColor.Color or Color3.fromRGB(255, 255, 255)
 
 								local displayName = nameChecker(player)
 
-								if Players.LocalPlayer.Character and getRoot(Players.LocalPlayer.Character) and Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
-									local distance = math.floor((getRoot(Players.LocalPlayer.Character).Position - getRoot(player.Character).Position).magnitude)
+								if getPlrChar(Players.LocalPlayer) and getRoot(getPlrChar(Players.LocalPlayer)) and getPlrChar(Players.LocalPlayer):FindFirstChildOfClass("Humanoid") then
+									local distance = math.floor((getRoot(getPlrChar(Players.LocalPlayer)).Position - getRoot(player.Character).Position).magnitude)
 									if player.Team then
 										textLabel.Text = Format("%s | Health: %d/%d | Studs: %d | Team: %s", displayName, health, maxHealth, distance, player.Team.Name)
 									else
@@ -1569,7 +1591,7 @@ function sFLY(vfly)
 		BV.velocity = Vector3.new(0, 0, 0)
 		BV.maxForce = Vector3.new(9e9, 9e9, 9e9)
 
-		spawn(function()
+		Spawn(function()
 			while FLYING do
 				if not vfly then
 					getHum().PlatformStand = true
@@ -1649,18 +1671,6 @@ local tool=nil
 spawn(function()
 	repeat wait() until getChar()
 	tool=getBp():FindFirstChildOfClass("Tool") or getChar():FindFirstChildOfClass("Tool") or nil
-end)
-
-local nc=false
-local ncLoop=nil
-ncLoop=RunService.Stepped:Connect(function()
-	if nc and getChar()~=nil then
-		for _,v in pairs(getChar():GetDescendants()) do
-			if v:IsA("BasePart") and v.CanCollide==true then
-				v.CanCollide=false
-			end
-		end
-	end
 end)
 
 local lp=Players.LocalPlayer
@@ -13551,10 +13561,8 @@ NACaller(function()
 		local updateLogMessage = maybeMock('Added "updlog" command (displays any new changes added into '..adminName..')')
 		DoNotif(updateLogMessage, nil, "Info")
 	end)
-
-	cmdInput.PlaceholderText = isAprilFools()
-		and '🤡 '..adminName.." V"..curVer..' 🤡'
-		or getSeasonEmoji()..' '..adminName.." V"..curVer..' '..getSeasonEmoji()
+	cmdInput.ZIndex = 10
+	cmdInput.PlaceholderText = isAprilFools() and '🤡 '..adminName.." V"..curVer..' 🤡' or getSeasonEmoji()..' '..adminName.." V"..curVer..' '..getSeasonEmoji()
 end)
 
 CaptureService.CaptureBegan:Connect(function()
