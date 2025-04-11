@@ -621,26 +621,6 @@ function isRelAdmin(Player)
 	return false
 end
 
-function AntiSit()
-	local character = LocalPlayer.Character
-	local humanoid = character and character:FindFirstChild("Humanoid")
-
-	if not humanoid then return end
-
-	humanoid:SetStateEnabled("Seated", false)
-	humanoid.Sit = true
-end
-
-function unAntiSit()
-	local character = LocalPlayer.Character
-	local humanoid = character and character:FindFirstChild("Humanoid")
-
-	if not humanoid then return end
-
-	humanoid:SetStateEnabled("Seated", true)
-	humanoid.Sit = false
-end
-
 function nameChecker(plr)
 	return plr.DisplayName == plr.Name and '@'..plr.Name or plr.DisplayName..' (@'..plr.Name..')'
 end
@@ -4401,14 +4381,42 @@ cmd.add({"respawn", "re"}, {"respawn", "Respawn your character"}, function()
 	respawn()
 end)
 
-cmd.add({"antisit"},{"antisit","Prevents the player from sitting"},function()
-	AntiSit()
+antiSITcon = nil
 
+cmd.add({"antisit"},{"antisit","Prevents the player from sitting"},function()
+	local function noSit(character)
+		local humanoid = character:WaitForChild("Humanoid", 5)
+		if humanoid then
+			humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated, false)
+			humanoid.Sit = true
+		end
+	end
+
+	if LocalPlayer.Character then
+		noSit(LocalPlayer.Character)
+	end
+
+	if antiSITcon then
+		antiSITcon:Disconnect()
+		antiSITcon = nil
+	end
+
+	antiSITcon = LocalPlayer.CharacterAdded:Connect(noSit)
 	DoNotif("Anti sit enabled", 3)
 end)
 
 cmd.add({"unantisit"},{"unantisit","Allows the player to sit again"},function()
-	unAntiSit()
+	local character = LocalPlayer.Character
+	local humanoid = character and character:FindFirstChild("Humanoid")
+	if humanoid then
+		humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated, true)
+		humanoid.Sit = false
+	end
+
+	if antiSITcon then
+		antiSITcon:Disconnect()
+		antiSITcon = nil
+	end
 
 	DoNotif("Anti sit disabled", 3)
 end)
