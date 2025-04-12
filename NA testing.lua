@@ -12739,6 +12739,122 @@ cmd.add({"bringnpcs"}, {"bringnpcs", "Brings NPCs"}, function()
 	end
 end)
 
+cmd.add({"gotonpcs"}, {"gotonpcs", "Teleports to each NPC"}, function()
+	local Players = game:GetService("Players")
+	local LocalPlayer = Players.LocalPlayer
+	local function getRoot(model)
+		return model:FindFirstChild("HumanoidRootPart") or model:FindFirstChild("Torso")
+	end
+	local npcs = {}
+	for _, d in pairs(game:GetService("Workspace"):GetDescendants()) do
+		if d:IsA("Humanoid") and not Players:GetPlayerFromCharacter(d.Parent) then
+			local root = getRoot(d.Parent)
+			if root then
+				table.insert(npcs, root)
+			end
+		end
+	end
+	Spawn(function()
+		for _, npcRoot in ipairs(npcs) do
+			local char = LocalPlayer.Character
+			if char and getRoot(char) then
+				getRoot(char).CFrame = npcRoot.CFrame + Vector3.new(0, 3, 0)
+			end
+		end
+	end)
+end)
+
+local NPCControl = {
+	Enabled = false,
+	Connection = nil,
+	CurrentTarget = nil,
+	MoveCooldown = 0
+}
+
+cmd.add({"actnpc"}, {"actnpc", "Start acting like an NPC"}, function()
+	if NPCControl.Enabled then return end
+	NPCControl.Enabled = true
+
+	local function moveToRandom()
+		local char = LocalPlayer.Character
+		local hum = char and char:FindFirstChildOfClass("Humanoid")
+		local root = getRoot(char)
+		if not (char and hum and root) then return end
+
+		local randomOffset = Vector3.new(math.random(-30, 30), 0, math.random(-30, 30))
+		local targetPos = root.Position + randomOffset
+
+		NPCControl.CurrentTarget = targetPos
+		hum:MoveTo(targetPos)
+
+		DoNotif("Moving to: "..Format("X: %.0f, Y: %.0f, Z: %.0f", targetPos.X, targetPos.Y, targetPos.Z), 1)
+	end
+
+	NPCControl.Connection = RunService.Heartbeat:Connect(function(dt)
+		local char = LocalPlayer.Character
+		local hum = char and char:FindFirstChildOfClass("Humanoid")
+		local root = getRoot(char)
+		if not (char and hum and root) then return end
+
+		NPCControl.MoveCooldown -= dt
+		NPCControl._jumpCooldown = (NPCControl._jumpCooldown or 0) - dt
+		NPCControl._moveTimeout = (NPCControl._moveTimeout or 0) + dt
+
+		if hum.Sit then
+			DoNotif("Sitting detected — jumping to escape", 1)
+			hum.Sit = false
+			hum:ChangeState(Enum.HumanoidStateType.Jumping)
+			NPCControl._jumpCooldown = 1.5
+			return
+		end
+
+		if NPCControl.CurrentTarget and (root.Position - NPCControl.CurrentTarget).Magnitude < 2 then
+			DoNotif("Reached target", 1)
+			NPCControl.CurrentTarget = nil
+		end
+
+		if not NPCControl.CurrentTarget or NPCControl._moveTimeout > 5 then
+			if NPCControl._moveTimeout > 5 then
+				DoNotif("Stuck — retrying new path", 1)
+			end
+			if NPCControl.MoveCooldown <= 0 then
+				moveToRandom()
+				NPCControl.MoveCooldown = math.random(2, 4)
+				NPCControl._moveTimeout = 0
+			end
+		end
+
+		local forward = root.CFrame.LookVector
+		local origin = root.Position + Vector3.new(0, 2, 0)
+		local rayParams = RaycastParams.new()
+		rayParams.FilterType = Enum.RaycastFilterType.Blacklist
+		rayParams.FilterDescendantsInstances = {char}
+		local result = Workspace:Raycast(origin, forward * 3 + Vector3.new(0, -2, 0), rayParams)
+
+		if result and NPCControl._jumpCooldown <= 0 then
+			local part = result.Instance
+			local model = part:FindFirstAncestorOfClass("Model")
+			local isPlayerChar = model and Players:GetPlayerFromCharacter(model)
+
+			if part.CanCollide and not isPlayerChar then
+				if hum:GetState() == Enum.HumanoidStateType.Running then
+					DoNotif("Obstacle detected — jumping", 1)
+					hum:ChangeState(Enum.HumanoidStateType.Jumping)
+					NPCControl._jumpCooldown = 1.5
+				end
+			end
+		end
+	end)
+end)
+
+cmd.add({"unactnpc", "stopnpc"}, {"unactnpc (stopnpc)", "Stop acting like an NPC"}, function()
+	if not NPCControl.Enabled then return end
+	NPCControl.Enabled = false
+	if NPCControl.Connection then
+		NPCControl.Connection:Disconnect()
+		NPCControl.Connection = nil
+	end
+end)
 
 --[[ FUNCTIONALITY ]]--
 localPlayer.Chatted:Connect(function(str)
