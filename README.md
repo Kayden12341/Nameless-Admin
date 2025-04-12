@@ -40,7 +40,7 @@ Connect with us on Discord:
 
 ## Original Owner
 
-We extend our gratitude to the original creators for laying the foundation of Nameless Admin:
+We extend our gratitude to the original creator for laying the foundation of Nameless Admin:
 
 <div align="left">
   <a href="https://github.com/FilteringEnabled">
