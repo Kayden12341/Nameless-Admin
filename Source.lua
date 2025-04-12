@@ -10874,7 +10874,7 @@ cmd.add({"autodeletefind", "autoremovefind", "autodelfind"}, {"autodeletefind {n
 	DoNotif("Auto deleting parts containing: "..kw, 2.5)
 end, true)
 
-cmd.add({"unautodeletefind", "unautoremovefind", "unautodelfind"}, {"unautodeletefind", "Stops autodeletefind"}, function()
+cmd.add({"unautodeletefind", "unautoremovefind", "unautodelfind"}, {"unautodeletefind (unautoremovefind,unautodelfind)", "Stops autodeletefind"}, function()
 	if finderConn then
 		finderConn:Disconnect()
 		finderConn = nil
