@@ -9976,6 +9976,37 @@ cmd.add({"unglue", "unloopgoto", "noloopgoto"}, {"unglue (unloopgoto,noloopgoto)
 	glueloop = {}
 end)
 
+glueBACKER = {}
+
+cmd.add({"glueback", "loopbehind", "lbehind"}, {"glueback <player> (loopbehind,lbehind)", "Loop teleport behind a player"}, function(...)
+	local input = (...)
+	local players = getPlr(input)
+	for _, target in next, players do
+		if glueBACKER[target] then
+			glueBACKER[target]:Disconnect()
+			glueBACKER[target] = nil
+		end
+		glueBACKER[target] = RunService.RenderStepped:Connect(function()
+			local targetChar = target.Character
+			if targetChar then
+				local targetRoot = getRoot(targetChar)
+				local localRoot = getRoot(getChar())
+				if targetRoot and localRoot then
+					local cf = targetRoot.CFrame * CFrame.new(0, 0, 3)
+					localRoot.CFrame = CFrame.new(cf.Position, targetRoot.Position)
+				end
+			end
+		end)
+	end
+end, true)
+
+cmd.add({"unglueback", "unloopbehind", "unlbehind"}, {"unglueback (unloopbehind,unlbehind)", "Stops teleporting you to a player"}, function()
+	for _, conn in pairs(glueBACKER) do
+		conn:Disconnect()
+	end
+	glueBACKER = {}
+end)
+
 cmd.add({"spook", "scare"}, {"spook <player> (scare)", "Teleports next to a player for a few seconds"}, function(...)
 	local username = (...)
 	local targets = getPlr(username)
