@@ -2,23 +2,29 @@
 
 ![Proof of Ownership](Github_Images/na_Proof.png)
 
+Nameless Admin is the official continuation of the original script. Our dedicated team is working to maintain and improve previous functionalities while developing brand new commands and features.
+
 ## Current Developers (New Owners)
+
+Click on the badges to check out our GitHub profiles:
 
 <div align="left">
   <a href="https://github.com/ltseverydayyou">
-    <img src="https://img.shields.io/badge/Null%20(@ltseverydayyou)-black?logo=github&logoColor=white&labelColor=black" alt="Null's Github">
+    <img src="https://img.shields.io/badge/Null%20(@ltseverydayyou)-black?logo=github&logoColor=white&labelColor=black" alt="Null's GitHub">
   </a>
   <a href="https://github.com/Cosmella-v">
-    <img src="https://img.shields.io/badge/Viper%20(@Cosmella)-darkgreen?logo=github&logoColor=white" alt="Viper's Github">
+    <img src="https://img.shields.io/badge/Viper%20(@Cosmella)-darkgreen?logo=github&logoColor=white" alt="Viper's GitHub">
   </a>
 </div>
 
-## Information
+## Project Information
 
-- **Old scripts** will be fixed and function properly.
-- **New commands** coming soon (if we're not lazy :P).
+- **Legacy Script Support:** Old scripts will be fixed and fully functional.
+- **Upcoming Features:** New commands are on the horizon (stay tuned and support our work!).
 
-## Join Us
+## Join the Community
+
+Connect with us on Discord:
 
 <div align="left">
   <a href="https://discord.gg/zS7TpV3p64">
@@ -32,22 +38,45 @@
   </a>
 </div>
 
-## Original Owner
+## Original Owners
+
+We extend our gratitude to the original creators for laying the foundation of Nameless Admin:
 
 <div align="left">
   <a href="https://github.com/FilteringEnabled">
-    <img src="https://img.shields.io/badge/FilteringEnabled-black?logo=github&logoColor=white&labelColor=black" alt="FilteringEnabled's Github">
+    <img src="https://img.shields.io/badge/FilteringEnabled-black?logo=github&logoColor=white&labelColor=black" alt="FilteringEnabled's GitHub">
   </a>
   <a href="https://github.com/lxte">
-    <img src="https://img.shields.io/badge/lxte-black?logo=github&logoColor=white" alt="lxte's Github">
+    <img src="https://img.shields.io/badge/lxte-black?logo=github&logoColor=white" alt="lxte's GitHub">
   </a>
 </div>
 
-## Original Script
+## Loadstrings
+
+### Original Script
+
+Use the following loadstring to run the original version:
 
 ```lua
 loadstring(game:HttpGet("https://github.com/FilteringEnabled/NamelessAdmin/blob/main/Source?raw=true"))()
 ```
 
+### Current Versions
+
+**Main Version:**
+
+```lua
+loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/Nameless-Admin/main/Source.lua"))()
+```
+
+**Testing Version:**
+
+```lua
+loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/Nameless-Admin/main/NA%20testing.lua"))()
+```
+
 ---
 
+Feel free to contribute or ask questions in our community channels. Enjoy using Nameless Admin!
+
+---
