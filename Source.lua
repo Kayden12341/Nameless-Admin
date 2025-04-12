@@ -659,7 +659,7 @@ function loadedResults(res)
 	end
 
 	local formatted = formatTime()
-	return isNegative and ("-" .. formatted) or formatted
+	return isNegative and ("-"..formatted) or formatted
 end
 
 
@@ -3824,18 +3824,19 @@ cmd.add({"breaklayeredclothing","blc"},{"breaklayeredclothing (blc)","Streches y
 	loadstring(game:HttpGet('https://raw.githubusercontent.com/ltseverydayyou/Nameless-Admin/main/leg%20resize'))()
 end)
 
-cmd.add({"fpsbooster","lowgraphics","boostfps","lowg"},{"fpsbooster (lowgraphics,boostfps,lowg)","Low graphics mode if the game is laggy"},function()
-	local decalsYeeted = true
+cmd.add({"fpsbooster","lowgraphics","boostfps","lowg"},{"fpsbooster (lowgraphics, boostfps, lowg)","Enables low graphics mode to improve performance."},function()
+	local decalsEnabled = false
 	local w = game:GetService("Workspace")
 	local l = SafeGetService("Lighting")
 	local t = w.Terrain
 
-	function optimizeInstance(v)
-		if v:IsA("BasePart") and not v:IsA("MeshPart") then
-			v.Material = "Plastic"
+	local function optimizeInstance(v)
+		if v:IsA("BasePart") then
+			v.Material = Enum.Material.Plastic
 			v.Reflectance = 0
-		elseif (v:IsA("Decal") or v:IsA("Texture")) and decalsYeeted then
-			v.Transparency = 1
+			if v:IsA("MeshPart") and not decalsEnabled then v.TextureID = "" end
+		elseif v:IsA("Decal") or v:IsA("Texture") then
+			if not decalsEnabled then v.Transparency = 1 end
 		elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
 			v.Lifetime = NumberRange.new(0)
 		elseif v:IsA("Explosion") then
@@ -3843,62 +3844,100 @@ cmd.add({"fpsbooster","lowgraphics","boostfps","lowg"},{"fpsbooster (lowgraphics
 			v.BlastRadius = 1
 		elseif v:IsA("Fire") or v:IsA("SpotLight") or v:IsA("Smoke") or v:IsA("Sparkles") then
 			v.Enabled = false
-		elseif v:IsA("MeshPart") and decalsYeeted then
-			v.Material = "Plastic"
-			v.Reflectance = 0
-			v.TextureID = 10385902758728957
-		elseif v:IsA("SpecialMesh") and decalsYeeted then
-			v.TextureId = 0
-		elseif v:IsA("ShirtGraphic") and decalsYeeted then
-			v.Graphic = 0
-		elseif (v:IsA("Shirt") or v:IsA("Pants")) and decalsYeeted then
-			v[v.ClassName.."Template"] = 0
+		elseif v:IsA("SpecialMesh") and not decalsEnabled then
+			v.TextureId = ""
+		elseif v:IsA("ShirtGraphic") and not decalsEnabled then
+			v.Graphic = ""
+		elseif (v:IsA("Shirt") or v:IsA("Pants")) and not decalsEnabled then
+			pcall(function() v[v.ClassName.."Template"] = "" end)
 		end
 	end
 
-	sethiddenproperty(l, "Technology", 2)
-	sethiddenproperty(t, "Decoration", false)
+	pcall(function() sethiddenproperty(l,"Technology",Enum.Technology.Compatibility) end)
+	pcall(function() sethiddenproperty(t,"Decoration",false) end)
 	t.WaterWaveSize = 0
 	t.WaterWaveSpeed = 0
 	t.WaterReflectance = 0
 	t.WaterTransparency = 0
 	l.GlobalShadows = false
-	l.FogEnd = 9e9
+	l.FogEnd = math.huge
 	l.Brightness = 0
-	settings().Rendering.QualityLevel = "Level01"
+	pcall(function() settings().Rendering.QualityLevel = Enum.QualityLevel.Level01 end)
 
-	for _, v in pairs(w:GetDescendants()) do
-		optimizeInstance(v)
-	end
-
-	for _, e in pairs(l:GetChildren()) do
+	for _,v in ipairs(w:GetDescendants()) do optimizeInstance(v) end
+	for _,e in ipairs(l:GetChildren()) do
 		if e:IsA("BlurEffect") or e:IsA("SunRaysEffect") or e:IsA("ColorCorrectionEffect") or e:IsA("BloomEffect") or e:IsA("DepthOfFieldEffect") then
 			e.Enabled = false
 		end
 	end
 
 	w.DescendantAdded:Connect(function(v)
-		Wait()
+		task.wait()
 		optimizeInstance(v)
 	end)
 end)
 
 cmd.add({"antilag","boostfps"},{"antilag (boostfps)","Low Graphics"},function()
 	local gui = InstanceNew("ScreenGui")
-	NaProtectUI(gui)
 	gui.Name = "AntiLagGUI"
 	gui.ResetOnSpawn = false
+	NaProtectUI(gui)
 
 	local frame = InstanceNew("Frame")
-	frame.AnchorPoint = Vector2.new(0.5,0)
+	frame.AnchorPoint = Vector2.new(0.5, 0)
 	frame.Size = UDim2.new(0.3, 0, 0.5, 0)
-	frame.Position = UDim2.new(0.5, 0, 0.4, 0)
+	frame.Position = UDim2.new(0.5, 0, 0.35, 0)
 	frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 	frame.BorderSizePixel = 0
 	frame.Parent = gui
 
-	local scrollingFrame = InstanceNew("ScrollingFrame",frame)
-	scrollingFrame.Size = UDim2.new(1, 0, 1, -50)
+	local topbar = InstanceNew("Frame")
+	topbar.Name = "TopBar"
+	topbar.Size = UDim2.new(1, 0, 0, 30)
+	topbar.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+	topbar.BorderSizePixel = 0
+	topbar.Parent = frame
+
+	local title = InstanceNew("TextLabel")
+	title.Text = "AntiLag Settings"
+	title.Font = Enum.Font.SourceSansBold
+	title.TextSize = 18
+	title.TextColor3 = Color3.new(1,1,1)
+	title.BackgroundTransparency = 1
+	title.Size = UDim2.new(1, -60, 1, 0)
+	title.Position = UDim2.new(0, 10, 0, 0)
+	title.TextXAlignment = Enum.TextXAlignment.Left
+	title.Parent = topbar
+
+	local closeBtn = InstanceNew("TextButton")
+	closeBtn.Size = UDim2.new(0, 24, 0, 24)
+	closeBtn.Position = UDim2.new(1, -28, 0, 3)
+	closeBtn.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
+	closeBtn.Text = "X"
+	closeBtn.TextColor3 = Color3.new(1, 1, 1)
+	closeBtn.Font = Enum.Font.SourceSansBold
+	closeBtn.TextSize = 16
+	closeBtn.Parent = topbar
+
+	local minimizeBtn = InstanceNew("TextButton")
+	minimizeBtn.Size = UDim2.new(0, 24, 0, 24)
+	minimizeBtn.Position = UDim2.new(1, -56, 0, 3)
+	minimizeBtn.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+	minimizeBtn.Text = "-"
+	minimizeBtn.TextColor3 = Color3.new(1, 1, 1)
+	minimizeBtn.Font = Enum.Font.SourceSansBold
+	minimizeBtn.TextSize = 16
+	minimizeBtn.Parent = topbar
+
+	local content = InstanceNew("Frame")
+	content.Name = "Content"
+	content.Size = UDim2.new(1, 0, 1, -30)
+	content.Position = UDim2.new(0, 0, 0, 30)
+	content.BackgroundTransparency = 1
+	content.Parent = frame
+
+	local scrollingFrame = InstanceNew("ScrollingFrame", content)
+	scrollingFrame.Size = UDim2.new(1, 0, 1, -60)
 	scrollingFrame.Position = UDim2.new(0, 0, 0, 0)
 	scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
 	scrollingFrame.ScrollBarThickness = 6
@@ -3943,34 +3982,69 @@ cmd.add({"antilag","boostfps"},{"antilag (boostfps)","Low Graphics"},function()
 	local userSettings = table.clone(defaultSettings)
 
 	local function updateCanvas()
-		Wait()
+		task.wait()
 		scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 20)
 	end
 
-	local function createToggle(section, key)
-		local btn = InstanceNew("TextButton")
-		btn.Size = UDim2.new(1, -10, 0, 32)
-		btn.TextColor3 = Color3.new(1, 1, 1)
-		btn.Font = Enum.Font.SourceSans
-		btn.TextSize = 18
-		btn.AutoButtonColor = false
-		btn.Text = key..": "..tostring(userSettings[section][key])
-		btn.BackgroundColor3 = userSettings[section][key] and Color3.fromRGB(0, 200, 0) or Color3.fromRGB(120, 30, 30)
-		btn.Parent = scrollingFrame
+	local function createSection(sectionName, keys)
+		local dropdown = InstanceNew("TextButton")
+		dropdown.Size = UDim2.new(1, -10, 0, 32)
+		dropdown.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+		dropdown.TextColor3 = Color3.new(1, 1, 1)
+		dropdown.Font = Enum.Font.SourceSansBold
+		dropdown.TextSize = 20
+		dropdown.Text = "▼ "..sectionName
+		dropdown.AutoButtonColor = false
+		dropdown.Parent = scrollingFrame
 
-		btn.MouseButton1Click:Connect(function()
-			userSettings[section][key] = not userSettings[section][key]
-			btn.Text = key..": "..tostring(userSettings[section][key])
-			btn.BackgroundColor3 = userSettings[section][key] and Color3.fromRGB(0, 200, 0) or Color3.fromRGB(120, 30, 30)
+		local container = InstanceNew("Frame")
+		container.Size = UDim2.new(1, -10, 0, 0)
+		container.BackgroundTransparency = 1
+		container.ClipsDescendants = true
+		container.Parent = scrollingFrame
+
+		local subLayout = InstanceNew("UIListLayout", container)
+		subLayout.Padding = UDim.new(0, 4)
+		subLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
+		local isOpen = false
+
+		local function updateDropdown()
+			container.Size = UDim2.new(1, -10, 0, isOpen and #keys * 36 or 0)
+			dropdown.Text = (isOpen and "▲ " or "▼ ")..sectionName
+			updateCanvas()
+		end
+
+		for _, key in pairs(keys) do
+			local btn = InstanceNew("TextButton")
+			btn.Size = UDim2.new(1, 0, 0, 32)
+			btn.TextColor3 = Color3.new(1, 1, 1)
+			btn.Font = Enum.Font.SourceSans
+			btn.TextSize = 18
+			btn.AutoButtonColor = false
+			btn.Text = key..": "..tostring(userSettings[sectionName][key])
+			btn.BackgroundColor3 = userSettings[sectionName][key] and Color3.fromRGB(0, 200, 0) or Color3.fromRGB(120, 30, 30)
+			btn.Parent = container
+
+			MouseButtonFix(btn,function()
+				userSettings[sectionName][key] = not userSettings[sectionName][key]
+				btn.Text = key..": "..tostring(userSettings[sectionName][key])
+				btn.BackgroundColor3 = userSettings[sectionName][key] and Color3.fromRGB(0, 200, 0) or Color3.fromRGB(120, 30, 30)
+			end)
+		end
+
+		MouseButtonFix(dropdown,function()
+			isOpen = not isOpen
+			updateDropdown()
 		end)
 
-		updateCanvas()
+		updateDropdown()
 	end
 
-	for section, values in pairs(userSettings) do
-		for key, _ in pairs(values) do
-			createToggle(section, key)
-		end
+	for section, data in pairs(userSettings) do
+		local keys = {}
+		for k in pairs(data) do table.insert(keys, k) end
+		createSection(section, keys)
 	end
 
 	local runBtn = InstanceNew("TextButton")
@@ -3981,14 +4055,25 @@ cmd.add({"antilag","boostfps"},{"antilag (boostfps)","Low Graphics"},function()
 	runBtn.Font = Enum.Font.SourceSansBold
 	runBtn.TextSize = 20
 	runBtn.Text = "Run AntiLag"
-	runBtn.Parent = frame
+	runBtn.Parent = content
 
-	runBtn.MouseButton1Click:Connect(function()
+	MouseButtonFix(runBtn,function()
 		_G.Settings = userSettings
 		gui:Destroy()
 		loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/uuuuuuu/main/low%20detail"))()
 	end)
-	gui.draggablev2(frame)
+
+	MouseButtonFix(closeBtn,function()
+		gui:Destroy()
+	end)
+
+	local minimized = false
+	MouseButtonFix(minimizeBtn,function()
+		minimized = not minimized
+		content.Visible = not minimized
+		minimizeBtn.Text = minimized and "+" or "-"
+	end)
+	gui.draggablev2(frame,topbar)
 end)
 
 local annoyLoop = false
@@ -4065,24 +4150,33 @@ cmd.add({"deleteinvisparts","deleteinvisibleparts","dip"},{"deleteinvisparts (de
 	end
 end)
 
-local shownParts={}
+local shownParts = {}
 
 cmd.add({"invisibleparts","invisparts"},{"invisibleparts (invisparts)","Shows invisible parts"},function()
-	for i,v in pairs(game:GetService("Workspace"):GetDescendants()) do
-		if v:IsA("BasePart") and v.Transparency==1 then
-			if not Discover(shownParts,v) then
-				Insert(shownParts,v)
+	for _, v in ipairs(game:GetService("Workspace"):GetDescendants()) do
+		if v:IsA("BasePart") and v.Transparency == 1 then
+			local alreadyShown = false
+			for _, p in ipairs(shownParts) do
+				if p == v then
+					alreadyShown = true
+					break
+				end
 			end
-			v.Transparency=0
+			if not alreadyShown then
+				table.insert(shownParts, v)
+			end
+			v.Transparency = 0
 		end
 	end
 end)
 
 cmd.add({"uninvisibleparts","uninvisparts"},{"uninvisibleparts (uninvisparts)","Makes parts affected by invisparts return to normal"},function()
-	for i,v in pairs(shownParts) do
-		v.Transparency=1
+	for _, v in ipairs(shownParts) do
+		if v and v:IsA("BasePart") then
+			v.Transparency = 1
+		end
 	end
-	shownParts={}
+	table.clear(shownParts)
 end)
 
 cmd.add({"replicationlag","backtrack"},{"replicationlag (backtrack)","Set IncomingReplicationLag"},function(...)
@@ -4102,23 +4196,27 @@ cmd.add({"render"},{"render","Enable 3d Rendering"},function()
 	RunService:Set3dRenderingEnabled(true)
 end)
 
-oofing=false
+oofing = false
 
-cmd.add({"loopoof"},{"loopoof","Loops everyones character sounds (everyone can hear)"},function()
-	oofing=true
-	repeat wait(0.1)
-		for i,v in pairs(Players:GetPlayers()) do
-			if v.Character~=nil and v.Character:FindFirstChild'Head' then
-				for _,x in pairs(v.Character:FindFirstChild("Head"):GetChildren()) do
-					if x:IsA'Sound' then x.Playing=true end
+cmd.add({"loopoof"},{"loopoof","Loops everyone's character sounds (everyone can hear)"},function()
+	oofing = true
+	repeat Wait(0.1)
+		for _, player in ipairs(Players:GetPlayers()) do
+			local char = player.Character
+			local head = char and char:FindFirstChild("Head")
+			if head then
+				for _, child in ipairs(head:GetChildren()) do
+					if child:IsA("Sound") and not child.Playing then
+						child.Playing = true
+					end
 				end
 			end
 		end
-	until oofing==false
+	until not oofing
 end)
 
 cmd.add({"unloopoof"},{"unloopoof","Stops the oof chaos"},function()
-	oofing=false
+	oofing = false
 end)
 
 cmd.add({"strengthen"},{"strengthen","Makes your character more dense (CustomPhysicalProperties)"},function(...)
@@ -4240,8 +4338,13 @@ end,true)
 cmd.add({"localtime", "yourtime"}, {"localtime (yourtime)", "Shows your current time"}, function()
 	local time = os.date("*t")
 	local clock = Format("%02d:%02d:%02d", time.hour, time.min, time.sec)
-
 	DoNotif("Your Local Time Is: "..clock)
+end)
+
+cmd.add({"localdate", "yourdate"}, {"localdate (yourdate)", "Shows your current date"}, function()
+	local time = os.date("*t")
+	local dateStr = Format("%02d/%02d/%04d", time.day, time.month, time.year)
+	DoNotif("Your Local Date Is: "..dateStr)
 end)
 
 cmd.add({"cartornado", "ctornado"}, {"cartornado (ctornado)", "Tornados a car just sit in the car"}, function()
@@ -10611,9 +10714,9 @@ cmd.add({"delete", "remove", "del"}, {"delete {partname} (remove, del)", "Remove
 	local args = {...}
 	local targetName = Concat(args, " ")
 
-	for _, descendant in pairs(game:GetService("Workspace"):GetDescendants()) do
-		if descendant.Name:lower() == targetName:lower() then
-			descendant:Destroy()
+	for _, d in pairs(game:GetService("Workspace"):GetDescendants()) do
+		if d.Name:lower() == targetName:lower() then
+			d:Destroy()
 			deleteCount = deleteCount + 1
 		end
 	end
@@ -10626,6 +10729,32 @@ cmd.add({"delete", "remove", "del"}, {"delete {partname} (remove, del)", "Remove
 		DoNotif("'"..targetName.."' not found to delete", 2.5)
 	end
 end, true)
+
+cmd.add({"deletefind", "removefind", "delfind"}, {"deletefind {partname} (removefind, delfind)", "Removes any part with a name containing the given text from the workspace"}, function(...)
+	local deFind = 0
+	local targetName = Concat({...}, " "):lower()
+
+	for _, d in pairs(game:GetService("Workspace"):GetDescendants()) do
+		if d.Name:lower():find(targetName) then
+			d:Destroy()
+			deFind = deFind + 1
+		end
+	end
+
+	Wait()
+
+	if deFind > 0 then
+		DoNotif("Deleted "..deFind.." instance(s) containing '"..targetName.."'", 2.5)
+	else
+		DoNotif("No instances found containing '"..targetName.."'", 2.5)
+	end
+end, true)
+
+cmd.add({"deletelighting", "removelighting", "removel", "ldel"},{"deletelighting (removelighting, removel, ldel)","Removes all descendants (objects) within Lighting."},function()
+    for _, l in ipairs(game:GetService("Lighting"):GetDescendants()) do
+        l:Destroy()
+    end
+end)
 
 autoRemover = {}
 autoRemoveConnection = nil
@@ -10671,6 +10800,55 @@ cmd.add({"unautodelete", "unautoremove", "unautodel"}, {"unautodelete {partname}
 		autoRemoveConnection = nil
 	end
 	autoRemover = {}
+end)
+
+autoFinder = {}
+finderConn = nil
+
+function onAdd(obj)
+	if #autoFinder > 0 then
+		for _, kw in pairs(autoFinder) do
+			if obj.Name:lower():find(kw) then
+				Wait()
+				obj:Destroy()
+				break
+			end
+		end
+	else
+		if finderConn then
+			finderConn:Disconnect()
+			finderConn = nil
+		end
+	end
+end
+
+cmd.add({"autodeletefind", "autoremovefind", "autodelfind"}, {"autodeletefind {name} (autoremovefind, autodelfind)", "Auto removes parts with names containing text"}, function(...)
+	local args = {...}
+	local kw = Concat(args, " "):lower()
+
+	if not FindInTable(autoFinder, kw) then
+		Insert(autoFinder, kw)
+		for _, obj in pairs(game:GetService("Workspace"):GetDescendants()) do
+			if obj.Name:lower():find(kw) then
+				obj:Destroy()
+			end
+		end
+	end
+
+	if not finderConn then
+		finderConn = game:GetService("Workspace").DescendantAdded:Connect(onAdd)
+	end
+
+	Wait()
+	DoNotif("Auto deleting parts containing: "..kw, 2.5)
+end, true)
+
+cmd.add({"unautodeletefind", "unautoremovefind", "unautodelfind"}, {"unautodeletefind", "Stops autodeletefind"}, function()
+	if finderConn then
+		finderConn:Disconnect()
+		finderConn = nil
+	end
+	autoFinder = {}
 end)
 
 cmd.add({"deleteclass", "removeclass", "dc"}, {"deleteclass {ClassName} (removeclass, dc)", "Removes any part with a certain classname from the workspace"}, function(...)
@@ -10759,6 +10937,26 @@ cmd.add({"chardelete", "charremove", "chardel", "cdelete", "cremove", "cdel"}, {
 	end
 end, true)
 
+cmd.add({"chardeletefind", "charremovefind", "chardelfind", "cdeletefind", "cremovefind", "cdelfind"}, {"chardeletefind {name} (charremovefind, chardelfind, cdeletefind, cremovefind, cdelfind)", "Removes parts in your character with names containing text"}, function(...)
+	local args = {...}
+	local kw = Concat(args, " "):lower()
+	local count = 0
+
+	for _, obj in pairs(Player.Character:GetDescendants()) do
+		if obj.Name:lower():find(kw) then
+			obj:Destroy()
+			count = count + 1
+		end
+	end
+
+	Wait()
+	if count > 0 then
+		DoNotif("Deleted "..count.." instance(s) containing '"..kw.."' in character", 2.5)
+	else
+		DoNotif("Nothing found containing '"..kw.."' in character", 2.5)
+	end
+end, true)
+
 cmd.add({"chardeleteclass", "charremoveclass", "chardeleteclassname", "cdc"}, {"chardeleteclass {ClassName} (charremoveclass, chardeleteclassname, cdc)", "Removes any part with a certain classname from your character"}, function(...)
 	local args = {...}
 	local targetClass = args[1]:lower()
@@ -10786,12 +10984,12 @@ cmd.add({"gotopart", "topart", "toprt"}, {"gotopart {partname} (topart, toprt)",
 		if part:IsA("BasePart") and part.Name:lower() == partName then
 			if getHum() then
 				getHum().Sit = false
-				wait(0.1)
+				Wait(0.1)
 			end
 			if getChar() then
 				getChar():PivotTo(part:GetPivot())
 			end
-			wait(0.2)
+			Wait(0.2)
 		end
 	end
 end, true)
@@ -10803,14 +11001,50 @@ cmd.add({"tweengotopart", "tgotopart", "ttopart", "ttoprt"}, {"tweengotopart {pa
 		if part:IsA("BasePart") and part.Name:lower() == partName then
 			if getHum() then
 				getHum().Sit = false
-				wait(0.1)
+				Wait(0.1)
 			end
 			TweenService:Create(
 				getRoot(getChar()),
 				TweenInfo.new(1, Enum.EasingStyle.Linear),
 				{CFrame = part.CFrame}
 			):Play()
-			wait(1)
+			Wait(1)
+		end
+	end
+end, true)
+
+cmd.add({"gotopartfind", "topartfind", "toprtfind"}, {"gotopartfind {name} (topartfind, toprtfind)", "Teleports you to a part with a name containing the given text"}, function(...)
+	local name = Concat({...}, " "):lower()
+
+	for _, part in pairs(game:GetService("Workspace"):GetDescendants()) do
+		if part:IsA("BasePart") and part.Name:lower():find(name) then
+			if getHum() then
+				getHum().Sit = false
+				Wait(0.1)
+			end
+			if getChar() then
+				getChar():PivotTo(part:GetPivot())
+			end
+			Wait(0.2)
+		end
+	end
+end, true)
+
+cmd.add({"tweengotopartfind", "tgotopartfind", "ttopartfind", "ttoprtfind"}, {"tweengotopartfind {name} (tgotopartfind, ttopartfind, ttoprtfind)", "Tweens your character to a part with a name containing the given text"}, function(...)
+	local name = Concat({...}, " "):lower()
+
+	for _, part in pairs(game:GetService("Workspace"):GetDescendants()) do
+		if part:IsA("BasePart") and part.Name:lower():find(name) then
+			if getHum() then
+				getHum().Sit = false
+				Wait(0.1)
+			end
+			TweenService:Create(
+				getRoot(getChar()),
+				TweenInfo.new(1, Enum.EasingStyle.Linear),
+				{CFrame = part.CFrame}
+			):Play()
+			Wait(1)
 		end
 	end
 end, true)
@@ -10822,12 +11056,12 @@ cmd.add({"gotopartclass", "gpc", "gotopartc", "gotoprtc"}, {"gotopartclass {clas
 		if part:IsA("BasePart") and part.ClassName:lower() == className then
 			if getHum() then
 				getHum().Sit = false
-				wait(0.1)
+				Wait(0.1)
 			end
 			if getChar() then
 				getChar():PivotTo(part:GetPivot())
 			end
-			wait(0.2)
+			Wait(0.2)
 		end
 	end
 end, true)
@@ -10863,12 +11097,41 @@ cmd.add({"gotomodel", "tomodel"}, {"gotomodel {modelname} (tomodel)", "Teleports
 		if model:IsA("Model") and model.Name:lower() == modelName then
 			if getHum() then
 				getHum().Sit = false
-				wait(0.1)
+				Wait(0.1)
 			end
 			if getChar() then
 				getChar():PivotTo(model:GetPivot())
 			end
-			wait(0.2)
+			Wait(0.2)
+		end
+	end
+end, true)
+
+cmd.add({"bringmodelfind", "bmodelfind"}, {"bringmodelfind {name} (bmodelfind)", "Brings a model to your character if its name contains the given text"}, function(...)
+	local name = Concat({...}, " "):lower()
+
+	for _, model in pairs(game:GetService("Workspace"):GetDescendants()) do
+		if model:IsA("Model") and model.Name:lower():find(name) then
+			if getChar() then
+				model:PivotTo(getChar():GetPivot())
+			end
+		end
+	end
+end, true)
+
+cmd.add({"gotomodelfind", "tomodelfind"}, {"gotomodelfind {name} (tomodelfind)", "Teleports you to a model whose name contains the given text"}, function(...)
+	local name = Concat({...}, " "):lower()
+
+	for _, model in pairs(game:GetService("Workspace"):GetDescendants()) do
+		if model:IsA("Model") and model.Name:lower():find(name) then
+			if getHum() then
+				getHum().Sit = false
+				Wait(0.1)
+			end
+			if getChar() then
+				getChar():PivotTo(model:GetPivot())
+			end
+			Wait(0.2)
 		end
 	end
 end, true)
@@ -10908,8 +11171,6 @@ cmd.add({"swim"}, {"swim {speed}", "Swim in the air"}, function(speed)
 		setHumanoidStates(humanoid, false)
 		humanoid:ChangeState(Enum.HumanoidStateType.Swimming)
 		humanoid.WalkSpeed = speed or 16
-	else
-		warn("Humanoid not found!")
 	end
 end, true)
 
@@ -11106,6 +11367,38 @@ cmd.add({"unviewpart", "unviewp"}, {"unviewpart (unviewp)", "Resets the camera t
     if humanoid then
         camera.CameraSubject = humanoid
     end
+end)
+
+cmd.add({"viewpartfind", "viewpfind", "vpartfind"}, {"viewpartfind {name} (viewpfind, vpartfind)", "Focuses camera on a part, model, or folder with name containing the given text"}, function(...)
+	local name = Concat({...}, " "):lower()
+	local ws = game:GetService("Workspace")
+	local cam = ws.CurrentCamera
+
+	for _, obj in ipairs(ws:GetDescendants()) do
+		if obj.Name:lower():find(name) then
+			if obj:IsA("BasePart") then
+				cam.CameraSubject = obj
+				return
+			elseif obj:IsA("Model") or obj:IsA("Folder") then
+				for _, child in ipairs(obj:GetDescendants()) do
+					if child:IsA("BasePart") then
+						cam.CameraSubject = child
+						return
+					end
+				end
+			end
+		end
+	end
+
+	DoNotif("No part, model, or folder containing '"..name.."' with a BasePart found")
+end, true)
+
+cmd.add({"unviewpart", "unviewp"}, {"unviewpart (unviewp)", "Resets the camera to the local humanoid"}, function()
+	local cam = game:GetService("Workspace").CurrentCamera
+	local hum = getHum()
+	if hum then
+		cam.CameraSubject = hum
+	end
 end)
 
 cmd.add({"console"},{"console","Opens developer console"},function()
@@ -13475,12 +13768,12 @@ NACaller(function()
 end)
 
 --[[ COMMAND BAR BUTTON ]]--
-local TextLabel = Instance.new("TextLabel")
-local UICorner = Instance.new("UICorner")
-local UIStroke = Instance.new("UIStroke")
-local UIGradient = Instance.new("UIGradient")
-local ImageButton = Instance.new("ImageButton")
-local UICorner2 = Instance.new("UICorner")
+local TextLabel = InstanceNew("TextLabel")
+local UICorner = InstanceNew("UICorner")
+local UIStroke = InstanceNew("UIStroke")
+local UIGradient = InstanceNew("UIGradient")
+local ImageButton = InstanceNew("ImageButton")
+local UICorner2 = InstanceNew("UICorner")
 
 TextLabel.Parent = ScreenGui
 TextLabel.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
