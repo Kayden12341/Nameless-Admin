@@ -681,76 +681,6 @@ function loadedResults(res)
 	return isNegative and ("-"..formatted) or formatted
 end
 
-remoteEvents = {}
-isUsingSegway = false
-scanInterval = 0.33
-mobileAdjustment = IsOnMobile and 0.1 or 0
-deleteKeywords = {"delete", "remove", "destroy", "clean", "clear","bullet", "bala", "shoot", "shot", "fire", "segway", "handless", "sword", "attack", "despawn", "deletar", "apagar"}
-testItem = Players.LocalPlayer:WaitForChild("StarterGear", 1)
-
-function verifyRemote(remote)
-    if not remote.Parent then return end
-    remote:FireServer(testItem)
-    Wait(scanInterval + mobileAdjustment + (Players.LocalPlayer:GetNetworkPing() * 2))
-    if Players.LocalPlayer:FindFirstChild("StarterGear") then return end
-    getgenv().foundRemote = remote
-    isUsingSegway = remote.Name == "DestroySegway"
-end
-
-function searchForRemotes(targetInstance, isSoftScan)
-    for _, child in pairs(targetInstance:GetDescendants()) do
-        if getgenv().foundRemote then return end
-        if not child:IsA("RemoteEvent") then continue end
-        if Discover(remoteEvents, child) then continue end
-        Insert(remoteEvents, child)
-        if isSoftScan then
-            for _, keyword in pairs(deleteKeywords) do
-                if child.Name:lower():find(keyword) then
-                    verifyRemote(child)
-                    break
-                end
-            end
-        else
-            verifyRemote(child)
-        end
-    end
-end
-
-function searchWithTimeout()
-    local startTime = tick()
-    local timeout = 2
-
-    local function searchAll()
-        searchForRemotes(ReplicatedStorage, true)
-        searchForRemotes(Players.LocalPlayer:FindFirstChildOfClass("PlayerGui"), true)
-        searchForRemotes(game:GetService("Workspace"), true)
-        searchForRemotes(ReplicatedStorage, false)
-        searchForRemotes(Players.LocalPlayer:FindFirstChildOfClass("PlayerGui"), false)
-        searchForRemotes(game:GetService("Workspace"), false)
-        for _, service in pairs(game:GetChildren()) do
-            local success, _ = pcall(function() return service.ClassName end)
-            if success then searchForRemotes(service, false) end
-        end
-    end
-
-    Spawn(searchAll)
-    while not getgenv().foundRemote and (tick() - startTime) < timeout do
-        Wait(0.1)
-    end
-
-    if not getgenv().foundRemote then
-        print("Remote event not found within 2 seconds.")
-    end
-end
-
-searchWithTimeout()
-
-if getgenv().foundRemote then
-    function DeleteObject(instanceToDelete)
-        getgenv().foundRemote:FireServer(instanceToDelete)
-    end
-end
-
 --[[ COMMAND FUNCTIONS ]]--
 local commandcount=0
 cmd={}
@@ -5854,46 +5784,6 @@ cmd.add({"reset","die"},{"reset (die)","Makes your health be 0"},function()
 	Player.Character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
 	Player.Character:FindFirstChildOfClass("Humanoid").Health=0
 end)
-
-if getgenv().foundRemote then
-    cmd.add({"kill", "removehead", "decapitate"}, {"kill <player> (removehead, decapitate)", "Deletes the player's head."}, function(...)
-        local targetPlayers = getPlr(...)
-        if #targetPlayers == 0 then
-            DoNotif("No target found.", 3)
-            return
-        end
-
-        for _, target in pairs(targetPlayers) do
-            local targetHead = target.Character and target.Character:FindFirstChild("Head")
-            local naem = nameChecker(target)
-
-            if targetHead then
-                DeleteObject(targetHead)
-                DoNotif(naem.."'s head has been removed.", 3)
-            else
-                DoNotif(naem.." doesn't have a head (or is missing character).", 3)
-            end
-        end
-    end)
-end
-
-if getgenv().foundRemote then
-    cmd.add({"kick", "boot"}, {"kick <player> (boot)", "Deletes the entire player instance from the game"}, function(...)
-        local targets = getPlr(...)
-        if #targets == 0 then
-            DoNotif("No target found.", 3)
-            return
-        end
-
-        for _, plr in ipairs(targets) do
-            if plr and plr:IsA("Player") then
-                local naem = nameChecker(plr)
-                DeleteObject(plr)
-                DoNotif(naem.." has been kicked from the game.", 3)
-            end
-        end
-    end)
-end
 
 cmd.add({"bubblechat","bchat"},{"bubblechat (bchat)","Enables BubbleChat"},function()
 	if LegacyChat then
