@@ -7936,10 +7936,10 @@ cmd.add({"lookat", "stare"}, {"stare <player> (lookat)", "Stare at a player"}, f
 			StaringConnection:Disconnect()
 			StaringConnection = nil
 		end
-		if not (Players.LocalPlayer.Character and Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")) then return end
-		if not (plr and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart")) then return end
+		if not (Players.LocalPlayer.Character and getRoot(Players.LocalPlayer.Character)) then return end
+		if not (plr and plr.Character and getRoot(plr.Character)) then return end
 		function Stare()
-			if Players.LocalPlayer.Character.PrimaryPart and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+			if Players.LocalPlayer.Character.PrimaryPart and plr.Character and getRoot(plr.Character) then
 				local LocalCharPos = Players.LocalPlayer.Character.PrimaryPart.Position
 				local TargetPos = plr.Character.HumanoidRootPart.Position
 				local AdjustedTargetPos = Vector3.new(TargetPos.X, LocalCharPos.Y, TargetPos.Z)
@@ -7960,6 +7960,60 @@ cmd.add({"unlookat", "unstare"}, {"unstare (unlookat)", "Stops staring"}, functi
 	if StaringConnection then
 		StaringConnection:Disconnect()
 		StaringConnection = nil
+	end
+end)
+
+local nearCON = nil
+
+cmd.add({"starenear", "stareclosest"}, {"starenear (stareclosest)", "Stare at the closest player"}, function()
+	if nearCON then
+		nearCON:Disconnect()
+		nearCON = nil
+	end
+
+	local function getClosest()
+		local lp = Players.LocalPlayer
+		local char = lp.Character
+		if not (char and getRoot(char)) then return nil end
+
+		local closest, dist = nil, math.huge
+		local pos = getRoot(char).Position
+
+		for _, p in ipairs(Players:GetPlayers()) do
+			if p ~= lp and p.Character and getRoot(p.Character) then
+				local pPos = getRoot(p.Character).Position
+				local d = (pPos - pos).Magnitude
+				if d < dist then
+					dist = d
+					closest = p
+				end
+			end
+		end
+
+		return closest
+	end
+
+	local function stare()
+		local lp = Players.LocalPlayer
+		local char = lp.Character
+		if not (char and char.PrimaryPart) then return end
+
+		local target = getClosest()
+		if target and getRoot(target.Character) then
+			local pos = char.PrimaryPart.Position
+			local tPos = getRoot(target.Character).Position
+			local lookAt = Vector3.new(tPos.X, pos.Y, tPos.Z)
+			char:SetPrimaryPartCFrame(CFrame.new(pos, lookAt))
+		end
+	end
+
+	nearCON = RunService.RenderStepped:Connect(stare)
+end, true)
+
+cmd.add({"unstarenear", "unstareclosest"}, {"unstarenear (unstareclosest)", "Stop staring at closest player"}, function()
+	if nearCON then
+		nearCON:Disconnect()
+		nearCON = nil
 	end
 end)
 
