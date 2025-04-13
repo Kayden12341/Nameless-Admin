@@ -17,17 +17,18 @@
 
 
 ]]
-if getgenv().RealNamelessLoaded then return end
+if ((getgenv and getgenv()) or _G).RealNamelessLoaded then return end
 
 local req = request or http_request or (syn and syn.request) or function() end
+local globalEnv = (getgenv and getgenv()) or _G;
 
 function NACaller(pp)--helps me log better
 	local s,err=pcall(pp)
 	if not s then print("NA script err: "..err) end
 end
 
-NACaller(function() getgenv().RealNamelessLoaded=true end)
-NACaller(function() getgenv().NATestingVer=true end)
+NACaller(function() globalEnv.RealNamelessLoaded=true end)
+NACaller(function() globalEnv.NATestingVer=true end)
 
 NAbegin=tick()
 CMDAUTOFILL = {}
@@ -59,7 +60,7 @@ end
 
 function isAprilFools()
 	local d = os.date("*t")
-	return (d.month == 4 and d.day == 1) or (getgenv and getgenv().ActivateAprilMode) or false
+	return (d.month == 4 and d.day == 1) or globalEnv.ActivateAprilMode or false
 end
 
 function MockText(text)
@@ -267,7 +268,7 @@ function getSeasonEmoji()
 end
 
 
-if getgenv().NATestingVer then
+if globalEnv.NATestingVer then
 	if isAprilFools() then
 		testingName = yayApril(true)
 		testingName = MockText(testingName)
@@ -282,14 +283,14 @@ else
 end
 
 if not gethui then
-	getgenv().gethui=function()
+	globalEnv.gethui=function()
 		local h=(SafeGetService("CoreGui"):FindFirstChildWhichIsA("ScreenGui") or SafeGetService("CoreGui") or Players.LocalPlayer:FindFirstChild("PlayerGui"))
 		return h
 	end
 end
 
 if (identifyexecutor and identifyexecutor() == "Solara") or not fireproximityprompt then
-    getgenv().fireproximityprompt = function(prompt)
+    globalEnv.fireproximityprompt = function(prompt)
         if not prompt or not prompt:IsA("ProximityPrompt") then return end
 
         local originalEnabled = prompt.Enabled
@@ -327,7 +328,7 @@ local githubUrl = ''
 local loader=''
 local NAimageButton=nil
 
-if getgenv().NATestingVer then
+if globalEnv.NATestingVer then
 	loader=[[loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/Nameless-Admin/main/NA%20testing.lua"))();]]
 	githubUrl="https://api.github.com/repos/ltseverydayyou/Nameless-Admin/commits?path=NA%20testing.lua"
 else
@@ -483,7 +484,7 @@ local Watch=false
 local Admin={}
 local playerButtons={}
 CoreGui=COREGUI;
-_G.NAadminsLol={
+globalEnv.NAadminsLol={
 	530829101; --Viper
 	229501685; --legshot
 	817571515; --Aimlock
@@ -633,7 +634,7 @@ function didYouMean(input)
 end
 
 function isRelAdmin(Player)
-	for _, id in ipairs(_G.NAadminsLol) do
+	for _, id in ipairs(globalEnv.NAadminsLol) do
 		if Player.UserId == id then
 			return true
 		end
@@ -681,6 +682,75 @@ function loadedResults(res)
 	return isNegative and ("-"..formatted) or formatted
 end
 
+remoteEvents = {}
+isUsingSegway = false
+scanInterval = 0.33
+mobileAdjustment = IsOnMobile and 0.1 or 0
+deleteKeywords = {"delete", "remove", "destroy", "clean", "clear","bullet", "bala", "shoot", "shot", "fire", "segway", "handless", "sword", "attack", "despawn", "deletar", "apagar"}
+testItem = Players.LocalPlayer:WaitForChild("StarterGear", 1)
+
+function verifyRemote(remote)
+    if not remote.Parent then return end
+    remote:FireServer(testItem)
+    Wait(scanInterval + mobileAdjustment + (Players.LocalPlayer:GetNetworkPing() * 2))
+    if Players.LocalPlayer:FindFirstChild("StarterGear") then return end
+    globalEnv.foundRemote = remote
+    isUsingSegway = remote.Name == "DestroySegway"
+end
+
+function searchForRemotes(targetInstance, isSoftScan)
+    for _, child in pairs(targetInstance:GetDescendants()) do
+        if globalEnv.foundRemote then return end
+        if not child:IsA("RemoteEvent") then continue end
+        if Discover(remoteEvents, child) then continue end
+        Insert(remoteEvents, child)
+        if isSoftScan then
+            for _, keyword in pairs(deleteKeywords) do
+                if child.Name:lower():find(keyword) then
+                    verifyRemote(child)
+                    break
+                end
+            end
+        else
+            verifyRemote(child)
+        end
+    end
+end
+
+function searchWithTimeout()
+    local startTime = tick()
+    local timeout = 2
+
+    local function searchAll()
+        searchForRemotes(ReplicatedStorage, true)
+        searchForRemotes(Players.LocalPlayer:FindFirstChildOfClass("PlayerGui"), true)
+        searchForRemotes(game:GetService("Workspace"), true)
+        searchForRemotes(ReplicatedStorage, false)
+        searchForRemotes(Players.LocalPlayer:FindFirstChildOfClass("PlayerGui"), false)
+        searchForRemotes(game:GetService("Workspace"), false)
+        for _, service in pairs(game:GetChildren()) do
+            local success, _ = pcall(function() return service.ClassName end)
+            if success then searchForRemotes(service, false) end
+        end
+    end
+
+    Spawn(searchAll)
+    while not globalEnv.foundRemote and (tick() - startTime) < timeout do
+        Wait(0.1)
+    end
+
+    if not globalEnv.foundRemote then
+        print("Remote event not found within 2 seconds.")
+    end
+end
+
+searchWithTimeout()
+
+if globalEnv.foundRemote then
+    function DeleteObject(instanceToDelete)
+        globalEnv.foundRemote:FireServer(instanceToDelete)
+    end
+end
 
 --[[ COMMAND FUNCTIONS ]]--
 local commandcount=0
@@ -2245,8 +2315,8 @@ cmd.add({"clickfling","mousefling"}, {"clickfling (mousefling)", "Fling a player
 				end
 
 				if Character and Humanoid and RootPart then
-					if not getgenv().OldPos or RootPart.Velocity.Magnitude < 50 then
-						getgenv().OldPos = RootPart.CFrame
+					if not globalEnv.OldPos or RootPart.Velocity.Magnitude < 50 then
+						globalEnv.OldPos = RootPart.CFrame
 					end
 					if THumanoid and THumanoid.Sit and not AllBool then
 					end
@@ -2360,8 +2430,8 @@ cmd.add({"clickfling","mousefling"}, {"clickfling (mousefling)", "Fling a player
 					game:GetService("Workspace").CurrentCamera.CameraSubject = Humanoid
 
 					repeat
-						RootPart.CFrame = getgenv().OldPos * CFrame.new(0, .5, 0)
-						Character:SetPrimaryPartCFrame(getgenv().OldPos * CFrame.new(0, .5, 0))
+						RootPart.CFrame = globalEnv.OldPos * CFrame.new(0, .5, 0)
+						Character:SetPrimaryPartCFrame(globalEnv.OldPos * CFrame.new(0, .5, 0))
 						Humanoid:ChangeState("GettingUp")
 						table.foreach(Character:GetChildren(), function(_, x)
 							if x:IsA("BasePart") then
@@ -2369,13 +2439,13 @@ cmd.add({"clickfling","mousefling"}, {"clickfling (mousefling)", "Fling a player
 							end
 						end)
 						Wait()
-					until (RootPart.Position - getgenv().OldPos.p).Magnitude < 25
-					game:GetService("Workspace").FallenPartsDestroyHeight = getgenv().FPDH
+					until (RootPart.Position - globalEnv.OldPos.p).Magnitude < 25
+					game:GetService("Workspace").FallenPartsDestroyHeight = globalEnv.FPDH
 				else
 				end
 			end
 
-			getgenv().Welcome = true
+			globalEnv.Welcome = true
 			if Targets[1] then for _, x in next, Targets do GetPlayer(x) end else return end
 
 			if AllBool then
@@ -4062,7 +4132,7 @@ cmd.add({"antilag","boostfps"},{"antilag (boostfps)","Low Graphics"},function()
 
 	for section, data in pairs(userSettings) do
 		local keys = {}
-		for k in pairs(data) do table.insert(keys, k) end
+		for k in pairs(data) do Insert(keys, k) end
 		createSection(section, keys)
 	end
 
@@ -4077,7 +4147,7 @@ cmd.add({"antilag","boostfps"},{"antilag (boostfps)","Low Graphics"},function()
 	runBtn.Parent = content
 
 	MouseButtonFix(runBtn,function()
-		_G.Settings = userSettings
+		globalEnv.Settings = userSettings
 		gui:Destroy()
 		loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/uuuuuuu/main/low%20detail"))()
 	end)
@@ -4092,7 +4162,7 @@ cmd.add({"antilag","boostfps"},{"antilag (boostfps)","Low Graphics"},function()
 		content.Visible = not minimized
 		minimizeBtn.Text = minimized and "+" or "-"
 	end)
-	gui.draggablev2(frame,topbar)
+	gui.draggablev2(frame)
 end)
 
 local annoyLoop = false
@@ -4182,7 +4252,7 @@ cmd.add({"invisibleparts","invisparts"},{"invisibleparts (invisparts)","Shows in
 				end
 			end
 			if not alreadyShown then
-				table.insert(shownParts, v)
+				Insert(shownParts, v)
 			end
 			v.Transparency = 0
 		end
@@ -4487,7 +4557,7 @@ cmd.add({"UNCTest","UNC"},{"UNCTest (UNC)","Test how many functions your executo
 end)
 
 cmd.add({"sUNCtest","sUNC"},{"sUNCtest (sUNC)","uses Super UNC test that test the functions if they're working"},function()
-	getgenv().sUNCDebug = {
+	globalEnv.sUNCDebug = {
 		["printcheckpoints"] = false,
 		["delaybetweentests"] = 0
 	}
@@ -5238,8 +5308,8 @@ cmd.add({"Decompiler"},{"Decompiler","Allows you to decompile LocalScript/Module
 			return call("/konstant/disassemble", scriptPath)
 		end
 
-		getgenv().decompile = decompile
-		getgenv().disassemble = disassemble
+		globalEnv.decompile = decompile
+		globalEnv.disassemble = disassemble
 
 		-- by lovrewe
 	end)
@@ -5646,8 +5716,8 @@ cmd.add({"esp"}, {"esp", "locate where the players are"}, function()
 		end
 	end
 
-	if not _G.ESPJoinConnection then
-		_G.ESPJoinConnection = Players.PlayerAdded:Connect(function(player)
+	if not globalEnv.ESPJoinConnection then
+		globalEnv.ESPJoinConnection = Players.PlayerAdded:Connect(function(player)
 			if ESPenabled and player.Name ~= Players.LocalPlayer.Name then
 				ESP(player)
 			end
@@ -5664,8 +5734,8 @@ cmd.add({"chams"}, {"chams", "ESP but without the text :shock:"}, function()
 		end
 	end
 
-	if not _G.ESPJoinConnection then
-		_G.ESPJoinConnection = Players.PlayerAdded:Connect(function(player)
+	if not globalEnv.ESPJoinConnection then
+		globalEnv.ESPJoinConnection = Players.PlayerAdded:Connect(function(player)
 			if ESPenabled and player.Name ~= Players.LocalPlayer.Name then
 				ESP(player)
 			end
@@ -5688,9 +5758,9 @@ cmd.add({"unesp", "unchams"}, {"unesp (unchams)", "Disables esp/chams"}, functio
 	chamsEnabled = false
 	removeAllESP()
 
-	if _G.ESPJoinConnection then
-		_G.ESPJoinConnection:Disconnect()
-		_G.ESPJoinConnection = nil
+	if globalEnv.ESPJoinConnection then
+		globalEnv.ESPJoinConnection:Disconnect()
+		globalEnv.ESPJoinConnection = nil
 	end
 end)
 
@@ -5785,6 +5855,46 @@ cmd.add({"reset","die"},{"reset (die)","Makes your health be 0"},function()
 	Player.Character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
 	Player.Character:FindFirstChildOfClass("Humanoid").Health=0
 end)
+
+if globalEnv.foundRemote then
+    cmd.add({"kill", "removehead", "decapitate"}, {"kill <player> (removehead, decapitate)", "Deletes the player's head."}, function(...)
+        local targetPlayers = getPlr(...)
+        if #targetPlayers == 0 then
+            DoNotif("No target found.", 3)
+            return
+        end
+
+        for _, target in pairs(targetPlayers) do
+            local targetHead = target.Character and target.Character:FindFirstChild("Head")
+            local naem = nameChecker(target)
+
+            if targetHead then
+                DeleteObject(targetHead)
+                DoNotif(naem.."'s head has been removed.", 3)
+            else
+                DoNotif(naem.." doesn't have a head (or is missing character).", 3)
+            end
+        end
+    end)
+end
+
+if globalEnv.foundRemote then
+    cmd.add({"kick", "boot"}, {"kick <player> (boot)", "Deletes the entire player instance from the game"}, function(...)
+        local targets = getPlr(...)
+        if #targets == 0 then
+            DoNotif("No target found.", 3)
+            return
+        end
+
+        for _, plr in ipairs(targets) do
+            if plr and plr:IsA("Player") then
+                local naem = nameChecker(plr)
+                DeleteObject(plr)
+                DoNotif(naem.." has been kicked from the game.", 3)
+            end
+        end
+    end)
+end
 
 cmd.add({"bubblechat","bchat"},{"bubblechat (bchat)","Enables BubbleChat"},function()
 	if LegacyChat then
@@ -6144,8 +6254,8 @@ cmd.add({"functionspy"},{"functionspy","Check console"},function()
 	clear.ImageRectSize=Vector2.new(36,36)
 
 	MouseButtonFix(clear,function()
-		if _G.functionspy then
-			_G.functionspy.shutdown()
+		if globalEnv.functionspy then
+			globalEnv.functionspy.shutdown()
 		end
 	end)
 
@@ -6220,18 +6330,18 @@ cmd.add({"functionspy"},{"functionspy","Check console"},function()
 	shadow.SliceCenter = Rect.new(10, 10, 118, 118)
 
 	function AKIHDI_fake_script()
-		_G.functionspy={
+		globalEnv.functionspy={
 			instance=Main.Parent;
 			logging=true;
 			connections={};
 		}
 
-		_G.functionspy.shutdown=function()
-			for i,v in pairs(_G.functionspy.connections) do
+		globalEnv.functionspy.shutdown=function()
+			for i,v in pairs(globalEnv.functionspy.connections) do
 				v:Disconnect()
 			end
-			_G.functionspy.connections={}
-			_G.functionspy=nil
+			globalEnv.functionspy.connections={}
+			globalEnv.functionspy=nil
 			Main.Parent:Destroy()
 		end
 
@@ -6256,8 +6366,8 @@ cmd.add({"functionspy"},{"functionspy","Check console"},function()
 		end
 
 		MouseButtonFix(clear,function()
-			if _G.functionspy then
-				_G.functionspy.shutdown()
+			if globalEnv.functionspy then
+				globalEnv.functionspy.shutdown()
 			end
 		end)
 
@@ -6381,7 +6491,7 @@ cmd.add({"functionspy"},{"functionspy","Check console"},function()
 					if func then
 						hooked[i]=hookfunction(func,function(...)
 							local args={...}
-							if _G.functionspy then
+							if globalEnv.functionspy then
 								pcall(function() 
 									out=""
 									out=out..(v..",Args-> {")..("\n"):format()
@@ -6401,7 +6511,7 @@ cmd.add({"functionspy"},{"functionspy","Check console"},function()
 										end
 									end
 									out=out..("},Result-> "..tostring(nil))..("\n"):format()
-									if _G.functionspy.logging==true then
+									if globalEnv.functionspy.logging==true then
 										log(v,out)
 									end
 								end)
@@ -6417,7 +6527,7 @@ cmd.add({"functionspy"},{"functionspy","Check console"},function()
 				local suc,err=pcall(function()
 					hooked[i]=hookfunction(v,function(...)
 						local args={...}
-						if _G.functionspy then
+						if globalEnv.functionspy then
 							pcall(function() 
 								out=""
 								local funcName = getinfo(v).name or "unknown"
@@ -6441,7 +6551,7 @@ cmd.add({"functionspy"},{"functionspy","Check console"},function()
 									end
 								end
 								out=out..("},Result-> "..tostring(nil))..("\n"):format()
-								if _G.functionspy.logging==true then
+								if globalEnv.functionspy.logging==true then
 									log(funcName,out)
 								end
 							end)
@@ -6461,39 +6571,39 @@ cmd.add({"functionspy"},{"functionspy","Check console"},function()
 	function BIPVKVC_fake_script()
 		local script=InstanceNew('LocalScript',FakeTitle)
 
-		Insert(_G.functionspy.connections,FakeTitle.MouseEnter:Connect(function()
-			if _G.functionspy.logging==true then
+		Insert(globalEnv.functionspy.connections,FakeTitle.MouseEnter:Connect(function()
+			if globalEnv.functionspy.logging==true then
 				TweenService:Create(FakeTitle.Parent.Title,TweenInfo.new(0.3),{TextColor3=Color3.new(0,1,0)}):Play()
-			elseif _G.functionspy.logging==false then
+			elseif globalEnv.functionspy.logging==false then
 				TweenService:Create(FakeTitle.Parent.Title,TweenInfo.new(0.3),{TextColor3=Color3.new(1,0,0)}):Play()
 			end
 		end))
 
-		Insert(_G.functionspy.connections,FakeTitle.MouseMoved:Connect(function()
-			if _G.functionspy.logging==true then
+		Insert(globalEnv.functionspy.connections,FakeTitle.MouseMoved:Connect(function()
+			if globalEnv.functionspy.logging==true then
 				TweenService:Create(FakeTitle.Parent.Title,TweenInfo.new(0.3),{TextColor3=Color3.new(0,1,0)}):Play()
-			elseif _G.functionspy.logging==false then
+			elseif globalEnv.functionspy.logging==false then
 				TweenService:Create(FakeTitle.Parent.Title,TweenInfo.new(0.3),{TextColor3=Color3.new(1,0,0)}):Play()
 			end
 		end))
 
-		Insert(_G.functionspy.connections,MouseButtonFix(FakeTitle,function()
-			_G.functionspy.logging=not _G.functionspy.logging
-			if _G.functionspy.logging==true then
+		Insert(globalEnv.functionspy.connections,MouseButtonFix(FakeTitle,function()
+			globalEnv.functionspy.logging=not globalEnv.functionspy.logging
+			if globalEnv.functionspy.logging==true then
 				TweenService:Create(FakeTitle.Parent.Title,TweenInfo.new(0.3),{TextColor3=Color3.new(0,1,0)}):Play()
-			elseif _G.functionspy.logging==false then
+			elseif globalEnv.functionspy.logging==false then
 				TweenService:Create(FakeTitle.Parent.Title,TweenInfo.new(0.3),{TextColor3=Color3.new(1,0,0)}):Play()
 			end
 		end))
 
-		Insert(_G.functionspy.connections,FakeTitle.MouseLeave:Connect(function()
+		Insert(globalEnv.functionspy.connections,FakeTitle.MouseLeave:Connect(function()
 			TweenService:Create(FakeTitle.Parent.Title,TweenInfo.new(0.3),{TextColor3=Color3.new(1,1,1)}):Play()
 		end))
 	end
 	coroutine.wrap(BIPVKVC_fake_script)()
 	function PRML_fake_script()
 		MouseButtonFix(clear,function()
-			_G.functionspy.shutdown()
+			globalEnv.functionspy.shutdown()
 		end)
 	end
 	coroutine.wrap(PRML_fake_script)()
@@ -7503,7 +7613,7 @@ end)
 
 cmd.add({"saw"}, {"saw <challenge>", "shush"}, function(...)
 	local challenge = Concat({...}, " ")
-	_G.SawFinish = false
+	globalEnv.SawFinish = false
 
 	local function playSound(id, vol)
 		local sfx = InstanceNew("Sound")
@@ -7568,7 +7678,7 @@ cmd.add({"saw"}, {"saw <challenge>", "shush"}, function(...)
 	}, ScreenGui)
 
 	coroutine.wrap(function()
-		while not _G.SawFinish do
+		while not globalEnv.SawFinish do
 			local newSize = math.random(140, 160)
 			local newRotation = math.random(-10, 10)
 			local tween = TweenService:Create(
@@ -7624,7 +7734,7 @@ cmd.add({"saw"}, {"saw <challenge>", "shush"}, function(...)
 	}, ScreenGui)
 
 	local function flickerText()
-		while not _G.SawFinish do
+		while not globalEnv.SawFinish do
 			local newColor = Color3.fromRGB(math.random(200, 255), 0, 0)
 			ttLabelLeft.TextColor3 = newColor
 			ttLabelRight.TextColor3 = newColor
@@ -7643,7 +7753,7 @@ cmd.add({"saw"}, {"saw <challenge>", "shush"}, function(...)
 	local function count()
 		local num = 180
 		while Wait(1) do
-			if not _G.SawFinish then
+			if not globalEnv.SawFinish then
 				if num > 0 then
 					num = num - 1
 					playSound(138081500, 1)
@@ -7683,7 +7793,7 @@ cmd.add({"saw"}, {"saw <challenge>", "shush"}, function(...)
 end, true)
 
 cmd.add({"jend"}, {"jend", "nil"}, function()
-	_G.SawFinish = true
+	globalEnv.SawFinish = true
 end)
 
 attachedPart=nil
@@ -7762,8 +7872,8 @@ cmd.add({"fling"}, {"fling <player>", "Fling the given player"}, function(plr)
 			Handle = Accessory.Handle
 		end
 		if Character and Humanoid and HRP then
-			if not getgenv().OldPos or RootPart.Velocity.Magnitude < 50 then
-				getgenv().OldPos = RootPart.CFrame
+			if not globalEnv.OldPos or RootPart.Velocity.Magnitude < 50 then
+				globalEnv.OldPos = RootPart.CFrame
 			end
 			if THumanoid and THumanoid.Sit and not AllBool then
 			end
@@ -7849,8 +7959,8 @@ cmd.add({"fling"}, {"fling <player>", "Fling the given player"}, function(plr)
 			Humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated, true)
 			game:GetService("Workspace").CurrentCamera.CameraSubject = Humanoid
 			repeat
-				RootPart.CFrame = getgenv().OldPos * CFrame.new(0, 0.5, 0)
-				Character:SetPrimaryPartCFrame(getgenv().OldPos * CFrame.new(0, 0.5, 0))
+				RootPart.CFrame = globalEnv.OldPos * CFrame.new(0, 0.5, 0)
+				Character:SetPrimaryPartCFrame(globalEnv.OldPos * CFrame.new(0, 0.5, 0))
 				Humanoid:ChangeState("GettingUp")
 				table.foreach(Character:GetChildren(), function(_, x)
 					if x:IsA("BasePart") then
@@ -7858,12 +7968,12 @@ cmd.add({"fling"}, {"fling <player>", "Fling the given player"}, function(plr)
 					end
 				end)
 				Wait()
-			until (RootPart.Position - getgenv().OldPos.p).Magnitude < 25
-			game:GetService("Workspace").FallenPartsDestroyHeight = getgenv().FPDH
+			until (RootPart.Position - globalEnv.OldPos.p).Magnitude < 25
+			game:GetService("Workspace").FallenPartsDestroyHeight = globalEnv.FPDH
 			attachedPart:Destroy()
 		end
 	end
-	getgenv().Welcome = true
+	globalEnv.Welcome = true
 	if Targets[1] then for _, x in next, Targets do GetPlayer(x) end else return end
 	if AllBool then
 		for _, x in next, Players:GetPlayers() do
@@ -8404,6 +8514,55 @@ cmd.add({"unfollow", "unstalk", "unwalk", "unpathfind"}, {"unfollow", "Stop all 
 	lib.disconnect("follow")
 end)
 
+PROXIMITY_RADIUS = 15
+lastDistances = {}
+ISfollowing = false
+
+cmd.add({"autofollow", "autostalk", "proxfollow"}, {"autofollow (autostalk,proxfollow)", "Automatically follow any player who comes close"}, function()
+	lib.disconnect("autofollow")
+	lastDistances = {}
+	ISfollowing = false
+
+	lib.connect("autofollow", RunService.Stepped:Connect(function()
+		if ISfollowing then return end
+
+		local myChar = getChar()
+		local myRoot = getRoot(myChar)
+		local myHum = myChar and myChar:FindFirstChildWhichIsA("Humanoid")
+		if not (myChar and myRoot and myHum) then return end
+
+		for _, plr in ipairs(Players:GetPlayers()) do
+			if plr ~= LocalPlayer then
+				local char = plr.Character
+				local root = getRoot(char)
+				if char and root then
+					local currentDist = (myRoot.Position - root.Position).Magnitude
+					local lastDist = lastDistances[plr]
+
+					if lastDist and lastDist > PROXIMITY_RADIUS and currentDist < PROXIMITY_RADIUS and currentDist < lastDist then
+						ISfollowing = true
+						lib.connect("follow_target", RunService.Stepped:Connect(function()
+							if myChar and myHum and root then
+								myHum:MoveTo(root.Position)
+							end
+						end))
+						break
+					end
+
+					lastDistances[plr] = currentDist
+				end
+			end
+		end
+	end))
+end, true)
+
+cmd.add({"unautofollow", "stopautofollow", "unproxfollow"}, {"unautofollow (stopautofollow,unproxfollow)", "Stop automatically following nearby players"}, function()
+	lib.disconnect("autofollow")
+	lib.disconnect("follow_target")
+	lastDistances = {}
+	ISfollowing = false
+end)
+
 cmd.add({"pathfind"}, {"pathfind <player>", "Follow a player using the pathfinder API wherever they go"}, function(p)
 	local targetPlayers = getPlr(p)
 	for _, plr in next, targetPlayers do
@@ -8464,6 +8623,112 @@ cmd.add({"unfreeze","unthaw","unanchor","unfr"},{"unfreeze (unthaw,unanchor,unfr
 			char.Anchored=false
 		end
 	end
+end)
+
+cmd.add({"blackhole"}, {"blackhole", "Makes unanchored parts teleport to the black hole"}, function()
+	local UserInputService = game:GetService("UserInputService")
+	local Mouse = LocalPlayer:GetMouse()
+	local Folder = InstanceNew("Folder", game:GetService("Workspace"))
+	local Part = InstanceNew("Part", Folder)
+	local Attachment1 = InstanceNew("Attachment", Part)
+	Part.Anchored = true
+	Part.CanCollide = false
+	Part.Transparency = 1
+	local Updated = Mouse.Hit + Vector3.new(0, 5, 0)
+
+	local NetworkAccess = coroutine.create(function()
+		settings().Physics.AllowSleep = false
+		while RunService.RenderStepped:Wait() do
+			for _, Players in next, game:GetService("Players"):GetPlayers() do
+				if Players ~= LocalPlayer then
+					Players.MaximumSimulationRadius = 0
+					sethiddenproperty(Players, "SimulationRadius", 0)
+				end
+			end
+			LocalPlayer.MaximumSimulationRadius = math.pow(math.huge, math.huge)
+		end
+	end)
+	coroutine.resume(NetworkAccess)
+
+	local function ForcePart(v)
+		if v:IsA("Part") and v.Anchored == false and v.Parent:FindFirstChild("Humanoid") == nil and v.Parent:FindFirstChild("Head") == nil and v.Name ~= "Handle" then
+			Mouse.TargetFilter = v
+			for _, x in next, v:GetChildren() do
+				if x:IsA("BodyAngularVelocity") or x:IsA("BodyForce") or x:IsA("BodyGyro") or x:IsA("BodyPosition") or x:IsA("BodyThrust") or x:IsA("BodyVelocity") or x:IsA("RocketPropulsion") then
+					x:Destroy()
+				end
+			end
+			if v:FindFirstChild("Attachment") then
+				v:FindFirstChild("Attachment"):Destroy()
+			end
+			if v:FindFirstChild("AlignPosition") then
+				v:FindFirstChild("AlignPosition"):Destroy()
+			end
+			if v:FindFirstChild("Torque") then
+				v:FindFirstChild("Torque"):Destroy()
+			end
+			v.CanCollide = false
+			local Torque = Instance.new("Torque", v)
+			Torque.Torque = Vector3.new(100000, 100000, 100000)
+			local AlignPosition = Instance.new("AlignPosition", v)
+			local Attachment2 = Instance.new("Attachment", v)
+			Torque.Attachment0 = Attachment2
+			AlignPosition.MaxForce = 9999999999999999
+			AlignPosition.MaxVelocity = math.huge
+			AlignPosition.Responsiveness = 200
+			AlignPosition.Attachment0 = Attachment2
+			AlignPosition.Attachment1 = Attachment1
+		end
+	end
+
+	for _, v in next, game:GetService("Workspace"):GetDescendants() do
+		ForcePart(v)
+	end
+
+	game:GetService("Workspace").DescendantAdded:Connect(function(v)
+		ForcePart(v)
+	end)
+
+	UserInputService.InputBegan:Connect(function(Key, Chat)
+		if Key.KeyCode == Enum.KeyCode.E and not Chat and not IsOnMobile then
+			Updated = Mouse.Hit + Vector3.new(0, 5, 0)
+		end
+	end)
+
+	if IsOnMobile then
+		local sGUI=InstanceNew("ScreenGui")
+		NaProtectUI(sGUI)
+		UICorner = InstanceNew("UICorner")
+		local button = InstanceNew("TextButton")
+		button.Text = "Move Blackhole"
+		button.AnchorPoint = Vector2.new(0.5,0)
+		button.Size = UDim2.new(0, 150, 0, 40)
+		button.Position = UDim2.new(0.5, 0, 0.9, 0)
+		button.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)
+		button.TextColor3 = Color3.new(1, 1, 1)
+		button.Font = Enum.Font.SourceSansBold
+		button.TextSize = 18
+		button.Parent=sGUI
+
+		UICorner.CornerRadius = UDim.new(0.25, 0)
+		UICorner.Parent = button
+		
+		button.MouseButton1Click:Connect(function()
+			Updated = Mouse.Hit + Vector3.new(0, 5, 0)
+		end)
+
+		gui.draggablev2(button)
+	end
+
+	Spawn(function()
+		while RunService.RenderStepped:Wait() do
+			Attachment1.WorldCFrame = Updated
+		end
+	end)
+
+	wait()
+
+	DoNotif("Blackhole has been loaded, "..(IsOnMobile and "tap the button to move it" or "press E to change the position to where your mouse is"))
 end)
 
 cmd.add({"disableanimations","disableanims"},{"disableanimations (disableanims)","Freezes your animations"},function()
@@ -8592,8 +8857,8 @@ cmd.add({"loopfling"}, {"loopfling <player>", "Loop voids a player"}, function(p
 				Handle = Accessory.Handle
 			end
 			if Character and Humanoid and HRP then
-				if not getgenv().OldPos or RootPart.Velocity.Magnitude < 50 then
-					getgenv().OldPos = RootPart.CFrame
+				if not globalEnv.OldPos or RootPart.Velocity.Magnitude < 50 then
+					globalEnv.OldPos = RootPart.CFrame
 				end
 				if THumanoid and THumanoid.Sit and not AllBool then
 					return
@@ -8687,8 +8952,8 @@ cmd.add({"loopfling"}, {"loopfling <player>", "Loop voids a player"}, function(p
 				Humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated, true)
 				game:GetService("Workspace").CurrentCamera.CameraSubject = Humanoid
 				repeat
-					RootPart.CFrame = getgenv().OldPos * CFrame.new(0, 0.5, 0)
-					Character:SetPrimaryPartCFrame(getgenv().OldPos * CFrame.new(0, 0.5, 0))
+					RootPart.CFrame = globalEnv.OldPos * CFrame.new(0, 0.5, 0)
+					Character:SetPrimaryPartCFrame(globalEnv.OldPos * CFrame.new(0, 0.5, 0))
 					Humanoid:ChangeState("GettingUp")
 					table.foreach(Character:GetChildren(), function(_, x)
 						if x:IsA("BasePart") then
@@ -8696,15 +8961,15 @@ cmd.add({"loopfling"}, {"loopfling <player>", "Loop voids a player"}, function(p
 						end
 					end)
 					Wait()
-				until (RootPart.Position - getgenv().OldPos.p).Magnitude < 25
-				game:GetService("Workspace").FallenPartsDestroyHeight = getgenv().FPDH
+				until (RootPart.Position - globalEnv.OldPos.p).Magnitude < 25
+				game:GetService("Workspace").FallenPartsDestroyHeight = globalEnv.FPDH
 				if LOOPPROTECT then LOOPPROTECT:Destroy() LOOPPROTECT = nil end
 			else
 				return
 			end
 		end
 		if not Welcome then DoNotif("Enjoy!", 5, "Script by AnthonyIsntHere") end
-		getgenv().Welcome = true
+		globalEnv.Welcome = true
 		if Targets[1] then for _, x in next, Targets do GetPlayer(x) end else return end
 		if AllBool then
 			for _, x in next, Players:GetPlayers() do
@@ -8753,10 +9018,10 @@ end)
                     PurchaseId = HttpService:GenerateGUID(false)
                 }
 
-                if typeof(_G.ProcessReceipt) == "function" then
-                    _G.ProcessReceipt(ReceiptInfo)
-                elseif typeof(getgenv().ProcessReceipt) == "function" then
-                    getgenv().ProcessReceipt(ReceiptInfo)
+                if typeof(globalEnv.ProcessReceipt) == "function" then
+                    globalEnv.ProcessReceipt(ReceiptInfo)
+                elseif typeof(globalEnv.ProcessReceipt) == "function" then
+                    globalEnv.ProcessReceipt(ReceiptInfo)
                 end
             end)
 
@@ -8971,12 +9236,12 @@ local loopjp = false
 local WScons = {}
 local JPcons = {}
 
-getgenv().NamelessWs = nil
-getgenv().NamelessJP = nil
+globalEnv.NamelessWs = nil
+globalEnv.NamelessJP = nil
 
 cmd.add({"loopwalkspeed", "loopws", "lws"}, {"loopwalkspeed <number> (loopws,lws)", "Loop walkspeed"}, function(...)
 	local val = tonumber(...) or 16
-	getgenv().NamelessWs = val
+	globalEnv.NamelessWs = val
 	loopws = true
 
 	for _, conn in ipairs(WScons) do conn:Disconnect() end
@@ -9015,7 +9280,7 @@ end)
 
 cmd.add({"loopjumppower", "loopjp", "ljp"}, {"loopjumppower <number> (loopjp,ljp)", "Loop JumpPower"}, function(...)
 	local val = tonumber(...) or 50
-	getgenv().NamelessJP = val
+	globalEnv.NamelessJP = val
 	loopjp = true
 
 	for _, conn in ipairs(JPcons) do conn:Disconnect() end
@@ -11806,11 +12071,11 @@ cmd.add({"pastebinscraper","pastebinscrape"},{"pastebinscraper (pastebinscrape)"
 end)
 
 cmd.add({"fullbright","fullb","fb"},{"fullbright (fullb,fb)","Makes games that are really dark to have no darkness and be really light"},function()
-	if not _G.FullBrightExecuted then
+	if not globalEnv.FullBrightExecuted then
 
-		_G.FullBrightEnabled=false
+		globalEnv.FullBrightEnabled=false
 
-		_G.NormalLightingSettings={
+		globalEnv.NormalLightingSettings={
 			Brightness=Lighting.Brightness,
 			ClockTime=Lighting.ClockTime,
 			FogEnd=Lighting.FogEnd,
@@ -11819,60 +12084,60 @@ cmd.add({"fullbright","fullb","fb"},{"fullbright (fullb,fb)","Makes games that a
 		}
 
 		Lighting:GetPropertyChangedSignal("Brightness"):Connect(function()
-			if Lighting.Brightness~=1 and Lighting.Brightness~=_G.NormalLightingSettings.Brightness then
-				_G.NormalLightingSettings.Brightness=Lighting.Brightness
-				if not _G.FullBrightEnabled then
+			if Lighting.Brightness~=1 and Lighting.Brightness~=globalEnv.NormalLightingSettings.Brightness then
+				globalEnv.NormalLightingSettings.Brightness=Lighting.Brightness
+				if not globalEnv.FullBrightEnabled then
 					repeat
 						Wait()
-					until _G.FullBrightEnabled
+					until globalEnv.FullBrightEnabled
 				end
 				Lighting.Brightness=1
 			end
 		end)
 
 		Lighting:GetPropertyChangedSignal("ClockTime"):Connect(function()
-			if Lighting.ClockTime~=12 and Lighting.ClockTime~=_G.NormalLightingSettings.ClockTime then
-				_G.NormalLightingSettings.ClockTime=Lighting.ClockTime
-				if not _G.FullBrightEnabled then
+			if Lighting.ClockTime~=12 and Lighting.ClockTime~=globalEnv.NormalLightingSettings.ClockTime then
+				globalEnv.NormalLightingSettings.ClockTime=Lighting.ClockTime
+				if not globalEnv.FullBrightEnabled then
 					repeat
 						Wait()
-					until _G.FullBrightEnabled
+					until globalEnv.FullBrightEnabled
 				end
 				Lighting.ClockTime=12
 			end
 		end)
 
 		Lighting:GetPropertyChangedSignal("FogEnd"):Connect(function()
-			if Lighting.FogEnd~=786543 and Lighting.FogEnd~=_G.NormalLightingSettings.FogEnd then
-				_G.NormalLightingSettings.FogEnd=Lighting.FogEnd
-				if not _G.FullBrightEnabled then
+			if Lighting.FogEnd~=786543 and Lighting.FogEnd~=globalEnv.NormalLightingSettings.FogEnd then
+				globalEnv.NormalLightingSettings.FogEnd=Lighting.FogEnd
+				if not globalEnv.FullBrightEnabled then
 					repeat
 						Wait()
-					until _G.FullBrightEnabled
+					until globalEnv.FullBrightEnabled
 				end
 				Lighting.FogEnd=786543
 			end
 		end)
 
 		Lighting:GetPropertyChangedSignal("GlobalShadows"):Connect(function()
-			if Lighting.GlobalShadows~=false and Lighting.GlobalShadows~=_G.NormalLightingSettings.GlobalShadows then
-				_G.NormalLightingSettings.GlobalShadows=Lighting.GlobalShadows
-				if not _G.FullBrightEnabled then
+			if Lighting.GlobalShadows~=false and Lighting.GlobalShadows~=globalEnv.NormalLightingSettings.GlobalShadows then
+				globalEnv.NormalLightingSettings.GlobalShadows=Lighting.GlobalShadows
+				if not globalEnv.FullBrightEnabled then
 					repeat
 						Wait()
-					until _G.FullBrightEnabled
+					until globalEnv.FullBrightEnabled
 				end
 				Lighting.GlobalShadows=false
 			end
 		end)
 
 		Lighting:GetPropertyChangedSignal("Ambient"):Connect(function()
-			if Lighting.Ambient~=Color3.fromRGB(178,178,178) and Lighting.Ambient~=_G.NormalLightingSettings.Ambient then
-				_G.NormalLightingSettings.Ambient=Lighting.Ambient
-				if not _G.FullBrightEnabled then
+			if Lighting.Ambient~=Color3.fromRGB(178,178,178) and Lighting.Ambient~=globalEnv.NormalLightingSettings.Ambient then
+				globalEnv.NormalLightingSettings.Ambient=Lighting.Ambient
+				if not globalEnv.FullBrightEnabled then
 					repeat
 						Wait()
-					until _G.FullBrightEnabled
+					until globalEnv.FullBrightEnabled
 				end
 				Lighting.Ambient=Color3.fromRGB(178,178,178)
 			end
@@ -11888,15 +12153,15 @@ cmd.add({"fullbright","fullb","fb"},{"fullbright (fullb,fb)","Makes games that a
 		spawn(function()
 			repeat
 				Wait()
-			until _G.FullBrightEnabled
+			until globalEnv.FullBrightEnabled
 			while Wait() do
-				if _G.FullBrightEnabled~=LatestValue then
-					if not _G.FullBrightEnabled then
-						Lighting.Brightness=_G.NormalLightingSettings.Brightness
-						Lighting.ClockTime=_G.NormalLightingSettings.ClockTime
-						Lighting.FogEnd=_G.NormalLightingSettings.FogEnd
-						Lighting.GlobalShadows=_G.NormalLightingSettings.GlobalShadows
-						Lighting.Ambient=_G.NormalLightingSettings.Ambient
+				if globalEnv.FullBrightEnabled~=LatestValue then
+					if not globalEnv.FullBrightEnabled then
+						Lighting.Brightness=globalEnv.NormalLightingSettings.Brightness
+						Lighting.ClockTime=globalEnv.NormalLightingSettings.ClockTime
+						Lighting.FogEnd=globalEnv.NormalLightingSettings.FogEnd
+						Lighting.GlobalShadows=globalEnv.NormalLightingSettings.GlobalShadows
+						Lighting.Ambient=globalEnv.NormalLightingSettings.Ambient
 					else
 						Lighting.Brightness=1
 						Lighting.ClockTime=12
@@ -11910,8 +12175,8 @@ cmd.add({"fullbright","fullb","fb"},{"fullbright (fullb,fb)","Makes games that a
 		end)
 	end
 
-	_G.FullBrightExecuted=true
-	_G.FullBrightEnabled=not _G.FullBrightEnabled
+	globalEnv.FullBrightExecuted=true
+	globalEnv.FullBrightEnabled=not globalEnv.FullBrightEnabled
 end)
 
 local dayCon=nil
@@ -12117,7 +12382,7 @@ end)
 			end
 		})
 		sandbox_env.game=nil
-		iy,_=game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"):gsub("local Main","Main"):gsub("Players.LocalPlayer.Chatted","Funny=Players.LocalPlayer.Chatted"):gsub("local lastMessage","notify=_G.notify\nlocal lastMessage")
+		iy,_=game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"):gsub("local Main","Main"):gsub("Players.LocalPlayer.Chatted","Funny=Players.LocalPlayer.Chatted"):gsub("local lastMessage","notify=globalEnv.notify\nlocal lastMessage")
 		setfenv(loadstring(iy),sandbox_env)()
 		iy_cmds_table=sandbox_env.CMDs
 		iy_gui=sandbox_env.Main
@@ -12564,7 +12829,7 @@ cmd.add({"unloopfov", "unlfov"}, {"unloopfov (unlfov)", "Stops the looped FOV"},
 end)
 
 cmd.add({"homebrew"},{"homebrew","Executes homebrew admin"},function()
-	_G.CustomUI=false
+	globalEnv.CustomUI=false
 	loadstring(game:HttpGet(('https://raw.githubusercontent.com/mgamingpro/HomebrewAdmin/master/Main'),true))()
 end)
 
@@ -12647,10 +12912,10 @@ cmd.add({"jp", "jumppower"}, {"jumppower <number> (jp)", "Sets your JumpPower"},
 end, true)
 
 cmd.add({"oofspam"},{"oofspam","Spams oof"},function()
-	_G.enabled=true
-	_G.speed=100
+	globalEnv.enabled=true
+	globalEnv.speed=100
 	local HRP=Humanoid.RootPart or Humanoid:FindFirstChild("HumanoidRootPart")
-	if not Humanoid or not _G.enabled then
+	if not Humanoid or not globalEnv.enabled then
 		if Humanoid and Humanoid.Health <=0 then
 			Humanoid:Destroy()
 		end
@@ -12666,7 +12931,7 @@ cmd.add({"oofspam"},{"oofspam","Spams oof"},function()
 	LocalPlayer.Character=nil
 	LocalPlayer.Character=Character
 	Wait(Players.RespawnTime+0.1)
-	while Wait(1/_G.speed) do
+	while Wait(1/globalEnv.speed) do
 		Humanoid:ChangeState(Enum.HumanoidStateType.Dead)
 	end
 end)
@@ -12835,7 +13100,7 @@ cmd.add({"gotonpcs"}, {"gotonpcs", "Teleports to each NPC"}, function()
 		if d:IsA("Humanoid") and not Players:GetPlayerFromCharacter(d.Parent) then
 			local root = getRoot(d.Parent)
 			if root then
-				table.insert(npcs, root)
+				Insert(npcs, root)
 			end
 		end
 	end
@@ -13842,8 +14107,8 @@ function bindToChat(plr, msg)
 	local userName = plr.Name or "Unknown"
 
 	local isNAadmin = false
-	if _G.NAadminsLol then
-		for _, id in ipairs(_G.NAadminsLol) do
+	if globalEnv.NAadminsLol then
+		for _, id in ipairs(globalEnv.NAadminsLol) do
 			if plr.UserId == id then
 				isNAadmin = true
 				break
@@ -14138,7 +14403,7 @@ NACaller(function()
 		return isAprilFools() and MockText(text) or text
 	end
 
-	delay(0.3, function()
+	Delay(0.3, function()
 		local executorName = identifyexecutor and identifyexecutor() or "Unknown"
 		local welcomeMessage = "Welcome to "..adminName.." V"..curVer
 
@@ -14161,15 +14426,24 @@ NACaller(function()
 			}
 		})
 
-		Wait(3)
+		Wait(1)
 
 		if IsOnPC then
 			local keybindMessage = maybeMock("Your Keybind Prefix: "..opt.prefix)
 			DoNotif(keybindMessage, 10, adminName.." Keybind Prefix")
 		end
 
-		local updateLogMessage = maybeMock('Added "updlog" command (displays any new changes added into '..adminName..')')
-		DoNotif(updateLogMessage, nil, "Info")
+		Wait(2)
+
+		--[[local updateLogMessage = maybeMock('Added "updlog" command (displays any new changes added into '..adminName..')')
+		DoNotif(updateLogMessage, nil, "Info")]]
+
+	local remFOUND = maybeMock("Found a game with supported remotes! You can now use commands like 'kill' and 'kick' to kill players or kick them")
+		if globalEnv.foundRemote then
+    		DoNotif(remFOUND, 10)
+		else
+    		DoNotif(maybeMock("No destructive remotes found. Commands 'kill' and 'kick' are not available"), 3)
+		end
 	end)
 	cmdInput.ZIndex = 10
 	cmdInput.PlaceholderText = isAprilFools() and '🤡 '..adminName.." V"..curVer..' 🤡' or getSeasonEmoji()..' '..adminName.." V"..curVer..' '..getSeasonEmoji()
@@ -14206,7 +14480,7 @@ print([[
 ╚═╝░░╚═╝╚═════╝░╚═╝░░░░░╚═╝╚═╝╚═╝░░╚══╝
 ]])
 
-if isAprilFools() then queueteleport("getgenv().ActivateAprilMode=true") end
+if isAprilFools() then queueteleport("globalEnv.ActivateAprilMode=true") end
 
 math.randomseed(os.time())
 
