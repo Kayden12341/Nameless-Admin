@@ -14307,14 +14307,6 @@ NACaller(function()
 
 		--[[local updateLogMessage = maybeMock('Added "updlog" command (displays any new changes added into '..adminName..')')
 		DoNotif(updateLogMessage, nil, "Info")]]
-
-	local remFOUND = maybeMock("Found a game with supported remotes! You can now use commands like 'kill' and 'kick' to kill players or kick them")
-		if getgenv().foundRemote then
-    		DoNotif(remFOUND, 10)
-		else
-    		DoNotif(maybeMock("No destructive remotes found. Commands 'kill' and 'kick' are not available"), 3)
-		end
-	end)
 	cmdInput.ZIndex = 10
 	cmdInput.PlaceholderText = isAprilFools() and '🤡 '..adminName.." V"..curVer..' 🤡' or getSeasonEmoji()..' '..adminName.." V"..curVer..' '..getSeasonEmoji()
 end)
