@@ -879,16 +879,13 @@ function rngMsg()
 end
 
 function getRoot(char)
-	return char:FindFirstChild("HumanoidRootPart") or 
-		char:FindFirstChild("Torso") or 
-		char:FindFirstChild("UpperTorso")
+	if char:IsA("Player") then char = char.Character end
+	return char:FindFirstChild("HumanoidRootPart") or char:FindFirstChild("Torso") or char:FindFirstChild("UpperTorso")
 end
 
 function getTorso(char)
-	return char:FindFirstChild("Torso") or 
-		char:FindFirstChild("UpperTorso") or 
-		char:FindFirstChild("LowerTorso") or
-		char:FindFirstChild("HumanoidRootPart")
+	if char:IsA("Player") then char = char.Character end
+	return char:FindFirstChild("Torso") or char:FindFirstChild("UpperTorso") or char:FindFirstChild("LowerTorso") or char:FindFirstChild("HumanoidRootPart")
 end
 
 function getChar()
@@ -1517,7 +1514,7 @@ plr=cmdlp
 local cmdm=plr:GetMouse()
 goofyFLY=nil
 function sFLY(vfly)
-	while not cmdlp or not cmdlp.Character or not getRoot(cmdlp) or not cmdlp.Character:FindFirstChild('Humanoid') or not cmdm do
+	while not cmdlp or not cmdlp.Character or not getRoot(cmdlp.Character) or not cmdlp.Character:FindFirstChild('Humanoid') or not cmdm do
 		Wait()
 	end
 
