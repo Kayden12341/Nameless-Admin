@@ -5407,47 +5407,60 @@ function UpdateAutoRotate(BOOL)
 	humanoid.AutoRotate=BOOL
 end
 
-local NA=false
-local gg=nil
-local gameSettings=UserSettings():GetService("UserGameSettings")
-local JJ=nil
+local GameSettings = UserSettings():GetService("UserGameSettings")
 
-function EnableShiftlock()
-	local i,k=pcall(function()
-		return gameSettings.RotationType
-	end)
-	_=i
-	gg=k
-	if JJ then JJ:Disconnect() end
-	JJ=RunService.RenderStepped:Connect(function()
-		pcall(function()
-			gameSettings.RotationType=Enum.RotationType.CameraRelative
-		end)
-	end)
-	DoNotif("ShiftLock Enabled",2,"ShiftLock")
-end
+local ShiftLockConnection = nil
+local OriginalRotationType = nil
+local ShiftLockEnabled = false
 
-function DisableShiftlock()
-	if JJ then
-		pcall(function()
-			gameSettings.RotationType=gg or Enum.RotationType.MovementRelative
-		end)
-		JJ:Disconnect()
+function EnableShiftLock()
+	if ShiftLockEnabled then return end
+
+	local success, currentRotation = pcall(function()
+		return GameSettings.RotationType
+	end)
+
+	if success then
+		OriginalRotationType = currentRotation
 	end
-	DoNotif("ShiftLock Disabled",2,"ShiftLock")
+
+	ShiftLockConnection = RunService.RenderStepped:Connect(function()
+		pcall(function()
+			GameSettings.RotationType = Enum.RotationType.CameraRelative
+		end)
+	end)
+
+	ShiftLockEnabled = true
+	DoNotif("ShiftLock Enabled", 2)
 end
 
-cmd.add({"shiftlock","sl"},{"shiftlock (sl)","Enables shiftlock"},function()
+function DisableShiftLock()
+	if not ShiftLockEnabled then return end
+
+	if ShiftLockConnection then
+		ShiftLockConnection:Disconnect()
+		ShiftLockConnection = nil
+	end
+
+	pcall(function()
+		GameSettings.RotationType = OriginalRotationType or Enum.RotationType.MovementRelative
+	end)
+
+	ShiftLockEnabled = false
+	DoNotif("ShiftLock Disabled", 2)
+end
+
+cmd.add({"shiftlock","sl"}, {"shiftlock (sl)", "Toggles shiftlock"}, function()
 	if IsOnMobile then
 		loadstring(game:HttpGet("https://github.com/ltseverydayyou/uuuuuuu/blob/main/shiftlock?raw=true"))()
 	else
-		EnableShiftlock()
+		EnableShiftLock()
 	end
 end)
 
-cmd.add({"unshiftlock","unsl"},{"unshiftlock (unsl)","Disables shiftlock"},function()
+cmd.add({"unshiftlock","unsl"}, {"unshiftlock (unsl)", "Disables shiftlock"}, function()
 	if IsOnPC then
-		DisableShiftlock()
+		DisableShiftLock()
 	end
 end)
 
@@ -5746,6 +5759,139 @@ end)
 cmd.add({"reset","die"},{"reset (die)","Makes your health be 0"},function()
 	Player.Character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
 	Player.Character:FindFirstChildOfClass("Humanoid").Health=0
+end)
+
+cmd.add({"runanim", "playanim", "anim"}, {"runanim <id> (playanim,anim)", "Plays an animation by ID"}, function(id)
+	local hum = getHum()
+	if not hum then return end
+
+	local a = hum:FindFirstChildOfClass("Animator") or Instance.new("Animator", hum)
+	local anim = Instance.new("Animation")
+	anim.AnimationId = "rbxassetid://"..tostring(id)
+
+	local t = a:LoadAnimation(anim)
+	t:Play()
+
+	task.delay(t.Length, function()
+		t:Stop()
+		t:Destroy()
+		anim:Destroy()
+	end)
+end,true)
+
+local storedAnims = {}
+
+cmd.add({"setkiller", "killeranim"}, {"setkiller (killeranim)", "Sets killer animation set"}, function()
+	if not IsR6() then DoNotif("command requires R6") return end
+	local hum = getHum()
+	if not hum then return end
+
+	local animate = hum.Parent:FindFirstChild("Animate")
+	if not animate then return end
+
+	if not storedAnims[hum] then
+		local store = {}
+		for _, obj in pairs(animate:GetChildren()) do
+			if obj:IsA("StringValue") then
+				local anim = obj:FindFirstChildWhichIsA("Animation")
+				if anim then
+					store[obj.Name] = anim.AnimationId
+				end
+			end
+		end
+		storedAnims[hum] = store
+	end
+
+	local function setAnim(name, id)
+		local obj = animate:FindFirstChild(name)
+		if obj and obj:IsA("StringValue") then
+			local anim = obj:FindFirstChildWhichIsA("Animation")
+			if anim then
+				anim.AnimationId = "rbxassetid://"..tostring(id)
+			end
+		end
+	end
+
+	setAnim("walk", 252557606)
+	setAnim("run", 252557606)
+	setAnim("jump", 165167557)
+	setAnim("fall", 97170520)
+end)
+
+cmd.add({"setpsycho", "psychoanim"}, {"setpsycho (psychoanim)", "Sets psycho animation set"}, function()
+	if not IsR6() then DoNotif("command requires R6") return end
+	local hum = getHum()
+	if not hum then return end
+
+	local animate = hum.Parent:FindFirstChild("Animate")
+	if not animate then return end
+
+	if not storedAnims[hum] then
+		local store = {}
+		for _, obj in pairs(animate:GetChildren()) do
+			if obj:IsA("StringValue") then
+				local anim = obj:FindFirstChildWhichIsA("Animation")
+				if anim then
+					store[obj.Name] = anim.AnimationId
+				end
+			end
+		end
+		storedAnims[hum] = store
+	end
+
+	local function setAnim(name, id)
+		local obj = animate:FindFirstChild(name)
+		if obj and obj:IsA("StringValue") then
+			local anim = obj:FindFirstChildWhichIsA("Animation")
+			if anim then
+				anim.AnimationId = "rbxassetid://"..tostring(id)
+			end
+		end
+	end
+
+	setAnim("idle", 33796059)
+	setAnim("walk", 95415492)
+	setAnim("run", 95415492)
+	setAnim("jump", 165167557)
+	setAnim("fall", 97170520)
+
+	local animator = hum:FindFirstChildOfClass("Animator")
+	if not animator then return end
+
+	Spawn(function()
+		while hum and hum.Parent and hum.Health > 0 do
+			for _, track in pairs(animator:GetPlayingAnimationTracks()) do
+				if track.Animation.AnimationId == "rbxassetid://33796059" and track.Speed < 50 then
+					track:AdjustSpeed(50)
+				end
+			end
+			Wait(0.2)
+		end
+	end)
+end)
+
+cmd.add({"resetanims", "defaultanims", "animsreset"}, {"resetanims (defaultanims,animsreset)", "Restores your previous animations"}, function()
+	if not IsR6() then DoNotif("command requires R6") return end
+	local hum = getHum()
+	if not hum then return end
+
+	local animate = hum.Parent:FindFirstChild("Animate")
+	if not animate then return end
+
+	local store = storedAnims[hum]
+	if not store then return end
+
+	for name, id in pairs(store) do
+		local obj = animate:FindFirstChild(name)
+		if obj and obj:IsA("StringValue") then
+			local anim = obj:FindFirstChildWhichIsA("Animation")
+			if anim then
+				anim.AnimationId = id
+			end
+		end
+	end
+
+	storedAnims[hum] = nil
 end)
 
 cmd.add({"bubblechat","bchat"},{"bubblechat (bchat)","Enables BubbleChat"},function()
@@ -7289,35 +7435,38 @@ cmd.add({"antichatlogs","antichatlogger"},{"antichatlogs (antichatlogger)","Prev
 	DoNotif(MsgPost and "Enabled" or "Failed to enable antichatlogs")
 end)
 
-cmd.add({"animspoofer","animationspoofer","spoofanim","animspoof"},{"animationspoofer (animspoof,spoofanim)","Loads up an animation spoofer,spoofs animations that use rbxassetid"},function()
+cmd.add({"animspoofer","animationspoofer","spoofanim","animspoof"},{"animspoofer (animationspoofer,spoofanim,animspoof)","Loads up an animation spoofer,spoofs animations that use rbxassetid"},function()
 	loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/Nameless-Admin/main/Animation%20Spoofer"))()
 end)
 
-local animSpeed
+local animCONN
 
-cmd.add({"animationspeed", "animspeed"}, {"animationspeed <speed> (animspeed)", "speeds up your animations"}, function(speed)
-	speed = tonumber(speed) or 1
+cmd.add({"animationspeed", "animspeed", "aspeed"}, {"animationspeed <speed> (animspeed,aspeed)", "Adjusts the speed of currently playing animations"}, function(speed)
+	local targetSpeed = tonumber(speed) or 1
 
-	if animSpeed then
-		animSpeed:Disconnect()
+	if animCONN then
+		animCONN:Disconnect()
 	end
 
-	animSpeed = RunService.Heartbeat:Connect(function()
-		local humanoid = getChar():FindFirstChildOfClass("Humanoid") or getChar():FindFirstChildOfClass("AnimationController")
+	animCONN = RunService.Heartbeat:Connect(function()
+		local character = getChar()
+		local humanoid = character:FindFirstChildOfClass("Humanoid") or character:FindFirstChildOfClass("AnimationController")
 		if humanoid then
-			for _, track in pairs(humanoid:GetPlayingAnimationTracks()) do
-				track:AdjustSpeed(speed)
+			for _, track in ipairs(humanoid:GetPlayingAnimationTracks()) do
+				if track and track:IsA("AnimationTrack") then
+					track:AdjustSpeed(targetSpeed)
+				end
 			end
 		end
 	end)
 
-	DoNotif("Animation speed set to "..speed)
-end,true)
+	DoNotif("Animation speed set to "..targetSpeed)
+end, true)
 
-cmd.add({"unanimationspeed", "unanimspeed"}, {"unanimationspeed (unanimspeed)", "stops the animation speed loop"}, function()
-	if animSpeed then
-		animSpeed:Disconnect()
-		animSpeed = nil
+cmd.add({"unanimationspeed", "unanimspeed", "unaspeed"}, {"unanimationspeed (unanimspeed,unaspeed)", "Stops the animation speed adjustment loop"}, function()
+	if animCONN then
+		animCONN:Disconnect()
+		animCONN = nil
 		DoNotif("Animation speed disabled")
 	else
 		DoNotif("No active animation speed to disable")
