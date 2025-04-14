@@ -7420,6 +7420,35 @@ cmd.add({"animspoofer","animationspoofer","spoofanim","animspoof"},{"animspoofer
 	loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/Nameless-Admin/main/Animation%20Spoofer"))()
 end)
 
+local transCONN
+
+cmd.add({"bodytransparency","btransparency", "bodyt"}, {"bodytransparency <number> (btransparency,bodyt)", "Sets LocalTransparencyModifier of bodyparts to whatever number you put (0-1)"}, function(v)
+	local vv = tonumber(v) or 0
+	if transCONN then transCONN:Disconnect() end
+
+	transCONN = RunService.RenderStepped:Connect(function()
+		local char = LocalPlayer.Character
+		if char then
+			for _, p in ipairs(char:GetChildren()) do
+				if p:IsA("BasePart") and p.Name:lower() ~= "head" then
+					p.LocalTransparencyModifier = vv
+				end
+			end
+		end
+	end)
+
+	DoNotif("Body transparency set to "..vv,1.5)
+end)
+
+cmd.add({"unbodytransparency", "unbtransparency", "unbodyt"}, {"unbodytransparency (unbtransparency,unbodyt)", "Stops transparency loop"}, function()
+	if transCONN then
+		transCONN:Disconnect()
+		transCONN = nil
+	else
+		DoNotif("No loop running",2)
+	end
+end)
+
 local animCONN
 
 cmd.add({"animationspeed", "animspeed", "aspeed"}, {"animationspeed <speed> (animspeed,aspeed)", "Adjusts the speed of currently playing animations"}, function(speed)
