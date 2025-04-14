@@ -7973,7 +7973,7 @@ cmd.add({"starenear", "stareclosest"}, {"starenear (stareclosest)", "Stare at th
 	end
 
 	nearCON = RunService.RenderStepped:Connect(stare)
-end, true)
+end)
 
 cmd.add({"unstarenear", "unstareclosest"}, {"unstarenear (unstareclosest)", "Stop staring at closest player"}, function()
 	if nearCON then
@@ -8448,7 +8448,7 @@ cmd.add({"autofollow", "autostalk", "proxfollow"}, {"autofollow (autostalk,proxf
 			end
 		end
 	end))
-end, true)
+end)
 
 cmd.add({"unautofollow", "stopautofollow", "unproxfollow"}, {"unautofollow (stopautofollow,unproxfollow)", "Stop automatically following nearby players"}, function()
 	lib.disconnect("autofollow")
