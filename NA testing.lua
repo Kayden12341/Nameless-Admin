@@ -65,7 +65,7 @@ end
 function MockText(text)
 	local result = {}
 	local toggle = true
-	local glitchChars = {"̶", "̷", "̸"}
+	local glitchChars = {"̶", "̷", "̸", "̹", "̺", "̻", "͓", "͔", "͘", "͜", "͞", "͟", "͢"}
 
 	math.randomseed(os.time())
 
@@ -185,40 +185,20 @@ local mainName = 'Nameless Admin'
 local testingName = 'NA Testing'
 local adminName = 'NA'
 
-function yayApril(t)
-	local variants = {
-		t and "Clueless Testing" or "Clueless Admin";
-		t and "Gay Testing" or "Gay Admin";
-		t and "Infinite Testing" or "Infinite Admin";
-		t and "Sussy Testing" or "Sussy Admin";
-		t and "Broken Testing" or "Broken Admin";
-		t and "Shadow Testing" or "Shadow Admin";
-		t and "Quirky Testing" or "Quirky Admin";
-		t and "Zoomy Testing" or "Zoomy Admin";
-		t and "Wacky Testing" or "Wacky Admin";
-		t and "Booba Testing" or "Booba Admin";
-		t and "Spicy Testing" or "Spicy Admin";
-		t and "Meme Testing" or "Meme Admin";
-		t and "Doofy Testing" or "Doofy Admin";
-		t and "Silly Testing" or "Silly Admin";
-		t and "Goblin Testing" or "Goblin Admin";
-		t and "Bingus Testing" or "Bingus Admin";
-		t and "Chonky Testing" or "Chonky Admin";
-		t and "Floofy Testing" or "Floofy Admin";
-		t and "Yeety Testing" or "Yeety Admin";
-		t and "Bonky Testing" or "Bonky Admin";
-		t and "Derpy Testing" or "Derpy Admin";
-		t and "Cheesy Testing" or "Cheesy Admin";
-		t and "Nugget Testing" or "Nugget Admin";
-		t and "Funky Testing" or "Funky Admin";
-		t and "Floppy Testing" or "Floppy Admin";
-		t and "Chunky Testing" or "Chunky Admin";
-		t and "Snazzy Testing" or "Snazzy Admin";
-		t and "Wonky Testing" or "Wonky Admin";
-		t and "Goober Testing" or "Goober Admin";
-		t and "Dorky Testing" or "Dorky Admin";
+-- Returns a single randomized name with the appropriate suffix
+function yayApril(isTesting: boolean)
+	local baseNames = {
+		"Clueless", "Gay", "Infinite", "Sussy", "Broken", "Shadow", "Quirky",
+		"Zoomy", "Wacky", "Booba", "Spicy", "Meme", "Doofy", "Silly",
+		"Goblin", "Bingus", "Chonky", "Floofy", "Yeety", "Bonky", "Derpy",
+		"Cheesy", "Nugget", "Funky", "Floppy", "Chunky", "Snazzy", "Wonky",
+		"Goober", "Dorky"
 	}
-	return variants[math.random(#variants)]
+
+	local suffix = isTesting and "Testing" or "Admin"
+	local name = baseNames[math.random(#baseNames)]
+
+	return name.." "..suffix
 end
 
 
@@ -368,7 +348,7 @@ function DoNotif(text, duration, sender)
 end
 
 --Custom file functions checker checker
-local CustomFunctionSupport=isfile and isfolder and writefile and readfile and listfiles;
+--local CustomFunctionSupport=isfile and isfolder and writefile and readfile and listfiles;
 local FileSupport=isfile and isfolder and writefile and readfile and makefolder;
 
 --Creates folder & files for Prefix & Plugins
@@ -446,7 +426,7 @@ end)
 local PlaceId,JobId,GameId=game.PlaceId,game.JobId,game.GameId
 local Players=game:GetService("Players");
 local UserInputService=SafeGetService("UserInputService");
-local ProximityPromptService=SafeGetService("ProximityPromptService");
+local ProximityPromptService=game:GetService("ProximityPromptService");
 local TweenService=SafeGetService("TweenService");
 local RunService=SafeGetService("RunService");
 local TeleportService=SafeGetService("TeleportService");
@@ -722,13 +702,9 @@ cmd.run = function(args)
 								Callback = function(input)
 									local parsedArguments = ParseArguments(input)
 									if parsedArguments then
-										Spawn(function()
-											commandFunc(unpack(parsedArguments))
-										end)
+										Spawn(function() commandFunc(unpack(parsedArguments)) end)
 									else
-										Spawn(function()
-											commandFunc()
-										end)
+										Spawn(function() commandFunc() end)
 									end
 								end
 							},
@@ -981,24 +957,15 @@ Foreach = function(Table, Func, Loop)
 end
 
 CheckIfNPC = function(Character)
-	if (Character and Character.ClassName == "Model") and (Character:FindFirstChildOfClass("Humanoid") and not Players:GetPlayerFromCharacter(Character)) then
+	if (Character and Character:IsA("Model")) and (Character:FindFirstChildOfClass("Humanoid") and not Players:GetPlayerFromCharacter(Character)) then
 		return true
 	end
 end
 
-function FindInTable(tbl,val)
+FindInTable = function(tbl,val)
 	if tbl==nil then return false end
 	for _,v in pairs(tbl) do
 		if v==val then return true end
-	end 
-	return false
-end
-
-function GetInTable(Table,Name)
-	for i=1,#Table do
-		if Table[i]==Name then
-			return i
-		end
 	end
 	return false
 end
@@ -1029,21 +996,21 @@ end
 
 --[[ FUNCTION TO GET A PLAYER ]]--
 local PlayerArgs = {
-	["all"] = function() 
+	["all"] = function()
 		return Players:GetPlayers()
 	end,
 
 	["others"] = function()
 		local Targets = {}
 
-		Foreach(Players:GetPlayers(), function(Index, Player) 
+		Foreach(Players:GetPlayers(), function(Index, Player)
 			if Player ~= LocalPlayer then
 				Insert(Targets, Player)
 			end
 		end)
 
 		return Targets
-	end, 
+	end,
 
 	["me"] = function()
 		return { LocalPlayer }
@@ -1058,31 +1025,31 @@ local PlayerArgs = {
 	["npc"] = function()
 		local Targets = {}
 
-		Foreach(workspace:GetDescendants(), function(Index, Model) 
+		Foreach(workspace:GetDescendants(), function(Index, Model)
 			if CheckIfNPC(Model) then
 				Insert(Targets, Model)
 			end
 		end)
 
 		return Targets
-	end, 
+	end,
 
 	["seated"] = function()
 		local Targets = {}
 
-		Foreach(Players:GetPlayers(), function(Index, Player) 
+		Foreach(Players:GetPlayers(), function(Index, Player)
 			if getPlrHum(Player.Character).Sit then
 				Insert(Targets, Player)
 			end
 		end)
 
 		return Targets
-	end, 
+	end,
 
 	["stood"] = function()
 		local Targets = {}
 
-		Foreach(Players:GetPlayers(), function(Index, Player) 
+		Foreach(Players:GetPlayers(), function(Index, Player)
 			if not getPlrHum(Player.Character).Sit then
 				Insert(Targets, Player)
 			end
@@ -1095,7 +1062,7 @@ local PlayerArgs = {
 		local Targets = {}
 		local ClosestDistance, ClosestPlayer = 9e9, nil
 
-		Foreach(Players:GetPlayers(), function(Index, Player) 
+		Foreach(Players:GetPlayers(), function(Index, Player)
 			local Distance = Player:DistanceFromCharacter(getRoot(Local.Character).Position)
 
 			if Player ~= LocalPlayer and Distance < ClosestDistance then
@@ -1111,7 +1078,7 @@ local PlayerArgs = {
 		local Targets = {}
 		local FurthestDistance, FurthestPlayer = 0, nil
 
-		Foreach(Players:GetPlayers(), function(Index, Player) 
+		Foreach(Players:GetPlayers(), function(Index, Player)
 			local Distance = Player:DistanceFromCharacter(GetRoot(Local.Character).Position)
 
 			if Player ~= LocalPlayer and Distance > FurthestDistance then
@@ -1126,7 +1093,7 @@ local PlayerArgs = {
 	["enemies"] = function()
 		local Targets = {}
 
-		Foreach(Players:GetPlayers(), function(Index, Player) 
+		Foreach(Players:GetPlayers(), function(Index, Player)
 			if Player.Team ~= LocalPlayer.Team then
 				Insert(Targets, Player)
 			end
@@ -1138,7 +1105,7 @@ local PlayerArgs = {
 	["dead"] = function()
 		local Targets = {}
 
-		Foreach(Players:GetPlayers(), function(Index, Player) 
+		Foreach(Players:GetPlayers(), function(Index, Player)
 			if GetHumanoid(Player.Character).Health == 0 then
 				Insert(Targets, Player)
 			end
@@ -1151,7 +1118,7 @@ local PlayerArgs = {
 	["alive"] = function()
 		local Targets = {}
 
-		Foreach(Players:GetPlayers(), function(Index, Player) 
+		Foreach(Players:GetPlayers(), function(Index, Player)
 			if GetHumanoid(Player.Character).Health > 0 then
 				Insert(Targets, Player)
 			end
@@ -1163,7 +1130,7 @@ local PlayerArgs = {
 	["friends"] = function()
 		local Targets = {}
 
-		Foreach(Players:GetPlayers(), function(Index, Player) 
+		Foreach(Players:GetPlayers(), function(Index, Player)
 			if Player:IsFriendsWith(LocalPlayer.UserId) and LocalPlayer ~= Player then
 				Insert(Targets, Player)
 			end
@@ -1175,7 +1142,7 @@ local PlayerArgs = {
 	["nonfriends"] = function()
 		local Targets = {}
 
-		Foreach(Players:GetPlayers(), function(Index, Player) 
+		Foreach(Players:GetPlayers(), function(Index, Player)
 			if not Player:IsFriendsWith(LocalPlayer.UserId) and LocalPlayer ~= Player then
 				Insert(Targets, Player)
 			end
@@ -1194,7 +1161,7 @@ function getPlr(Target)
 	else
 		local Specific = {}
 
-		Foreach(Players:GetPlayers(), function(Index, Player) 
+		Foreach(Players:GetPlayers(), function(Index, Player)
 			local Name, Display = Lower(Player.Name), Lower(Player.DisplayName)
 
 			if Sub(Name, 1, #Target) == Target then
@@ -1214,7 +1181,6 @@ plr=Player
 speaker=Player
 char=plr.Character
 local JSONEncode,JSONDecode=HttpService.JSONEncode,HttpService.JSONDecode
-local LoadTime=tick();
 
 NACaller(function()
 	Players.LocalPlayer.CharacterAdded:Connect(function(c)
@@ -1380,16 +1346,16 @@ function ESP(player, persistent)
 								local hasTeamColor, teamColor = pcall(function() return player.Team.TeamColor.Color end)
 								local teamColorFinal = hasTeamColor and teamColor or Color3.fromRGB(255, 255, 255)
 					
-								local displayName = player:IsA("Model") and player.Name or nameChecker(player)
+								local userNaem = player:IsA("Model") and player.Name or nameChecker(player)
 					
 								if getPlrChar(Players.LocalPlayer) and getRoot(getPlrChar(Players.LocalPlayer)) and getPlrChar(Players.LocalPlayer):FindFirstChildOfClass("Humanoid") then
 									local distance = math.floor((getRoot(getPlrChar(Players.LocalPlayer)).Position - getRoot(getPlrChar(player)).Position).magnitude)
 					
 									local hasTeamName, teamName = pcall(function() return player.Team.Name end)
 									if hasTeamName then
-										textLabel.Text = Format("%s | Health: %d/%d | Studs: %d | Team: %s", displayName, health, maxHealth, distance, teamName)
+										textLabel.Text = Format("%s | Health: %d/%d | Studs: %d | Team: %s", userNaem, health, maxHealth, distance, teamName)
 									else
-										textLabel.Text = Format("%s | Health: %d/%d | Studs: %d", displayName, health, maxHealth, distance)
+										textLabel.Text = Format("%s | Health: %d/%d | Studs: %d", userNaem, health, maxHealth, distance)
 									end
 					
 									textLabel.TextColor3 = distance < 50 and Color3.fromRGB(255, 0, 0)
@@ -1398,9 +1364,9 @@ function ESP(player, persistent)
 								else
 									local hasTeamName, teamName = pcall(function() return player.Team.Name end)
 									if hasTeamName then
-										textLabel.Text = Format("%s | Health: %d/%d | Team: %s", displayName, health, maxHealth, teamName)
+										textLabel.Text = Format("%s | Health: %d/%d | Team: %s", userNaem, health, maxHealth, teamName)
 									else
-										textLabel.Text = Format("%s | Health: %d/%d", displayName, health, maxHealth)
+										textLabel.Text = Format("%s | Health: %d/%d", userNaem, health, maxHealth)
 									end
 									textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 								end
@@ -1551,7 +1517,7 @@ plr=cmdlp
 local cmdm=plr:GetMouse()
 goofyFLY=nil
 function sFLY(vfly)
-	while not cmdlp or not cmdlp.Character or not cmdlp.Character:FindFirstChild('HumanoidRootPart') or not cmdlp.Character:FindFirstChild('Humanoid') or not cmdm do
+	while not cmdlp or not cmdlp.Character or not getRoot(cmdlp) or not cmdlp.Character:FindFirstChild('Humanoid') or not cmdm do
 		Wait()
 	end
 
@@ -3747,7 +3713,7 @@ cmd.add({"antivoid"},{"antivoid","Prevents you from falling into the void by lau
 
 	AntiVoidConnect = RunService.Stepped:Connect(function()
 		local character = Players.LocalPlayer.Character
-		local root = character and character:FindFirstChild("HumanoidRootPart")
+		local root = character and getRoot(character)
 		if root and root.Position.Y <= OrgDestroyHeight + 25 then
 			root.Velocity = Vector3.new(root.Velocity.X, root.Velocity.Y + 250, root.Velocity.Z)
 		end
@@ -4115,7 +4081,7 @@ cmd.add({"annoy"}, {"annoy <player>", "Annoys the given player"}, function(...)
 	end
 
 	local target = targets[1]
-	if not target.Character or not target.Character:FindFirstChild("HumanoidRootPart") then
+	if not target.Character or not getRoot(target.Character) then
 		DoNotif("Target has no character or root part.", 3)
 		annoyLoop = false
 		return
@@ -4137,7 +4103,7 @@ cmd.add({"annoy"}, {"annoy <player>", "Annoys the given player"}, function(...)
 		Wait(0.05)
 
 		local targetChar = target.Character
-		local targetRoot = targetChar and targetChar:FindFirstChild("HumanoidRootPart")
+		local targetRoot = targetChar and getRoot(targetChar)
 		myChar = getChar()
 		myRoot = myChar and getRoot(myChar)
 
@@ -4985,7 +4951,7 @@ cmd.add({"hamster"}, {"hamster <number>", "Hamster ball"}, function(...)
 		end
 	end
 
-	local ball = character.HumanoidRootPart
+	local ball = getRoot(character)
 	ball.Shape = Enum.PartType.Ball
 	ball.Size = Vector3.new(5, 5, 5)
 	local humanoid = character:WaitForChild("Humanoid")
@@ -6821,8 +6787,8 @@ cmd.add({"antibang"}, {"antibang", "prevents users to bang you (still WORK IN PR
 
 	bangCon = game:GetService("RunService").Stepped:Connect(function()
 		for _, p in pairs(game:GetService("Players"):GetPlayers()) do
-			if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-				if (p.Character.HumanoidRootPart.Position - root.Position).Magnitude <= 10 then
+			if p ~= LocalPlayer and p.Character and getRoot(p.Character) then
+				if (getRoot(p.Character).Position - root.Position).Magnitude <= 10 then
 					local tracks = p.Character:FindFirstChild("Humanoid"):GetPlayingAnimationTracks()
 					for _, t in pairs(tracks) do
 						if Discover(anims, t.Animation.AnimationId) then
@@ -6841,7 +6807,7 @@ cmd.add({"antibang"}, {"antibang", "prevents users to bang you (still WORK IN PR
 								root.CFrame = CFrame.new(Vector3.new(0, orgHeight - 25, 0))
 								if not toldNotif then
 									toldNotif = true
-									DoNotif("Antibang activated | Target: "..targetPlayer.Name, 2)
+									DoNotif("Antibang activated | Target: "..nameChecker(targetPlayer), 2)
 								end
 							end
 						end
@@ -7940,7 +7906,7 @@ cmd.add({"lookat", "stare"}, {"stare <player> (lookat)", "Stare at a player"}, f
 		function Stare()
 			if Players.LocalPlayer.Character.PrimaryPart and plr.Character and getRoot(plr.Character) then
 				local LocalCharPos = Players.LocalPlayer.Character.PrimaryPart.Position
-				local TargetPos = plr.Character.HumanoidRootPart.Position
+				local TargetPos = getRoot(plr.Character).Position
 				local AdjustedTargetPos = Vector3.new(TargetPos.X, LocalCharPos.Y, TargetPos.Z)
 				local NewCFrame = CFrame.new(LocalCharPos, AdjustedTargetPos)
 				Players.LocalPlayer.Character:SetPrimaryPartCFrame(NewCFrame)
@@ -8406,11 +8372,17 @@ end)
 PROXIMITY_RADIUS = 15
 lastDistances = {}
 ISfollowing = false
+followTarget = nil
+followConnection = nil
+flwCharAdd = nil
 
 cmd.add({"autofollow", "autostalk", "proxfollow"}, {"autofollow (autostalk,proxfollow)", "Automatically follow any player who comes close"}, function()
 	lib.disconnect("autofollow")
+	if followConnection then followConnection:Disconnect() followConnection = nil end
+	if flwCharAdd then flwCharAdd:Disconnect() flwCharAdd = nil end
 	lastDistances = {}
 	ISfollowing = false
+	followTarget = nil
 
 	lib.connect("autofollow", RunService.Stepped:Connect(function()
 		if ISfollowing then return end
@@ -8430,11 +8402,44 @@ cmd.add({"autofollow", "autostalk", "proxfollow"}, {"autofollow (autostalk,proxf
 
 					if lastDist and lastDist > PROXIMITY_RADIUS and currentDist < PROXIMITY_RADIUS and currentDist < lastDist then
 						ISfollowing = true
-						lib.connect("follow_target", RunService.Stepped:Connect(function()
-							if myChar and myHum and root then
-								myHum:MoveTo(root.Position)
+						followTarget = plr
+
+						local function setupFollow(char)
+							local targetRoot = getRoot(char)
+							if not targetRoot then return end
+
+							if followConnection then followConnection:Disconnect() end
+							followConnection = RunService.Stepped:Connect(function()
+								if myChar and myHum and targetRoot and char and char.Parent then
+									myHum:MoveTo(targetRoot.Position)
+								else
+									if followConnection then followConnection:Disconnect() followConnection = nil end
+									if flwCharAdd then flwCharAdd:Disconnect() flwCharAdd = nil end
+									ISfollowing = false
+									followTarget = nil
+								end
+							end)
+
+							local hum = char:FindFirstChildWhichIsA("Humanoid")
+							if hum then
+								hum.Died:Connect(function()
+									if followConnection then followConnection:Disconnect() followConnection = nil end
+									ISfollowing = false
+									followTarget = nil
+								end)
 							end
-						end))
+						end
+
+						if plr.Character then
+							setupFollow(plr.Character)
+						end
+
+						if flwCharAdd then flwCharAdd:Disconnect() end
+						flwCharAdd = plr.CharacterAdded:Connect(function(newChar)
+							Wait(0.1)
+							setupFollow(newChar)
+						end)
+
 						break
 					end
 
@@ -8447,9 +8452,11 @@ end, true)
 
 cmd.add({"unautofollow", "stopautofollow", "unproxfollow"}, {"unautofollow (stopautofollow,unproxfollow)", "Stop automatically following nearby players"}, function()
 	lib.disconnect("autofollow")
-	lib.disconnect("follow_target")
+	if followConnection then followConnection:Disconnect() followConnection = nil end
+	if flwCharAdd then flwCharAdd:Disconnect() flwCharAdd = nil end
 	lastDistances = {}
 	ISfollowing = false
+	followTarget = nil
 end)
 
 cmd.add({"pathfind"}, {"pathfind <player>", "Follow a player using the pathfinder API wherever they go"}, function(p)
@@ -8468,7 +8475,7 @@ cmd.add({"pathfind"}, {"pathfind <player>", "Follow a player using the pathfinde
 				return
 			end
 			local hum = character:FindFirstChildWhichIsA("Humanoid")
-			local main = target:FindFirstChild("HumanoidRootPart")
+			local main = getRoot(target)
 			if hum and main then
 				local targetPart = main or target:FindFirstChild("Head")
 				local targetPos = (targetPart.CFrame * CFrame.new(0, 0, -0.5)).p
@@ -8602,7 +8609,7 @@ cmd.add({"blackhole"}, {"blackhole", "Makes unanchored parts teleport to the bla
 		UICorner.CornerRadius = UDim.new(0.25, 0)
 		UICorner.Parent = button
 		
-		button.MouseButton1Click:Connect(function()
+		MouseButtonFix(button,function()
 			Updated = Mouse.Hit + Vector3.new(0, 5, 0)
 		end)
 
@@ -9290,7 +9297,7 @@ cmd.add({"waveat", "wat"}, {"waveat <player> (wat)", "Wave to a player"}, functi
 	if targetRoot then
 		localRoot.CFrame = targetRoot.CFrame * CFrame.new(0, 0, -3)
 		local charPos = char.PrimaryPart.Position
-		local targetHRP = plr.Character:FindFirstChild("HumanoidRootPart")
+		local targetHRP = getRoot(plr.Character)
 		if targetHRP then
 			local newCFrame = CFrame.new(charPos, Vector3.new(targetHRP.Position.X, charPos.Y, targetHRP.Position.Z))
 			Players.LocalPlayer.Character:SetPrimaryPartCFrame(newCFrame)
@@ -10107,7 +10114,7 @@ cmd.add({"hug", "clickhug"}, {"hug (clickhug)", "huggies time (click on a target
 					end
 
 					Spawn(function()
-						while hugModeEnabled and targetCharacter and targetCharacter:FindFirstChild("HumanoidRootPart") and (currentHugTarget == targetCharacter) do
+						while hugModeEnabled and targetCharacter and getRoot(targetCharacter) and (currentHugTarget == targetCharacter) do
 							targetHRP = getRoot(targetCharacter)
 							offset = (hugFromFront and (targetHRP.CFrame.LookVector * offsetDistance)) or (-(targetHRP.CFrame.LookVector * offsetDistance))
 							local newHugPos = targetHRP.Position + offset
@@ -10824,6 +10831,28 @@ cmd.add({"maxslopeangle", "msa"}, {"maxslopeangle (msa)", "Changes your characte
 	end
 end,true)
 
+goedMoed = nil
+
+cmd.add({"godmode", "god"}, {"godmode (god)", "Toggles invincibility"}, function()
+	local humanoid = getHum()
+	if humanoid then
+		if goedMoed then goedMoed:Disconnect() goedMoed=nil end
+		goedMoed=humanoid:GetPropertyChangedSignal("Health"):Connect(function()
+			if humanoid.Health ~= humanoid.MaxHealth then
+				humanoid.Health = humanoid.MaxHealth
+			end
+		end)
+		humanoid.Health = humanoid.MaxHealth
+		DoNotif("Godmode ON", 2)
+	else
+		DoNotif("Humanoid not found", 2)
+	end
+end)
+
+cmd.add({"ungodmode", "ungod"}, {"ungodmode (ungod)", "Disables invincibility"}, function()
+	if goedMoed then goedMoed:Disconnect() goedMoed=nil DoNotif("Godmode OFF", 2) end
+end)
+
 cmd.add({"controllock", "ctrllock"}, {"controllock (ctrllock)", "Sets your Shiftlock keybinds to the control keys"}, function()
 	local player = Players.LocalPlayer
 	local mouseLockController = player:WaitForChild("PlayerScripts"):WaitForChild("PlayerModule"):WaitForChild("CameraModule"):WaitForChild("MouseLockController")
@@ -11442,6 +11471,10 @@ cmd.add({"unswim"}, {"unswim", "Stops the swim script"}, function()
 		humanoid:ChangeState(Enum.HumanoidStateType.RunningNoPhysics)
 		humanoid.WalkSpeed = 16
 	end
+end)
+
+cmd.add({"swordfighter", "sfighter", "swordf", "swordbot", "sf"},{"swordfighter (sfighter, swordf, swordbot, sf)", "Activates a sword fighting bot that engages in automated PvP combat"},function()
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/uuuuuuu/refs/heads/main/Sword%20Fight%20Bot"))()
 end)
 
 local espList = {}
@@ -12803,7 +12836,7 @@ end, true)
 cmd.add({"oofspam"},{"oofspam","Spams oof"},function()
 	getgenv().enabled=true
 	getgenv().speed=100
-	local HRP=Humanoid.RootPart or Humanoid:FindFirstChild("HumanoidRootPart")
+	local HRP=Humanoid.RootPart or getRoot(Humanoid.Parent)
 	if not Humanoid or not getgenv().enabled then
 		if Humanoid and Humanoid.Health <=0 then
 			Humanoid:Destroy()
@@ -12981,9 +13014,6 @@ end)
 cmd.add({"gotonpcs"}, {"gotonpcs", "Teleports to each NPC"}, function()
 	local Players = game:GetService("Players")
 	local LocalPlayer = Players.LocalPlayer
-	local function getRoot(model)
-		return model:FindFirstChild("HumanoidRootPart") or model:FindFirstChild("Torso")
-	end
 	local npcs = {}
 	for _, d in pairs(game:GetService("Workspace"):GetDescendants()) do
 		if d:IsA("Humanoid") and not Players:GetPlayerFromCharacter(d.Parent) then
