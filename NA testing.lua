@@ -4919,7 +4919,7 @@ cmd.add({"setspawn", "spawnpoint", "ss"}, {"setspawn (spawnpoint, ss)", "Sets yo
 	stationaryRespawn = true
 
 	function handleRespawn()
-		if stationaryRespawn and getChar().Humanoid.Health == 0 then
+		if stationaryRespawn and getHum() and getHum().Health == 0 then
 			if not hasPosition then
 				spawnPosition = getRoot(getChar()).CFrame
 				hasPosition = true
