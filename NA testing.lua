@@ -5783,8 +5783,8 @@ cmd.add({"runanim", "playanim", "anim"}, {"runanim <id> (playanim,anim)", "Plays
 	local hum = getHum()
 	if not hum then return end
 
-	local a = hum:FindFirstChildOfClass("Animator") or Instance.new("Animator", hum)
-	local anim = Instance.new("Animation")
+	local a = hum:FindFirstChildOfClass("Animator") or InstanceNew("Animator", hum)
+	local anim = InstanceNew("Animation")
 	anim.AnimationId = "rbxassetid://"..tostring(id)
 
 	local t = a:LoadAnimation(anim)
@@ -7536,6 +7536,68 @@ cmd.add({"gameid","universeid","gid"},{"gameid (universeid,gid)","Copies the Gam
 	DoNotif("Copied the game's GameId: "..GameId)
 end)
 
+cmd.add({"firework"}, {"firework", "pop"}, function()
+	local character = LocalPlayer.Character
+	if not character then return end
+
+	local root = getRoot(character)
+	local humanoid = character:FindFirstChildWhichIsA("Humanoid")
+	if not root or not humanoid then return end
+
+	humanoid.PlatformStand = true
+
+	local part = InstanceNew("Part")
+	part.Size = Vector3.new(0.1, 0.1, 0.1)
+	part.Transparency = 1
+	part.Anchored = false
+	part.CanCollide = false
+	part.Parent = game:GetService("Workspace").CurrentCamera
+
+	local weld = InstanceNew("Weld")
+	weld.Part0 = part
+	weld.Part1 = root
+	weld.C0 = CFrame.new()
+	weld.Parent = part
+
+	local bv = Instance.new("BodyVelocity")
+	bv.Velocity = Vector3.new(0, 50, 0)
+	bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+	bv.Parent = part
+
+	local bg = Instance.new("BodyGyro")
+	bg.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
+	bg.P = 10000
+	bg.D = 0
+	bg.Parent = part
+
+	local spinTime = 3
+	local spinSpeed = 720
+	local startTime = tick()
+	local angle = 0
+
+	local connection
+	connection = RunService.Heartbeat:Connect(function(dt)
+		if tick() - startTime > spinTime then
+			connection:Disconnect()
+			bv:Destroy()
+			bg:Destroy()
+			part:Destroy()
+
+			local explosion = Instance.new("Explosion")
+			explosion.Position = root.Position
+			explosion.BlastRadius = 6
+			explosion.BlastPressure = 500000
+			explosion.Parent = game:GetService("Workspace")
+
+			humanoid.Health = 0
+			return
+		end
+
+		angle += math.rad(spinSpeed * dt)
+		bg.CFrame = CFrame.new(root.Position) * CFrame.Angles(0, angle, 0)
+	end)
+end)
+
 cmd.add({"placename","pname"},{"placename (pname)","Copies the game's place name to your clipboard"},function()
 	placeNaem = placeName()
 	setclipboard(placeNaem)
@@ -8757,10 +8819,10 @@ cmd.add({"blackhole"}, {"blackhole", "Makes unanchored parts teleport to the bla
 				v:FindFirstChild("Torque"):Destroy()
 			end
 			v.CanCollide = false
-			local Torque = Instance.new("Torque", v)
+			local Torque = InstanceNew("Torque", v)
 			Torque.Torque = Vector3.new(100000, 100000, 100000)
-			local AlignPosition = Instance.new("AlignPosition", v)
-			local Attachment2 = Instance.new("Attachment", v)
+			local AlignPosition = InstanceNew("AlignPosition", v)
+			local Attachment2 = InstanceNew("Attachment", v)
 			Torque.Attachment0 = Attachment2
 			AlignPosition.MaxForce = 9999999999999999
 			AlignPosition.MaxVelocity = math.huge
