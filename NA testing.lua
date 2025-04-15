@@ -268,27 +268,23 @@ if not gethui then
 	end
 end
 
-if (identifyexecutor and identifyexecutor() == "Solara") or not fireproximityprompt then
-    getgenv().fireproximityprompt = function(prompt)
-        if not prompt or not prompt:IsA("ProximityPrompt") then return end
-
-        local originalEnabled = prompt.Enabled
-        local originalHoldDuration = prompt.HoldDuration
-        local originalLineOfSight = prompt.RequiresLineOfSight
-
-        prompt.Enabled = true
-        prompt.HoldDuration = 0
-        prompt.RequiresLineOfSight = false
-
-        Wait()
-        prompt:InputHoldBegin()
-        Wait(0.1)
-        prompt:InputHoldEnd()
-
-        prompt.Enabled = originalEnabled
-        prompt.HoldDuration = originalHoldDuration
-        prompt.RequiresLineOfSight = originalLineOfSight
-    end
+if (identifyexecutor() == "Solara" or identifyexecutor() == "Xeno") or not fireproximityprompt then
+    getgenv().fireproximityprompt=function(pp)
+		local oldenabled=pp.Enabled
+		local oldhold=pp.HoldDuration
+		local oldrlos=pp.RequiresLineOfSight
+		pp.Enabled=true
+		pp.HoldDuration=0
+		pp.RequiresLineOfSight=false
+		Wait(.23)
+		pp:InputHoldBegin()
+		Wait()
+		pp:InputHoldEnd()
+		Wait(.1)
+		pp.Enabled=pp.Enabled
+		pp.HoldDuration=pp.HoldDuration
+		pp.RequiresLineOfSight=pp.RequiresLineOfSight
+	end
 end
 
 local GetService=game.GetService
@@ -4623,37 +4619,59 @@ cmd.add({"bypassteleport", "btp"}, {"bypassteleport (btp)", "Bypass Teleportatio
 	DoNotif("Teleport bypass enabled.")
 end)
 
-acftpCON = nil
+acftpCON = {}
 acftpCONN = nil
+acftpCFrames = {}
 
 cmd.add({"anticframeteleport","acframetp","acftp"},{"anticframeteleport (acframetp,acftp)","Prevents scripts from teleporting you by resetting your CFrame"},function()
-	if acftpCON then acftpCON:Disconnect() acftpCON=nil end
-	if acftpCONN then acftpCONN:Disconnect() acftpCONN=nil end
-	local character = LocalPlayer and LocalPlayer.Character
-	local root = character and getRoot(character)
+	for _, con in pairs(acftpCON) do
+		con:Disconnect()
+	end
+	acftpCON = {}
+	acftpCFrames = {}
 
-	if not root then
-		DoNotif("Your character or root part is invalid.", 3)
+	if acftpCONN then acftpCONN:Disconnect() acftpCONN = nil end
+
+	local character = LocalPlayer and LocalPlayer.Character
+	if not character then
+		DoNotif("Your character is invalid.", 3)
 		return
 	end
 
-	DoNotif("Anti CFrame Teleport enabled", 3)
-
-	local oldCFrame = root.CFrame
-	acftpCON = root:GetPropertyChangedSignal("CFrame"):Connect(function()
-		root.CFrame = oldCFrame
-	end)
+	for _, part in pairs(character:GetChildren()) do
+		if part:IsA("BasePart") then
+			acftpCFrames[part] = part.CFrame
+			acftpCON[part] = part:GetPropertyChangedSignal("CFrame"):Connect(function()
+				if part:IsDescendantOf(character) and part.CFrame ~= acftpCFrames[part] then
+					part.CFrame = acftpCFrames[part]
+				end
+			end)
+		end
+	end
 
 	acftpCONN = RunService.RenderStepped:Connect(function()
-		if root then
-			oldCFrame = root.CFrame
+		for part in pairs(acftpCFrames) do
+			if part and part:IsDescendantOf(character) then
+				acftpCFrames[part] = part.CFrame
+			end
 		end
 	end)
+
+	DoNotif("Anti CFrame Teleport enabled", 3)
 end)
 
 cmd.add({"unanticframeteleport","unacframetp","unacftp"},{"unanticframeteleport (unacframetp,unacftp)","Disables Anti CFrame Teleport"},function()
-	if acftpCON then acftpCON:Disconnect() acftpCON=nil end
-	if acftpCONN then acftpCONN:Disconnect() acftpCONN=nil end
+	for _, con in pairs(acftpCON) do
+		con:Disconnect()
+	end
+	acftpCON = {}
+	acftpCFrames = {}
+
+	if acftpCONN then
+		acftpCONN:Disconnect()
+		acftpCONN = nil
+	end
+
 	DoNotif("Anti CFrame Teleport disabled", 3)
 end)
 
@@ -5772,7 +5790,7 @@ cmd.add({"runanim", "playanim", "anim"}, {"runanim <id> (playanim,anim)", "Plays
 	local t = a:LoadAnimation(anim)
 	t:Play()
 
-	task.delay(t.Length, function()
+	Delay(t.Length, function()
 		t:Stop()
 		t:Destroy()
 		anim:Destroy()
@@ -12060,60 +12078,63 @@ cmd.add({"firetouchinterests", "fti"}, {"firetouchinterests (fti)", "Fires every
 	DoNotif("Fired "..count.." touch interests")
 end)
 
-local infJump = nil
-local jumpFixy = nil
+local jumpyCON = nil
+local jumpyChar = nil
 
-cmd.add({"infjump", "infinitejump"}, {"infjump (infinitejump)", "Makes you be able to jump infinitely"}, function()
+cmd.add({"infjump", "infinitejump"}, {"infjump (infinitejump)", "Enables infinite jumping"}, function()
 	Wait()
+	DoNotif("Infinite Jump Enabled",2)
 
-	DoNotif("Infinite Jump Enabled")
+	local function getHumanoid()
+		local character = plr.Character or plr.CharacterAdded:Wait()
+		return character:WaitForChild("Humanoid")
+	end
 
-	local lastJumpTime = 0
-	local jumpCooldown = 0.25
-
-	local function fix()
-		if infJump then
-			infJump:Disconnect()
-			infJump = nil
+	local function enableInfiniteJump()
+		if jumpyCON then
+			jumpyCON:Disconnect()
+			jumpyCON = nil
 		end
 
-		local hum = getHum()
-		if not hum then
-			local char = plr.Character or plr.CharacterAdded:Wait()
-			hum = char:WaitForChild("Humanoid")
-		end
+		local debounce = false
+		local humanoid = getHumanoid()
 
-		infJump = hum:GetPropertyChangedSignal("Jump"):Connect(function()
-			if tick() - lastJumpTime > jumpCooldown then
-				lastJumpTime = tick()
-				hum:ChangeState(Enum.HumanoidStateType.Jumping)
+		jumpyCON = UserInputService.JumpRequest:Connect(function()
+			if not debounce and humanoid:GetState() ~= Enum.HumanoidStateType.Dead then
+				debounce = true
+				humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+
+				Delay(0.25, function()
+					debounce = false
+				end)
 			end
 		end)
 	end
 
-	fix()
+	enableInfiniteJump()
 
-	if jumpFixy then
-		jumpFixy:Disconnect()
-		jumpFixy = nil
+	if jumpyChar then
+		jumpyChar:Disconnect()
 	end
 
-	jumpFixy = plr.CharacterAdded:Connect(fix)
+	jumpyChar = plr.CharacterAdded:Connect(function(char)
+		char:WaitForChild("Humanoid")
+		enableInfiniteJump()
+	end)
 end)
 
-cmd.add({"uninfjump", "uninfinitejump"}, {"uninfjump (uninfinitejump)", "Makes you NOT be able to infinitely jump"}, function()
+cmd.add({"uninfjump", "uninfinitejump"}, {"uninfjump (uninfinitejump)", "Disables infinite jumping"}, function()
 	Wait()
+	DoNotif("Infinite Jump Disabled", 2)
 
-	DoNotif("Infinite Jump Disabled", 3)
-
-	if infJump then
-		infJump:Disconnect()
-		infJump = nil
+	if jumpyCON then
+		jumpyCON:Disconnect()
+		jumpyCON = nil
 	end
 
-	if jumpFixy then
-		jumpFixy:Disconnect()
-		jumpFixy = nil
+	if jumpyChar then
+		jumpyChar:Disconnect()
+		jumpyChar = nil
 	end
 end)
 
@@ -12527,58 +12548,136 @@ cmd.add({"minzoom"},{"minzoom <amount>","Set your minimum camera distance"},func
 	Players.LocalPlayer.CameraMinZoomDistance=num
 end,true)
 
-cmd.add({"cameranoclip","camnoclip","cnoclip","nccam"},{"cameranoclip (camnoclip,cnoclip,nccam)","Makes your camera clip through walls"},function()
-	SetConstant=(debug and debug.setconstant) or setconstant
-	GetConstants=(debug and debug.getconstants) or getconstants
-	if SetConstant or GetConstants or getgc then
-		local Popper=Players.LocalPlayer.PlayerScripts.PlayerModule.CameraModule.ZoomController.Popper
-		for i,v in pairs(getgc()) do
-			if type(v)=='function' and getfenv(v).script==Popper then
-				for i,v1 in pairs(GetConstants(v)) do
-					if tonumber(v1)==.25 then
-						SetConstant(v,i,0)
-					elseif tonumber(v1)==0 then
-						SetConstant(v,i,.25)
+cmd.add({"cameranoclip","camnoclip","cnoclip","nccam"},{"cameranoclip (camnoclip,cnoclip,nccam)","Makes your camera clip through walls"}, function()
+	local player = Players.LocalPlayer
+	local camera = game:GetService("Workspace").CurrentCamera
+
+	local SetConstant = (debug and debug.setconstant) or setconstant
+	local GetConstants = (debug and debug.getconstants) or getconstants
+	local HasAdvancedAccess = (getgc and SetConstant and GetConstants)
+
+	if HasAdvancedAccess then
+		local PlayerModule = player:FindFirstChild("PlayerScripts") and player.PlayerScripts:FindFirstChild("PlayerModule")
+		local Popper = PlayerModule and PlayerModule:FindFirstChild("CameraModule") and PlayerModule.CameraModule:FindFirstChild("ZoomController") and PlayerModule.CameraModule.ZoomController:FindFirstChild("Popper")
+
+		if Popper then
+			for i, v in pairs(getgc()) do
+				if type(v) == "function" and getfenv(v).script == Popper then
+					for i2, v2 in pairs(GetConstants(v)) do
+						if tonumber(v2) == 0.25 then
+							SetConstant(v, i2, 0)
+						elseif tonumber(v2) == 0 then
+							SetConstant(v, i2, 0.25)
+						end
 					end
 				end
 			end
 		end
 	else
-		Wait();
+		if _G._noclipConnection then _G._noclipConnection:Disconnect() end
+		if _G._noclipInput then _G._noclipInput:Disconnect() end
+		if _G._noclipZoom then _G._noclipZoom:Disconnect() end
+		if _G._noclipBegin then _G._noclipBegin:Disconnect() end
+		if _G._noclipEnd then _G._noclipEnd:Disconnect() end
 
-		DoNotif("Sorry,your exploit does not support cameranoclip")
+		local rootPart = (player.Character or player.CharacterAdded:Wait()):WaitForChild("HumanoidRootPart")
+		local zoom = (camera.CFrame.Position - rootPart.Position).Magnitude
+		local minZoom = player.CameraMinZoomDistance
+		local maxZoom = player.CameraMaxZoomDistance
+		local rotationX, rotationY = 0, 0
+		local sensitivity = 0.2
+		local rotating = false
+
+		camera.CameraType = Enum.CameraType.Scriptable
+		UserInputService.MouseBehavior = Enum.MouseBehavior.Default
+
+		_G._noclipBegin = UserInputService.InputBegan:Connect(function(input)
+			if input.UserInputType == Enum.UserInputType.MouseButton2 then
+				rotating = true
+				UserInputService.MouseBehavior = Enum.MouseBehavior.LockCurrentPosition
+			end
+		end)
+
+		_G._noclipEnd = UserInputService.InputEnded:Connect(function(input)
+			if input.UserInputType == Enum.UserInputType.MouseButton2 then
+				rotating = false
+				UserInputService.MouseBehavior = Enum.MouseBehavior.Default
+			end
+		end)
+
+		_G._noclipInput = UserInputService.InputChanged:Connect(function(input)
+			if input.UserInputType == Enum.UserInputType.MouseMovement and rotating then
+				rotationX -= input.Delta.X * sensitivity
+				rotationY = math.clamp(rotationY + input.Delta.Y * sensitivity, -80, 80)
+			end
+		end)
+
+		_G._noclipZoom = UserInputService.InputChanged:Connect(function(input)
+			if input.UserInputType == Enum.UserInputType.MouseWheel then
+				zoom = math.clamp(zoom - input.Position.Z * 2, minZoom, maxZoom)
+			end
+		end)
+
+		_G._noclipConnection = RunService.RenderStepped:Connect(function()
+			local targetPos = rootPart.Position + Vector3.new(0, 2, 0)
+			local rot = CFrame.Angles(0, math.rad(rotationX), 0) * CFrame.Angles(math.rad(rotationY), 0, 0)
+			local camPos = targetPos + rot:VectorToWorldSpace(Vector3.new(0, 0, -zoom))
+			camera.CFrame = CFrame.new(camPos, targetPos)
+		end)
 	end
 end)
 
-cmd.add({"uncameranoclip","uncamnoclip","uncnoclip","unnccam"},{"uncameranoclip (uncamnoclip,uncnoclip,unnccam)","Makes your camera not clip through walls"},function()
-	local SetConstant=(debug and debug.setconstant) or setconstant
-	local GetConstants=(debug and debug.getconstants) or getconstants
-	if SetConstant or GetConstants or getgc then
-		local Popper=Players.LocalPlayer.PlayerScripts.PlayerModule.CameraModule.ZoomController.Popper
-		for i,v in pairs(getgc()) do
-			if type(v)=='function' and getfenv(v).script==Popper then
-				for i,v1 in pairs(GetConstants(v)) do
-					if tonumber(v1)==.25 then
-						SetConstant(v,i,0)
-					elseif tonumber(v1)==0 then
-						SetConstant(v,i,.25)
+cmd.add({"uncameranoclip","uncamnoclip","uncnoclip","unnccam"},{"uncameranoclip (uncamnoclip,uncnoclip,unnccam)","Restores normal camera"}, function()
+	local player = Players.LocalPlayer
+	local camera = game:GetService("Workspace").CurrentCamera
+
+	local SetConstant = (debug and debug.setconstant) or setconstant
+	local GetConstants = (debug and debug.getconstants) or getconstants
+	local HasAdvancedAccess = (getgc and SetConstant and GetConstants)
+
+	if HasAdvancedAccess then
+		local PlayerModule = player:FindFirstChild("PlayerScripts") and player.PlayerScripts:FindFirstChild("PlayerModule")
+		local Popper = PlayerModule and PlayerModule:FindFirstChild("CameraModule") and PlayerModule.CameraModule:FindFirstChild("ZoomController") and PlayerModule.CameraModule.ZoomController:FindFirstChild("Popper")
+
+		if Popper then
+			for i, v in pairs(getgc()) do
+				if type(v) == "function" and getfenv(v).script == Popper then
+					for i2, v2 in pairs(GetConstants(v)) do
+						if tonumber(v2) == 0.25 then
+							SetConstant(v, i2, 0)
+						elseif tonumber(v2) == 0 then
+							SetConstant(v, i2, 0.25)
+						end
 					end
 				end
 			end
 		end
 	else
-		Wait();
+		if _G._noclipConnection then _G._noclipConnection:Disconnect() _G._noclipConnection = nil end
+		if _G._noclipInput then _G._noclipInput:Disconnect() _G._noclipInput = nil end
+		if _G._noclipZoom then _G._noclipZoom:Disconnect() _G._noclipZoom = nil end
+		if _G._noclipBegin then _G._noclipBegin:Disconnect() _G._noclipBegin = nil end
+		if _G._noclipEnd then _G._noclipEnd:Disconnect() _G._noclipEnd = nil end
 
-		DoNotif("Sorry,your exploit does not support cameranoclip and uncameranoclip")
-	end	
+		UserInputService.MouseBehavior = Enum.MouseBehavior.Default
+		camera.CameraType = Enum.CameraType.Custom
+
+		local scripts = player:FindFirstChild("PlayerScripts")
+		if scripts then
+			local existingModule = scripts:FindFirstChild("PlayerModule")
+			if existingModule then existingModule:Destroy() end
+
+			local starterModule = game:GetService("StarterPlayer"):FindFirstChild("StarterPlayerScripts"):FindFirstChild("PlayerModule")
+			if starterModule then
+				local newModule = starterModule:Clone()
+				newModule.Parent = scripts
+			end
+		end
+	end
 end)
 
 cmd.add({"oganims"},{"oganims","Old animations from 2007"},function()
-
-
-
 	Wait();
-
 	DoNotif("OG animations set")
 	loadstring(game:HttpGet(('https://pastebin.com/raw/6GNkQUu6'),true))()
 end)
@@ -12587,8 +12686,13 @@ cmd.add({"fakechat"},{"fakechat","Fake a chat gui"},function()
 	loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/Nameless-Admin/main/fake%20chatte"))()
 end)
 
-cmd.add({"fpscap"},{"fpscap <number>","Sets the fps cap to whatever you want"},function(...)
-	setfpscap(...)
+cmd.add({"fpscap"},{"fpscap <number>","Sets the fps cap to whatever you want"},function(arg)
+	local cap = tonumber(arg)
+	if cap then
+		setfpscap(math.clamp(cap, 1, 999))
+	else
+		DoNotif("invalid input",1.3)
+	end
 end,true)
 
 cmd.add({"toolinvisible", "tinvis"}, {"toolinvisible (tinvis)", "Be invisible while still being able to use tools"}, function()
@@ -12897,7 +13001,7 @@ local monitorcon = nil
 cmd.add({"fov"}, {"fov <number>", "Sets your FOV to a custom value (1–120)"}, function(num)
 	local field = math.clamp(tonumber(num) or 70, 1, 120)
 	local cam = Workspace.CurrentCamera
-	TweenService:Create(cam, TweenInfo.new(0, Enum.EasingStyle.Linear), {FieldOfView = field}):Play()
+	TweenService:Create(cam, TweenInfo.new(0.5, Enum.EasingStyle.Linear), {FieldOfView = field}):Play()
 end, true)
 
 cmd.add({"loopfov", "lfov"}, {"loopfov <number> (lfov)", "Loops your FOV to stay at a custom value (1–120)"}, function(num)
@@ -12934,20 +13038,37 @@ cmd.add({"fatesadmin"},{"fatesadmin","Executes fates admin"},function()
 	loadstring(game:HttpGet("https://raw.githubusercontent.com/fatesc/fates-admin/main/main.lua"))();
 end)
 
-cmd.add({"savetools","stools"},{"savetools (stools)","puts your tools in players.localplayer"},function()
-	for _,v in pairs(Players.LocalPlayer.Backpack:GetChildren()) do
-		if (v:IsA("Tool")) then
-			v.Parent=Players.LocalPlayer
+storedTools = {}
+
+cmd.add({"savetools", "stools"}, {"savetools (stools)", "Saves your tools to memory"}, function()
+	storedTools = {}
+
+	for _, tool in pairs(LocalPlayer.Backpack:GetChildren()) do
+		if tool:IsA("Tool") then
+			local clonedTool = tool:Clone()
+			Insert(storedTools, clonedTool)
 		end
 	end
+
+	for _, tool in pairs(LocalPlayer.Character:GetChildren()) do
+		if tool:IsA("Tool") then
+			local clonedTool = tool:Clone()
+			Insert(storedTools, clonedTool)
+		end
+	end
+
+	DoNotif("Tools saved: "..#storedTools,2)
 end)
 
-cmd.add({"loadtools","ltools"},{"loadtools (ltools)","puts your tools back in the backpack"},function()
-	for _,v in pairs(Players.LocalPlayer:GetChildren()) do
-		if (v:IsA("Tool")) then
-			v.Parent=Players.LocalPlayer.Backpack
+cmd.add({"loadtools", "ltools"}, {"loadtools (ltools)", "Restores your saved tools to your backpack"}, function()
+	for _, tool in pairs(storedTools) do
+		if not LocalPlayer.Backpack:FindFirstChild(tool.Name) then
+			local clonedTool = tool:Clone()
+			clonedTool.Parent = LocalPlayer.Backpack
 		end
 	end
+
+	DoNotif("Tools loaded: "..#storedTools,2)
 end)
 
 local noEQ = nil
@@ -13042,7 +13163,7 @@ cmd.add({"keystroke"},{"keystroke","Executes a keystroke ui script"},function()
 end)
 
 cmd.add({"errorchat"},{"errorchat","Makes the chat error appear when roblox chat is slow"},function()
-	for i=1,3 do 
+	for i=1,3 do
 		lib.LocalPlayerChat("\0","All")
 	end
 end)
@@ -13127,7 +13248,7 @@ cmd.add({"sitnpcs"}, {"sitnpcs", "Makes NPCS sit"}, function()
 			local rootPart = getRoot(hum.Parent)
 			if rootPart then
 				hum.Sit = true
-			end      
+			end
 		end
 	end
 	for _,hum in pairs(game:GetService("Workspace"):GetDescendants()) do
@@ -13144,7 +13265,7 @@ cmd.add({"unsitnpcs"}, {"unsitnpcs", "Makes NPCS unsit"}, function()
 			local rootPart = getRoot(hum.Parent)
 			if rootPart then
 				hum.Sit = true
-			end      
+			end
 		end
 	end
 	for _,hum in pairs(game:GetService("Workspace"):GetDescendants()) do
@@ -13161,7 +13282,7 @@ cmd.add({"killnpcs"}, {"killnpcs", "Kills NPCs"}, function()
 			local rootPart = getRoot(hum.Parent)
 			if rootPart then
 				hum.Health = 0
-			end      
+			end
 		end
 	end
 	for _,hum in pairs(game:GetService("Workspace"):GetDescendants()) do
@@ -13178,12 +13299,56 @@ cmd.add({"bringnpcs"}, {"bringnpcs", "Brings NPCs"}, function()
 			local rootPart = getRoot(hum.Parent)
 			if rootPart then
 				rootPart.CFrame = getRoot(LocalPlayer.Character).CFrame
-			end      
+			end
 		end
 	end
 	for _,hum in pairs(game:GetService("Workspace"):GetDescendants()) do
 		disappear(hum)
 	end
+end)
+
+bringingNpcs = false
+bringNPClooper = nil
+npcCache = {}
+
+cmd.add({"loopbringnpcs", "lbnpcs"}, {"loopbringnpcs (lbnpcs)", "Loops NPC bringing"}, function()
+	if bringingNpcs then return end
+	bringingNpcs = true
+
+	table.clear(npcCache)
+	for _, hum in ipairs(game:GetService("Workspace"):GetDescendants()) do
+		if hum:IsA("Humanoid") and not Players:GetPlayerFromCharacter(hum.Parent) then
+			Insert(npcCache, hum)
+		end
+	end
+
+	bringNPClooper = coroutine.create(function()
+		while bringingNpcs do
+			for _, hum in ipairs(npcCache) do
+				if hum.Parent and hum.Health > 0 then
+					local model = hum.Parent
+					local rootPart = getRoot(model)
+					if rootPart and LocalPlayer.Character and getRoot(LocalPlayer.Character) then
+						rootPart.CFrame = getRoot(LocalPlayer.Character).CFrame
+					end
+					for _, part in ipairs(model:GetDescendants()) do
+						if part:IsA("BasePart") then
+							part.CanCollide = false
+						end
+					end
+				end
+			end
+			Wait()
+		end
+	end)
+
+	coroutine.resume(bringNPClooper)
+end)
+
+cmd.add({"unloopbringnpcs"}, {"unloopbringnpcs", "Stops NPC bring loop"}, function()
+	if not bringingNpcs then return end
+	bringingNpcs = false
+	bringNPClooper = nil
 end)
 
 cmd.add({"gotonpcs"}, {"gotonpcs", "Teleports to each NPC"}, function()
@@ -13231,7 +13396,7 @@ cmd.add({"actnpc"}, {"actnpc", "Start acting like an NPC"}, function()
 		NPCControl.CurrentTarget = targetPos
 		hum:MoveTo(targetPos)
 
-		DoNotif("Moving to: "..Format("X: %.0f, Y: %.0f, Z: %.0f", targetPos.X, targetPos.Y, targetPos.Z), 1)
+		DoNotif("Moving to: "..Format("X: %.0f, Y: %.0f, Z: %.0f", targetPos.X, targetPos.Y, targetPos.Z), 1.5)
 	end
 
 	NPCControl.Connection = RunService.Heartbeat:Connect(function(dt)
@@ -13245,7 +13410,7 @@ cmd.add({"actnpc"}, {"actnpc", "Start acting like an NPC"}, function()
 		NPCControl._moveTimeout = (NPCControl._moveTimeout or 0) + dt
 
 		if hum.Sit then
-			DoNotif("Sitting detected — jumping to escape", 1)
+			DoNotif("Sitting detected — jumping to escape", 1.5)
 			hum.Sit = false
 			hum:ChangeState(Enum.HumanoidStateType.Jumping)
 			NPCControl._jumpCooldown = 1.5
@@ -13253,13 +13418,13 @@ cmd.add({"actnpc"}, {"actnpc", "Start acting like an NPC"}, function()
 		end
 
 		if NPCControl.CurrentTarget and (root.Position - NPCControl.CurrentTarget).Magnitude < 2 then
-			DoNotif("Reached target", 1)
+			DoNotif("Reached target", 1.5)
 			NPCControl.CurrentTarget = nil
 		end
 
 		if not NPCControl.CurrentTarget or NPCControl._moveTimeout > 5 then
 			if NPCControl._moveTimeout > 5 then
-				DoNotif("Stuck — retrying new path", 1)
+				DoNotif("Stuck — retrying new path", 1.5)
 			end
 			if NPCControl.MoveCooldown <= 0 then
 				moveToRandom()
@@ -13282,7 +13447,7 @@ cmd.add({"actnpc"}, {"actnpc", "Start acting like an NPC"}, function()
 
 			if part.CanCollide and not isPlayerChar then
 				if hum:GetState() == Enum.HumanoidStateType.Running then
-					DoNotif("Obstacle detected — jumping", 1)
+					DoNotif("Obstacle detected — jumping", 1.5)
 					hum:ChangeState(Enum.HumanoidStateType.Jumping)
 					NPCControl._jumpCooldown = 1.5
 				end
