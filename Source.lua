@@ -4909,7 +4909,7 @@ cmd.add({"setspawn", "spawnpoint", "ss"}, {"setspawn (spawnpoint, ss)", "Sets yo
 		end
 
 		if needsRespawning then
-			getRoot(getChar()).CFrame = spawnPosition
+			if getChar() then getRoot(getChar()).CFrame = spawnPosition end
 		end
 	end
 
