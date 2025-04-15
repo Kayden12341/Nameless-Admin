@@ -13001,7 +13001,7 @@ local monitorcon = nil
 cmd.add({"fov"}, {"fov <number>", "Sets your FOV to a custom value (1–120)"}, function(num)
 	local field = math.clamp(tonumber(num) or 70, 1, 120)
 	local cam = Workspace.CurrentCamera
-	TweenService:Create(cam, TweenInfo.new(0.5, Enum.EasingStyle.Linear), {FieldOfView = field}):Play()
+	TweenService:Create(cam, TweenInfo.new(0.3, Enum.EasingStyle.Sine), {FieldOfView = field}):Play()
 end, true)
 
 cmd.add({"loopfov", "lfov"}, {"loopfov <number> (lfov)", "Loops your FOV to stay at a custom value (1–120)"}, function(num)
@@ -13345,7 +13345,7 @@ cmd.add({"loopbringnpcs", "lbnpcs"}, {"loopbringnpcs (lbnpcs)", "Loops NPC bring
 	coroutine.resume(bringNPClooper)
 end)
 
-cmd.add({"unloopbringnpcs"}, {"unloopbringnpcs", "Stops NPC bring loop"}, function()
+cmd.add({"unloopbringnpcs", "unlbnpcs"}, {"unloopbringnpcs (unlbnpcs)", "Stops NPC bring loop"}, function()
 	if not bringingNpcs then return end
 	bringingNpcs = false
 	bringNPClooper = nil
