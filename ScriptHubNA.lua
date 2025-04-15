@@ -297,7 +297,7 @@ dd.MouseButton1Click:Connect(function()
 end)
 
 local function search(q,doEmpty)
-    local url = engine == "ScriptBlox" and "https://www.scriptblox.com/api/script/search?q="..q or "https://rscripts.net/api/v2/scripts?page=1&orderBy=date&sort=desc&q="..q
+    local url = engine == "ScriptBlox" and "https://scriptblox.com/api/script/search?q="..q or "https://rscripts.net/api/v2/scripts?page=1&orderBy=date&sort=desc&q="..q
 
     if doEmpty and engine == "ScriptBlox" then
         url='https://www.scriptblox.com/api/script/fetch'
