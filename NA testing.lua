@@ -12546,6 +12546,13 @@ end)
 
 cmd.add({"unsuspendvc", "fixvc", "rejoinvc", "restorevc"},{"unsuspendvc (fixvc, rejoinvc, restorevc)","allows you to use Voice Chat again"},function(...)
 	SafeGetService("VoiceChatService"):joinVoice()
+
+	if typeof(onVoiceModerated) ~= "RBXScriptConnection" then
+        onVoiceModerated = SafeGetService(game:GetService("VoiceChatInternal")).LocalPlayerModerated:Connect(function()
+            Wait(1)
+            SafeGetService("VoiceChatService"):joinVoice()
+        end)
+    end
 end)
 
 --[[cmd.add({"iy"},{"iy {command}","Executes infinite yield scripts"},function(...)
