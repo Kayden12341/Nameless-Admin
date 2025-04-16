@@ -3739,8 +3739,8 @@ cmd.add({"notools"},{"notools","Remove your tools"},function()
 	end
 end)
 
-cmd.add({"breaklayeredclothing","blc"},{"breaklayeredclothing (blc)","Streches your layered clothing"},function()
-	--its literally just leg resize with swim
+-- leg resize sureeee
+--[[cmd.add({"breaklayeredclothing","blc"},{"breaklayeredclothing (blc)","Streches your layered clothing"},function()
 	Wait();
 
 	DoNotif("Break layered clothing executed,if you havent already equip shirt,jacket,pants and shoes (Layered Clothing ones)")
@@ -3780,7 +3780,7 @@ cmd.add({"breaklayeredclothing","blc"},{"breaklayeredclothing (blc)","Streches y
 	end
 	Noclipping=RunService.Stepped:Connect(NoclipLoop)
 	loadstring(game:HttpGet('https://raw.githubusercontent.com/ltseverydayyou/Nameless-Admin/main/leg%20resize'))()
-end)
+end)]]
 
 cmd.add({"fpsbooster","lowgraphics","boostfps","lowg"},{"fpsbooster (lowgraphics, boostfps, lowg)","Enables low graphics mode to improve performance."},function()
 	local decalsEnabled = false
@@ -4137,14 +4137,33 @@ cmd.add({"uninvisibleparts","uninvisparts"},{"uninvisibleparts (uninvisparts)","
 	table.clear(shownParts)
 end)
 
-cmd.add({"replicationlag","backtrack"},{"replicationlag (backtrack)","Set IncomingReplicationLag"},function(...)
-	local t={...}
-	local args=t[1] or 0
+cmd.add({"replicationlag", "backtrack"}, {"replicationlag (backtrack)", "Set IncomingReplicationLag"}, function(num)
+	settings():GetService("NetworkSettings").IncomingReplicationLag = tonumber(num) or 0
+end, true)
 
-	if tonumber(args) then
-		settings():GetService("NetworkSettings").IncomingReplicationLag=args
-	end
-end,true)
+cmd.add({"sleepon"}, {"sleepon", "Enable AllowSleep"}, function()
+	settings():GetService("PhysicsSettings").AllowSleep = true
+end, true)
+
+cmd.add({"unsleepon"}, {"unsleepon", "Disable AllowSleep"}, function()
+	settings():GetService("PhysicsSettings").AllowSleep = false
+end, true)
+
+cmd.add({"throttle"}, {"throttle", "Set PhysicsEnvironmentalThrottle (1 = default, 2 = disabled)"}, function(num)
+	settings():GetService("PhysicsSettings").PhysicsEnvironmentalThrottle = tonumber(num) or 1
+end, true)
+
+cmd.add({"quality"}, {"quality", "Set Rendering QualityLevel (0-10)"}, function(level)
+	settings().Rendering.QualityLevel = tonumber(level) or 5
+end, true)
+
+cmd.add({"logphysics"}, {"logphysics", "Enable Physics Error Logging"}, function()
+	settings():GetService("NetworkSettings").PrintPhysicsErrors = true
+end, true)
+
+cmd.add({"nologphysics"}, {"nologphysics", "Disable Physics Error Logging"}, function()
+	settings():GetService("NetworkSettings").PrintPhysicsErrors = false
+end, true)
 
 cmd.add({"norender"},{"norender","Disable 3d Rendering to decrease the amount of CPU the client uses"},function()
 	RunService:Set3dRenderingEnabled(false)
@@ -4282,12 +4301,18 @@ cmd.add({"vehicleseat", "vseat"}, {"vehicleseat (vseat)", "Sits you in a vehicle
 end)
 
 cmd.add({"copytools","ctools"},{"copytools <player> (ctools)","Copies the tools the given player has"},function(...)
-	PLAYERNAMEHERE=(...)
-	Target=getPlr(PLAYERNAMEHERE)
-	for _, plr in next, Target do
-		for i,v in pairs(plr.Backpack:GetChildren()) do
-			if v:IsA("Tool") or v:IsA('HopperBin') then
-				v:Clone().Parent=Players.LocalPlayer:FindFirstChildOfClass("Backpack")
+	local targets = getPlr(...)
+	local lp = Players.LocalPlayer
+	if not lp then return end
+	local backpack = lp:FindFirstChildOfClass("Backpack")
+	if not backpack then return end
+	for _,plr in ipairs(targets) do
+		local tBackpack = plr:FindFirstChildOfClass("Backpack")
+		if tBackpack then
+			for _,tool in ipairs(tBackpack:GetChildren()) do
+				if tool:IsA("Tool") or tool:IsA("HopperBin") then
+					tool:Clone().Parent = backpack
+				end
 			end
 		end
 	end
@@ -4551,55 +4576,6 @@ cmd.add({"antikick", "nokick", "bypasskick", "bk"}, {"antikick (nokick, bypasski
 	DoNotif("Anti-Kick Enabled")
 end)
 
-cmd.add({"bypassteleport", "btp"}, {"bypassteleport (btp)", "Bypass Teleportation on Most Games"}, function()
-	local getRawMetatable = (debug and debug.getmetatable) or getrawmetatable
-	local setReadOnly = setreadonly or (
-		make_writeable and function(t, readOnly)
-			if readOnly then
-				make_readonly(t)
-			else
-				make_writeable(t)
-			end
-		end
-	)
-
-	local isCaller = checkcaller or is_protosmasher_caller
-
-	if not getRawMetatable or not setReadOnly or not newcclosure or not isCaller then
-		DoNotif("BypassTeleport is not supported in this environment", 3)
-		return
-	end
-
-	local meta = getRawMetatable(game)
-	if not meta then
-		DoNotif("Failed to access game's metatable", 3)
-		return
-	end
-
-	local originalNewIndex = meta.__newindex
-
-	setReadOnly(meta, false)
-
-	meta.__newindex = newcclosure(function(self, property, value)
-		if isCaller() then
-			return originalNewIndex(self, property, value)
-		end
-
-		if typeof(self) == "Instance" and (property == "CFrame" or property == "Position") then
-			local char = localPlayer.Character
-			if char and (self == char:FindFirstChild("HumanoidRootPart") or self == char:FindFirstChild("Torso") or self == char:FindFirstChild("UpperTorso")) then
-				return true
-			end
-		end
-
-		return originalNewIndex(self, property, value)
-	end)
-
-	setReadOnly(meta, true)
-
-	DoNotif("Teleport bypass enabled.")
-end)
-
 acftpCON = {}
 acftpCONN = nil
 acftpCFrames = {}
@@ -4700,6 +4676,7 @@ cmd.add({"antitrip"}, {"antitrip", "no tripping today bruh"}, function()
 	end
 
 	charTRIP = LocalPlayer.CharacterAdded:Connect(doTRIPPER)
+	DoNotif("Antitrip Enabled",2)
 end)
 
 cmd.add({"unantitrip"}, {"unantitrip", "tripping allowed now"}, function()
@@ -4711,6 +4688,7 @@ cmd.add({"unantitrip"}, {"unantitrip", "tripping allowed now"}, function()
 		charTRIP:Disconnect()
 		charTRIP = nil
 	end
+	DoNotif("Antitrip Disabled",2)
 end)
 
 cmd.add({"checkrfe"},{"checkrfe","Checks if the game has respect filtering enabled off"},function()
@@ -4909,7 +4887,7 @@ cmd.add({"setspawn", "spawnpoint", "ss"}, {"setspawn (spawnpoint, ss)", "Sets yo
 		end
 
 		if needsRespawning then
-			if getChar() then getRoot(getChar()).CFrame = spawnPosition end
+			if getChar() and getRoot(getChar()) then getRoot(getChar()).CFrame = spawnPosition end
 		end
 	end
 
@@ -11928,7 +11906,7 @@ cmd.add({"unviewpart", "unviewp"}, {"unviewpart (unviewp)", "Resets the camera t
 	end
 end)
 
-cmd.add({"console"},{"console","Opens developer console"},function()
+cmd.add({"console", "debug"},{"console (debug)","Opens developer console"},function()
 	StarterGui:SetCore("DevConsoleVisible",true)
 end)
 
@@ -12525,11 +12503,16 @@ cmd.add({"fireproximityprompts","fpp","firepp"},{"fireproximityprompts (fpp,fire
 	DoNotif("Fired "..fppamount.." of proximity prompts")
 end)
 
+cmd.add({"gamma", "exposure"},{"gamma (exposure)","gamma vision (real)"},function(num)
+	expose = tonumber(num) or 0
+	Lighting.ExposureCompensation = expose
+end)
+
 cmd.add({"unsuspendvc", "fixvc", "rejoinvc", "restorevc"},{"unsuspendvc (fixvc, rejoinvc, restorevc)","allows you to use Voice Chat again"},function(...)
 	SafeGetService("VoiceChatService"):joinVoice()
 
 	if typeof(onVoiceModerated) ~= "RBXScriptConnection" then
-        onVoiceModerated = SafeGetService(game:GetService("VoiceChatInternal")).LocalPlayerModerated:Connect(function()
+        onVoiceModerated = SafeGetService("VoiceChatInternal").LocalPlayerModerated:Connect(function()
             Wait(1)
             SafeGetService("VoiceChatService"):joinVoice()
         end)
@@ -12574,15 +12557,8 @@ cmd.add({"thirdp","3rdp","thirdperson"},{"thirdperson (3rdp,thirdp)","Makes you 
 	Player.CameraMode="Classic"
 end)
 
-cmd.add({"maxzoom"},{"maxzoom <amount>","Set your maximum camera distance"},function(...)
-	local args={...}
-	local num=args[1]
-
-	if num==nil then
-		num=math.huge
-	else
-		num=tonumber(num)
-	end
+cmd.add({"maxzoom"},{"maxzoom <amount>","Set your maximum camera distance"},function(num)
+	local num=tonumber(num) or 128
 	Players.LocalPlayer.CameraMaxZoomDistance=num
 end,true)
 
