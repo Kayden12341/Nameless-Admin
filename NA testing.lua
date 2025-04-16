@@ -14846,9 +14846,6 @@ NACaller(function()
 
 		--[[local updateLogMessage = maybeMock('Added "updlog" command (displays any new changes added into '..adminName..')')
 		DoNotif(updateLogMessage, nil, "Info")]]
-		if Players.LocalPlayer.UserId==3101266219 then
-			DoNotif("I thought you were a friend, but it turns out you’re just like them. Using me for your own sake")
-		end
 	end)
 	cmdInput.ZIndex = 10
 	cmdInput.PlaceholderText = isAprilFools() and '🤡 '..adminName.." V"..curVer..' 🤡' or getSeasonEmoji()..' '..adminName.." V"..curVer..' '..getSeasonEmoji()
