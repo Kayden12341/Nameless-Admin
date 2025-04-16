@@ -491,22 +491,22 @@ local player,plr,lp=Players.LocalPlayer,Players.LocalPlayer,Players.LocalPlayer
 local ctrlModule = nil
 
 pcall(function()
-	local playerScripts = Players.LocalPlayer:FindFirstChildOfClass("PlayerScripts")
-	if not playerScripts then return end
+	ppDSCRIPTSS = Players.LocalPlayer:FindFirstChildOfClass("PlayerScripts")
+	if not ppDSCRIPTSS then return end
 
-	local playerModule = playerScripts:WaitForChild("PlayerModule", 5)
-	if not playerModule then return end
+	PPMODULEEEE = ppDSCRIPTSS:WaitForChild("PlayerModule", 5)
+	if not PPMODULEEEE then return end
 
-	local controlModule = playerModule:WaitForChild("ControlModule", 5)
-	if not controlModule then return end
+	controllermodellllLLL = PPMODULEEEE:WaitForChild("ControlModule", 5)
+	if not controllermodellllLLL then return end
 
-	ctrlModule = require(controlModule)
+	ctrlModule = require(controllermodellllLLL)
 end)
 
-local inputVector = Vector3.zero
-local thumbstickVector = Vector2.zero
+customVECTORMOVE = Vector3.zero
+thumberSTICKER = Vector2.zero
 
-local inputState = {
+sussyINPUTTER = {
 	W = false,
 	A = false,
 	S = false,
@@ -515,43 +515,43 @@ local inputState = {
 
 local function updateInputVector()
 	local x, z = 0, 0
-	if inputState.W then z += 1 end
-	if inputState.S then z -= 1 end
-	if inputState.A then x -= 1 end
-	if inputState.D then x += 1 end
+	if sussyINPUTTER.W then z += 1 end
+	if sussyINPUTTER.S then z -= 1 end
+	if sussyINPUTTER.A then x -= 1 end
+	if sussyINPUTTER.D then x += 1 end
 
-	if thumbstickVector.Magnitude > 0.1 then
-		inputVector = Vector3.new(thumbstickVector.X, 0, thumbstickVector.Y)
+	if thumberSTICKER.Magnitude > 0.1 then
+		customVECTORMOVE = Vector3.new(thumberSTICKER.X, 0, thumberSTICKER.Y)
 	else
-		inputVector = Vector3.new(x, 0, z)
+		customVECTORMOVE = Vector3.new(x, 0, z)
 	end
 
-	if inputVector.Magnitude > 1 then
-		inputVector = inputVector.Unit
+	if customVECTORMOVE.Magnitude > 1 then
+		customVECTORMOVE = customVECTORMOVE.Unit
 	end
 end
 
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
 	if gameProcessed then return end
-	if input.KeyCode == Enum.KeyCode.W then inputState.W = true end
-	if input.KeyCode == Enum.KeyCode.S then inputState.S = true end
-	if input.KeyCode == Enum.KeyCode.A then inputState.A = true end
-	if input.KeyCode == Enum.KeyCode.D then inputState.D = true end
+	if input.KeyCode == Enum.KeyCode.W then sussyINPUTTER.W = true end
+	if input.KeyCode == Enum.KeyCode.S then sussyINPUTTER.S = true end
+	if input.KeyCode == Enum.KeyCode.A then sussyINPUTTER.A = true end
+	if input.KeyCode == Enum.KeyCode.D then sussyINPUTTER.D = true end
 	updateInputVector()
 end)
 
 UserInputService.InputEnded:Connect(function(input)
-	if input.KeyCode == Enum.KeyCode.W then inputState.W = false end
-	if input.KeyCode == Enum.KeyCode.S then inputState.S = false end
-	if input.KeyCode == Enum.KeyCode.A then inputState.A = false end
-	if input.KeyCode == Enum.KeyCode.D then inputState.D = false end
+	if input.KeyCode == Enum.KeyCode.W then sussyINPUTTER.W = false end
+	if input.KeyCode == Enum.KeyCode.S then sussyINPUTTER.S = false end
+	if input.KeyCode == Enum.KeyCode.A then sussyINPUTTER.A = false end
+	if input.KeyCode == Enum.KeyCode.D then sussyINPUTTER.D = false end
 	updateInputVector()
 end)
 
 UserInputService.InputChanged:Connect(function(input, gameProcessed)
 	if input.UserInputType == Enum.UserInputType.Gamepad1 or input.UserInputType == Enum.UserInputType.Touch then
 		if input.KeyCode == Enum.KeyCode.Thumbstick1 then
-			thumbstickVector = input.Position
+			thumberSTICKER = input.Position
 			updateInputVector()
 		end
 	end
@@ -566,7 +566,7 @@ function GetCustomMoveVector()
 			return vec
 		end
 	end
-	return Vector3.new(inputVector.X, inputVector.Y, -inputVector.Z)
+	return Vector3.new(customVECTORMOVE.X, customVECTORMOVE.Y, -customVECTORMOVE.Z)
 end
 
 local bringc={}
@@ -3090,11 +3090,7 @@ end)
 
 cmd.add({"unflyfling","unff"}, {"unflyfling (unff)", "stops fly and fling"}, function()
 	cmd.run({'unwalkfling'})
-	if IsOnMobile then
-		unmobilefly()
-	elseif IsOnPC then
-		cmd.run({'unvfly'})
-	end
+	cmd.run({'unvfly'})
 end)
 
 hiddenfling = false
@@ -6771,15 +6767,15 @@ cmd.add({"fly"}, {"fly [speed]", "Enable flight"}, function(...)
 	
 		gui.draggablev2(btn)
 		gui.draggablev2(speedBox)
+	else
+		FLYING = false
+		getHum().PlatformStand = false
+		Wait()
+		DoNotif("Fly enabled. Press '"..toggleKey:upper().."' to toggle flying.")
+		sFLY()
+		speedofthevfly = flySpeed
+		speedofthefly = flySpeed
 	end
-
-	FLYING = false
-	getHum().PlatformStand = false
-	Wait()
-	DoNotif("Fly enabled. Press '"..toggleKey:upper().."' to toggle flying.")
-	sFLY()
-	speedofthevfly = flySpeed
-	speedofthefly = flySpeed
 end, true)
 
 cmd.add({"unfly"}, {"unfly", "Disable flight"}, function(bool)
