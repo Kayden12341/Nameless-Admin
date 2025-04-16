@@ -3543,7 +3543,7 @@ end, true)
 
 cmd.add({"unvfly", "unvehiclefly"}, {"unvehiclefly (unvfly)", "disable vehicle fly"}, function(bool)
 	Wait()
-	DoNotif("Not flying anymore", 2)
+	if not bool then DoNotif("Not vFlying anymore", 2) end
 	FLYING = false
 	getHum().PlatformStand = false
 	if goofyFLY then goofyFLY:Destroy() end
@@ -6780,7 +6780,7 @@ end, true)
 
 cmd.add({"unfly"}, {"unfly", "Disable flight"}, function(bool)
 	Wait()
-	DoNotif("Not flying anymore", 2)
+	if not bool then DoNotif("Not flying anymore", 2) end
 	FLYING = false
 	getHum().PlatformStand = false
 	if goofyFLY then goofyFLY:Destroy() end
@@ -7202,7 +7202,7 @@ cmd.add({"freecam","fc","fcam"},{"freecam [speed] (fc,fcam)","Enable free camera
 		gui.draggablev2(btn)
 		gui.draggablev2(speedBox)
 	else
-		DoNotif("Freecam is activated, use input to move around", 2)
+		DoNotif("Freecam is activated, use WASD to move around", 2)
 		runFREECAM()
 	end
 end, true)
@@ -11866,6 +11866,37 @@ cmd.add({"pesp", "esppart", "partesp"}, {"pesp {partname} (esppart, partesp)", "
 
 	if not partTrigger then
 		partTrigger = game:GetService("Workspace").DescendantAdded:Connect(onPartAdded)
+	end
+end, true)
+
+cmd.add({"pespfind", "partespfind", "esppartfind"}, {"pespfind {partname} (partespfind, esppartfind)", "Highlights parts that partially match the name"}, function(...)
+	local args = {...}
+	local partName = Concat(args, " "):lower()
+
+	if not Discover(espList, partName) then
+		Insert(espList, partName)
+
+		for _, obj in pairs(game:GetService("Workspace"):GetDescendants()) do
+			if obj.Name:lower():find(partName) then
+				if obj:IsA("BasePart") or obj:IsA("Model") then
+					createBox(obj, Color3.fromRGB(50, 205, 50), 0.45)
+				end
+			end
+		end
+	end
+
+	if not partTrigger then
+		partTrigger = game:GetService("Workspace").DescendantAdded:Connect(function(part)
+			if #espList > 0 then
+				for _, name in ipairs(espList) do
+					if part.Name:lower():find(name) then
+						if part:IsA("BasePart") or part:IsA("Model") then
+							createBox(part, Color3.fromRGB(50, 205, 50), 0.45)
+						end
+					end
+				end
+			end
+		end)
 	end
 end, true)
 
