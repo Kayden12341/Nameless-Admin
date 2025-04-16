@@ -505,14 +505,7 @@ pcall(function()
 end)
 
 local inputVector = Vector3.zero
-local thumbstickVector = Vector2.zero
-
-local inputState = {
-	W = false,
-	A = false,
-	S = false,
-	D = false,
-}
+local inputState = { W = false, A = false, S = false, D = false }
 
 local function updateInputVector()
 	local x, z = 0, 0
@@ -520,45 +513,48 @@ local function updateInputVector()
 	if inputState.S then z -= 1 end
 	if inputState.A then x -= 1 end
 	if inputState.D then x += 1 end
-
-	if thumbstickVector.Magnitude > 0.1 then
-		inputVector = Vector3.new(thumbstickVector.X, 0, thumbstickVector.Y)
-	else
-		inputVector = Vector3.new(x, 0, z)
-	end
-
+	inputVector = Vector3.new(x, 0, z)
 	if inputVector.Magnitude > 1 then
 		inputVector = inputVector.Unit
 	end
 end
 
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-	if gameProcessed then return end
-	if input.KeyCode == Enum.KeyCode.W then inputState.W = true end
-	if input.KeyCode == Enum.KeyCode.S then inputState.S = true end
-	if input.KeyCode == Enum.KeyCode.A then inputState.A = true end
-	if input.KeyCode == Enum.KeyCode.D then inputState.D = true end
+UserInputService.InputBegan:Connect(function(input, processed)
+	if processed then return end
+	local k = input.KeyCode
+	if k == Enum.KeyCode.W then inputState.W = true end
+	if k == Enum.KeyCode.S then inputState.S = true end
+	if k == Enum.KeyCode.A then inputState.A = true end
+	if k == Enum.KeyCode.D then inputState.D = true end
 	updateInputVector()
 end)
 
 UserInputService.InputEnded:Connect(function(input)
-	if input.KeyCode == Enum.KeyCode.W then inputState.W = false end
-	if input.KeyCode == Enum.KeyCode.S then inputState.S = false end
-	if input.KeyCode == Enum.KeyCode.A then inputState.A = false end
-	if input.KeyCode == Enum.KeyCode.D then inputState.D = false end
+	local k = input.KeyCode
+	if k == Enum.KeyCode.W then inputState.W = false end
+	if k == Enum.KeyCode.S then inputState.S = false end
+	if k == Enum.KeyCode.A then inputState.A = false end
+	if k == Enum.KeyCode.D then inputState.D = false end
 	updateInputVector()
 end)
 
-UserInputService.InputChanged:Connect(function(input, gameProcessed)
-	if input.UserInputType == Enum.UserInputType.Gamepad1 or input.UserInputType == Enum.UserInputType.Touch then
-		if input.KeyCode == Enum.KeyCode.Thumbstick1 then
-			thumbstickVector = input.Position
-			updateInputVector()
+function GetCustomMoveVector()
+	local hum = getHum()
+	if hum then
+		local moveDir = hum.MoveDirection
+		if moveDir.Magnitude > 0 then
+			local cam = workspace.CurrentCamera
+			local right = cam.CFrame.RightVector
+			local forward = cam.CFrame.LookVector
+			right = Vector3.new(right.X, 0, right.Z).Unit
+			forward = Vector3.new(forward.X, 0, forward.Z).Unit
+			return Vector3.new(
+				moveDir:Dot(forward),
+				0,
+				moveDir:Dot(right)
+			)
 		end
 	end
-end)
-
-function GetCustomMoveVector()
 	return inputVector
 end
 
