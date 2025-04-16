@@ -9185,6 +9185,72 @@ cmd.add({"unheadsit"}, {"unheadsit", "Stop the headsit command."}, function()
 	end
 end)
 
+wallhopConn = nil
+
+cmd.add({"wallhop"},{"wallhop","wallhop helper"},function()
+	local char = getChar()
+	local root = getRoot(char)
+	local hum = char:FindFirstChildOfClass("Humanoid")
+
+	if wallhopConn then
+		wallhopConn:Disconnect()
+	end
+
+	local canHop = true
+
+	wallhopConn = game:GetService("RunService").Heartbeat:Connect(function()
+		if not char or not root or not hum or hum.Health <= 0 then
+			wallhopConn:Disconnect()
+			wallhopConn = nil
+			return
+		end
+
+		local params = RaycastParams.new()
+		params.FilterType = Enum.RaycastFilterType.Blacklist
+		params.FilterDescendantsInstances = {char}
+
+		local origin = root.Position + Vector3.new(0, -1, 0)
+		local direction = root.CFrame.LookVector * 1.5
+		local wallResult = workspace:Raycast(origin, direction, params)
+
+		if wallResult and hum.FloorMaterial == Enum.Material.Air then
+			local hitPart = wallResult.Instance
+			local topPoint = wallResult.Position + Vector3.new(0, 0.1, 0)
+			local upperCheck = workspace:Raycast(topPoint, Vector3.new(0, 2, 0), params)
+
+			if upperCheck and upperCheck.Instance ~= hitPart then
+				if root.Velocity.Y < -1 and canHop then
+					canHop = false
+
+					local originalYaw = root.Orientation.Y
+					local flickAngle = 35 * (math.random(0,1) == 0 and -1 or 1)
+					local newYaw = originalYaw + flickAngle
+
+					root.CFrame = CFrame.new(root.Position) * CFrame.Angles(0, math.rad(newYaw), 0)
+					hum:ChangeState(Enum.HumanoidStateType.Jumping)
+
+					Delay(0.1, function()
+						if root and root.Parent then
+							root.CFrame = CFrame.new(root.Position) * CFrame.Angles(0, math.rad(originalYaw), 0)
+						end
+					end)
+				end
+			end
+		end
+
+		if root.Velocity.Y > 0 then
+			canHop = true
+		end
+	end)
+end)
+
+cmd.add({"unwallhop"},{"unwallhop","disable wallhop helper"},function()
+	if wallhopConn then
+		wallhopConn:Disconnect()
+		wallhopConn = nil
+	end
+end)
+
 cmd.add({"jump"},{"jump","jump."},function()
 	getHum():ChangeState(Enum.HumanoidStateType.Jumping)
 end)
