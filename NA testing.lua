@@ -488,7 +488,7 @@ local mouse=localPlayer:GetMouse()
 local camera=game:GetService("Workspace").CurrentCamera
 local Commands,Aliases={},{}
 local player,plr,lp=Players.LocalPlayer,Players.LocalPlayer,Players.LocalPlayer
-local ctrlModule
+local ctrlModule = nil
 
 pcall(function()
 	local playerScripts = Players.LocalPlayer:FindFirstChildOfClass("PlayerScripts")
@@ -503,6 +503,64 @@ pcall(function()
 
 	ctrlModule = require(controlModule)
 end)
+
+local inputVector = Vector3.zero
+local thumbstickVector = Vector2.zero
+
+local inputState = {
+	W = false,
+	A = false,
+	S = false,
+	D = false,
+}
+
+local function updateInputVector()
+	local x, z = 0, 0
+	if inputState.W then z += 1 end
+	if inputState.S then z -= 1 end
+	if inputState.A then x -= 1 end
+	if inputState.D then x += 1 end
+
+	if thumbstickVector.Magnitude > 0.1 then
+		inputVector = Vector3.new(thumbstickVector.X, 0, thumbstickVector.Y)
+	else
+		inputVector = Vector3.new(x, 0, z)
+	end
+
+	if inputVector.Magnitude > 1 then
+		inputVector = inputVector.Unit
+	end
+end
+
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+	if gameProcessed then return end
+	if input.KeyCode == Enum.KeyCode.W then inputState.W = true end
+	if input.KeyCode == Enum.KeyCode.S then inputState.S = true end
+	if input.KeyCode == Enum.KeyCode.A then inputState.A = true end
+	if input.KeyCode == Enum.KeyCode.D then inputState.D = true end
+	updateInputVector()
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+	if input.KeyCode == Enum.KeyCode.W then inputState.W = false end
+	if input.KeyCode == Enum.KeyCode.S then inputState.S = false end
+	if input.KeyCode == Enum.KeyCode.A then inputState.A = false end
+	if input.KeyCode == Enum.KeyCode.D then inputState.D = false end
+	updateInputVector()
+end)
+
+UserInputService.InputChanged:Connect(function(input, gameProcessed)
+	if input.UserInputType == Enum.UserInputType.Gamepad1 or input.UserInputType == Enum.UserInputType.Touch then
+		if input.KeyCode == Enum.KeyCode.Thumbstick1 then
+			thumbstickVector = input.Position
+			updateInputVector()
+		end
+	end
+end)
+
+function GetCustomMoveVector()
+	return inputVector
+end
 
 local bringc={}
 
@@ -907,12 +965,6 @@ end
 function getPlrHum(plr)
 	local char = getPlrChar(plr)
 	return char and char:FindFirstChildWhichIsA("Humanoid") or nil
-end
-
-function isNumber(str)
-	if tonumber(str)~=nil or str=='inf' then
-		return true
-	end
 end
 
 function IsR15(plr)
@@ -4172,8 +4224,10 @@ cmd.add({"throttle"}, {"throttle", "Set PhysicsEnvironmentalThrottle (1 = defaul
 	settings():GetService("PhysicsSettings").PhysicsEnvironmentalThrottle = tonumber(num) or 1
 end, true)
 
-cmd.add({"quality"}, {"quality", "Set Rendering QualityLevel (0-10)"}, function(level)
-	settings().Rendering.QualityLevel = tonumber(level) or 5
+cmd.add({"quality"}, {"quality", "Set Rendering QualityLevel (1-10)"}, function(level)
+    level = tonumber(level) or 5
+    level = math.clamp(level, 1, 10)
+    settings().Rendering.QualityLevel = level
 end, true)
 
 cmd.add({"logphysics"}, {"logphysics", "Enable Physics Error Logging"}, function()
@@ -4959,12 +5013,12 @@ cmd.add({"hamster"}, {"hamster <number>", "Hamster ball"}, function(...)
 		if UserInputService:GetFocusedTextBox() then return end
 
 		if IsOnMobile then
-			local direction = ctrlModule:GetMoveVector()
+			local direction = GetCustomMoveVector()
 			if direction.Magnitude > 0 then
 				local right = Camera.CFrame.RightVector
 				local forward = Camera.CFrame.LookVector
-				ball.RotVelocity = ball.RotVelocity + (-right * direction.Z * delta * SPEED_MULTIPLIER)
-				ball.RotVelocity = ball.RotVelocity + (forward * direction.X * delta * SPEED_MULTIPLIER)
+				ball.RotVelocity = ball.RotVelocity + ( -right * direction.Z * delta * SPEED_MULTIPLIER)
+				ball.RotVelocity = ball.RotVelocity + ( forward * direction.X * delta * SPEED_MULTIPLIER)
 			end
 		else
 			if UserInputService:IsKeyDown("W") then
@@ -11387,8 +11441,11 @@ autoRemoveConnection = nil
 function handleDescendantAdd(part)
 	if #autoRemover > 0 then
 		if FindInTable(autoRemover, part.Name:lower()) then
-			Wait()
-			part:Destroy()
+			task.defer(function()
+				if part and part.Parent then
+					part:Destroy()
+				end
+			end)
 		end
 	else
 		if autoRemoveConnection then
@@ -11434,8 +11491,11 @@ function onAdd(obj)
 	if #autoFinder > 0 then
 		for _, kw in pairs(autoFinder) do
 			if obj.Name:lower():find(kw) then
-				Wait()
-				obj:Destroy()
+				task.defer(function()
+					if obj and obj.Parent then
+						obj:Destroy()
+					end
+				end)
 				break
 			end
 		end
@@ -11502,8 +11562,11 @@ local autoClassConnection = nil
 function handleClassDescendantAdd(part)
 	if #autoClassRemover > 0 then
 		if FindInTable(autoClassRemover, part.ClassName:lower()) then
-			Wait()
-			part:Destroy()
+			task.defer(function()
+				if part and part.Parent then
+					part:Destroy()
+				end
+			end)
 		end
 	else
 		if autoClassConnection then
