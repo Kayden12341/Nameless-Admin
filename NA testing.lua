@@ -492,7 +492,6 @@ local ctrlModule = nil
 
 pcall(function()
 	local playerScripts = Players.LocalPlayer:FindFirstChildOfClass("PlayerScripts")
-
 	if not playerScripts then return end
 
 	local playerModule = playerScripts:WaitForChild("PlayerModule", 5)
@@ -505,7 +504,14 @@ pcall(function()
 end)
 
 local inputVector = Vector3.zero
-local inputState = { W = false, A = false, S = false, D = false }
+local thumbstickVector = Vector2.zero
+
+local inputState = {
+	W = false,
+	A = false,
+	S = false,
+	D = false,
+}
 
 local function updateInputVector()
 	local x, z = 0, 0
@@ -513,49 +519,54 @@ local function updateInputVector()
 	if inputState.S then z -= 1 end
 	if inputState.A then x -= 1 end
 	if inputState.D then x += 1 end
-	inputVector = Vector3.new(x, 0, z)
+
+	if thumbstickVector.Magnitude > 0.1 then
+		inputVector = Vector3.new(thumbstickVector.X, 0, thumbstickVector.Y)
+	else
+		inputVector = Vector3.new(x, 0, z)
+	end
+
 	if inputVector.Magnitude > 1 then
 		inputVector = inputVector.Unit
 	end
 end
 
-UserInputService.InputBegan:Connect(function(input, processed)
-	if processed then return end
-	local k = input.KeyCode
-	if k == Enum.KeyCode.W then inputState.W = true end
-	if k == Enum.KeyCode.S then inputState.S = true end
-	if k == Enum.KeyCode.A then inputState.A = true end
-	if k == Enum.KeyCode.D then inputState.D = true end
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+	if gameProcessed then return end
+	if input.KeyCode == Enum.KeyCode.W then inputState.W = true end
+	if input.KeyCode == Enum.KeyCode.S then inputState.S = true end
+	if input.KeyCode == Enum.KeyCode.A then inputState.A = true end
+	if input.KeyCode == Enum.KeyCode.D then inputState.D = true end
 	updateInputVector()
 end)
 
 UserInputService.InputEnded:Connect(function(input)
-	local k = input.KeyCode
-	if k == Enum.KeyCode.W then inputState.W = false end
-	if k == Enum.KeyCode.S then inputState.S = false end
-	if k == Enum.KeyCode.A then inputState.A = false end
-	if k == Enum.KeyCode.D then inputState.D = false end
+	if input.KeyCode == Enum.KeyCode.W then inputState.W = false end
+	if input.KeyCode == Enum.KeyCode.S then inputState.S = false end
+	if input.KeyCode == Enum.KeyCode.A then inputState.A = false end
+	if input.KeyCode == Enum.KeyCode.D then inputState.D = false end
 	updateInputVector()
 end)
 
-function GetCustomMoveVector()
-	local hum = getHum()
-	if hum then
-		local moveDir = hum.MoveDirection
-		if moveDir.Magnitude > 0 then
-			local cam = workspace.CurrentCamera
-			local right = cam.CFrame.RightVector
-			local forward = cam.CFrame.LookVector
-			right = Vector3.new(right.X, 0, right.Z).Unit
-			forward = Vector3.new(forward.X, 0, forward.Z).Unit
-			return Vector3.new(
-				moveDir:Dot(forward),
-				0,
-				moveDir:Dot(right)
-			)
+UserInputService.InputChanged:Connect(function(input, gameProcessed)
+	if input.UserInputType == Enum.UserInputType.Gamepad1 or input.UserInputType == Enum.UserInputType.Touch then
+		if input.KeyCode == Enum.KeyCode.Thumbstick1 then
+			thumbstickVector = input.Position
+			updateInputVector()
 		end
 	end
-	return inputVector
+end)
+
+function GetCustomMoveVector()
+	if ctrlModule then
+		local success, vec = pcall(function()
+			return ctrlModule:GetMoveVector()
+		end)
+		if success and vec and vec.Magnitude > 0 then
+			return vec
+		end
+	end
+	return Vector3.new(inputVector.X, inputVector.Y, -inputVector.Z)
 end
 
 local bringc={}
@@ -1447,7 +1458,7 @@ function ESP(player, persistent)
 	end)
 end
 
-local Signal1, Signal2 = nil, nil
+--[[local Signal1, Signal2 = nil, nil
 local flyMobile, MobileWeld = nil, nil
 
 function mobilefly(speed, vfly)
@@ -1510,7 +1521,7 @@ function mobilefly(speed, vfly)
 			end
 
 			bg.CFrame = camera.CFrame
-			local direction = ctrlModule:GetMoveVector()
+			local direction = GetCustomMoveVector()
 			local newVelocity = Vector3.new()
 
 			if direction.X ~= 0 then
@@ -1532,7 +1543,7 @@ function unmobilefly()
 	end
 	if Signal1 then Signal1:Disconnect() end
 	if Signal2 then Signal2:Disconnect() end
-end
+end]]
 
 
 function x(v)
@@ -1551,12 +1562,15 @@ function x(v)
 	end
 end
 
-local cmdlp=Players.LocalPlayer
+local cmdlp = Players.LocalPlayer
+plr = cmdlp
+goofyFLY = nil
 
-plr=cmdlp
+local cmdlp = Players.LocalPlayer
+plr = cmdlp
+local cmdm = plr:GetMouse()
+goofyFLY = nil
 
-local cmdm=plr:GetMouse()
-goofyFLY=nil
 function sFLY(vfly)
 	while not cmdlp or not cmdlp.Character or not getRoot(cmdlp.Character) or not cmdlp.Character:FindFirstChild('Humanoid') or not cmdm do
 		Wait()
@@ -1564,12 +1578,12 @@ function sFLY(vfly)
 
 	if goofyFLY then goofyFLY:Destroy() end
 
-	goofyFLY = InstanceNew("Part",game:GetService("Workspace").CurrentCamera)
+	goofyFLY = InstanceNew("Part", game:GetService("Workspace").CurrentCamera)
 	goofyFLY.Size = Vector3.new(0.05, 0.05, 0.05)
 	goofyFLY.CanCollide = false
 
-	local CONTROL = { F = 0, B = 0, L = 0, R = 0, Q = 0, E = 0 }
-	local lCONTROL = { F = 0, B = 0, L = 0, R = 0, Q = 0, E = 0 }
+	local CONTROL = { Q = 0, E = 0 }
+	local lCONTROL = { Q = 0, E = 0 }
 	local SPEED = 0
 
 	local function FLY()
@@ -1594,31 +1608,35 @@ function sFLY(vfly)
 					getHum().PlatformStand = true
 				end
 
-				if CONTROL.L + CONTROL.R ~= 0 or CONTROL.F + CONTROL.B ~= 0 or CONTROL.Q + CONTROL.E ~= 0 then
+				local moveVec = GetCustomMoveVector()
+				moveVec = Vector3.new(moveVec.X, moveVec.Y, -moveVec.Z)
+				local hasInput = moveVec.Magnitude > 0 or CONTROL.Q ~= 0 or CONTROL.E ~= 0
+
+				if hasInput then
 					SPEED = 50
 				elseif SPEED ~= 0 then
 					SPEED = 0
 				end
 
-				if CONTROL.L + CONTROL.R ~= 0 or CONTROL.F + CONTROL.B ~= 0 or CONTROL.Q + CONTROL.E ~= 0 then
-					BV.velocity = ((game:GetService("Workspace").CurrentCamera.CoordinateFrame.lookVector * (CONTROL.F + CONTROL.B)) +
-						((game:GetService("Workspace").CurrentCamera.CoordinateFrame * CFrame.new(CONTROL.L + CONTROL.R, (CONTROL.F + CONTROL.B + CONTROL.Q + CONTROL.E) * 0.2, 0).p) -
+				if hasInput then
+					BV.velocity = ((game:GetService("Workspace").CurrentCamera.CoordinateFrame.LookVector * moveVec.Z) +
+						((game:GetService("Workspace").CurrentCamera.CoordinateFrame * CFrame.new(moveVec.X, (moveVec.Z + CONTROL.Q + CONTROL.E) * 0.2, 0).p) -
 							game:GetService("Workspace").CurrentCamera.CoordinateFrame.p)) * SPEED
-					lCONTROL = { F = CONTROL.F, B = CONTROL.B, L = CONTROL.L, R = CONTROL.R }
+					lCONTROL = { Q = CONTROL.Q, E = CONTROL.E }
 				elseif SPEED ~= 0 then
-					BV.velocity = ((game:GetService("Workspace").CurrentCamera.CoordinateFrame.lookVector * (lCONTROL.F + lCONTROL.B)) +
-						((game:GetService("Workspace").CurrentCamera.CoordinateFrame * CFrame.new(lCONTROL.L + lCONTROL.R, (lCONTROL.F + lCONTROL.B + CONTROL.Q + CONTROL.E) * 0.2, 0).p) -
+					BV.velocity = ((game:GetService("Workspace").CurrentCamera.CoordinateFrame.LookVector * moveVec.Z) +
+						((game:GetService("Workspace").CurrentCamera.CoordinateFrame * CFrame.new(moveVec.X, (moveVec.Z + lCONTROL.Q + lCONTROL.E) * 0.2, 0).p) -
 							game:GetService("Workspace").CurrentCamera.CoordinateFrame.p)) * SPEED
 				else
-					BV.velocity = Vector3.new(0, 0, 0)
+					BV.velocity = Vector3.zero
 				end
 
 				BG.cframe = game:GetService("Workspace").CurrentCamera.CoordinateFrame
 				Wait()
 			end
 
-			CONTROL = { F = 0, B = 0, L = 0, R = 0, Q = 0, E = 0 }
-			lCONTROL = { F = 0, B = 0, L = 0, R = 0, Q = 0, E = 0 }
+			CONTROL = { Q = 0, E = 0 }
+			lCONTROL = { Q = 0, E = 0 }
 			SPEED = 0
 			BG:Destroy()
 			BV:Destroy()
@@ -1628,15 +1646,7 @@ function sFLY(vfly)
 
 	cmdm.KeyDown:Connect(function(KEY)
 		local key = KEY:lower()
-		if key == 'w' then
-			CONTROL.F = vfly and speedofthevfly or speedofthefly
-		elseif key == 's' then
-			CONTROL.B = vfly and -speedofthevfly or -speedofthefly
-		elseif key == 'a' then
-			CONTROL.L = vfly and -speedofthevfly or -speedofthefly
-		elseif key == 'd' then
-			CONTROL.R = vfly and speedofthevfly or speedofthefly
-		elseif key == 'y' then
+		if key == 'y' then
 			CONTROL.Q = vfly and speedofthevfly * 2 or speedofthefly * 2
 		elseif key == 't' then
 			CONTROL.E = vfly and -speedofthevfly * 2 or -speedofthefly * 2
@@ -1645,15 +1655,7 @@ function sFLY(vfly)
 
 	cmdm.KeyUp:Connect(function(KEY)
 		local key = KEY:lower()
-		if key == 'w' then
-			CONTROL.F = 0
-		elseif key == 's' then
-			CONTROL.B = 0
-		elseif key == 'a' then
-			CONTROL.L = 0
-		elseif key == 'd' then
-			CONTROL.R = 0
-		elseif key == 'y' then
+		if key == 'y' then
 			CONTROL.Q = 0
 		elseif key == 't' then
 			CONTROL.E = 0
@@ -1662,7 +1664,6 @@ function sFLY(vfly)
 
 	FLY()
 end
-
 
 local tool=nil
 spawn(function()
@@ -3082,18 +3083,9 @@ end)
 
 cmd.add({"flyfling","ff"}, {"flyfling (ff)", "makes you fly and fling"}, function()
 	cmd.run({'unwalkfling'})
-	if IsOnMobile then
-		unmobilefly()
-	elseif IsOnPC then
-		cmd.run({'unvfly'})
-	end
-
+	cmd.run({'unvfly'})
 	cmd.run({'walkfling'})
-	if IsOnMobile then
-		mobilefly(50, true)
-	elseif IsOnPC then
-		cmd.run({'vfly'})
-	end
+	cmd.run({'vfly'})
 end)
 
 cmd.add({"unflyfling","unff"}, {"unflyfling (unff)", "stops fly and fling"}, function()
@@ -3410,20 +3402,12 @@ vKeybindConn = nil
 function toggleVFly()
 	if vFlyEnabled then
 		FLYING = false
-		if IsOnMobile then
-			unmobilefly()
-		else
-			getHum().PlatformStand = false
-			if goofyFLY then goofyFLY:Destroy() end
-		end
+		getHum().PlatformStand = false
+		if goofyFLY then goofyFLY:Destroy() end
 		vFlyEnabled = false
 	else
 		FLYING = true
-		if IsOnMobile then
-			mobilefly(vFlySpeed, true)
-		else
-			sFLY(true)
-		end
+		sFLY(true)
 		vFlyEnabled = true
 	end
 end
@@ -3441,17 +3425,21 @@ end
 
 cmd.add({"vfly", "vehiclefly"}, {"vehiclefly (vfly)", "be able to fly vehicles"}, function(...)
 	local arg = (...) or nil
-	vFlySpeed = IsOnMobile and (arg or 50) or (arg or 1)
+	vFlySpeed = arg or 1
 	connectVFlyKey()
 	vFlyEnabled = true
+
+	if vRAHH then
+		vRAHH:Destroy()
+		vRAHH = nil
+	end
+
+	cmd.run({"unfly", ''})
+
 	if IsOnMobile then
 		Wait()
-		DoNotif(adminName.." detected mobile. vFly button added for easier use.",2)
-		if vRAHH then
-			vRAHH:Destroy()
-			vRAHH = nil
-		end
-		cmd.run({"unfly",''})
+		DoNotif(adminName.." detected mobile. vFly button added for easier use.", 2)
+
 		vRAHH = InstanceNew("ScreenGui")
 		local btn = InstanceNew("TextButton")
 		local speedBox = InstanceNew("TextBox")
@@ -3460,8 +3448,10 @@ cmd.add({"vfly", "vehiclefly"}, {"vehiclefly (vfly)", "be able to fly vehicles"}
 		local corner2 = InstanceNew("UICorner")
 		local corner3 = InstanceNew("UICorner")
 		local aspect = InstanceNew("UIAspectRatioConstraint")
+
 		NaProtectUI(vRAHH)
 		vRAHH.ResetOnSpawn = false
+
 		btn.Parent = vRAHH
 		btn.BackgroundColor3 = Color3.fromRGB(30,30,30)
 		btn.BackgroundTransparency = 0.1
@@ -3474,10 +3464,13 @@ cmd.add({"vfly", "vehiclefly"}, {"vehiclefly (vfly)", "be able to fly vehicles"}
 		btn.TextWrapped = true
 		btn.Active = true
 		btn.TextScaled = true
-		corner.CornerRadius = UDim.new(0.2,0)
+
+		corner.CornerRadius = UDim.new(0.2, 0)
 		corner.Parent = btn
+
 		aspect.Parent = btn
 		aspect.AspectRatio = 1.0
+
 		speedBox.Parent = vRAHH
 		speedBox.BackgroundColor3 = Color3.fromRGB(30,30,30)
 		speedBox.BackgroundTransparency = 0.1
@@ -3492,8 +3485,10 @@ cmd.add({"vfly", "vehiclefly"}, {"vehiclefly (vfly)", "be able to fly vehicles"}
 		speedBox.ClearTextOnFocus = false
 		speedBox.PlaceholderText = "Speed"
 		speedBox.Visible = false
+
 		corner2.CornerRadius = UDim.new(0.2,0)
 		corner2.Parent = speedBox
+
 		toggleBtn.Parent = btn
 		toggleBtn.BackgroundColor3 = Color3.fromRGB(50,50,50)
 		toggleBtn.BackgroundTransparency = 0.1
@@ -3506,12 +3501,15 @@ cmd.add({"vfly", "vehiclefly"}, {"vehiclefly (vfly)", "be able to fly vehicles"}
 		toggleBtn.TextWrapped = true
 		toggleBtn.Active = true
 		toggleBtn.AutoButtonColor = true
-		corner3.CornerRadius = UDim.new(1,0)
+
+		corner3.CornerRadius = UDim.new(1, 0)
 		corner3.Parent = toggleBtn
+
 		MouseButtonFix(toggleBtn, function()
 			speedBox.Visible = not speedBox.Visible
 			toggleBtn.Text = speedBox.Visible and "-" or "+"
 		end)
+
 		coroutine.wrap(function()
 			MouseButtonFix(btn, function()
 				if not vOn then
@@ -3520,17 +3518,20 @@ cmd.add({"vfly", "vehiclefly"}, {"vehiclefly (vfly)", "be able to fly vehicles"}
 					speedBox.Text = tostring(vFlySpeed)
 					vOn = true
 					btn.Text = "UnvFly"
-					btn.BackgroundColor3 = Color3.fromRGB(0,170,0)
-					mobilefly(vFlySpeed, true)
+					btn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+					sFLY(true)
 					getHum().PlatformStand = false
 				else
 					vOn = false
 					btn.Text = "vFly"
-					btn.BackgroundColor3 = Color3.fromRGB(170,0,0)
-					unmobilefly()
+					btn.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
+					FLYING = false
+					getHum().PlatformStand = false
+					if goofyFLY then goofyFLY:Destroy() end
 				end
 			end)
 		end)()
+
 		gui.draggablev2(btn)
 		gui.draggablev2(speedBox)
 	else
@@ -3546,17 +3547,10 @@ end, true)
 
 cmd.add({"unvfly", "unvehiclefly"}, {"unvehiclefly (unvfly)", "disable vehicle fly"}, function(bool)
 	Wait()
-	if IsOnMobile then
-		if not bool then
-			DoNotif("Mobile vFly Disabled.",2)
-		end
-		unmobilefly()
-	else
-		DoNotif("Not flying anymore",2)
-		FLYING = false
-		getHum().PlatformStand = false
-		if goofyFLY then goofyFLY:Destroy() end
-	end
+	DoNotif("Not flying anymore", 2)
+	FLYING = false
+	getHum().PlatformStand = false
+	if goofyFLY then goofyFLY:Destroy() end
 	vOn = false
 	if vRAHH then
 		vRAHH:Destroy()
@@ -5008,27 +5002,13 @@ cmd.add({"hamster"}, {"hamster <number>", "Hamster ball"}, function(...)
 		humanoid.PlatformStand = true
 		if UserInputService:GetFocusedTextBox() then return end
 
-		if IsOnMobile then
-			local direction = GetCustomMoveVector()
-			if direction.Magnitude > 0 then
-				local right = Camera.CFrame.RightVector
-				local forward = Camera.CFrame.LookVector
-				ball.RotVelocity = ball.RotVelocity + ( -right * direction.Z * delta * SPEED_MULTIPLIER)
-				ball.RotVelocity = ball.RotVelocity + ( forward * direction.X * delta * SPEED_MULTIPLIER)
-			end
-		else
-			if UserInputService:IsKeyDown("W") then
-				ball.RotVelocity -= Camera.CFrame.RightVector * delta * SPEED_MULTIPLIER
-			end
-			if UserInputService:IsKeyDown("A") then
-				ball.RotVelocity -= Camera.CFrame.LookVector * delta * SPEED_MULTIPLIER
-			end
-			if UserInputService:IsKeyDown("S") then
-				ball.RotVelocity += Camera.CFrame.RightVector * delta * SPEED_MULTIPLIER
-			end
-			if UserInputService:IsKeyDown("D") then
-				ball.RotVelocity += Camera.CFrame.LookVector * delta * SPEED_MULTIPLIER
-			end
+		local moveVec = GetCustomMoveVector()
+
+		if moveVec.Magnitude > 0 then
+			local right = Camera.CFrame.RightVector
+			local forward = Camera.CFrame.LookVector
+			ball.RotVelocity = ball.RotVelocity + (right * moveVec.Z * delta * SPEED_MULTIPLIER)
+			ball.RotVelocity = ball.RotVelocity + (forward * moveVec.X * delta * SPEED_MULTIPLIER)
 		end
 	end)
 
@@ -6663,20 +6643,12 @@ keybindConn = nil
 function toggleFly()
 	if flyEnabled then
 		FLYING = false
-		if IsOnMobile then
-			unmobilefly()
-		else
-			getHum().PlatformStand = false
-			if goofyFLY then goofyFLY:Destroy() end
-		end
+		getHum().PlatformStand = false
+		if goofyFLY then goofyFLY:Destroy() end
 		flyEnabled = false
 	else
 		FLYING = true
-		if IsOnMobile then
-			mobilefly(flySpeed)
-		else
-			sFLY()
-		end
+		sFLY()
 		flyEnabled = true
 	end
 end
@@ -6694,17 +6666,18 @@ end
 
 cmd.add({"fly"}, {"fly [speed]", "Enable flight"}, function(...)
 	local arg = (...) or nil
-	flySpeed = IsOnMobile and (arg or 50) or (arg or 1)
+	flySpeed = arg or 1
 	connectFlyKey()
 	flyEnabled = true
+
+	if mFlyBruh then
+		mFlyBruh:Destroy()
+		mFlyBruh = nil
+	end
+
+	cmd.run({"unvfly", ''})
+
 	if IsOnMobile then
-		Wait()
-		DoNotif(adminName.." detected mobile. Fly button added for easier use.",2)
-		if mFlyBruh then
-			mFlyBruh:Destroy()
-			mFlyBruh = nil
-		end
-		cmd.run({"unvfly",''})
 		mFlyBruh = InstanceNew("ScreenGui")
 		local btn = InstanceNew("TextButton")
 		local speedBox = InstanceNew("TextBox")
@@ -6713,58 +6686,68 @@ cmd.add({"fly"}, {"fly [speed]", "Enable flight"}, function(...)
 		local corner2 = InstanceNew("UICorner")
 		local corner3 = InstanceNew("UICorner")
 		local aspect = InstanceNew("UIAspectRatioConstraint")
+	
 		NaProtectUI(mFlyBruh)
 		mFlyBruh.ResetOnSpawn = false
+	
 		btn.Parent = mFlyBruh
-		btn.BackgroundColor3 = Color3.fromRGB(30,30,30)
+		btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 		btn.BackgroundTransparency = 0.1
-		btn.Position = UDim2.new(0.9,0,0.5,0)
-		btn.Size = UDim2.new(0.08,0,0.1,0)
+		btn.Position = UDim2.new(0.9, 0, 0.5, 0)
+		btn.Size = UDim2.new(0.08, 0, 0.1, 0)
 		btn.Font = Enum.Font.GothamBold
 		btn.Text = "Fly"
-		btn.TextColor3 = Color3.fromRGB(255,255,255)
+		btn.TextColor3 = Color3.fromRGB(255, 255, 255)
 		btn.TextSize = 18
 		btn.TextWrapped = true
 		btn.Active = true
 		btn.TextScaled = true
-		corner.CornerRadius = UDim.new(0.2,0)
+	
+		corner.CornerRadius = UDim.new(0.2, 0)
 		corner.Parent = btn
+	
 		aspect.Parent = btn
 		aspect.AspectRatio = 1.0
+	
 		speedBox.Parent = mFlyBruh
-		speedBox.BackgroundColor3 = Color3.fromRGB(30,30,30)
+		speedBox.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 		speedBox.BackgroundTransparency = 0.1
 		speedBox.AnchorPoint = Vector2.new(0.5, 0)
 		speedBox.Position = UDim2.new(0.5, 0, 0, 10)
 		speedBox.Size = UDim2.new(0, 75, 0, 35)
 		speedBox.Font = Enum.Font.GothamBold
 		speedBox.Text = tostring(flySpeed)
-		speedBox.TextColor3 = Color3.fromRGB(255,255,255)
+		speedBox.TextColor3 = Color3.fromRGB(255, 255, 255)
 		speedBox.TextSize = 18
 		speedBox.TextWrapped = true
 		speedBox.ClearTextOnFocus = false
 		speedBox.PlaceholderText = "Speed"
 		speedBox.Visible = false
-		corner2.CornerRadius = UDim.new(0.2,0)
+	
+		corner2.CornerRadius = UDim.new(0.2, 0)
 		corner2.Parent = speedBox
+	
 		toggleBtn.Parent = btn
-		toggleBtn.BackgroundColor3 = Color3.fromRGB(50,50,50)
+		toggleBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 		toggleBtn.BackgroundTransparency = 0.1
-		toggleBtn.Position = UDim2.new(0.8,0,-0.1,0)
-		toggleBtn.Size = UDim2.new(0.4,0,0.4,0)
+		toggleBtn.Position = UDim2.new(0.8, 0, -0.1, 0)
+		toggleBtn.Size = UDim2.new(0.4, 0, 0.4, 0)
 		toggleBtn.Font = Enum.Font.SourceSans
 		toggleBtn.Text = "+"
-		toggleBtn.TextColor3 = Color3.fromRGB(255,255,255)
+		toggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 		toggleBtn.TextScaled = true
 		toggleBtn.TextWrapped = true
 		toggleBtn.Active = true
 		toggleBtn.AutoButtonColor = true
-		corner3.CornerRadius = UDim.new(1,0)
+	
+		corner3.CornerRadius = UDim.new(1, 0)
 		corner3.Parent = toggleBtn
+	
 		MouseButtonFix(toggleBtn, function()
 			speedBox.Visible = not speedBox.Visible
 			toggleBtn.Text = speedBox.Visible and "-" or "+"
 		end)
+	
 		coroutine.wrap(function()
 			MouseButtonFix(btn, function()
 				if not mOn then
@@ -6773,42 +6756,38 @@ cmd.add({"fly"}, {"fly [speed]", "Enable flight"}, function(...)
 					speedBox.Text = tostring(flySpeed)
 					mOn = true
 					btn.Text = "Unfly"
-					btn.BackgroundColor3 = Color3.fromRGB(0,170,0)
-					mobilefly(flySpeed)
+					btn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+					sFLY()
 				else
 					mOn = false
 					btn.Text = "Fly"
-					btn.BackgroundColor3 = Color3.fromRGB(170,0,0)
-					unmobilefly()
+					btn.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
+					FLYING = false
+					getHum().PlatformStand = false
+					if goofyFLY then goofyFLY:Destroy() end
 				end
 			end)
 		end)()
+	
 		gui.draggablev2(btn)
 		gui.draggablev2(speedBox)
-	else
-		FLYING = false
-		getHum().PlatformStand = false
-		Wait()
-		DoNotif("Fly enabled. Press '"..toggleKey:upper().."' to toggle flying.")
-		sFLY()
-		speedofthevfly = flySpeed
-		speedofthefly = flySpeed
 	end
+
+	FLYING = false
+	getHum().PlatformStand = false
+	Wait()
+	DoNotif("Fly enabled. Press '"..toggleKey:upper().."' to toggle flying.")
+	sFLY()
+	speedofthevfly = flySpeed
+	speedofthefly = flySpeed
 end, true)
 
 cmd.add({"unfly"}, {"unfly", "Disable flight"}, function(bool)
 	Wait()
-	if IsOnMobile then
-		if not bool then
-			DoNotif("Mobile Fly Disabled.",2)
-		end
-		unmobilefly()
-	else
-		DoNotif("Not flying anymore",2)
-		FLYING = false
-		getHum().PlatformStand = false
-		if goofyFLY then goofyFLY:Destroy() end
-	end
+	DoNotif("Not flying anymore", 2)
+	FLYING = false
+	getHum().PlatformStand = false
+	if goofyFLY then goofyFLY:Destroy() end
 	mOn = false
 	if mFlyBruh then
 		mFlyBruh:Destroy()
@@ -6845,35 +6824,12 @@ tflyCORE = nil
 cmd.add({"tfly", "tweenfly"}, {"tfly [speed] (tweenfly)", "Enables smooth flying"}, function(...)
 	TFlyEnabled = true
 	local speed = (...) or 2
-	local e1, e2
 	local Humanoid = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-	local mouse = LocalPlayer:GetMouse()
 
 	tflyCORE = InstanceNew("Part", game:GetService("Workspace").CurrentCamera)
 	tflyCORE:SetAttribute("tflyPart", true)
 	tflyCORE.Size = Vector3.new(0.05, 0.05, 0.05)
 	tflyCORE.CanCollide = false
-
-	local keys = { w = false, a = false, s = false, d = false }
-
-	if IsOnPC then
-		e1 = mouse.KeyDown:Connect(function(key)
-			if not tflyCORE or not tflyCORE.Parent then
-				e1:Disconnect()
-				e2:Disconnect()
-				return
-			end
-			if keys[key] ~= nil then
-				keys[key] = true
-			end
-		end)
-
-		e2 = mouse.KeyUp:Connect(function(key)
-			if keys[key] ~= nil then
-				keys[key] = false
-			end
-		end)
-	end
 
 	local Weld = InstanceNew("Weld", tflyCORE)
 	Weld.Part0 = tflyCORE
@@ -6892,27 +6848,13 @@ cmd.add({"tfly", "tweenfly"}, {"tfly [speed] (tweenfly)", "Enables smooth flying
 		Humanoid.PlatformStand = true
 		local newPosition = gyro.cframe - gyro.cframe.p + pos.position
 
-		if IsOnPC then
+		local moveVec = GetCustomMoveVector()
+		moveVec = Vector3.new(moveVec.X, moveVec.Y, -moveVec.Z)
+
+		if moveVec.Magnitude > 0 then
 			local camera = game:GetService("Workspace").CurrentCamera
-			if keys.w then
-				newPosition = newPosition + camera.CoordinateFrame.LookVector * speed
-			end
-			if keys.s then
-				newPosition = newPosition - camera.CoordinateFrame.LookVector * speed
-			end
-			if keys.d then
-				newPosition = newPosition * CFrame.new(speed, 0, 0)
-			end
-			if keys.a then
-				newPosition = newPosition * CFrame.new(-speed, 0, 0)
-			end
-		elseif IsOnMobile then
-			local direction = ctrlModule:GetMoveVector()
-			if direction.Magnitude > 0 then
-				local camera = game:GetService("Workspace").CurrentCamera
-				newPosition = newPosition + (direction.X * camera.CFrame.RightVector * speed)
-				newPosition = newPosition - (direction.Z * camera.CFrame.LookVector * speed)
-			end
+			newPosition = newPosition + (camera.CFrame.RightVector * moveVec.X * speed)
+			newPosition = newPosition + (camera.CFrame.LookVector * moveVec.Z * speed)
 		end
 
 		pos.position = newPosition.p
@@ -7114,11 +7056,11 @@ cmd.add({"freezewalk"},{"freezewalk","Freezes your character on the server but l
 	DoNotif("freezewalk is activated,reset to stop it")
 end)
 
-fcBTNTOGGLE= nil
+fcBTNTOGGLE = nil
 
 cmd.add({"freecam","fc","fcam"},{"freecam [speed] (fc,fcam)","Enable free camera"},function(...)
-	argg=(...)
-	local speed=argg or 5
+	argg = (...)
+	local speed = argg or 5
 
 	if connections["freecam"] then
 		lib.disconnect("freecam")
@@ -7126,89 +7068,37 @@ cmd.add({"freecam","fc","fcam"},{"freecam [speed] (fc,fcam)","Enable free camera
 		wrap(function() character.PrimaryPart.Anchored = false end)
 	end
 
-	if fcBTNTOGGLE then fcBTNTOGGLE:Destroy() fcBTNTOGGLE=nil end
+	if fcBTNTOGGLE then fcBTNTOGGLE:Destroy() fcBTNTOGGLE = nil end
 
 	function runFREECAM()
-		local dir={w=false,a=false,s=false,d=false}
-		local cf=InstanceNew("CFrameValue")
-		local camPart=InstanceNew("Part")
-		camPart.Transparency=1
-		camPart.Anchored=true
-		camPart.CFrame=camera.CFrame
+		local cf = InstanceNew("CFrameValue")
+		local camPart = InstanceNew("Part")
+		camPart.Transparency = 1
+		camPart.Anchored = true
+		camPart.CFrame = camera.CFrame
+
 		wrap(function()
-			character.PrimaryPart.Anchored=true
+			character.PrimaryPart.Anchored = true
 		end)
 
-		lib.connect("freecam",RunService.RenderStepped:Connect(function(dt)
-			local primaryPart=camPart
-			camera.CameraSubject=primaryPart
+		lib.connect("freecam", RunService.RenderStepped:Connect(function(dt)
+			local primaryPart = camPart
+			camera.CameraSubject = primaryPart
 
-			local x,y,z=0,0,0
-			if dir.w then z=-1*speed end
-			if dir.a then x=-1*speed end
-			if dir.s then z=1*speed end
-			if dir.d then x=1*speed end
-			if dir.q then y=-1*speed end
-			if dir.e then y=1*speed end
+			local moveVec = GetCustomMoveVector()
 
-			if IsOnMobile then
-				local direction = ctrlModule:GetMoveVector()
-				if direction.X ~= 0 then
-					x = x + direction.X * speed
-				end
-				if direction.Z ~= 0 then
-					z = z + direction.Z * speed
-				end
-			end
+			local x = moveVec.X * speed
+			local y = moveVec.Y * speed
+			local z = moveVec.Z * speed
 
-			primaryPart.CFrame=CFrame.new(
+			primaryPart.CFrame = CFrame.new(
 				primaryPart.CFrame.p,
-				(camera.CFrame*CFrame.new(0,0,-100)).p
+				(camera.CFrame * CFrame.new(0, 0, -100)).p
 			)
 
-			local moveDir=CFrame.new(x,y,z)
-			cf.Value=cf.Value:lerp(moveDir,0.2)
-			primaryPart.CFrame=primaryPart.CFrame:lerp(primaryPart.CFrame*cf.Value,0.2)
-		end))
-
-		lib.connect("freecam",UserInputService.InputBegan:Connect(function(input,event)
-			if event then return end
-			local code,codes=input.KeyCode,Enum.KeyCode
-			if code==codes.W then
-				dir.w=true
-			elseif code==codes.A then
-				dir.a=true
-			elseif code==codes.S then
-				dir.s=true
-			elseif code==codes.D then
-				dir.d=true
-			elseif code==codes.Q then
-				dir.q=true
-			elseif code==codes.E then
-				dir.e=true
-			elseif code==codes.Space then
-				dir.q=true
-			end
-		end))
-
-		lib.connect("freecam",UserInputService.InputEnded:Connect(function(input,event)
-			if event then return end
-			local code,codes=input.KeyCode,Enum.KeyCode
-			if code==codes.W then
-				dir.w=false
-			elseif code==codes.A then
-				dir.a=false
-			elseif code==codes.S then
-				dir.s=false
-			elseif code==codes.D then
-				dir.d=false
-			elseif code==codes.Q then
-				dir.q=false
-			elseif code==codes.E then
-				dir.e=false
-			elseif code==codes.Space then
-				dir.q=false
-			end
+			local moveDir = CFrame.new(x, y, z)
+			cf.Value = cf.Value:lerp(moveDir, 0.2)
+			primaryPart.CFrame = primaryPart.CFrame:lerp(primaryPart.CFrame * cf.Value, 0.2)
 		end))
 	end
 
@@ -7247,14 +7137,14 @@ cmd.add({"freecam","fc","fcam"},{"freecam [speed] (fc,fcam)","Enable free camera
 		aspect.AspectRatio = 1.0
 
 		speedBox.Parent = fcBTNTOGGLE
-		speedBox.BackgroundColor3 = Color3.fromRGB(30,30,30)
+		speedBox.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 		speedBox.BackgroundTransparency = 0.1
 		speedBox.AnchorPoint = Vector2.new(0.5, 0)
 		speedBox.Position = UDim2.new(0.5, 0, 0, 10)
 		speedBox.Size = UDim2.new(0, 75, 0, 35)
 		speedBox.Font = Enum.Font.GothamBold
 		speedBox.Text = tostring(speed)
-		speedBox.TextColor3 = Color3.fromRGB(255,255,255)
+		speedBox.TextColor3 = Color3.fromRGB(255, 255, 255)
 		speedBox.TextSize = 18
 		speedBox.TextWrapped = true
 		speedBox.ClearTextOnFocus = false
@@ -7316,16 +7206,16 @@ cmd.add({"freecam","fc","fcam"},{"freecam [speed] (fc,fcam)","Enable free camera
 		gui.draggablev2(btn)
 		gui.draggablev2(speedBox)
 	else
-		DoNotif("Freecam is activated, use WASD to move around", 2)
+		DoNotif("Freecam is activated, use input to move around", 2)
 		runFREECAM()
-	end	
-end,true)
+	end
+end, true)
 
 cmd.add({"unfreecam","unfc","unfcam"},{"unfreecam (unfc,unfcam)","Disable free camera"},function()
 	lib.disconnect("freecam")
-	camera.CameraSubject=character
+	camera.CameraSubject = character
 	wrap(function()
-		character.PrimaryPart.Anchored=false
+		character.PrimaryPart.Anchored = false
 	end)
 	if fcBTNTOGGLE then fcBTNTOGGLE:Destroy() fcBTNTOGGLE = nil end
 end)
