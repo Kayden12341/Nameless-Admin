@@ -9536,7 +9536,7 @@ cmd.add({"waveat", "wat"}, {"waveat <player> (wat)", "Wave to a player"}, functi
 			Players.LocalPlayer.Character:SetPrimaryPartCFrame(newCFrame)
 		end
 		local waveAnim = InstanceNew("Animation")
-		if humanoid.RigType == Enum.HumanoidRigType.R15 then
+		if IsR15() then
 			waveAnim.AnimationId = "rbxassetid://507770239"
 		else
 			waveAnim.AnimationId = "rbxassetid://128777973"
@@ -9646,6 +9646,7 @@ end)
 jerkAnim, jerkTrack, jerkLoop, jerkDied, jerkParts = nil, nil, nil, nil, {}
 
 cmd.add({"jerkuser", "jorkuser"}, {"jerkuser <player> (jorkuser)", "Lay under them and vibe"}, function(h, d)
+	if not IsR6() then DoNotif("command requires R6",3) return end
 	local username = h
 	local players = getPlr(username)
 	if #players == 0 then return end
