@@ -9643,6 +9643,110 @@ cmd.add({"unheadbang", "unmouthbang", "unhb", "unmb"}, {"unheadbang (unmouthbang
 	bangParts = {}
 end)
 
+jerkAnim, jerkTrack, jerkLoop, jerkDied, jerkParts = nil, nil, nil, nil, {}
+
+cmd.add({"jerkuser", "jorkuser"}, {"jerkuser <player> (jorkuser)", "Lay under them and vibe"}, function(h, d)
+	local username = h
+	local players = getPlr(username)
+	if #players == 0 then return end
+	local plr = players[1]
+
+	local char = getChar()
+	if not char then return end
+
+	local humanoid = char:FindFirstChildOfClass("Humanoid")
+	if not humanoid then return end
+
+	jerkAnim = InstanceNew("Animation")
+	jerkAnim.AnimationId = "rbxassetid://95383980"
+	jerkTrack = humanoid:LoadAnimation(jerkAnim)
+	jerkTrack.Looped = true
+	jerkTrack:Play()
+
+	humanoid.Sit = true
+	Wait(0.1)
+
+	local root = getRoot(char)
+	if not root then return end
+
+	root.CFrame = root.CFrame * CFrame.Angles(math.pi * 0.5, math.pi, 0)
+
+	for _, part in pairs(jerkParts) do
+		part:Destroy()
+	end
+	jerkParts = {}
+	
+	local thick = 0.2
+	local halfWidth = 2
+	local halfDepth = 2
+	local halfHeight = 3
+	local walls = {
+		{offset = CFrame.new(0, 0, halfDepth + thick / 500), size = Vector3.new(4, 6, thick)},
+		{offset = CFrame.new(0, 0, -(halfDepth + thick / 500)), size = Vector3.new(4, 6, thick)},
+		{offset = CFrame.new(halfWidth + thick / 500, 0, 0), size = Vector3.new(thick, 6, 4)},
+		{offset = CFrame.new(-(halfWidth + thick / 500), 0, 0), size = Vector3.new(thick, 6, 4)},
+		{offset = CFrame.new(0, halfHeight + thick / 500, 0), size = Vector3.new(4, thick, 4)},
+		{offset = CFrame.new(0, -(halfHeight + thick / 500), 0), size = Vector3.new(4, thick, 4)}
+	}
+	
+	for i, wall in ipairs(walls) do
+		local part = InstanceNew("Part")
+		part.Size = wall.size
+		part.Anchored = true
+		part.CanCollide = true
+		part.Transparency = 1
+		part.Parent = game:GetService("Workspace").CurrentCamera
+		Insert(jerkParts, part)
+	end
+
+	local jerkOffset = CFrame.new(0, -2.5, -0.25) * CFrame.Angles(math.pi * 0.5, 0, math.pi)
+	jerkLoop = RunService.Stepped:Connect(function()
+		pcall(function()
+			for i, wall in ipairs(walls) do
+				jerkParts[i].CFrame = root.CFrame * wall.offset
+			end
+			local targetChar = plr.Character
+			local targetRoot = targetChar and getRoot(targetChar)
+			if targetRoot then
+				root.CFrame = targetRoot.CFrame * jerkOffset
+			end
+		end)
+	end)
+
+	jerkDied = humanoid.Died:Connect(function()
+		if jerkLoop then jerkLoop:Disconnect() end
+		if jerkTrack then jerkTrack:Stop() end
+		if jerkAnim then jerkAnim:Destroy() end
+		for _, part in pairs(jerkParts) do
+			part:Destroy()
+		end
+		jerkParts = {}
+	end)
+end, true)
+
+cmd.add({"unjerkuser", "unjorkuser"}, {"unjerkuser (unjorkuser)", "Stop the jerk user action"}, function()
+	if jerkLoop then jerkLoop:Disconnect() end
+	if jerkTrack then jerkTrack:Stop() end
+	if jerkAnim then jerkAnim:Destroy() end
+	if jerkDied then jerkDied:Disconnect() end
+
+	local char = getChar()
+	local root = char and getRoot(char)
+	if root then
+		root.CFrame = root.CFrame * CFrame.Angles(0, math.pi, 0)
+	end
+
+	local humanoid = char and char:FindFirstChildOfClass("Humanoid")
+	if humanoid then
+		humanoid.Sit = false
+	end
+
+	for _, part in pairs(jerkParts) do
+		part:Destroy()
+	end
+	jerkParts = {}
+end)
+
 suckLOOP = nil
 suckANIM = nil
 suckDIED = nil
