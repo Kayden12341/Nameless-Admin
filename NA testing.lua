@@ -11970,8 +11970,13 @@ cmd.add({"unpesp", "unesppart", "unpartesp"}, {"unpesp (unesppart, unpartesp)", 
 	for _, obj in pairs(game:GetService("Workspace"):GetDescendants()) do
 		if obj:IsA("BoxHandleAdornment") and obj.Name:sub(-4) == "_ESP" then
 			local adornee = obj.Adornee
-			if adornee and Discover(espList, adornee.Name:lower()) then
-				obj:Destroy()
+			if adornee then
+				for _, name in ipairs(espList) do
+					if adornee.Name:lower():find(name) then
+						obj:Destroy()
+						break
+					end
+				end
 			end
 		end
 	end
