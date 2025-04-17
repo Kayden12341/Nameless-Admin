@@ -3,6 +3,10 @@ local RunService = game:GetService("RunService")
 local TextService = game:GetService("TextService")
 local UserInputService = game:GetService("UserInputService")
 
+function blankfunction(...)
+	return ...
+end
+
 local cloneref = cloneref or blankfunction
 
 local function SafeGetService(service)
