@@ -1562,9 +1562,23 @@ function x(v)
 	end
 end
 
-local cmdlp = Players.LocalPlayer
-plr = cmdlp
-goofyFLY = nil
+-- [[ FLY VARIABLES ]] --
+
+mOn = false
+mFlyBruh = nil
+flyEnabled = false
+toggleKey = "f"
+flySpeed = 1
+keybindConn = nil
+
+vOn = false
+vRAHH = nil
+vFlyEnabled = false
+vToggleKey = "v"
+vFlySpeed = 1
+vKeybindConn = nil
+
+-----------------------------
 
 local cmdlp = Players.LocalPlayer
 plr = cmdlp
@@ -1613,7 +1627,7 @@ function sFLY(vfly)
 				local hasInput = moveVec.Magnitude > 0 or CONTROL.Q ~= 0 or CONTROL.E ~= 0
 
 				if hasInput then
-					SPEED = 50
+					SPEED = (vfly and vFlySpeed or flySpeed) * 50
 				elseif SPEED ~= 0 then
 					SPEED = 0
 				end
@@ -1646,18 +1660,18 @@ function sFLY(vfly)
 
 	cmdm.KeyDown:Connect(function(KEY)
 		local key = KEY:lower()
-		if key == 'y' then
-			CONTROL.Q = vfly and speedofthevfly * 2 or speedofthefly * 2
-		elseif key == 't' then
-			CONTROL.E = vfly and -speedofthevfly * 2 or -speedofthefly * 2
+		if key == 'q' then
+			CONTROL.Q = vfly and -speedofthevfly * 2 or -speedofthefly * 2
+		elseif key == 'e' then
+			CONTROL.E = vfly and speedofthevfly * 2 or speedofthefly * 2
 		end
 	end)
-
+	
 	cmdm.KeyUp:Connect(function(KEY)
 		local key = KEY:lower()
-		if key == 'y' then
+		if key == 'q' then
 			CONTROL.Q = 0
-		elseif key == 't' then
+		elseif key == 'e' then
 			CONTROL.E = 0
 		end
 	end)
@@ -3387,13 +3401,6 @@ end)
 cmd.add({"unhitboxes"},{"unhitboxes","removes the hitboxes outline"},function()
 	settings():GetService("RenderSettings").ShowBoundingBoxes=false
 end)
-
-vOn = false
-vRAHH = nil
-vFlyEnabled = false
-vToggleKey = "v"
-vFlySpeed = 1
-vKeybindConn = nil
 
 function toggleVFly()
 	if vFlyEnabled then
@@ -6629,13 +6636,6 @@ cmd.add({"functionspy"},{"functionspy","Check console"},function()
 	coroutine.wrap(PRML_fake_script)()
 end)
 
-mOn = false
-mFlyBruh = nil
-flyEnabled = false
-toggleKey = "f"
-flySpeed = 1
-keybindConn = nil
-
 function toggleFly()
 	if flyEnabled then
 		FLYING = false
@@ -6674,6 +6674,9 @@ cmd.add({"fly"}, {"fly [speed]", "Enable flight"}, function(...)
 	cmd.run({"unvfly", ''})
 
 	if IsOnMobile then
+		Wait()
+		DoNotif(adminName.." detected mobile. Fly button added for easier use.", 2)
+
 		mFlyBruh = InstanceNew("ScreenGui")
 		local btn = InstanceNew("TextButton")
 		local speedBox = InstanceNew("TextBox")
