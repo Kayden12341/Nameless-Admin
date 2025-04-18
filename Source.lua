@@ -7585,7 +7585,7 @@ cmd.add({"bodytransparency","btransparency", "bodyt"}, {"bodytransparency <numbe
 	end)
 
 	DoNotif("Body transparency set to "..vv,1.5)
-end)
+end,true)
 
 cmd.add({"unbodytransparency", "unbtransparency", "unbodyt"}, {"unbodytransparency (unbtransparency,unbodyt)", "Stops transparency loop"}, function()
 	if transCONN then
@@ -9320,6 +9320,7 @@ cmd.add({"unlockmouse", "unlockm"}, {"unlockmouse (unlockm)", "Unlocks your mous
 end)
 
 cmd.add({"chattag", "ctags", "chatt", "tag"}, {"chattag (ctags, chatt, tag)", "gives you a chat tag (visually)"}, function(...)
+	if not LegacyChat then return DoNotif("this doesn't work with Legacy Chat System please use it on a game that uses the new Chat System",5) end
 	local tag = Concat({...}, " ")
 	LocalPlayer:SetAttribute("CustomNAtagger", tag)
 end, true)
