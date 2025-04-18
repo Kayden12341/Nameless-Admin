@@ -13540,7 +13540,7 @@ cmd.add({"oofspam"},{"oofspam","Spams oof"},function()
 	end
 end)
 
-cmd.add({"httpspy"},{"httspy","HTTP Spy"},function()
+cmd.add({"httpspy"},{"httpspy","HTTP Spy"},function()
 	loadstring(game:HttpGet('https://raw.githubusercontent.com/ltseverydayyou/Nameless-Admin/main/httpspy.lua'))()
 end)
 
