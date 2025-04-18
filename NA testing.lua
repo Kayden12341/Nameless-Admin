@@ -3769,8 +3769,24 @@ cmd.add({"unantivoid"},{"unantivoid","Disables antivoid"},function()
 	DoNotif("AntiVoid Disabled", 3)
 end)
 
-cmd.add({"antivoid2"},{"antivoid2","sets FallenPartsDestroyHeight to -inf"},function()
+originalFPDH = nil
+
+cmd.add({"antivoid2"}, {"antivoid2", "sets FallenPartsDestroyHeight to -inf"}, function()
+	if not originalFPDH then
+		originalFPDH = game:GetService("Workspace").FallenPartsDestroyHeight
+	end
+
 	game:GetService("Workspace").FallenPartsDestroyHeight = -9e9
+	DoNotif("FallenPartsDestroyHeight set to -inf | Antivoid2 Enabled",2)
+end)
+
+cmd.add({"unantivoid2"}, {"unantivoid2", "reverts FallenPartsDestroyHeight"}, function()
+	if originalFPDH ~= nil then
+		game:GetService("Workspace").FallenPartsDestroyHeight = originalFPDH
+		DoNotif("FallenPartsDestroyHeight reverted to original value | Antivoid2 Disabled",2)
+	else
+		DoNotif("Original value was not stored. Cannot revert.",2)
+	end
 end)
 
 cmd.add({"droptools"},{"dropalltools","Drop all of your tools"},function()
@@ -5389,19 +5405,20 @@ cmd.add({"unlockws","unlockworkspace"},{"unlockws (unlockworkspace)","Unlocks th
 	end
 end)
 
-local vehicleloopspeed
+vehicleloopspeed = nil
+vspeedBTN = nil
 
 cmd.add({"vehiclespeed", "vspeed"}, {"vehiclespeed <amount> (vspeed)", "Change the vehicle speed"}, function(amount)
 	if vehicleloopspeed then
 		vehicleloopspeed:Disconnect()
 		vehicleloopspeed = nil
 	end
-
-	local intens = tonumber(amount)
-	if not intens or intens <= 0 then
-		DoNotif("Invalid speed amount. Please provide a positive number.")
-		return
+	if vspeedBTN then
+		vspeedBTN:Destroy()
+		vspeedBTN = nil
 	end
+
+	local intens = tonumber(amount) or 1
 
 	vehicleloopspeed = RunService.Stepped:Connect(function()
 		local subject = game:GetService("Workspace").CurrentCamera.CameraSubject
@@ -5413,16 +5430,157 @@ cmd.add({"vehiclespeed", "vspeed"}, {"vehiclespeed <amount> (vspeed)", "Change t
 	end)
 
 	DoNotif("Vehicle speed set to "..intens)
-end,true)
+
+	if IsOnMobile then
+		Wait()
+		DoNotif(adminName.." detected mobile. Vehicle speed button added.", 2)
+
+		vspeedBTN = InstanceNew("ScreenGui")
+		local btn = InstanceNew("TextButton")
+		local speedBox = InstanceNew("TextBox")
+		local toggleBtn = InstanceNew("TextButton")
+		local corner = InstanceNew("UICorner")
+		local corner2 = InstanceNew("UICorner")
+		local corner3 = InstanceNew("UICorner")
+		local aspect = InstanceNew("UIAspectRatioConstraint")
+
+		NaProtectUI(vspeedBTN)
+
+		btn.Parent = vspeedBTN
+		btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+		btn.BackgroundTransparency = 0.1
+		btn.Position = UDim2.new(0.9, 0, 0.4, 0)
+		btn.Size = UDim2.new(0.08, 0, 0.1, 0)
+		btn.Font = Enum.Font.GothamBold
+		btn.Text = "vSpeed"
+		btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+		btn.TextScaled = true
+		btn.TextWrapped = true
+		btn.Active = true
+
+		corner.CornerRadius = UDim.new(0.2, 0)
+		corner.Parent = btn
+
+		aspect.Parent = btn
+		aspect.AspectRatio = 1.0
+
+		speedBox.Parent = vspeedBTN
+		speedBox.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+		speedBox.BackgroundTransparency = 0.1
+		speedBox.AnchorPoint = Vector2.new(0.5, 0)
+		speedBox.Position = UDim2.new(0.5, 0, 0, 10)
+		speedBox.Size = UDim2.new(0, 75, 0, 35)
+		speedBox.Font = Enum.Font.GothamBold
+		speedBox.Text = tostring(intens)
+		speedBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+		speedBox.TextSize = 18
+		speedBox.TextWrapped = true
+		speedBox.ClearTextOnFocus = false
+		speedBox.PlaceholderText = "Speed"
+		speedBox.Visible = false
+
+		corner2.CornerRadius = UDim.new(0.2, 0)
+		corner2.Parent = speedBox
+
+		toggleBtn.Parent = btn
+		toggleBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+		toggleBtn.BackgroundTransparency = 0.1
+		toggleBtn.Position = UDim2.new(0.8, 0, -0.1, 0)
+		toggleBtn.Size = UDim2.new(0.4, 0, 0.4, 0)
+		toggleBtn.Font = Enum.Font.SourceSans
+		toggleBtn.Text = "+"
+		toggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+		toggleBtn.TextScaled = true
+		toggleBtn.TextWrapped = true
+		toggleBtn.Active = true
+		toggleBtn.AutoButtonColor = true
+
+		corner3.CornerRadius = UDim.new(1, 0)
+		corner3.Parent = toggleBtn
+
+		MouseButtonFix(toggleBtn, function()
+			speedBox.Visible = not speedBox.Visible
+			toggleBtn.Text = speedBox.Visible and "-" or "+"
+		end)
+
+		local vSpeedOn = true
+		btn.Text = "vSpeed ON"
+		btn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+
+		MouseButtonFix(btn, function()
+			vSpeedOn = not vSpeedOn
+
+			if vSpeedOn then
+				local newIntens = tonumber(speedBox.Text) or 1
+				intens = newIntens
+
+				if vehicleloopspeed then
+					vehicleloopspeed:Disconnect()
+				end
+
+				vehicleloopspeed = RunService.Stepped:Connect(function()
+					local subject = game:GetService("Workspace").CurrentCamera.CameraSubject
+					if subject and subject:IsA("Humanoid") and subject.SeatPart then
+						subject.SeatPart:ApplyImpulse(subject.SeatPart.CFrame.LookVector * Vector3.new(intens, 0, intens))
+					elseif subject and subject:IsA("BasePart") then
+						subject:ApplyImpulse(subject.CFrame.LookVector * Vector3.new(intens, 0, intens))
+					end
+				end)
+
+				btn.Text = "vSpeed ON"
+				btn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+				DoNotif("vSpeed enabled at "..intens, 1.3)
+			else
+				if vehicleloopspeed then
+					vehicleloopspeed:Disconnect()
+					vehicleloopspeed = nil
+				end
+
+				btn.Text = "vSpeed"
+				btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+				DoNotif("vSpeed disabled", 1)
+			end
+		end)
+
+		speedBox.FocusLost:Connect(function()
+			if not vSpeedOn then return end
+			local newIntens = tonumber(speedBox.Text) or 1
+
+			intens = newIntens
+
+			if vehicleloopspeed then
+				vehicleloopspeed:Disconnect()
+			end
+
+			vehicleloopspeed = RunService.Stepped:Connect(function()
+				local subject = game:GetService("Workspace").CurrentCamera.CameraSubject
+				if subject and subject:IsA("Humanoid") and subject.SeatPart then
+					subject.SeatPart:ApplyImpulse(subject.SeatPart.CFrame.LookVector * Vector3.new(intens, 0, intens))
+				elseif subject and subject:IsA("BasePart") then
+					subject:ApplyImpulse(subject.CFrame.LookVector * Vector3.new(intens, 0, intens))
+				end
+			end)
+
+			DoNotif("vSpeed updated to "..intens, 1.2)
+		end)
+
+		gui.draggablev2(btn)
+		gui.draggablev2(speedBox)
+	end
+end, true)
 
 cmd.add({"unvehiclespeed", "unvspeed"}, {"unvehiclespeed (unvspeed)", "Stops the vehiclespeed command"}, function()
 	if vehicleloopspeed then
 		vehicleloopspeed:Disconnect()
 		vehicleloopspeed = nil
-		DoNotif("Vehicle speed disabled")
-	else
-		DoNotif("Vehicle speed is not active")
 	end
+
+	if vspeedBTN then
+		vspeedBTN:Destroy()
+		vspeedBTN = nil
+	end
+
+	DoNotif("Vehicle speed disabled")
 end)
 
 local active=false
@@ -7227,6 +7385,54 @@ cmd.add({"nohats","drophats"},{"nohats (drophats)","Drop all of your hats"},func
 	end
 end)
 
+cmd.add({"permadeath", "pdeath"}, {"permadeath (pdeath)", "be death permanently"}, function()
+	if not replicatesignal then
+		return DoNotif("Your executor does not support 'replicatesignal'")
+	end
+
+	replicatesignal(LocalPlayer.ConnectDiedSignalBackend)
+	Wait(Players.RespawnTime + 0.1)
+	
+	local humanoid = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+	if humanoid then
+		humanoid:ChangeState(Enum.HumanoidStateType.Dead)
+	end
+end)
+
+cmd.add({"unpermadeath", "unpdeath"}, {"unpermadeath (unpdeath)", "no perma death"}, function()
+	if not replicatesignal then
+		return DoNotif("Your executor does not support 'replicatesignal'")
+	end
+
+	replicatesignal(LocalPlayer.ConnectDiedSignalBackend)
+end)
+
+cmd.add({"instantrespawn", "instantr", "irespawn"}, {"instantrespawn (instantr, irespawn)", "respawn instantly"}, function()
+	if not replicatesignal then
+		return DoNotif("Your executor does not support 'replicatesignal'")
+	end
+
+	replicatesignal(LocalPlayer.ConnectDiedSignalBackend)
+
+	local rootPart = LocalPlayer.Character and getRoot(LocalPlayer.Character)
+	local cam = game:GetService("Workspace").CurrentCamera
+
+	Wait(Players.RespawnTime - 0.165)
+
+	local humanoid = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+	if humanoid then
+		humanoid:ChangeState(Enum.HumanoidStateType.Dead)
+	end
+
+	Wait(0.5)
+
+	if rootPart then
+		getRoot(LocalPlayer.Character).CFrame = rootPart.CFrame
+	end
+
+	game:GetService("Workspace").CurrentCamera = cam
+end)
+
 function getAllTools()
 	local tools={}
 	local backpack=localPlayer:FindFirstChildWhichIsA("Backpack")
@@ -8335,7 +8541,7 @@ function createSpecUI()
 			local currentPlayer = playerButtons[currentPlayerIndex]
 			local nameCheck = nameChecker(currentPlayer)
 			dropdownLabel.Text = "Spectating: "..nameCheck
-			if currentPlayer == game.Players.LocalPlayer then
+			if currentPlayer == LocalPlayer then
 				dropdownLabel.TextColor3 = Color3.fromRGB(255, 255, 0)
 			else
 				dropdownLabel.TextColor3 = Color3.fromRGB(0, 162, 255)
@@ -8349,7 +8555,7 @@ function createSpecUI()
 						if idx then
 							local playerRef = playerButtons[idx]
 							if playerRef then
-								if playerRef == game.Players.LocalPlayer then
+								if playerRef == LocalPlayer then
 									child.TextColor3 = Color3.fromRGB(255, 255, 0)
 								elseif playerRef == currentPlayer then
 									child.TextColor3 = Color3.fromRGB(0, 162, 255)
@@ -11207,7 +11413,7 @@ cmd.add({"controllock", "ctrllock"}, {"controllock (ctrllock)", "Sets your Shift
 end)
 
 cmd.add({"resetlock"}, {"resetlock", "Resets your Shiftlock keybinds to default (LeftShift)"}, function()
-	local player = game.Players.LocalPlayer
+	local player = LocalPlayer
 	local mouseLockController = player:WaitForChild("PlayerScripts"):WaitForChild("PlayerModule"):WaitForChild("CameraModule"):WaitForChild("MouseLockController")
 	local boundKeys = mouseLockController:WaitForChild("BoundKeys")
 
