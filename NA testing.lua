@@ -169,6 +169,10 @@ function NaProtectUI(sGui)
 	end
 end
 
+function guiCHECKINGAHHHHH()
+	return (gethui and gethui()) or SafeGetService("CoreGui"):FindFirstChild("RobloxGui") or SafeGetService("CoreGui") or SafeGetService("Players").LocalPlayer:FindFirstChild("PlayerGui")
+end
+
 function InstanceNew(c,p)
 	local inst = Instance.new(c)
 	if p then inst.Parent=p end
@@ -471,6 +475,7 @@ _G.NAadminsLol={
 	2502806181; --null
 	1594235217; --Purple
 	1620986547; --pc alt
+	7269577915; --another alt
 }
 
 if UserInputService.TouchEnabled then
@@ -1313,7 +1318,7 @@ function discPlrESP(player)
 end
 
 function removeAllESP()
-	for _, child in pairs(COREGUI:GetChildren()) do
+	for _, child in pairs(guiCHECKINGAHHHHH():GetChildren()) do
 		if Sub(child.Name, -4) == '_ESP' then
 			child:Destroy()
 		end
@@ -1325,7 +1330,7 @@ end
 
 function removeESPonLEAVE(plr)
 	if plr then
-		for _, child in pairs(COREGUI:GetChildren()) do
+		for _, child in pairs(guiCHECKINGAHHHHH():GetChildren()) do
 			if child.Name == plr.Name..'_ESP' then
 				child:Destroy()
 			end
@@ -1338,7 +1343,7 @@ function ESP(player, persistent)
 	Spawn(function()
 		discPlrESP(player)
 
-		for _, child in pairs(COREGUI:GetChildren()) do
+		for _, child in pairs(guiCHECKINGAHHHHH():GetChildren()) do
 			if child.Name == player.Name..'_ESP' then
 				child:Destroy()
 			end
@@ -1346,10 +1351,10 @@ function ESP(player, persistent)
 		Wait()
 
 		local function createESP()
-			if getPlrChar(player) and player.Name ~= Players.LocalPlayer.Name and not COREGUI:FindFirstChild(player.Name..'_ESP') then
+			if getPlrChar(player) and player.Name ~= Players.LocalPlayer.Name and not guiCHECKINGAHHHHH():FindFirstChild(player.Name..'_ESP') then
 				local espHolder = InstanceNew("Folder")
 				espHolder.Name = player.Name..'_ESP'
-				espHolder.Parent = COREGUI
+				espHolder.Parent = guiCHECKINGAHHHHH()
 
 				repeat Wait(1) until getPlrChar(player) and getRoot(getPlrChar(player)) and getPlrChar(player):FindFirstChildOfClass("Humanoid")
 
@@ -1391,7 +1396,7 @@ function ESP(player, persistent)
 
 					local espLoop
 					espLoop = RunService.RenderStepped:Connect(function()
-						if COREGUI:FindFirstChild(player.Name..'_ESP') then
+						if guiCHECKINGAHHHHH():FindFirstChild(player.Name..'_ESP') then
 							if getPlrChar(player) and getRoot(getPlrChar(player)) and getPlrChar(player):FindFirstChildOfClass("Humanoid") then
 								local humanoid = getPlrChar(player):FindFirstChildOfClass("Humanoid")
 								local health = math.floor(humanoid.Health)
@@ -1447,7 +1452,7 @@ function ESP(player, persistent)
 				return
 			end
 
-			for _, child in pairs(COREGUI:GetChildren()) do
+			for _, child in pairs(guiCHECKINGAHHHHH():GetChildren()) do
 				if child.Name == player.Name..'_ESP' then
 					child:Destroy()
 				end
@@ -1768,8 +1773,16 @@ lib.find=function(t,v)	--mmmmmm
 end
 
 lib.parseText = function(text, watch, rPlr)
-	local parsed = {}
+	local function FIIIX(str)
+		local chatPrefix = str:match("^/(%a+)%s")
+		if chatPrefix then
+			str = str:gsub("^/%a+%s*", "")
+		end
+		return str
+	end
+
 	if not text then return nil end
+
 	local prefix
 	if rPlr then
 		if isRelAdmin(rPlr) and isRelAdmin(Players.LocalPlayer) then
@@ -1783,36 +1796,32 @@ lib.parseText = function(text, watch, rPlr)
 	else
 		prefix = watch
 	end
-	for arg in text:gmatch("[^"..watch.."]+") do
-		arg = arg:gsub("-", "%%-")
-		local pos = text:find(arg)
-		arg = arg:gsub("%%", "")
-		if pos then
-			local find = text:sub(pos - prefix:len(), pos - 1)
-			if (find == prefix and watch == prefix) or watch ~= prefix then
-				Insert(parsed, arg)
-			end
-		else
-			Insert(parsed, nil)
-		end
+
+	text = FIIIX(text)
+
+	if text:sub(1, #prefix) ~= prefix then
+		return nil
 	end
-	return parsed
+
+	text = text:sub(#prefix + 1)
+
+	local parsed = {}
+	for arg in text:gmatch("[^ ]+") do
+		Insert(parsed, arg)
+	end
+
+	return {parsed}
 end
 
 lib.parseCommand = function(text, rPlr)
 	wrap(function()
-		local commands
-		if rPlr then
-			if isRelAdmin(rPlr) and isRelAdmin(Players.LocalPlayer) then
-				return
-			end
-			commands = lib.parseText(text, ";", rPlr)
-		else
-			commands = lib.parseText(text, opt.prefix)
-		end
+		local prefix = rPlr and (isRelAdmin(rPlr) and not isRelAdmin(Players.LocalPlayer) and ";" or nil) or opt.prefix
+		if not prefix then return end
+		local commands = lib.parseText(text, prefix, rPlr)
+		if not commands then return end
 		for _, parsed in pairs(commands) do
 			local args = {}
-			for arg in parsed:gmatch("[^ ]+") do
+			for _, arg in pairs(parsed) do
 				Insert(args, arg)
 			end
 			cmd.run(args)
@@ -9329,9 +9338,14 @@ cmd.add({"unlockmouse", "unlockm"}, {"unlockmouse (unlockm)", "Unlocks your mous
 	UserInputService.MouseBehavior = Enum.MouseBehavior.Default
 end)
 
+cmd.add({"chattag", "ctags", "chatt", "tag"}, {"chattag (ctags, chatt, tag)", "gives you a chat tag (visually)"}, function(...)
+	local tag = Concat({...}, " ")
+	LocalPlayer:SetAttribute("CustomNAtagger", tag)
+end, true)
+
 headSit, sitDied, platformParts = nil, nil, {}
 
-cmd.add({"headsit"}, {"headsit <player>", "Head sit."}, function(p)
+cmd.add({"headsit"}, {"headsit <player>", "sit on someone's head"}, function(p)
 	local ppp = getPlr(p)
 	for _, plr in next, ppp do
 		if not plr then return end
@@ -15117,6 +15131,35 @@ CaptureService.CaptureEnded:Connect(function()
 		end
 	end)
 end)
+
+if not LegacyChat then
+	TextChatService.OnIncomingMessage = function(message)
+		local textSource = message.TextSource
+		if not textSource then return end
+
+		local fromPlayer = Players:GetPlayerByUserId(textSource.UserId)
+		if not fromPlayer then return end
+
+		for _, adminId in ipairs(_G.NAadminsLol) do
+			if fromPlayer.UserId == adminId then
+				local clr = 255
+				local hex = Format("#%02X%02X%02X", clr, clr, clr)
+				local props = InstanceNew("TextChatMessageProperties")
+				props.PrefixText = Format('<font color="%s">[NA ADMIN]</font> %s', hex, message.PrefixText or "")
+				props.Text = message.Text
+				return props
+			end
+		end
+
+		local tag = fromPlayer:GetAttribute("CustomNAtagger")
+		if tag then
+			local props = InstanceNew("TextChatMessageProperties")
+			props.PrefixText = Format('<font color="#00FFAA">[%s]</font> %s', tag, message.PrefixText or "")
+			props.Text = message.Text
+			return props
+		end
+	end
+end
 
 print([[
 	
