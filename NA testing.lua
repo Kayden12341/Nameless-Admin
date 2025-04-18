@@ -1319,7 +1319,7 @@ end
 
 function removeAllESP()
 	for _, child in pairs(guiCHECKINGAHHHHH():GetChildren()) do
-		if Sub(child.Name, -4) == '_ESP' then
+		if Sub(child.Name, -4) == '_PEEPEE' then
 			child:Destroy()
 		end
 	end
@@ -1331,7 +1331,7 @@ end
 function removeESPonLEAVE(plr)
 	if plr then
 		for _, child in pairs(guiCHECKINGAHHHHH():GetChildren()) do
-			if child.Name == plr.Name..'_ESP' then
+			if child.Name == plr.Name..'_PEEPEE' then
 				child:Destroy()
 			end
 		end
@@ -1344,16 +1344,16 @@ function ESP(player, persistent)
 		discPlrESP(player)
 
 		for _, child in pairs(guiCHECKINGAHHHHH():GetChildren()) do
-			if child.Name == player.Name..'_ESP' then
+			if child.Name == player.Name..'_PEEPEE' then
 				child:Destroy()
 			end
 		end
 		Wait()
 
 		local function createESP()
-			if getPlrChar(player) and player.Name ~= Players.LocalPlayer.Name and not guiCHECKINGAHHHHH():FindFirstChild(player.Name..'_ESP') then
+			if getPlrChar(player) and player.Name ~= Players.LocalPlayer.Name and not guiCHECKINGAHHHHH():FindFirstChild(player.Name..'_PEEPEE') then
 				local espHolder = InstanceNew("Folder")
-				espHolder.Name = player.Name..'_ESP'
+				espHolder.Name = player.Name..'_PEEPEE'
 				espHolder.Parent = guiCHECKINGAHHHHH()
 
 				repeat Wait(1) until getPlrChar(player) and getRoot(getPlrChar(player)) and getPlrChar(player):FindFirstChildOfClass("Humanoid")
@@ -1396,7 +1396,7 @@ function ESP(player, persistent)
 
 					local espLoop
 					espLoop = RunService.RenderStepped:Connect(function()
-						if guiCHECKINGAHHHHH():FindFirstChild(player.Name..'_ESP') then
+						if guiCHECKINGAHHHHH():FindFirstChild(player.Name..'_PEEPEE') then
 							if getPlrChar(player) and getRoot(getPlrChar(player)) and getPlrChar(player):FindFirstChildOfClass("Humanoid") then
 								local humanoid = getPlrChar(player):FindFirstChildOfClass("Humanoid")
 								local health = math.floor(humanoid.Health)
@@ -1453,7 +1453,7 @@ function ESP(player, persistent)
 			end
 
 			for _, child in pairs(guiCHECKINGAHHHHH():GetChildren()) do
-				if child.Name == player.Name..'_ESP' then
+				if child.Name == player.Name..'_PEEPEE' then
 					child:Destroy()
 				end
 			end
@@ -12055,7 +12055,7 @@ local espTriggers = {}
 
 function createBox(part, color, transparency)
 	local box = InstanceNew("BoxHandleAdornment")
-	box.Name = part.Name:lower().."_ESP"
+	box.Name = part.Name:lower().."_PEEPEE"
 	box.Parent = part
 	box.Adornee = part
 	box.AlwaysOnTop = true
@@ -12123,7 +12123,7 @@ function disableEsp(objType, list)
 	end
 
 	for _, obj in pairs(game:GetService("Workspace"):GetDescendants()) do
-		if obj:IsA("BoxHandleAdornment") and obj.Name:sub(-4) == "_ESP" then
+		if obj:IsA("BoxHandleAdornment") and obj.Name:sub(-4) == "_PEEPEE" then
 			local adornee = obj.Adornee
 			if adornee and Discover(list, adornee) then
 				obj:Destroy()
@@ -12188,7 +12188,7 @@ end, true)
 
 cmd.add({"unpesp", "unesppart", "unpartesp"}, {"unpesp (unesppart, unpartesp)", "Removes ESP from specific parts added by pesp"}, function()
 	for _, obj in pairs(game:GetService("Workspace"):GetDescendants()) do
-		if obj:IsA("BoxHandleAdornment") and obj.Name:sub(-4) == "_ESP" then
+		if obj:IsA("BoxHandleAdornment") and obj.Name:sub(-4) == "_PEEPEE" then
 			local adornee = obj.Adornee
 			if adornee then
 				for _, name in ipairs(espList) do
