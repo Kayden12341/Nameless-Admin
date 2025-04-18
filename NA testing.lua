@@ -292,11 +292,13 @@ local GetService=game.GetService
 NA_storage=InstanceNew("ScreenGui")--Stupid Ahh script removing folders
 
 if not game:IsLoaded() then
-	local waiting=InstanceNew("Message")
-	NaProtectUI(waiting)
-	waiting.Text=adminName..' is waiting for the game to load'
+	local message = Instance.new("Message")
+	message.Text = adminName.." is waiting for the game to load"
+	NaProtectUI(message)
 	game.Loaded:Wait()
-	waiting:Destroy()
+	
+	repeat Wait() until game:GetService("Players").LocalPlayer
+	message:Destroy()
 end
 
 local githubUrl = ''
@@ -490,7 +492,7 @@ local Commands,Aliases={},{}
 local player,plr,lp=Players.LocalPlayer,Players.LocalPlayer,Players.LocalPlayer
 local ctrlModule = nil
 
-pcall(function()
+Spawn(function()
 	ppDSCRIPTSS = Players.LocalPlayer:FindFirstChildOfClass("PlayerScripts")
 	if not ppDSCRIPTSS then return end
 
@@ -950,8 +952,8 @@ function getTorso(char)
 end
 
 function getChar()
-	local player = Players.LocalPlayer
-	return player.Character or player.CharacterAdded:Wait()
+	local plr = Players.LocalPlayer
+	return plr.Character
 end
 
 function getPlrChar(plr)
@@ -960,8 +962,8 @@ function getPlrChar(plr)
 end
 
 function getBp()
-	local player = Players.LocalPlayer
-	return player:FindFirstChildWhichIsA("Backpack")
+	local plr = Players.LocalPlayer
+	return plr:FindFirstChildWhichIsA("Backpack")
 end
 
 function getHum()
@@ -1680,10 +1682,7 @@ function sFLY(vfly)
 end
 
 local tool=nil
-spawn(function()
-	repeat Wait() until getChar()
-	tool=getBp():FindFirstChildOfClass("Tool") or getChar():FindFirstChildOfClass("Tool") or nil
-end)
+if getChar() then tool=getBp():FindFirstChildOfClass("Tool") or getChar():FindFirstChildOfClass("Tool") or nil end
 
 local lp=Players.LocalPlayer
 
@@ -13624,7 +13623,7 @@ npcfollowloop = false
 cmd.add({"loopnpcfollow"}, {"loopnpcfollow", "Makes NPCS follow you in a loop"}, function()
 	npcfollowloop = true
 
-	repeat wait(0.1)
+	repeat Wait(0.1)
 		local npcs = {}
 
 		local function disappear(hum)
@@ -14831,8 +14830,8 @@ function setupPlayer(plr)
 	end
 
 	if ESPenabled then
-		spawn(function()
-			repeat wait(1) until plr.Character
+		Spawn(function()
+			repeat Wait(1) until plr.Character
 			ESP(plr)
 		end)
 	end
@@ -14901,7 +14900,7 @@ RunService.RenderStepped:Connect(function()
 	end
 end)
 
-NACaller(function()
+Spawn(function()
 	local template = UpdLogsLabel
 	local list = UpdLogsList
 
@@ -15060,7 +15059,7 @@ end
 
 --original by @qipu | loadstring(game:HttpGet("https://raw.githubusercontent.com/FilteringEnabled/NamelessAdmin/main/Source"))();
 
-NACaller(function()
+Spawn(function()
 	local NAresult = tick() - NAbegin
 	local nameCheck = nameChecker(Player)
 
