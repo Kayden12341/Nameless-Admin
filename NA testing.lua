@@ -1319,7 +1319,7 @@ end
 
 function removeAllESP()
 	for _, child in pairs(guiCHECKINGAHHHHH():GetChildren()) do
-		if Sub(child.Name, -4) == '_PEEPEE' then
+		if Sub(child.Name, -7) == '_PEEPEE' then
 			child:Destroy()
 		end
 	end
@@ -12123,7 +12123,7 @@ function disableEsp(objType, list)
 	end
 
 	for _, obj in pairs(game:GetService("Workspace"):GetDescendants()) do
-		if obj:IsA("BoxHandleAdornment") and obj.Name:sub(-4) == "_PEEPEE" then
+		if obj:IsA("BoxHandleAdornment") and obj.Name:sub(-7) == "_PEEPEE" then
 			local adornee = obj.Adornee
 			if adornee and Discover(list, adornee) then
 				obj:Destroy()
@@ -12188,7 +12188,7 @@ end, true)
 
 cmd.add({"unpesp", "unesppart", "unpartesp"}, {"unpesp (unesppart, unpartesp)", "Removes ESP from specific parts added by pesp"}, function()
 	for _, obj in pairs(game:GetService("Workspace"):GetDescendants()) do
-		if obj:IsA("BoxHandleAdornment") and obj.Name:sub(-4) == "_PEEPEE" then
+		if obj:IsA("BoxHandleAdornment") and obj.Name:sub(-7) == "_PEEPEE" then
 			local adornee = obj.Adornee
 			if adornee then
 				for _, name in ipairs(espList) do
