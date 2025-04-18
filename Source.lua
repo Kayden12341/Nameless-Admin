@@ -5509,7 +5509,6 @@ cmd.add({"vehiclespeed", "vspeed"}, {"vehiclespeed <amount> (vspeed)", "Change t
 
 				btn.Text = "vSpeed ON"
 				btn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
-				DoNotif("vSpeed enabled at "..intens, 1.3)
 			else
 				if vehicleloopspeed then
 					vehicleloopspeed:Disconnect()
@@ -5518,7 +5517,6 @@ cmd.add({"vehiclespeed", "vspeed"}, {"vehiclespeed <amount> (vspeed)", "Change t
 
 				btn.Text = "vSpeed"
 				btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-				DoNotif("vSpeed disabled", 1)
 			end
 		end)
 
@@ -5541,7 +5539,7 @@ cmd.add({"vehiclespeed", "vspeed"}, {"vehiclespeed <amount> (vspeed)", "Change t
 				end
 			end)
 
-			DoNotif("vSpeed updated to "..intens, 1.2)
+			DoNotif("vSpeed updated to "..intens, 2)
 		end)
 
 		gui.draggablev2(btn)
