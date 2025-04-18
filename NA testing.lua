@@ -404,7 +404,7 @@ local updLogs = {}
 
 local updDate="unknown" --month,day,year
 
-pcall(function()
+NACaller(function()
 	local response = req({
 		Url = githubUrl,
 		Method = "GET"
