@@ -9315,11 +9315,11 @@ cmd.add({"unlockmouse", "unlockm"}, {"unlockmouse (unlockm)", "Unlocks your mous
 	UserInputService.MouseBehavior = Enum.MouseBehavior.Default
 end)
 
-cmd.add({"chattag", "ctags", "chatt", "tag"}, {"chattag (ctags, chatt, tag)", "gives you a chat tag (visually)"}, function(...)
+--[[cmd.add({"chattag", "ctags", "chatt", "tag"}, {"chattag (ctags, chatt, tag)", "gives you a chat tag (visually)"}, function(...)
 	if not LegacyChat then return DoNotif("this doesn't work with Legacy Chat System please use it on a game that uses the new Chat System",5) end
 	local tag = Concat({...}, " ")
 	LocalPlayer:SetAttribute("CustomNAtagger", tag)
-end, true)
+end, true)]]
 
 headSit, sitDied, platformParts = nil, nil, {}
 
@@ -15153,7 +15153,6 @@ function mainNameless()
 end
 
 coroutine.wrap(mainNameless)()
-coroutine.wrap(bindToDevConsole)()
 
 if IsOnMobile then
 	MouseButtonFix(ImageButton,function()
@@ -15229,7 +15228,7 @@ CaptureService.CaptureEnded:Connect(function()
 	end)
 end)
 
-if not LegacyChat then
+--[[if not LegacyChat then
 	TextChatService.OnIncomingMessage = function(message)
 		local textSource = message.TextSource
 		if not textSource then return end
@@ -15256,7 +15255,7 @@ if not LegacyChat then
 			return props
 		end
 	end
-end
+end]]
 
 print([[
 	
@@ -15297,6 +15296,8 @@ Spawn(function() -- init
 	if resizeFrame then resizeFrame.Name = randomString() end
 	if description then description.Name = randomString() end
 end)
+
+Spawn(bindToDevConsole)
 
 Spawn(function()
 	NACaller(function()--better saveinstance support
