@@ -296,7 +296,7 @@ local GetService=game.GetService
 NA_storage=InstanceNew("ScreenGui")--Stupid Ahh script removing folders
 
 if not game:IsLoaded() then
-	local message = Instance.new("Message")
+	local message = InstanceNew("Message")
 	message.Text = adminName.." is waiting for the game to load"
 	NaProtectUI(message)
 	game.Loaded:Wait()
@@ -1084,7 +1084,7 @@ local PlayerArgs = {
 	["npc"] = function()
 		local Targets = {}
 
-		Foreach(workspace:GetDescendants(), function(Index, Model)
+		Foreach(game:GetService("Workspace"):GetDescendants(), function(Index, Model)
 			if CheckIfNPC(Model) then
 				Insert(Targets, Model)
 			end
@@ -1318,149 +1318,125 @@ function discPlrESP(player)
 end
 
 function removeAllESP()
-	for _, child in pairs(guiCHECKINGAHHHHH():GetChildren()) do
-		if Sub(child.Name, -7) == '_PEEPEE' then
-			child:Destroy()
-		end
+	for _, esp in pairs(espCONS) do
+		if esp.highlight then esp.highlight:Destroy() end
+		if esp.billboard then esp.billboard:Destroy() end
+		if esp.connection then esp.connection:Disconnect() end
 	end
-	for playerName, _ in pairs(espCONS) do
-		espCONS[playerName] = nil
-	end
+	table.clear(espCONS)
 end
 
-function removeESPonLEAVE(plr)
-	if plr then
-		for _, child in pairs(guiCHECKINGAHHHHH():GetChildren()) do
-			if child.Name == plr.Name..'_PEEPEE' then
-				child:Destroy()
-			end
-		end
+function removeESPonLEAVE(player)
+	local esp = espCONS[player]
+	if esp then
+		if esp.highlight then esp.highlight:Destroy() end
+		if esp.billboard then esp.billboard:Destroy() end
+		if esp.connection then esp.connection:Disconnect() end
+		espCONS[player] = nil
 	end
 end
 
 function ESP(player, persistent)
 	persistent = persistent or false
+
 	Spawn(function()
 		discPlrESP(player)
 
-		for _, child in pairs(guiCHECKINGAHHHHH():GetChildren()) do
-			if child.Name == player.Name..'_PEEPEE' then
-				child:Destroy()
-			end
+		local character = getPlrChar(player)
+		if not character or player == Players.LocalPlayer then return end
+
+		if espCONS[player] then
+			if espCONS[player].highlight then espCONS[player].highlight:Destroy() end
+			if espCONS[player].billboard then espCONS[player].billboard:Destroy() end
+			if espCONS[player].connection then espCONS[player].connection:Disconnect() end
 		end
-		Wait()
 
-		local function createESP()
-			if getPlrChar(player) and player.Name ~= Players.LocalPlayer.Name and not guiCHECKINGAHHHHH():FindFirstChild(player.Name..'_PEEPEE') then
-				local espHolder = InstanceNew("Folder")
-				espHolder.Name = player.Name..'_PEEPEE'
-				espHolder.Parent = guiCHECKINGAHHHHH()
+		local highlight = InstanceNew("Highlight")
+		highlight.Name = "\0"
+		highlight.FillTransparency = 0.6
+		highlight.OutlineTransparency = 0
+		highlight.Parent = character
 
-				repeat Wait(1) until getPlrChar(player) and getRoot(getPlrChar(player)) and getPlrChar(player):FindFirstChildOfClass("Humanoid")
+		local billboardGui
+		local textLabel
+		local espLoop
 
-				local adornments = {}
+		if character:FindFirstChild("Head") then
+			billboardGui = InstanceNew("BillboardGui")
+			billboardGui.Name = "\0"
+			billboardGui.Size = UDim2.new(0, 200, 0, 50)
+			billboardGui.StudsOffset = Vector3.new(0, 2.5, 0)
+			billboardGui.AlwaysOnTop = true
+			billboardGui.Parent = character.Head
 
-				for _, part in pairs(getPlrChar(player):GetChildren()) do
-					if part:IsA("BasePart") and not part:FindFirstChildOfClass("Accessory") then
-						local boxAdornment = InstanceNew("BoxHandleAdornment")
-						boxAdornment.Name = player.Name.."_Box"
-						boxAdornment.Parent = espHolder
-						boxAdornment.Adornee = part
-						boxAdornment.AlwaysOnTop = true
-						boxAdornment.ZIndex = 0
-						boxAdornment.Size = part.Size
-						boxAdornment.Color3 = Color3.fromRGB(0, 255, 0)
-						boxAdornment.Transparency = 0.45
-						Insert(adornments, boxAdornment)
+			textLabel = InstanceNew("TextLabel")
+			textLabel.Size = UDim2.new(1, 0, 1, 0)
+			textLabel.Position = UDim2.new(0, 0, 0, 0)
+			textLabel.BackgroundTransparency = 1
+			textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+			textLabel.Font = Enum.Font.GothamBold
+			textLabel.TextSize = 14
+			textLabel.TextStrokeTransparency = 0.2
+			textLabel.Text = ""
+			textLabel.Parent = billboardGui
+
+			espLoop = RunService.RenderStepped:Connect(function()
+				if not character:IsDescendantOf(game:GetService("Workspace")) then
+					espLoop:Disconnect()
+					return
+				end
+
+				local humanoid = character:FindFirstChildOfClass("Humanoid")
+				local rootPart = getRoot(character)
+				if humanoid and rootPart then
+					local health = math.floor(humanoid.Health)
+					local maxHealth = math.floor(humanoid.MaxHealth)
+					local distance = math.floor((getRoot(getPlrChar(Players.LocalPlayer)).Position - rootPart.Position).Magnitude)
+
+					local displayText = Format("%s | %d/%d HP | %d studs", nameChecker(player), health, maxHealth, distance)
+					textLabel.Text = displayText
+
+					textLabel.TextColor3 = distance < 50 and Color3.fromRGB(255, 0, 0)
+						or distance < 100 and Color3.fromRGB(255, 165, 0)
+						or Color3.fromRGB(0, 255, 0)
+
+					local teamColor = player.Team and player.Team.TeamColor and player.Team.TeamColor.Color
+					if teamColor then
+						highlight.FillColor = teamColor
+						highlight.OutlineColor = Color3.new(1, 1, 1)
 					end
 				end
-
-				if getPlrChar(player):FindFirstChild("Head") then
-					local billboardGui = InstanceNew("BillboardGui")
-					local textLabel = InstanceNew("TextLabel")
-
-					billboardGui.Adornee = getPlrChar(player):FindFirstChild("Head")
-					billboardGui.Parent = espHolder
-					billboardGui.Size = UDim2.new(0, 200, 0, 100)
-					billboardGui.StudsOffset = Vector3.new(0, 2, 0)
-					billboardGui.AlwaysOnTop = true
-
-					textLabel.Parent = billboardGui
-					textLabel.BackgroundTransparency = 1
-					textLabel.Size = UDim2.new(1, 0, 1, 0)
-					textLabel.Font = Enum.Font.GothamBold
-					textLabel.TextSize = 14
-					textLabel.TextStrokeTransparency = 0.2
-					textLabel.TextYAlignment = Enum.TextYAlignment.Center
-					textLabel.Visible = not chamsEnabled
-
-					local espLoop
-					espLoop = RunService.RenderStepped:Connect(function()
-						if guiCHECKINGAHHHHH():FindFirstChild(player.Name..'_PEEPEE') then
-							if getPlrChar(player) and getRoot(getPlrChar(player)) and getPlrChar(player):FindFirstChildOfClass("Humanoid") then
-								local humanoid = getPlrChar(player):FindFirstChildOfClass("Humanoid")
-								local health = math.floor(humanoid.Health)
-								local maxHealth = math.floor(humanoid.MaxHealth)
-					
-								local hasTeamColor, teamColor = pcall(function() return player.Team.TeamColor.Color end)
-								local teamColorFinal = hasTeamColor and teamColor or Color3.fromRGB(255, 255, 255)
-					
-								local userNaem = player:IsA("Model") and player.Name or nameChecker(player)
-					
-								if getPlrChar(Players.LocalPlayer) and getRoot(getPlrChar(Players.LocalPlayer)) and getPlrChar(Players.LocalPlayer):FindFirstChildOfClass("Humanoid") then
-									local distance = math.floor((getRoot(getPlrChar(Players.LocalPlayer)).Position - getRoot(getPlrChar(player)).Position).magnitude)
-					
-									local hasTeamName, teamName = pcall(function() return player.Team.Name end)
-									if hasTeamName then
-										textLabel.Text = Format("%s | Health: %d/%d | Studs: %d | Team: %s", userNaem, health, maxHealth, distance, teamName)
-									else
-										textLabel.Text = Format("%s | Health: %d/%d | Studs: %d", userNaem, health, maxHealth, distance)
-									end
-					
-									textLabel.TextColor3 = distance < 50 and Color3.fromRGB(255, 0, 0)
-										or distance < 100 and Color3.fromRGB(255, 165, 0)
-										or Color3.fromRGB(0, 255, 0)
-								else
-									local hasTeamName, teamName = pcall(function() return player.Team.Name end)
-									if hasTeamName then
-										textLabel.Text = Format("%s | Health: %d/%d | Team: %s", userNaem, health, maxHealth, teamName)
-									else
-										textLabel.Text = Format("%s | Health: %d/%d", userNaem, health, maxHealth)
-									end
-									textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-								end
-					
-								for _, adornment in pairs(adornments) do
-									adornment.Color3 = teamColorFinal
-								end
-							end
-						else
-							espLoop:Disconnect()
-						end
-					end)
-					storeESP(player, "renderStepped", espLoop)
-				end
-			end
+			end)
 		end
 
-		createESP()
-		if not player:IsA("Model") then
-		local characterAddedConnection
-		characterAddedConnection = player.CharacterAdded:Connect(function()
-			if not ESPenabled and not persistent then
-				characterAddedConnection:Disconnect()
-				return
-			end
+		espCONS[player] = {
+			highlight = highlight,
+			billboard = billboardGui,
+			connection = espLoop
+		}
 
-			for _, child in pairs(guiCHECKINGAHHHHH():GetChildren()) do
-				if child.Name == player.Name..'_PEEPEE' then
-					child:Destroy()
+		if not player:IsA("Model") then
+			local characterAddedConnection
+			characterAddedConnection = player.CharacterAdded:Connect(function()
+				if not ESPenabled and not persistent then
+					characterAddedConnection:Disconnect()
+					return
 				end
-			end
-			Wait(1)
-			createESP()
-		end)
-		storeESP(player, "characterAdded", characterAddedConnection)
+
+				local char = player.Character or player.CharacterAdded:Wait()
+
+				if espCONS[player] then
+					if espCONS[player].highlight then espCONS[player].highlight:Destroy() end
+					if espCONS[player].billboard then espCONS[player].billboard:Destroy() end
+					if espCONS[player].connection then espCONS[player].connection:Disconnect() end
+					espCONS[player] = nil
+				end
+
+				Wait(1)
+				ESP(player, persistent)
+			end)
+
+			storeESP(player, "characterAdded", characterAddedConnection)
 		end
 	end)
 end
@@ -7688,12 +7664,12 @@ cmd.add({"firework"}, {"firework", "pop"}, function()
 	weld.C0 = CFrame.new()
 	weld.Parent = part
 
-	local bv = Instance.new("BodyVelocity")
+	local bv = InstanceNew("BodyVelocity")
 	bv.Velocity = Vector3.new(0, 50, 0)
 	bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
 	bv.Parent = part
 
-	local bg = Instance.new("BodyGyro")
+	local bg = InstanceNew("BodyGyro")
 	bg.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
 	bg.P = 10000
 	bg.D = 0
@@ -7712,7 +7688,7 @@ cmd.add({"firework"}, {"firework", "pop"}, function()
 			bg:Destroy()
 			part:Destroy()
 
-			local explosion = Instance.new("Explosion")
+			local explosion = InstanceNew("Explosion")
 			explosion.Position = root.Position
 			explosion.BlastRadius = 6
 			explosion.BlastPressure = 500000
@@ -12367,12 +12343,11 @@ cmd.add({"breakcars", "bcars"}, {"breakcars (bcars)", "Breaks any car"}, functio
 
 	local Player = Players.LocalPlayer
 	local Mouse = Player:GetMouse()
-	local Workspace = game:GetService("Workspace")
 	local RunService = RunService
 	local UserInputService = UserInputService
 
 	local Folder = InstanceNew("Folder")
-	Folder.Parent = Workspace
+	Folder.Parent = game:GetService("Workspace")
 
 	local Part = InstanceNew("Part")
 	Part.Anchored = true
@@ -12436,11 +12411,11 @@ cmd.add({"breakcars", "bcars"}, {"breakcars (bcars)", "Breaks any car"}, functio
 		alignPosition.Attachment1 = Attachment1
 	end
 
-	for _, descendant in ipairs(Workspace:GetDescendants()) do
+	for _, descendant in ipairs(game:GetService("Workspace"):GetDescendants()) do
 		applyForceToPart(descendant)
 	end
 
-	Workspace.DescendantAdded:Connect(applyForceToPart)
+	game:GetService("Workspace").DescendantAdded:Connect(applyForceToPart)
 
 	UserInputService.InputBegan:Connect(function(input, isChatting)
 		if input.KeyCode == Enum.KeyCode.E and not isChatting then
