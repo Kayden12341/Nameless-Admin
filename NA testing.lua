@@ -14974,6 +14974,7 @@ end
 
 RunService.Stepped:Connect(function()
 	updateCanvasSize(chatLogs)
+	updateCanvasSize(NAconsoleLogs)
 	updateCanvasSize(commandsList)
 	updateCanvasSize(UpdLogsList)
 end)
