@@ -442,6 +442,7 @@ local COREGUI=SafeGetService("CoreGui");
 local AvatarEditorService = SafeGetService("AvatarEditorService");
 local ChatService = SafeGetService("Chat");
 local TextChatService = SafeGetService("TextChatService");
+local LogService = SafeGetService("LogService");
 local CaptureService = SafeGetService("CaptureService");
 local MarketplaceService = SafeGetService("MarketplaceService");
 local TextService = SafeGetService("TextService")
@@ -12275,7 +12276,8 @@ cmd.add({"unviewpart", "unviewp"}, {"unviewpart (unviewp)", "Resets the camera t
 end)
 
 cmd.add({"console", "debug"},{"console (debug)","Opens developer console"},function()
-	StarterGui:SetCore("DevConsoleVisible",true)
+	--StarterGui:SetCore("DevConsoleVisible",true)
+	gui.consoleeee()
 end)
 
 local ogSIZES = {}
@@ -13902,26 +13904,30 @@ repeat Wait() until ScreenGui~=nil -- if it loads late then I'll just add this h
 
 NaProtectUI(ScreenGui)
 
-local description=ScreenGui:FindFirstChild("Description");
-local cmdBar=ScreenGui:FindFirstChild("CmdBar");
-local centerBar=cmdBar:FindFirstChild("CenterBar");
-local cmdInput=centerBar:FindFirstChild("Input");
-local cmdAutofill=cmdBar:FindFirstChild("Autofill");
-local cmdExample=cmdAutofill:FindFirstChild("Cmd");
-local leftFill=cmdBar:FindFirstChild("LeftFill");
-local rightFill=cmdBar:FindFirstChild("RightFill");
-local chatLogsFrame=ScreenGui:FindFirstChild("ChatLogs");
-local chatLogs=chatLogsFrame:FindFirstChild("Container"):FindFirstChild("Logs");
-local chatExample=chatLogs:FindFirstChild("TextLabel");
-local commandsFrame=ScreenGui:FindFirstChild("Commands");
-local commandsFilter=commandsFrame:FindFirstChild("Container"):FindFirstChild("Filter");
-local commandsList=commandsFrame:FindFirstChild("Container"):FindFirstChild("List");
-local commandExample=commandsList:FindFirstChild("TextLabel");
-local UpdLogsFrame=ScreenGui:FindFirstChild("UpdLog");
-local UpdLogsTitle=UpdLogsFrame:FindFirstChild("Topbar"):FindFirstChild("TopBar"):FindFirstChild("Title");
-local UpdLogsList=UpdLogsFrame:FindFirstChild("Container"):FindFirstChild("List");
-local UpdLogsLabel=UpdLogsList:FindFirstChildOfClass("TextLabel");
-local resizeFrame=ScreenGui:FindFirstChild("Resizeable");
+local description = ScreenGui:FindFirstChild("Description")
+
+local cmdBar = ScreenGui:FindFirstChild("CmdBar")
+local centerBar = cmdBar and cmdBar:FindFirstChild("CenterBar")
+local cmdInput = centerBar and centerBar:FindFirstChild("Input")
+local cmdAutofill = cmdBar and cmdBar:FindFirstChild("Autofill")
+local cmdExample = cmdAutofill and cmdAutofill:FindFirstChild("Cmd")
+local leftFill = cmdBar and cmdBar:FindFirstChild("LeftFill")
+local rightFill = cmdBar and cmdBar:FindFirstChild("RightFill")
+local chatLogsFrame = ScreenGui:FindFirstChild("ChatLogs")
+local chatLogs = chatLogsFrame and chatLogsFrame:FindFirstChild("Container") and chatLogsFrame:FindFirstChild("Container"):FindFirstChild("Logs")
+local chatExample = chatLogs and chatLogs:FindFirstChildWhichIsA("TextLabel")
+local NAconsoleFrame = ScreenGui:FindFirstChild("soRealConsole")
+local NAconsoleLogs = NAconsoleFrame and NAconsoleFrame:FindFirstChild("Container") and NAconsoleFrame:FindFirstChild("Container"):FindFirstChild("Logs")
+local NAconsoleExample = NAconsoleLogs and NAconsoleLogs:FindFirstChildWhichIsA("TextLabel")
+local commandsFrame = ScreenGui:FindFirstChild("Commands")
+local commandsFilter = commandsFrame and commandsFrame:FindFirstChild("Container") and commandsFrame:FindFirstChild("Container"):FindFirstChild("Filter")
+local commandsList = commandsFrame and commandsFrame:FindFirstChild("Container") and commandsFrame:FindFirstChild("Container"):FindFirstChild("List")
+local commandExample = commandsList and commandsList:FindFirstChild("TextLabel")
+local UpdLogsFrame = ScreenGui:FindFirstChild("UpdLog")
+local UpdLogsTitle = UpdLogsFrame and UpdLogsFrame:FindFirstChild("Topbar") and UpdLogsFrame:FindFirstChild("Topbar"):FindFirstChild("TopBar") and UpdLogsFrame:FindFirstChild("Topbar"):FindFirstChild("TopBar"):FindFirstChild("Title")
+local UpdLogsList = UpdLogsFrame and UpdLogsFrame:FindFirstChild("Container") and UpdLogsFrame:FindFirstChild("Container"):FindFirstChild("List")
+local UpdLogsLabel = UpdLogsList and UpdLogsList:FindFirstChildWhichIsA("TextLabel")
+local resizeFrame = ScreenGui:FindFirstChild("Resizeable")
 local resizeXY={
 	Top = {Vector2.new(0,-1),    Vector2.new(0,-1),    "rbxassetid://2911850935"},
 	Bottom = {Vector2.new(0,1),    Vector2.new(0,0),    "rbxassetid://2911850935"},
@@ -13934,11 +13940,29 @@ local resizeXY={
 	BottomRight = {Vector2.new(1,1),    Vector2.new(0,0),    "rbxassetid://2911852219"},
 }
 
-cmdExample.Parent=nil
-chatExample.Parent=nil
-commandExample.Parent=nil
-UpdLogsLabel.Parent=nil
-resizeFrame.Parent=nil
+if cmdExample then
+	cmdExample.Parent = nil
+end
+
+if chatExample then
+	chatExample.Parent = nil
+end
+
+if NAconsoleExample then
+	NAconsoleExample.Parent = nil
+end
+
+if commandExample then
+	commandExample.Parent = nil
+end
+
+if UpdLogsLabel then
+	UpdLogsLabel.Parent = nil
+end
+
+if resizeFrame then
+	resizeFrame.Parent = nil
+end
 
 	--[[pcall(function()
 		for i,v in pairs(ScreenGui:GetDescendants()) do
@@ -14014,23 +14038,34 @@ gui.commands = function()
 	cList.CanvasSize = UDim2.new(0, 0, 0, yOffset)
 	cFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
 end
-gui.chatlogs=function()
-	if not chatLogsFrame.Visible then
-		chatLogsFrame.Visible=true
+gui.chatlogs = function()
+	if chatLogsFrame then
+		if not chatLogsFrame.Visible then
+			chatLogsFrame.Visible = true
+		end
+		chatLogsFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
 	end
-	chatLogsFrame.Position=UDim2.new(0.5,0,0.5,0)
 end
-gui.updateLogs=function()
-	if not UpdLogsFrame.Visible and next(updLogs) then
-		UpdLogsFrame.Visible=true
-	elseif not next(updLogs) then
-		DoNotif("no upd logs for now...")
-	else
-		warn("huh?")
+gui.consoleeee = function()
+	if NAconsoleFrame then
+		if not NAconsoleFrame.Visible then
+			NAconsoleFrame.Visible = true
+		end
+		NAconsoleFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
 	end
-	UpdLogsFrame.Position=UDim2.new(0.5,0,0.5,0)
 end
-
+gui.updateLogs = function()
+	if UpdLogsFrame then
+		if not UpdLogsFrame.Visible and next(updLogs) then
+			UpdLogsFrame.Visible = true
+		elseif not next(updLogs) then
+			DoNotif("no upd logs for now...")
+		else
+			warn("huh?")
+		end
+		UpdLogsFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+	end
+end
 gui.tween = function(obj, style, direction, duration, goal, callback)
 	style = style or "Sine"
 	direction = direction or "Out"
@@ -14615,17 +14650,41 @@ end)
 
 gui.barDeselect(0)
 cmdBar.Visible=true
-gui.menuifyv2(chatLogsFrame)
-gui.menuify(commandsFrame)
-gui.menuify(UpdLogsFrame)
+if chatLogsFrame then
+	gui.menuifyv2(chatLogsFrame)
+end
+
+if NAconsoleFrame then
+	gui.menuifyv2(NAconsoleFrame)
+end
+
+if commandsFrame then
+	gui.menuify(commandsFrame)
+end
+
+if UpdLogsFrame then
+	gui.menuify(UpdLogsFrame)
+end
 
 --[[ GUI RESIZE FUNCTION ]]--
 
 --Discover({Enum.Platform.IOS,Enum.Platform.Android},UserInputService:GetPlatform()) | searches if the player is on mobile.
 if IsOnPC then
-	gui.resizeable(chatLogsFrame)
-	gui.resizeable(commandsFrame)
-	gui.resizeable(UpdLogsFrame)
+	if chatLogsFrame then
+		gui.resizeable(chatLogsFrame)
+	end
+	
+	if NAconsoleFrame then
+		gui.resizeable(NAconsoleFrame)
+	end
+	
+	if commandsFrame then
+		gui.resizeable(commandsFrame)
+	end
+	
+	if UpdLogsFrame then
+		gui.resizeable(UpdLogsFrame)
+	end
 end
 
 --[[ CMDS COMMANDS SEARCH FUNCTION ]]--
@@ -14753,6 +14812,7 @@ function bindToChat(plr, msg)
 		end
 	end
 
+	chatMsg.Name = randomString()
 	chatMsg.Parent = chatLogs
 
 	local displayName = plr.DisplayName or "Unknown"
@@ -14804,6 +14864,66 @@ function bindToChat(plr, msg)
 			chatFrames[i]:Destroy()
 		end
 	end
+end
+
+function bindToDevConsole()
+	if not NAconsoleLogs or not NAconsoleExample then return end
+
+	LogService.MessageOut:Connect(function(msg, msgTYPE)
+		local logLabel = NAconsoleExample:Clone()
+
+		for _, v in pairs(NAconsoleLogs:GetChildren()) do
+			if v:IsA("TextLabel") then
+				v.LayoutOrder = v.LayoutOrder - 1
+			end
+		end
+
+		logLabel.Name = randomString()
+		logLabel.Parent = NAconsoleLogs
+		logLabel.RichText = true
+
+		local tagColor, tagText = "", ""
+
+		if msgTYPE == Enum.MessageType.MessageError then
+			tagColor = "#ff6464"
+			tagText = "Error"
+		elseif msgTYPE == Enum.MessageType.MessageWarning then
+			tagColor = "#ffcc00"
+			tagText = "Warn"
+		else
+			tagColor = "#cccccc"
+			tagText = "Output"
+		end
+
+		logLabel.Text = Format(
+			'<font color="%s">[%s]</font>: <font color="#ffffff">%s</font>',
+			tagColor,
+			tagText,
+			msg
+		)
+
+		local txtSize = gui.txtSize(logLabel, logLabel.AbsoluteSize.X, 100)
+		logLabel.Size = UDim2.new(1, -5, 0, txtSize.Y)
+
+		local MAX_MESSAGES = 100
+		local logFrames = {}
+
+		for _, v in pairs(NAconsoleLogs:GetChildren()) do
+			if v:IsA("TextLabel") then
+				Insert(logFrames, v)
+			end
+		end
+
+		table.sort(logFrames, function(a, b)
+			return a.LayoutOrder < b.LayoutOrder
+		end)
+
+		if #logFrames > MAX_MESSAGES then
+			for i = MAX_MESSAGES + 1, #logFrames do
+				logFrames[i]:Destroy()
+			end
+		end
+	end)
 end
 
 function setupPlayer(plr)
@@ -15033,6 +15153,7 @@ function mainNameless()
 end
 
 coroutine.wrap(mainNameless)()
+coroutine.wrap(bindToDevConsole)()
 
 if IsOnMobile then
 	MouseButtonFix(ImageButton,function()
@@ -15167,13 +15288,14 @@ Spawn(function()
 	end
 end)
 
-Spawn(function() -- innit
-	cmdBar.Name = randomString()
-	chatLogsFrame.Name = randomString()
-	commandsFrame.Name = randomString()
-	UpdLogsFrame.Name = randomString()
-	resizeFrame.Name = randomString()
-	description.Name = randomString()
+Spawn(function() -- init
+	if cmdBar then cmdBar.Name = randomString() end
+	if chatLogsFrame then chatLogsFrame.Name = randomString() end
+	if NAconsoleFrame then NAconsoleFrame.Name = randomString() end
+	if commandsFrame then commandsFrame.Name = randomString() end
+	if UpdLogsFrame then UpdLogsFrame.Name = randomString() end
+	if resizeFrame then resizeFrame.Name = randomString() end
+	if description then description.Name = randomString() end
 end)
 
 Spawn(function()

@@ -277,7 +277,7 @@ local GetService=game.GetService
 NA_storage=InstanceNew("ScreenGui")--Stupid Ahh script removing folders
 
 if not game:IsLoaded() then
-	local message = Instance.new("Message")
+	local message = InstanceNew("Message")
 	message.Text = adminName.." is waiting for the game to load"
 	NaProtectUI(message)
 	game.Loaded:Wait()
@@ -423,6 +423,7 @@ local COREGUI=SafeGetService("CoreGui");
 local AvatarEditorService = SafeGetService("AvatarEditorService");
 local ChatService = SafeGetService("Chat");
 local TextChatService = SafeGetService("TextChatService");
+local LogService = SafeGetService("LogService");
 local CaptureService = SafeGetService("CaptureService");
 local MarketplaceService = SafeGetService("MarketplaceService");
 local TextService = SafeGetService("TextService")
@@ -1065,7 +1066,7 @@ local PlayerArgs = {
 	["npc"] = function()
 		local Targets = {}
 
-		Foreach(workspace:GetDescendants(), function(Index, Model)
+		Foreach(game:GetService("Workspace"):GetDescendants(), function(Index, Model)
 			if CheckIfNPC(Model) then
 				Insert(Targets, Model)
 			end
@@ -1299,149 +1300,125 @@ function discPlrESP(player)
 end
 
 function removeAllESP()
-	for _, child in pairs(guiCHECKINGAHHHHH():GetChildren()) do
-		if Sub(child.Name, -7) == '_PEEPEE' then
-			child:Destroy()
-		end
+	for _, esp in pairs(espCONS) do
+		if esp.highlight then esp.highlight:Destroy() end
+		if esp.billboard then esp.billboard:Destroy() end
+		if esp.connection then esp.connection:Disconnect() end
 	end
-	for playerName, _ in pairs(espCONS) do
-		espCONS[playerName] = nil
-	end
+	table.clear(espCONS)
 end
 
-function removeESPonLEAVE(plr)
-	if plr then
-		for _, child in pairs(guiCHECKINGAHHHHH():GetChildren()) do
-			if child.Name == plr.Name..'_PEEPEE' then
-				child:Destroy()
-			end
-		end
+function removeESPonLEAVE(player)
+	local esp = espCONS[player]
+	if esp then
+		if esp.highlight then esp.highlight:Destroy() end
+		if esp.billboard then esp.billboard:Destroy() end
+		if esp.connection then esp.connection:Disconnect() end
+		espCONS[player] = nil
 	end
 end
 
 function ESP(player, persistent)
 	persistent = persistent or false
+
 	Spawn(function()
 		discPlrESP(player)
 
-		for _, child in pairs(guiCHECKINGAHHHHH():GetChildren()) do
-			if child.Name == player.Name..'_PEEPEE' then
-				child:Destroy()
-			end
+		local character = getPlrChar(player)
+		if not character or player == Players.LocalPlayer then return end
+
+		if espCONS[player] then
+			if espCONS[player].highlight then espCONS[player].highlight:Destroy() end
+			if espCONS[player].billboard then espCONS[player].billboard:Destroy() end
+			if espCONS[player].connection then espCONS[player].connection:Disconnect() end
 		end
-		Wait()
 
-		local function createESP()
-			if getPlrChar(player) and player.Name ~= Players.LocalPlayer.Name and not guiCHECKINGAHHHHH():FindFirstChild(player.Name..'_PEEPEE') then
-				local espHolder = InstanceNew("Folder")
-				espHolder.Name = player.Name..'_PEEPEE'
-				espHolder.Parent = guiCHECKINGAHHHHH()
+		local highlight = InstanceNew("Highlight")
+		highlight.Name = "\0"
+		highlight.FillTransparency = 0.6
+		highlight.OutlineTransparency = 0
+		highlight.Parent = character
 
-				repeat Wait(1) until getPlrChar(player) and getRoot(getPlrChar(player)) and getPlrChar(player):FindFirstChildOfClass("Humanoid")
+		local billboardGui
+		local textLabel
+		local espLoop
 
-				local adornments = {}
+		if character:FindFirstChild("Head") then
+			billboardGui = InstanceNew("BillboardGui")
+			billboardGui.Name = "\0"
+			billboardGui.Size = UDim2.new(0, 200, 0, 50)
+			billboardGui.StudsOffset = Vector3.new(0, 2.5, 0)
+			billboardGui.AlwaysOnTop = true
+			billboardGui.Parent = character.Head
 
-				for _, part in pairs(getPlrChar(player):GetChildren()) do
-					if part:IsA("BasePart") and not part:FindFirstChildOfClass("Accessory") then
-						local boxAdornment = InstanceNew("BoxHandleAdornment")
-						boxAdornment.Name = player.Name.."_Box"
-						boxAdornment.Parent = espHolder
-						boxAdornment.Adornee = part
-						boxAdornment.AlwaysOnTop = true
-						boxAdornment.ZIndex = 0
-						boxAdornment.Size = part.Size
-						boxAdornment.Color3 = Color3.fromRGB(0, 255, 0)
-						boxAdornment.Transparency = 0.45
-						Insert(adornments, boxAdornment)
+			textLabel = InstanceNew("TextLabel")
+			textLabel.Size = UDim2.new(1, 0, 1, 0)
+			textLabel.Position = UDim2.new(0, 0, 0, 0)
+			textLabel.BackgroundTransparency = 1
+			textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+			textLabel.Font = Enum.Font.GothamBold
+			textLabel.TextSize = 14
+			textLabel.TextStrokeTransparency = 0.2
+			textLabel.Text = ""
+			textLabel.Parent = billboardGui
+
+			espLoop = RunService.RenderStepped:Connect(function()
+				if not character:IsDescendantOf(game:GetService("Workspace")) then
+					espLoop:Disconnect()
+					return
+				end
+
+				local humanoid = character:FindFirstChildOfClass("Humanoid")
+				local rootPart = getRoot(character)
+				if humanoid and rootPart then
+					local health = math.floor(humanoid.Health)
+					local maxHealth = math.floor(humanoid.MaxHealth)
+					local distance = math.floor((getRoot(getPlrChar(Players.LocalPlayer)).Position - rootPart.Position).Magnitude)
+
+					local displayText = Format("%s | %d/%d HP | %d studs", nameChecker(player), health, maxHealth, distance)
+					textLabel.Text = displayText
+
+					textLabel.TextColor3 = distance < 50 and Color3.fromRGB(255, 0, 0)
+						or distance < 100 and Color3.fromRGB(255, 165, 0)
+						or Color3.fromRGB(0, 255, 0)
+
+					local teamColor = player.Team and player.Team.TeamColor and player.Team.TeamColor.Color
+					if teamColor then
+						highlight.FillColor = teamColor
+						highlight.OutlineColor = Color3.new(1, 1, 1)
 					end
 				end
-
-				if getPlrChar(player):FindFirstChild("Head") then
-					local billboardGui = InstanceNew("BillboardGui")
-					local textLabel = InstanceNew("TextLabel")
-
-					billboardGui.Adornee = getPlrChar(player):FindFirstChild("Head")
-					billboardGui.Parent = espHolder
-					billboardGui.Size = UDim2.new(0, 200, 0, 100)
-					billboardGui.StudsOffset = Vector3.new(0, 2, 0)
-					billboardGui.AlwaysOnTop = true
-
-					textLabel.Parent = billboardGui
-					textLabel.BackgroundTransparency = 1
-					textLabel.Size = UDim2.new(1, 0, 1, 0)
-					textLabel.Font = Enum.Font.GothamBold
-					textLabel.TextSize = 14
-					textLabel.TextStrokeTransparency = 0.2
-					textLabel.TextYAlignment = Enum.TextYAlignment.Center
-					textLabel.Visible = not chamsEnabled
-
-					local espLoop
-					espLoop = RunService.RenderStepped:Connect(function()
-						if guiCHECKINGAHHHHH():FindFirstChild(player.Name..'_PEEPEE') then
-							if getPlrChar(player) and getRoot(getPlrChar(player)) and getPlrChar(player):FindFirstChildOfClass("Humanoid") then
-								local humanoid = getPlrChar(player):FindFirstChildOfClass("Humanoid")
-								local health = math.floor(humanoid.Health)
-								local maxHealth = math.floor(humanoid.MaxHealth)
-					
-								local hasTeamColor, teamColor = pcall(function() return player.Team.TeamColor.Color end)
-								local teamColorFinal = hasTeamColor and teamColor or Color3.fromRGB(255, 255, 255)
-					
-								local userNaem = player:IsA("Model") and player.Name or nameChecker(player)
-					
-								if getPlrChar(Players.LocalPlayer) and getRoot(getPlrChar(Players.LocalPlayer)) and getPlrChar(Players.LocalPlayer):FindFirstChildOfClass("Humanoid") then
-									local distance = math.floor((getRoot(getPlrChar(Players.LocalPlayer)).Position - getRoot(getPlrChar(player)).Position).magnitude)
-					
-									local hasTeamName, teamName = pcall(function() return player.Team.Name end)
-									if hasTeamName then
-										textLabel.Text = Format("%s | Health: %d/%d | Studs: %d | Team: %s", userNaem, health, maxHealth, distance, teamName)
-									else
-										textLabel.Text = Format("%s | Health: %d/%d | Studs: %d", userNaem, health, maxHealth, distance)
-									end
-					
-									textLabel.TextColor3 = distance < 50 and Color3.fromRGB(255, 0, 0)
-										or distance < 100 and Color3.fromRGB(255, 165, 0)
-										or Color3.fromRGB(0, 255, 0)
-								else
-									local hasTeamName, teamName = pcall(function() return player.Team.Name end)
-									if hasTeamName then
-										textLabel.Text = Format("%s | Health: %d/%d | Team: %s", userNaem, health, maxHealth, teamName)
-									else
-										textLabel.Text = Format("%s | Health: %d/%d", userNaem, health, maxHealth)
-									end
-									textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-								end
-					
-								for _, adornment in pairs(adornments) do
-									adornment.Color3 = teamColorFinal
-								end
-							end
-						else
-							espLoop:Disconnect()
-						end
-					end)
-					storeESP(player, "renderStepped", espLoop)
-				end
-			end
+			end)
 		end
 
-		createESP()
-		if not player:IsA("Model") then
-		local characterAddedConnection
-		characterAddedConnection = player.CharacterAdded:Connect(function()
-			if not ESPenabled and not persistent then
-				characterAddedConnection:Disconnect()
-				return
-			end
+		espCONS[player] = {
+			highlight = highlight,
+			billboard = billboardGui,
+			connection = espLoop
+		}
 
-			for _, child in pairs(guiCHECKINGAHHHHH():GetChildren()) do
-				if child.Name == player.Name..'_PEEPEE' then
-					child:Destroy()
+		if not player:IsA("Model") then
+			local characterAddedConnection
+			characterAddedConnection = player.CharacterAdded:Connect(function()
+				if not ESPenabled and not persistent then
+					characterAddedConnection:Disconnect()
+					return
 				end
-			end
-			Wait(1)
-			createESP()
-		end)
-		storeESP(player, "characterAdded", characterAddedConnection)
+
+				local char = player.Character or player.CharacterAdded:Wait()
+
+				if espCONS[player] then
+					if espCONS[player].highlight then espCONS[player].highlight:Destroy() end
+					if espCONS[player].billboard then espCONS[player].billboard:Destroy() end
+					if espCONS[player].connection then espCONS[player].connection:Disconnect() end
+					espCONS[player] = nil
+				end
+
+				Wait(1)
+				ESP(player, persistent)
+			end)
+
+			storeESP(player, "characterAdded", characterAddedConnection)
 		end
 	end)
 end
@@ -7669,12 +7646,12 @@ cmd.add({"firework"}, {"firework", "pop"}, function()
 	weld.C0 = CFrame.new()
 	weld.Parent = part
 
-	local bv = Instance.new("BodyVelocity")
+	local bv = InstanceNew("BodyVelocity")
 	bv.Velocity = Vector3.new(0, 50, 0)
 	bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
 	bv.Parent = part
 
-	local bg = Instance.new("BodyGyro")
+	local bg = InstanceNew("BodyGyro")
 	bg.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
 	bg.P = 10000
 	bg.D = 0
@@ -7693,7 +7670,7 @@ cmd.add({"firework"}, {"firework", "pop"}, function()
 			bg:Destroy()
 			part:Destroy()
 
-			local explosion = Instance.new("Explosion")
+			local explosion = InstanceNew("Explosion")
 			explosion.Position = root.Position
 			explosion.BlastRadius = 6
 			explosion.BlastPressure = 500000
@@ -12280,7 +12257,8 @@ cmd.add({"unviewpart", "unviewp"}, {"unviewpart (unviewp)", "Resets the camera t
 end)
 
 cmd.add({"console", "debug"},{"console (debug)","Opens developer console"},function()
-	StarterGui:SetCore("DevConsoleVisible",true)
+	--StarterGui:SetCore("DevConsoleVisible",true)
+	gui.consoleeee()
 end)
 
 local ogSIZES = {}
@@ -12348,12 +12326,11 @@ cmd.add({"breakcars", "bcars"}, {"breakcars (bcars)", "Breaks any car"}, functio
 
 	local Player = Players.LocalPlayer
 	local Mouse = Player:GetMouse()
-	local Workspace = game:GetService("Workspace")
 	local RunService = RunService
 	local UserInputService = UserInputService
 
 	local Folder = InstanceNew("Folder")
-	Folder.Parent = Workspace
+	Folder.Parent = game:GetService("Workspace")
 
 	local Part = InstanceNew("Part")
 	Part.Anchored = true
@@ -12417,11 +12394,11 @@ cmd.add({"breakcars", "bcars"}, {"breakcars (bcars)", "Breaks any car"}, functio
 		alignPosition.Attachment1 = Attachment1
 	end
 
-	for _, descendant in ipairs(Workspace:GetDescendants()) do
+	for _, descendant in ipairs(game:GetService("Workspace"):GetDescendants()) do
 		applyForceToPart(descendant)
 	end
 
-	Workspace.DescendantAdded:Connect(applyForceToPart)
+	game:GetService("Workspace").DescendantAdded:Connect(applyForceToPart)
 
 	UserInputService.InputBegan:Connect(function(input, isChatting)
 		if input.KeyCode == Enum.KeyCode.E and not isChatting then
@@ -13908,26 +13885,30 @@ repeat Wait() until ScreenGui~=nil -- if it loads late then I'll just add this h
 
 NaProtectUI(ScreenGui)
 
-local description=ScreenGui:FindFirstChild("Description");
-local cmdBar=ScreenGui:FindFirstChild("CmdBar");
-local centerBar=cmdBar:FindFirstChild("CenterBar");
-local cmdInput=centerBar:FindFirstChild("Input");
-local cmdAutofill=cmdBar:FindFirstChild("Autofill");
-local cmdExample=cmdAutofill:FindFirstChild("Cmd");
-local leftFill=cmdBar:FindFirstChild("LeftFill");
-local rightFill=cmdBar:FindFirstChild("RightFill");
-local chatLogsFrame=ScreenGui:FindFirstChild("ChatLogs");
-local chatLogs=chatLogsFrame:FindFirstChild("Container"):FindFirstChild("Logs");
-local chatExample=chatLogs:FindFirstChild("TextLabel");
-local commandsFrame=ScreenGui:FindFirstChild("Commands");
-local commandsFilter=commandsFrame:FindFirstChild("Container"):FindFirstChild("Filter");
-local commandsList=commandsFrame:FindFirstChild("Container"):FindFirstChild("List");
-local commandExample=commandsList:FindFirstChild("TextLabel");
-local UpdLogsFrame=ScreenGui:FindFirstChild("UpdLog");
-local UpdLogsTitle=UpdLogsFrame:FindFirstChild("Topbar"):FindFirstChild("TopBar"):FindFirstChild("Title");
-local UpdLogsList=UpdLogsFrame:FindFirstChild("Container"):FindFirstChild("List");
-local UpdLogsLabel=UpdLogsList:FindFirstChildOfClass("TextLabel");
-local resizeFrame=ScreenGui:FindFirstChild("Resizeable");
+local description = ScreenGui:FindFirstChild("Description")
+
+local cmdBar = ScreenGui:FindFirstChild("CmdBar")
+local centerBar = cmdBar and cmdBar:FindFirstChild("CenterBar")
+local cmdInput = centerBar and centerBar:FindFirstChild("Input")
+local cmdAutofill = cmdBar and cmdBar:FindFirstChild("Autofill")
+local cmdExample = cmdAutofill and cmdAutofill:FindFirstChild("Cmd")
+local leftFill = cmdBar and cmdBar:FindFirstChild("LeftFill")
+local rightFill = cmdBar and cmdBar:FindFirstChild("RightFill")
+local chatLogsFrame = ScreenGui:FindFirstChild("ChatLogs")
+local chatLogs = chatLogsFrame and chatLogsFrame:FindFirstChild("Container") and chatLogsFrame:FindFirstChild("Container"):FindFirstChild("Logs")
+local chatExample = chatLogs and chatLogs:FindFirstChildWhichIsA("TextLabel")
+local NAconsoleFrame = ScreenGui:FindFirstChild("soRealConsole")
+local NAconsoleLogs = NAconsoleFrame and NAconsoleFrame:FindFirstChild("Container") and NAconsoleFrame:FindFirstChild("Container"):FindFirstChild("Logs")
+local NAconsoleExample = NAconsoleLogs and NAconsoleLogs:FindFirstChildWhichIsA("TextLabel")
+local commandsFrame = ScreenGui:FindFirstChild("Commands")
+local commandsFilter = commandsFrame and commandsFrame:FindFirstChild("Container") and commandsFrame:FindFirstChild("Container"):FindFirstChild("Filter")
+local commandsList = commandsFrame and commandsFrame:FindFirstChild("Container") and commandsFrame:FindFirstChild("Container"):FindFirstChild("List")
+local commandExample = commandsList and commandsList:FindFirstChild("TextLabel")
+local UpdLogsFrame = ScreenGui:FindFirstChild("UpdLog")
+local UpdLogsTitle = UpdLogsFrame and UpdLogsFrame:FindFirstChild("Topbar") and UpdLogsFrame:FindFirstChild("Topbar"):FindFirstChild("TopBar") and UpdLogsFrame:FindFirstChild("Topbar"):FindFirstChild("TopBar"):FindFirstChild("Title")
+local UpdLogsList = UpdLogsFrame and UpdLogsFrame:FindFirstChild("Container") and UpdLogsFrame:FindFirstChild("Container"):FindFirstChild("List")
+local UpdLogsLabel = UpdLogsList and UpdLogsList:FindFirstChildWhichIsA("TextLabel")
+local resizeFrame = ScreenGui:FindFirstChild("Resizeable")
 local resizeXY={
 	Top = {Vector2.new(0,-1),    Vector2.new(0,-1),    "rbxassetid://2911850935"},
 	Bottom = {Vector2.new(0,1),    Vector2.new(0,0),    "rbxassetid://2911850935"},
@@ -13940,11 +13921,29 @@ local resizeXY={
 	BottomRight = {Vector2.new(1,1),    Vector2.new(0,0),    "rbxassetid://2911852219"},
 }
 
-cmdExample.Parent=nil
-chatExample.Parent=nil
-commandExample.Parent=nil
-UpdLogsLabel.Parent=nil
-resizeFrame.Parent=nil
+if cmdExample then
+	cmdExample.Parent = nil
+end
+
+if chatExample then
+	chatExample.Parent = nil
+end
+
+if NAconsoleExample then
+	NAconsoleExample.Parent = nil
+end
+
+if commandExample then
+	commandExample.Parent = nil
+end
+
+if UpdLogsLabel then
+	UpdLogsLabel.Parent = nil
+end
+
+if resizeFrame then
+	resizeFrame.Parent = nil
+end
 
 	--[[pcall(function()
 		for i,v in pairs(ScreenGui:GetDescendants()) do
@@ -14020,23 +14019,34 @@ gui.commands = function()
 	cList.CanvasSize = UDim2.new(0, 0, 0, yOffset)
 	cFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
 end
-gui.chatlogs=function()
-	if not chatLogsFrame.Visible then
-		chatLogsFrame.Visible=true
+gui.chatlogs = function()
+	if chatLogsFrame then
+		if not chatLogsFrame.Visible then
+			chatLogsFrame.Visible = true
+		end
+		chatLogsFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
 	end
-	chatLogsFrame.Position=UDim2.new(0.5,0,0.5,0)
 end
-gui.updateLogs=function()
-	if not UpdLogsFrame.Visible and next(updLogs) then
-		UpdLogsFrame.Visible=true
-	elseif not next(updLogs) then
-		DoNotif("no upd logs for now...")
-	else
-		warn("huh?")
+gui.consoleeee = function()
+	if NAconsoleFrame then
+		if not NAconsoleFrame.Visible then
+			NAconsoleFrame.Visible = true
+		end
+		NAconsoleFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
 	end
-	UpdLogsFrame.Position=UDim2.new(0.5,0,0.5,0)
 end
-
+gui.updateLogs = function()
+	if UpdLogsFrame then
+		if not UpdLogsFrame.Visible and next(updLogs) then
+			UpdLogsFrame.Visible = true
+		elseif not next(updLogs) then
+			DoNotif("no upd logs for now...")
+		else
+			warn("huh?")
+		end
+		UpdLogsFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+	end
+end
 gui.tween = function(obj, style, direction, duration, goal, callback)
 	style = style or "Sine"
 	direction = direction or "Out"
@@ -14621,17 +14631,41 @@ end)
 
 gui.barDeselect(0)
 cmdBar.Visible=true
-gui.menuifyv2(chatLogsFrame)
-gui.menuify(commandsFrame)
-gui.menuify(UpdLogsFrame)
+if chatLogsFrame then
+	gui.menuifyv2(chatLogsFrame)
+end
+
+if NAconsoleFrame then
+	gui.menuifyv2(NAconsoleFrame)
+end
+
+if commandsFrame then
+	gui.menuify(commandsFrame)
+end
+
+if UpdLogsFrame then
+	gui.menuify(UpdLogsFrame)
+end
 
 --[[ GUI RESIZE FUNCTION ]]--
 
 --Discover({Enum.Platform.IOS,Enum.Platform.Android},UserInputService:GetPlatform()) | searches if the player is on mobile.
 if IsOnPC then
-	gui.resizeable(chatLogsFrame)
-	gui.resizeable(commandsFrame)
-	gui.resizeable(UpdLogsFrame)
+	if chatLogsFrame then
+		gui.resizeable(chatLogsFrame)
+	end
+	
+	if NAconsoleFrame then
+		gui.resizeable(NAconsoleFrame)
+	end
+	
+	if commandsFrame then
+		gui.resizeable(commandsFrame)
+	end
+	
+	if UpdLogsFrame then
+		gui.resizeable(UpdLogsFrame)
+	end
 end
 
 --[[ CMDS COMMANDS SEARCH FUNCTION ]]--
@@ -14759,6 +14793,7 @@ function bindToChat(plr, msg)
 		end
 	end
 
+	chatMsg.Name = randomString()
 	chatMsg.Parent = chatLogs
 
 	local displayName = plr.DisplayName or "Unknown"
@@ -14810,6 +14845,66 @@ function bindToChat(plr, msg)
 			chatFrames[i]:Destroy()
 		end
 	end
+end
+
+function bindToDevConsole()
+	if not NAconsoleLogs or not NAconsoleExample then return end
+
+	LogService.MessageOut:Connect(function(msg, msgTYPE)
+		local logLabel = NAconsoleExample:Clone()
+
+		for _, v in pairs(NAconsoleLogs:GetChildren()) do
+			if v:IsA("TextLabel") then
+				v.LayoutOrder = v.LayoutOrder - 1
+			end
+		end
+
+		logLabel.Name = randomString()
+		logLabel.Parent = NAconsoleLogs
+		logLabel.RichText = true
+
+		local tagColor, tagText = "", ""
+
+		if msgTYPE == Enum.MessageType.MessageError then
+			tagColor = "#ff6464"
+			tagText = "Error"
+		elseif msgTYPE == Enum.MessageType.MessageWarning then
+			tagColor = "#ffcc00"
+			tagText = "Warn"
+		else
+			tagColor = "#cccccc"
+			tagText = "Output"
+		end
+
+		logLabel.Text = Format(
+			'<font color="%s">[%s]</font>: <font color="#ffffff">%s</font>',
+			tagColor,
+			tagText,
+			msg
+		)
+
+		local txtSize = gui.txtSize(logLabel, logLabel.AbsoluteSize.X, 100)
+		logLabel.Size = UDim2.new(1, -5, 0, txtSize.Y)
+
+		local MAX_MESSAGES = 100
+		local logFrames = {}
+
+		for _, v in pairs(NAconsoleLogs:GetChildren()) do
+			if v:IsA("TextLabel") then
+				Insert(logFrames, v)
+			end
+		end
+
+		table.sort(logFrames, function(a, b)
+			return a.LayoutOrder < b.LayoutOrder
+		end)
+
+		if #logFrames > MAX_MESSAGES then
+			for i = MAX_MESSAGES + 1, #logFrames do
+				logFrames[i]:Destroy()
+			end
+		end
+	end)
 end
 
 function setupPlayer(plr)
@@ -15039,6 +15134,7 @@ function mainNameless()
 end
 
 coroutine.wrap(mainNameless)()
+coroutine.wrap(bindToDevConsole)()
 
 if IsOnMobile then
 	MouseButtonFix(ImageButton,function()
@@ -15173,13 +15269,14 @@ Spawn(function()
 	end
 end)
 
-Spawn(function() -- innit
-	cmdBar.Name = randomString()
-	chatLogsFrame.Name = randomString()
-	commandsFrame.Name = randomString()
-	UpdLogsFrame.Name = randomString()
-	resizeFrame.Name = randomString()
-	description.Name = randomString()
+Spawn(function() -- init
+	if cmdBar then cmdBar.Name = randomString() end
+	if chatLogsFrame then chatLogsFrame.Name = randomString() end
+	if NAconsoleFrame then NAconsoleFrame.Name = randomString() end
+	if commandsFrame then commandsFrame.Name = randomString() end
+	if UpdLogsFrame then UpdLogsFrame.Name = randomString() end
+	if resizeFrame then resizeFrame.Name = randomString() end
+	if description then description.Name = randomString() end
 end)
 
 Spawn(function()
