@@ -10461,56 +10461,50 @@ cmd.add({"unsuslay"}, {"unsuslay", "Stand up from the sussy lay"}, function()
 end)
 
 cmd.add({"jerk", "jork"}, {"jerk (jork)", "jorking it"}, function()
-	local plr = LocalPlayer
-	local bp = plr:FindFirstChildWhichIsA("Backpack")
+	local humanoid = getChar():FindFirstChildWhichIsA("Humanoid")
+    local backpack = LocalPlayer:FindFirstChildWhichIsA("Backpack")
+    if not humanoid or not backpack then return end
 
-	local tool = InstanceNew("Tool")
-	tool.Name = "Jerking: OFF"
-	tool.ToolTip = "i am jorking it"
-	tool.RequiresHandle = false
-	tool.Parent = bp
+    local tool = InstanceNew("Tool")
+    tool.Name = "Jerk"
+    tool.ToolTip = "oh yes i am feeling it COMING OUT AHHHHHHHHHHHHHHHHHHHHH"
+    tool.RequiresHandle = false
+    tool.Parent = backpack
 
-	local active, track = false, nil
-	local hum = getChar():FindFirstChildOfClass("Humanoid")
+    local jorkin = false
+    local track = nil
 
-	local function updateHum()
-		hum = getChar():FindFirstChildOfClass("Humanoid")
-	end
-	if not hum then updateHum() end
+    local function stopTomfoolery()
+        jorkin = false
+        if track then
+            track:Stop()
+            track = nil
+        end
+    end
 
-	local function stop()
-		active = false
-		if track then
-			pcall(function() track:Stop() end)
-			track = nil
-		end
-	end
+    tool.Equipped:Connect(function() jorkin = true end)
+    tool.Unequipped:Connect(stopTomfoolery)
+    humanoid.Died:Connect(stopTomfoolery)
 
-	local function play()
-		if not active or not hum then return end
-		if not track then
-			local anim = InstanceNew("Animation")
-			anim.AnimationId = IsR15() and "rbxassetid://698251653" or "rbxassetid://72042024"
-			track = hum:LoadAnimation(anim)
-			track.Looped = true
-		end
-		track:Play(0.1, 1, 1)
-		track:AdjustSpeed(IsR15() and 0.7 or 0.65)
-	end
+    while Wait() do
+        if not jorkin then continue end
 
-	tool.Equipped:Connect(function()
-		active = true
-		tool.Name = "Jerking: ON"
-		play()
-	end)
+        if not track then
+            local anim = InstanceNew("Animation")
+            anim.AnimationId = not IsR15() and "rbxassetid://72042024" or "rbxassetid://698251653"
+            track = humanoid:LoadAnimation(anim)
+        end
 
-	tool.Unequipped:Connect(function()
-		tool.Name = "Jerking: OFF"
-		stop()
-	end)
-
-	plr.CharacterAdded:Connect(updateHum)
-	if hum then hum.Died:Connect(stop) end
+        track:Play()
+        track:AdjustSpeed(IsR15() and 0.7 or 0.65)
+        track.TimePosition = 0.6
+        Wait(0.2)
+        while track and track.TimePosition < (not IsR15() and 0.65 or 0.7) do Wait(0.2) end
+        if track then
+            track:Stop()
+            track = nil
+        end
+    end
 end)
 
 huggiePARTS = {}
@@ -14867,7 +14861,7 @@ function bindToDevConsole()
 
 	local toggles = { Output = true, Info = true, Warn = true, Error = true }
 
-	local FilterButtons = Instance.new("Frame")
+	local FilterButtons = InstanceNew("Frame")
 	FilterButtons.Name = "FilterButtons"
 	FilterButtons.Size = UDim2.new(1, -10, 0, 22)
 	FilterButtons.Position = UDim2.new(0.5, 0, 0, 30)
@@ -14875,35 +14869,66 @@ function bindToDevConsole()
 	FilterButtons.BackgroundTransparency = 1
 	FilterButtons.Parent = NAconsoleLogs.Parent
 
-	local layout = Instance.new("UIListLayout")
+	local layout = InstanceNew("UIListLayout")
 	layout.FillDirection = Enum.FillDirection.Horizontal
 	layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 	layout.SortOrder = Enum.SortOrder.LayoutOrder
-	layout.Padding = UDim.new(0, 4)
+	layout.Padding = UDim.new(0, 6)
 	layout.Parent = FilterButtons
 
 	local buttonTypes = { "Output", "Info", "Warn", "Error" }
 
 	for _, logType in ipairs(buttonTypes) do
-		local btn = Instance.new("TextButton")
-		btn.Name = logType
-		btn.Text = logType
-		btn.Size = UDim2.new(0, 90, 1, 0)
-		btn.BackgroundColor3 = Color3.fromRGB(0, 155, 0)
-		btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-		btn.Font = Enum.Font.Gotham
-		btn.TextSize = 14
-		btn.AutoButtonColor = false
-		btn.Parent = FilterButtons
+		local btnContainer = InstanceNew("Frame")
+		btnContainer.Name = logType
+		btnContainer.Size = UDim2.new(0, 90, 1, 0)
+		btnContainer.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+		btnContainer.Parent = FilterButtons
 
-		btn.MouseButton1Click:Connect(function()
+		local corner = InstanceNew("UICorner")
+		corner.CornerRadius = UDim.new(1, 0)
+		corner.Parent = btnContainer
+
+		local checkbox = InstanceNew("TextLabel")
+		checkbox.Name = "Checkbox"
+		checkbox.Size = UDim2.new(0, 18, 1, 0)
+		checkbox.Position = UDim2.new(0, 5, 0, 0)
+		checkbox.BackgroundTransparency = 1
+		checkbox.Font = Enum.Font.Gotham
+		checkbox.TextSize = 14
+		checkbox.TextXAlignment = Enum.TextXAlignment.Center
+		checkbox.TextYAlignment = Enum.TextYAlignment.Center
+		checkbox.Text = "✅"
+		checkbox.TextColor3 = Color3.fromRGB(255, 255, 255)
+		checkbox.Parent = btnContainer
+
+		local label = InstanceNew("TextLabel")
+		label.Name = "Label"
+		label.Text = logType
+		label.Position = UDim2.new(0, 28, 0, 0)
+		label.Size = UDim2.new(1, -28, 1, 0)
+		label.BackgroundTransparency = 1
+		label.Font = Enum.Font.Gotham
+		label.TextSize = 14
+		label.TextColor3 = Color3.fromRGB(255, 255, 255)
+		label.TextXAlignment = Enum.TextXAlignment.Center
+		label.Parent = btnContainer
+
+		local clickZone = InstanceNew("TextButton")
+		clickZone.Name = "ClickArea"
+		clickZone.Size = UDim2.new(1, 0, 1, 0)
+		clickZone.BackgroundTransparency = 1
+		clickZone.Text = ""
+		clickZone.Parent = btnContainer
+
+		clickZone.MouseButton1Click:Connect(function()
 			toggles[logType] = not toggles[logType]
-			btn.BackgroundColor3 = toggles[logType] and Color3.fromRGB(0, 155, 0) or Color3.fromRGB(155, 0, 0)
+			checkbox.Text = toggles[logType] and "✅" or "⬜"
 
 			for _, label in pairs(NAconsoleLogs:GetChildren()) do
 				if label:IsA("TextLabel") and label:FindFirstChild("Tag") then
-					local tag = label:FindFirstChild("Tag").Value
-					local matchesSearch = NAfilter.Text == "" or string.find(label.Text:lower(), NAfilter.Text:lower())
+					local tag = label.Tag.Value
+					local matchesSearch = NAfilter.Text == "" or Find(label.Text:lower(), NAfilter.Text:lower())
 					label.Visible = toggles[tag] and matchesSearch
 				end
 			end
@@ -14914,7 +14939,7 @@ function bindToDevConsole()
 		local query = NAfilter.Text:lower()
 		for _, label in pairs(NAconsoleLogs:GetChildren()) do
 			if label:IsA("TextLabel") and label:FindFirstChild("Tag") then
-				local tag = label:FindFirstChild("Tag").Value
+				local tag = label.Tag.Value
 				local matches = query == "" or Find(label.Text:lower(), query)
 				label.Visible = toggles[tag] and matches
 			end
@@ -14952,14 +14977,14 @@ function bindToDevConsole()
 			tagText = "Output"
 		end
 
-		logLabel.Text = Format(
+		logLabel.Text = string.format(
 			'<font color="%s">[%s]</font>: <font color="#ffffff">%s</font>',
 			tagColor,
 			tagText,
 			msg
 		)
 
-		local tag = Instance.new("StringValue")
+		local tag = InstanceNew("StringValue")
 		tag.Name = "Tag"
 		tag.Value = tagText
 		tag.Parent = logLabel
