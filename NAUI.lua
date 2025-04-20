@@ -124,6 +124,8 @@ local UIListLayout_5 = Instance.new("UIListLayout")
 local TextLabel_4 = Instance.new("TextLabel")
 local UICorner_11 = Instance.new("UICorner")
 local UIGradient_10 = Instance.new("UIGradient")
+local Filter_2 = Instance.new("TextBox")
+local UICorner_12 = Instance.new("UICorner")
 local Topbar_4 = Instance.new("Frame")
 local Icon_4 = Instance.new("ImageLabel")
 local Exit_4 = Instance.new("TextButton")
@@ -136,10 +138,11 @@ local ImageLabel_17 = Instance.new("ImageLabel")
 local Title_4 = Instance.new("TextLabel")
 local Clear_2 = Instance.new("TextButton")
 local ImageLabel_18 = Instance.new("ImageLabel")
-local UICorner_12 = Instance.new("UICorner")
+local UICorner_13 = Instance.new("UICorner")
 local UIGradient_11 = Instance.new("UIGradient")
 
 AdminUI.Name = "AdminUI"
+AdminUI.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 AdminUI.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 AdminUI.ResetOnSpawn = false
 
@@ -1234,8 +1237,8 @@ Logs_2.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 Logs_2.BackgroundTransparency = 1.000
 Logs_2.BorderColor3 = Color3.fromRGB(16, 16, 16)
 Logs_2.BorderSizePixel = 0
-Logs_2.Position = UDim2.new(0.5, 0, 0.5, 0)
-Logs_2.Size = UDim2.new(1, -10, 1, -10)
+Logs_2.Position = UDim2.new(0.5, 0, 0.549142063, 0)
+Logs_2.Size = UDim2.new(1, -10, 0.901715875, -10)
 Logs_2.BottomImage = "rbxgameasset://Images/scrollBottom (1)"
 Logs_2.MidImage = "rbxgameasset://Images/scrollMid"
 Logs_2.ScrollBarThickness = 4
@@ -1263,6 +1266,24 @@ UICorner_11.Parent = Container_4
 
 UIGradient_10.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(12, 4, 20)), ColorSequenceKeypoint.new(0.50, Color3.fromRGB(12, 4, 20)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(12, 4, 20))}
 UIGradient_10.Parent = Container_4
+
+Filter_2.Name = "Filter"
+Filter_2.Parent = Container_4
+Filter_2.AnchorPoint = Vector2.new(0.5, 0)
+Filter_2.BackgroundColor3 = Color3.fromRGB(4, 4, 4)
+Filter_2.BackgroundTransparency = 0.700
+Filter_2.BorderSizePixel = 0
+Filter_2.Position = UDim2.new(0.5, 0, 0, 5)
+Filter_2.Size = UDim2.new(1, -10, 0, 20)
+Filter_2.Font = Enum.Font.SourceSans
+Filter_2.PlaceholderColor3 = Color3.fromRGB(124, 124, 124)
+Filter_2.PlaceholderText = "Search..."
+Filter_2.Text = ""
+Filter_2.TextColor3 = Color3.fromRGB(229, 229, 229)
+Filter_2.TextSize = 18.000
+
+UICorner_12.CornerRadius = UDim.new(0, 9)
+UICorner_12.Parent = Filter_2
 
 Topbar_4.Name = "Topbar"
 Topbar_4.Parent = soRealConsole
@@ -1400,8 +1421,8 @@ ImageLabel_18.Image = "http://www.roblox.com/asset/?id=8650484523"
 ImageLabel_18.ImageColor3 = Color3.fromRGB(12, 4, 20)
 ImageLabel_18.ImageTransparency = 0.500
 
-UICorner_12.CornerRadius = UDim.new(0, 9)
-UICorner_12.Parent = soRealConsole
+UICorner_13.CornerRadius = UDim.new(0, 9)
+UICorner_13.Parent = soRealConsole
 
 UIGradient_11.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(12, 4, 20)), ColorSequenceKeypoint.new(0.38, Color3.fromRGB(4, 4, 4)), ColorSequenceKeypoint.new(0.52, Color3.fromRGB(4, 4, 4)), ColorSequenceKeypoint.new(0.68, Color3.fromRGB(4, 4, 4)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(12, 4, 20))}
 UIGradient_11.Parent = soRealConsole
