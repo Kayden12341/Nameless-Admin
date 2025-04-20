@@ -142,7 +142,6 @@ local UICorner_13 = Instance.new("UICorner")
 local UIGradient_11 = Instance.new("UIGradient")
 
 AdminUI.Name = "AdminUI"
-AdminUI.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 AdminUI.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 AdminUI.ResetOnSpawn = false
 
