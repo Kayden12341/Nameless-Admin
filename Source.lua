@@ -5397,9 +5397,7 @@ cmd.add({"vehiclespeed", "vspeed"}, {"vehiclespeed <amount> (vspeed)", "Change t
 
 	DoNotif("Vehicle speed set to "..intens)
 
-	if IsOnMobile then
 		Wait()
-		DoNotif(adminName.." detected mobile. Vehicle speed button added.", 2)
 
 		vspeedBTN = InstanceNew("ScreenGui")
 		local btn = InstanceNew("TextButton")
@@ -5475,15 +5473,15 @@ cmd.add({"vehiclespeed", "vspeed"}, {"vehiclespeed <amount> (vspeed)", "Change t
 
 		MouseButtonFix(btn, function()
 			vSpeedOn = not vSpeedOn
-
+		
 			if vSpeedOn then
 				local newIntens = tonumber(speedBox.Text) or 1
 				intens = newIntens
-
+		
 				if vehicleloopspeed then
 					vehicleloopspeed:Disconnect()
 				end
-
+		
 				vehicleloopspeed = RunService.Stepped:Connect(function()
 					local subject = game:GetService("Workspace").CurrentCamera.CameraSubject
 					if subject and subject:IsA("Humanoid") and subject.SeatPart then
@@ -5492,7 +5490,7 @@ cmd.add({"vehiclespeed", "vspeed"}, {"vehiclespeed <amount> (vspeed)", "Change t
 						subject:ApplyImpulse(subject.CFrame.LookVector * Vector3.new(intens, 0, intens))
 					end
 				end)
-
+		
 				btn.Text = "vSpeed ON"
 				btn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
 			else
@@ -5500,12 +5498,41 @@ cmd.add({"vehiclespeed", "vspeed"}, {"vehiclespeed <amount> (vspeed)", "Change t
 					vehicleloopspeed:Disconnect()
 					vehicleloopspeed = nil
 				end
-
+		
+				local subject = game:GetService("Workspace").CurrentCamera.CameraSubject
+				if subject then
+					local root
+					if subject:IsA("Humanoid") and subject.SeatPart then
+						root = subject.SeatPart
+					elseif subject:IsA("BasePart") then
+						root = subject
+					end
+		
+					if root then
+						local model = root:FindFirstAncestorOfClass("Model")
+						if model then
+							for _, part in ipairs(model:GetDescendants()) do
+								if part:IsA("BasePart") then
+									part.AssemblyLinearVelocity = Vector3.zero
+									part.AssemblyAngularVelocity = Vector3.zero
+								end
+								if part:IsA("VehicleSeat") then
+									part.Throttle = 0
+									part.Steer = 0
+								end
+							end
+						else
+							root.AssemblyLinearVelocity = Vector3.zero
+							root.AssemblyAngularVelocity = Vector3.zero
+						end
+					end
+				end
+		
 				btn.Text = "vSpeed"
 				btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 			end
 		end)
-
+		
 		speedBox.FocusLost:Connect(function()
 			if not vSpeedOn then return end
 			local newIntens = tonumber(speedBox.Text) or 1
@@ -5530,7 +5557,6 @@ cmd.add({"vehiclespeed", "vspeed"}, {"vehiclespeed <amount> (vspeed)", "Change t
 
 		gui.draggablev2(btn)
 		gui.draggablev2(speedBox)
-	end
 end, true)
 
 cmd.add({"unvehiclespeed", "unvspeed"}, {"unvehiclespeed (unvspeed)", "Stops the vehiclespeed command"}, function()
@@ -5542,6 +5568,35 @@ cmd.add({"unvehiclespeed", "unvspeed"}, {"unvehiclespeed (unvspeed)", "Stops the
 	if vspeedBTN then
 		vspeedBTN:Destroy()
 		vspeedBTN = nil
+	end
+
+	local subject = game:GetService("Workspace").CurrentCamera.CameraSubject
+	if subject then
+		local root
+		if subject:IsA("Humanoid") and subject.SeatPart then
+			root = subject.SeatPart
+		elseif subject:IsA("BasePart") then
+			root = subject
+		end
+
+		if root then
+			local model = root:FindFirstAncestorOfClass("Model")
+			if model then
+				for _, part in ipairs(model:GetDescendants()) do
+					if part:IsA("BasePart") then
+						part.AssemblyLinearVelocity = Vector3.zero
+						part.AssemblyAngularVelocity = Vector3.zero
+					end
+					if part:IsA("VehicleSeat") then
+						part.Throttle = 0
+						part.Steer = 0
+					end
+				end
+			else
+				root.AssemblyLinearVelocity = Vector3.zero
+				root.AssemblyAngularVelocity = Vector3.zero
+			end
+		end
 	end
 
 	DoNotif("Vehicle speed disabled")
@@ -15056,10 +15111,21 @@ function updateCanvasSize(frame)
 end
 
 RunService.Stepped:Connect(function()
-	updateCanvasSize(chatLogs)
-	updateCanvasSize(NAconsoleLogs)
-	updateCanvasSize(commandsList)
-	updateCanvasSize(UpdLogsList)
+	if chatLogs then
+		updateCanvasSize(chatLogs)
+	end
+	
+	if NAconsoleLogs then
+		updateCanvasSize(NAconsoleLogs)
+	end
+	
+	if commandsList then
+		updateCanvasSize(commandsList)
+	end
+	
+	if UpdLogsList then
+		updateCanvasSize(UpdLogsList)
+	end
 end)
 
 RunService.RenderStepped:Connect(function()
