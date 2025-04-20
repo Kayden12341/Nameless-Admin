@@ -14946,18 +14946,15 @@ function bindToDevConsole()
 		end
 	end)
 
+	local messageCounter = 0
+
 	LogService.MessageOut:Connect(function(msg, msgTYPE)
+		messageCounter += 1
+
 		local logLabel = NAconsoleExample:Clone()
-
-		for _, v in pairs(NAconsoleLogs:GetChildren()) do
-			if v:IsA("TextLabel") then
-				v.LayoutOrder = v.LayoutOrder - 1
-			end
-		end
-
 		logLabel.Name = "Log_"..tostring(math.random(100000, 999999))
 		logLabel.Parent = NAconsoleLogs
-		logLabel.LayoutOrder = 0
+		logLabel.LayoutOrder = messageCounter
 		logLabel.RichText = true
 
 		local tagColor = "#cccccc"
@@ -14972,12 +14969,9 @@ function bindToDevConsole()
 		elseif msgTYPE == Enum.MessageType.MessageInfo then
 			tagColor = "#66ccff"
 			tagText = "Info"
-		elseif msgTYPE == Enum.MessageType.MessageOutput then
-			tagColor = "#cccccc"
-			tagText = "Output"
 		end
 
-		logLabel.Text = string.format(
+		logLabel.Text = Format(
 			'<font color="%s">[%s]</font>: <font color="#ffffff">%s</font>',
 			tagColor,
 			tagText,
@@ -14992,7 +14986,7 @@ function bindToDevConsole()
 		local txtSize = gui.txtSize(logLabel, logLabel.AbsoluteSize.X, 100)
 		logLabel.Size = UDim2.new(1, -5, 0, txtSize.Y)
 
-		local MAX_MESSAGES = 100
+		local MAX_MESSAGES = 200
 		local logFrames = {}
 
 		for _, v in pairs(NAconsoleLogs:GetChildren()) do
@@ -15005,10 +14999,9 @@ function bindToDevConsole()
 			return a.LayoutOrder < b.LayoutOrder
 		end)
 
-		if #logFrames > MAX_MESSAGES then
-			for i = MAX_MESSAGES + 1, #logFrames do
-				logFrames[i]:Destroy()
-			end
+		while #logFrames > MAX_MESSAGES do
+			logFrames[1]:Destroy()
+			table.remove(logFrames, 1)
 		end
 
 		local matchesSearch = NAfilter.Text == "" or Find(logLabel.Text:lower(), NAfilter.Text:lower())
