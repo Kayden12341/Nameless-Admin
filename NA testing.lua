@@ -331,7 +331,7 @@ repeat
 		Notification = result
 	else
 		warn(math.random(1,999999).." | Failed to load notification module, retrying...")
-		Wait(1)
+		Wait(.3)
 	end
 until Notification
 
@@ -13897,7 +13897,7 @@ repeat
 		ScreenGui = result
 	else
 		warn(math.random(1,999999).." | Failed to load UI module, retrying...")
-		Wait(1)
+		Wait(.3)
 	end
 until ScreenGui
 local rPlayer=Players:FindFirstChildWhichIsA("Player")
