@@ -311,7 +311,7 @@ repeat
 	if success then
 		Notification = result
 	else
-		warn("Failed to load notification module, retrying...")
+		warn(math.random(1,999999).." | Failed to load notification module, retrying...")
 		Wait(1)
 	end
 until Notification
@@ -13873,7 +13873,20 @@ function Getmodel(id)
 end
 
 --[[ GUI VARIABLES ]]--
-local ScreenGui=Getmodel("rbxassetid://140418556029404")
+local ScreenGui=nil --Getmodel("rbxassetid://140418556029404")
+
+repeat
+	local success, result = pcall(function()
+		return loadstring(game:HttpGet("https://github.com/ltseverydayyou/Nameless-Admin/blob/main/NAUI.lua?raw=NEWUI"))()
+	end)
+
+	if success then
+		ScreenGui = result
+	else
+		warn(math.random(1,999999).." | Failed to load UI module, retrying...")
+		Wait(1)
+	end
+until ScreenGui
 local rPlayer=Players:FindFirstChildWhichIsA("Player")
 local coreGuiProtection={}
 if not RunService:IsStudio() then
@@ -13881,7 +13894,7 @@ else
 	repeat Wait() until player:FindFirstChild("AdminUI",true)
 	ScreenGui=player:FindFirstChild("AdminUI",true)
 end
-repeat Wait() until ScreenGui~=nil -- if it loads late then I'll just add this here
+--repeat Wait() until ScreenGui~=nil -- if it loads late then I'll just add this here
 
 NaProtectUI(ScreenGui)
 
@@ -13900,6 +13913,8 @@ local chatExample = chatLogs and chatLogs:FindFirstChildWhichIsA("TextLabel")
 local NAconsoleFrame = ScreenGui:FindFirstChild("soRealConsole")
 local NAconsoleLogs = NAconsoleFrame and NAconsoleFrame:FindFirstChild("Container") and NAconsoleFrame:FindFirstChild("Container"):FindFirstChild("Logs")
 local NAconsoleExample = NAconsoleLogs and NAconsoleLogs:FindFirstChildWhichIsA("TextLabel")
+local NAcontainer = NAconsoleFrame and NAconsoleFrame:FindFirstChild("Container")
+local NAfilter = NAcontainer and NAcontainer:FindFirstChild("Filter")
 local commandsFrame = ScreenGui:FindFirstChild("Commands")
 local commandsFilter = commandsFrame and commandsFrame:FindFirstChild("Container") and commandsFrame:FindFirstChild("Container"):FindFirstChild("Filter")
 local commandsList = commandsFrame and commandsFrame:FindFirstChild("Container") and commandsFrame:FindFirstChild("Container"):FindFirstChild("List")
@@ -14850,6 +14865,62 @@ end
 function bindToDevConsole()
 	if not NAconsoleLogs or not NAconsoleExample then return end
 
+	local toggles = { Output = true, Info = true, Warn = true, Error = true }
+
+	local FilterButtons = Instance.new("Frame")
+	FilterButtons.Name = "FilterButtons"
+	FilterButtons.Size = UDim2.new(1, -10, 0, 22)
+	FilterButtons.Position = UDim2.new(0.5, 0, 0, 30)
+	FilterButtons.AnchorPoint = Vector2.new(0.5, 0)
+	FilterButtons.BackgroundTransparency = 1
+	FilterButtons.Parent = NAconsoleLogs.Parent
+
+	local layout = Instance.new("UIListLayout")
+	layout.FillDirection = Enum.FillDirection.Horizontal
+	layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+	layout.SortOrder = Enum.SortOrder.LayoutOrder
+	layout.Padding = UDim.new(0, 4)
+	layout.Parent = FilterButtons
+
+	local buttonTypes = { "Output", "Info", "Warn", "Error" }
+
+	for _, logType in ipairs(buttonTypes) do
+		local btn = Instance.new("TextButton")
+		btn.Name = logType
+		btn.Text = logType
+		btn.Size = UDim2.new(0, 90, 1, 0)
+		btn.BackgroundColor3 = Color3.fromRGB(0, 155, 0)
+		btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+		btn.Font = Enum.Font.Gotham
+		btn.TextSize = 14
+		btn.AutoButtonColor = false
+		btn.Parent = FilterButtons
+
+		btn.MouseButton1Click:Connect(function()
+			toggles[logType] = not toggles[logType]
+			btn.BackgroundColor3 = toggles[logType] and Color3.fromRGB(0, 155, 0) or Color3.fromRGB(155, 0, 0)
+
+			for _, label in pairs(NAconsoleLogs:GetChildren()) do
+				if label:IsA("TextLabel") and label:FindFirstChild("Tag") then
+					local tag = label:FindFirstChild("Tag").Value
+					local matchesSearch = NAfilter.Text == "" or string.find(label.Text:lower(), NAfilter.Text:lower())
+					label.Visible = toggles[tag] and matchesSearch
+				end
+			end
+		end)
+	end
+
+	NAfilter:GetPropertyChangedSignal("Text"):Connect(function()
+		local query = NAfilter.Text:lower()
+		for _, label in pairs(NAconsoleLogs:GetChildren()) do
+			if label:IsA("TextLabel") and label:FindFirstChild("Tag") then
+				local tag = label:FindFirstChild("Tag").Value
+				local matches = query == "" or Find(label.Text:lower(), query)
+				label.Visible = toggles[tag] and matches
+			end
+		end
+	end)
+
 	LogService.MessageOut:Connect(function(msg, msgTYPE)
 		local logLabel = NAconsoleExample:Clone()
 
@@ -14859,11 +14930,13 @@ function bindToDevConsole()
 			end
 		end
 
-		logLabel.Name = randomString()
+		logLabel.Name = "Log_"..tostring(math.random(100000, 999999))
 		logLabel.Parent = NAconsoleLogs
+		logLabel.LayoutOrder = 0
 		logLabel.RichText = true
 
-		local tagColor, tagText = "", ""
+		local tagColor = "#cccccc"
+		local tagText = "Output"
 
 		if msgTYPE == Enum.MessageType.MessageError then
 			tagColor = "#ff6464"
@@ -14871,7 +14944,10 @@ function bindToDevConsole()
 		elseif msgTYPE == Enum.MessageType.MessageWarning then
 			tagColor = "#ffcc00"
 			tagText = "Warn"
-		else
+		elseif msgTYPE == Enum.MessageType.MessageInfo then
+			tagColor = "#66ccff"
+			tagText = "Info"
+		elseif msgTYPE == Enum.MessageType.MessageOutput then
 			tagColor = "#cccccc"
 			tagText = "Output"
 		end
@@ -14882,6 +14958,11 @@ function bindToDevConsole()
 			tagText,
 			msg
 		)
+
+		local tag = Instance.new("StringValue")
+		tag.Name = "Tag"
+		tag.Value = tagText
+		tag.Parent = logLabel
 
 		local txtSize = gui.txtSize(logLabel, logLabel.AbsoluteSize.X, 100)
 		logLabel.Size = UDim2.new(1, -5, 0, txtSize.Y)
@@ -14904,6 +14985,9 @@ function bindToDevConsole()
 				logFrames[i]:Destroy()
 			end
 		end
+
+		local matchesSearch = NAfilter.Text == "" or Find(logLabel.Text:lower(), NAfilter.Text:lower())
+		logLabel.Visible = toggles[tagText] and matchesSearch
 	end)
 end
 
