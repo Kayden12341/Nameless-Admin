@@ -15499,7 +15499,7 @@ local UIGradient = InstanceNew("UIGradient")
 local ImageButton = InstanceNew("ImageButton")
 local UICorner2 = InstanceNew("UICorner")
 
-TextLabel.Parent = ScreenGui
+TextLabel.Parent = NASCREENGUI
 TextLabel.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 TextLabel.BackgroundTransparency = 1
 TextLabel.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -15535,7 +15535,7 @@ UIGradient.Transparency = NumberSequence.new{
 }
 UIGradient.Rotation = 45
 
-ImageButton.Parent = ScreenGui
+ImageButton.Parent = NASCREENGUI
 ImageButton.BackgroundTransparency = 1
 ImageButton.AnchorPoint = Vector2.new(0.5, 0)
 ImageButton.BorderSizePixel = 0
