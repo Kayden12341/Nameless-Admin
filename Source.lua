@@ -7470,6 +7470,162 @@ function getAllTools()
 	return tools
 end
 
+cmd.add({"circlemath", "cm"}, {"circlemath <mode> <size>", "Gay circle math\nModes: a,b,c,d,e"}, function(mode, size)
+	local mode = mode or "a"
+	local backpack = getBp()
+	lib.disconnect("cm")
+	if backpack and character.Parent then
+		local tools = getAllTools()
+		for i, tool in pairs(tools) do
+			local cpos, g = (math.pi*2)*(i/#tools), CFrame.new()
+			local tcon = {}
+			tool.Parent = backpack
+			
+			if mode == "a" then
+				size = tonumber(size) or 2
+				g = (
+					CFrame.new(0, 0, size)*
+					CFrame.Angles(rad(90), 0, cpos)
+				)
+			elseif mode == "b" then
+				size = tonumber(size) or 2
+				g = (
+					CFrame.new(i - #tools/2, 0, 0)*
+					CFrame.Angles(rad(90), 0, 0)
+				)
+			elseif mode == "c" then
+				size = tonumber(size) or 2
+				g = (
+					CFrame.new(cpos/3, 0, 0)*
+					CFrame.Angles(rad(90), 0, cpos*2)
+				)
+			elseif mode == "d" then
+				size = tonumber(size) or 2
+				g = (
+					CFrame.new(clamp(tan(cpos), -3, 3), 0, 0)*
+					CFrame.Angles(rad(90), 0, cpos)
+				)
+			elseif mode == "e" then
+				size = tonumber(size) or 2
+				g = (
+					CFrame.new(0, 0, clamp(tan(cpos), -5, 5))*
+					CFrame.Angles(rad(90), 0, cpos)
+				)
+			end
+			tool.Grip = g
+			tool.Parent = character
+			
+			tcon[#tcon] = lib.connect("cm", mouse.Button1Down:Connect(function()
+				tool:Activate()
+			end))
+			tcon[#tcon] = lib.connect("cm", tool.Changed:Connect(function(p)
+				if p == "Grip" and tool.Grip ~= g then
+					tool.Grip = g
+				end
+			end))
+			
+			lib.connect("cm", tool.AncestryChanged:Connect(function()
+				for i = 1, #tcon do
+					tcon[i]:Disconnect()
+				end
+			end))
+		end
+	end
+end)
+
+cmd.add({"seizure"}, {"seizure", "Gives you a seizure"}, function()
+	Spawn(function()
+		if getgenv().Lzzz == true then return end
+
+		local Anim = Instance.new("Animation")
+		if LocalPlayer.Character:FindFirstChild("UpperTorso") then
+			Anim.AnimationId = "rbxassetid://507767968"
+		else
+			Anim.AnimationId = "rbxassetid://180436148"
+		end
+		local k = getHum():LoadAnimation(Anim)
+		getgenv().ssss = LocalPlayer:GetMouse()
+		getgenv().Lzzz = false
+
+		if Lzzz == false then
+			getgenv().Lzzz = true
+			if LocalPlayer.Character:FindFirstChild("UpperTorso") then
+				Anim.AnimationId = "rbxassetid://507767968"
+			else
+				Anim.AnimationId = "rbxassetid://180436148"
+			end
+			getgenv().currentnormal = game:GetService("Workspace").Gravity
+			game:GetService("Workspace").Gravity = 196.2
+			LocalPlayer.Character:PivotTo(LocalPlayer.Character:GetPivot() * CFrame.Angles(2, 0, 0))
+			wait(0.5)
+			getHum().PlatformStand = true
+			LocalPlayer.Character.Animate.Disabled = true
+
+			k:Play()
+			k:AdjustSpeed(10)
+
+			LocalPlayer.Character.Animate.Disabled = true
+		else
+			getgenv().Lzzz = false
+			if LocalPlayer.Character:FindFirstChild("UpperTorso") then
+				Anim.AnimationId = "rbxassetid://507767968"
+			else
+				Anim.AnimationId = "rbxassetid://180436148"
+			end
+			game:GetService("Workspace").Gravity = currentnormal
+			getHum().PlatformStand = false
+			getHum().Jump = true
+			k:Stop()
+
+			LocalPlayer.Character.Animate.Disabled = false
+			game:GetService'RunService'.Heartbeat:Wait()
+			for i = 1,10 do
+				getRoot(LocalPlayer.Character).AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+				wait(0.1)
+			end
+		end
+
+		game:GetService("RunService").RenderStepped:Connect(function()
+			if Lzzz == true then
+				getRoot(LocalPlayer.Character).CFrame = getRoot(LocalPlayer.Character).CFrame * CFrame.new(
+					.075 * math.sin(45 * tick()),
+					.075 * math.sin(45 * tick()),
+					.075 * math.sin(45 * tick())
+				)
+			end
+		end)
+	end)
+end)
+
+cmd.add({"unseizure"}, {"unseizure", "Stops you from having a seizure not in real life noob"}, function(n)
+	spawn(function()
+		if getgenv().Lzzz ~= true then return end
+
+		local Anim = Instance.new("Animation")
+		if LocalPlayer.Character:FindFirstChild("UpperTorso") then
+			Anim.AnimationId = "rbxassetid://507767968"
+		else
+			Anim.AnimationId = "rbxassetid://180436148"
+		end
+
+		local k = getHum():LoadAnimation(Anim)
+
+		getgenv().Lzzz = false
+		game:GetService("Workspace").Gravity = currentnormal
+		getHum().PlatformStand = false
+		getHum().Jump = true
+		k:Stop()
+
+		LocalPlayer.Character.Animate.Disabled = false
+
+		game:GetService("RunService").Heartbeat:Wait()
+		for i = 1, 10 do
+			getRoot(LocalPlayer.Character).AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+			wait(0.1)
+		end
+	end)
+end)
+
 cmd.add({"fakelag", "flag"}, {"fakelag (flag)", "fake lag"}, function()
 	if FakeLag then return end
 	FakeLag = true
