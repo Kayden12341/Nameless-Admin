@@ -46,6 +46,7 @@ local Delay = task.delay;
 local Wait = task.wait;
 local Discover = table.find;
 local Concat = table.concat;
+local Defer = task.defer;
 
 function blankfunction(...)
 	return ...
@@ -189,7 +190,6 @@ local mainName = 'Nameless Admin'
 local testingName = 'NA Testing'
 local adminName = 'NA'
 
--- Returns a single randomized name with the appropriate suffix
 function yayApril(isTesting: boolean)
 	local baseNames = {
 		"Clueless", "Gay", "Infinite", "Sussy", "Broken", "Shadow", "Quirky",
@@ -308,6 +308,7 @@ end
 local githubUrl = ''
 local loader=''
 local NAimageButton=nil
+QOTRANALREADY=false
 
 if getgenv().NATestingVer then
 	loader=[[loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/Nameless-Admin/main/NA%20testing.lua"))();]]
@@ -351,9 +352,9 @@ end
 
 --Custom file functions checker checker
 --local CustomFunctionSupport=isfile and isfolder and writefile and readfile and listfiles;
-local FileSupport=isfile and isfolder and writefile and readfile and makefolder;
+local FileSupport = isfile and isfolder and writefile and readfile and makefolder
 
---Creates folder & files for Prefix & Plugins
+-- Creates folder & files for Prefix, Plugins, and QoT toggle
 if FileSupport then
 	if not isfolder("Nameless-Admin") then
 		makefolder("Nameless-Admin")
@@ -366,14 +367,20 @@ if FileSupport then
 	if not isfile("Nameless-Admin/ImageButtonSize.txt") then
 		writefile("Nameless-Admin/ImageButtonSize.txt", "1")
 	end
+	
+	if not isfile("Nameless-Admin/QueueOnTeleport.txt") then
+		writefile("Nameless-Admin/QueueOnTeleport.txt", "false")
+	end
 end
 
 local prefixCheck = ";"
 local NAScale = 1
+local NAQoTEnabled = false
 
 if FileSupport then
 	prefixCheck = readfile("Nameless-Admin/Prefix.txt")
 	NAsavedScale = tonumber(readfile("Nameless-Admin/ImageButtonSize.txt"))
+	NAQoTEnabled = readfile("Nameless-Admin/QueueOnTeleport.txt") == "true"
 
 	if prefixCheck:match("[a-zA-Z0-9]") then
 		prefixCheck = ";"
@@ -1337,7 +1344,7 @@ function removeESPonLEAVE(player)
 	end
 end
 
-function ESP(player, persistent)
+function NAESP(player, persistent)
 	persistent = persistent or false
 
 	Spawn(function()
@@ -1356,13 +1363,14 @@ function ESP(player, persistent)
 		highlight.Name = "\0"
 		highlight.FillTransparency = 0.6
 		highlight.OutlineTransparency = 0
+		highlight.OutlineColor = Color3.new(1, 1, 1)
 		highlight.Parent = character
 
 		local billboardGui
 		local textLabel
 		local espLoop
 
-		if character:FindFirstChild("Head") then
+		if character:FindFirstChild("Head") and not chamsEnabled then
 			billboardGui = InstanceNew("BillboardGui")
 			billboardGui.Name = "\0"
 			billboardGui.Size = UDim2.new(0, 200, 0, 50)
@@ -1380,35 +1388,46 @@ function ESP(player, persistent)
 			textLabel.TextStrokeTransparency = 0.2
 			textLabel.Text = ""
 			textLabel.Parent = billboardGui
+		end
 
-			espLoop = RunService.RenderStepped:Connect(function()
-				if not character:IsDescendantOf(game:GetService("Workspace")) then
-					espLoop:Disconnect()
-					return
-				end
+		espLoop = RunService.RenderStepped:Connect(function()
+			if not character:IsDescendantOf(workspace) then
+				espLoop:Disconnect()
+				return
+			end
 
-				local humanoid = character:FindFirstChildOfClass("Humanoid")
-				local rootPart = getRoot(character)
-				if humanoid and rootPart then
-					local health = math.floor(humanoid.Health)
-					local maxHealth = math.floor(humanoid.MaxHealth)
-					local distance = math.floor((getRoot(getPlrChar(Players.LocalPlayer)).Position - rootPart.Position).Magnitude)
+			local humanoid = character:FindFirstChildOfClass("Humanoid")
+			local rootPart = getRoot(character)
+			if humanoid and rootPart then
+				local health = math.floor(humanoid.Health)
+				local maxHealth = math.floor(humanoid.MaxHealth)
+				local distance = math.floor((getRoot(getPlrChar(Players.LocalPlayer)).Position - rootPart.Position).Magnitude)
 
-					local displayText = Format("%s | %d/%d HP | %d studs", nameChecker(player), health, maxHealth, distance)
-					textLabel.Text = displayText
+				local distanceColor = distance < 50 and Color3.fromRGB(255, 0, 0)
+					or distance < 100 and Color3.fromRGB(255, 165, 0)
+					or Color3.fromRGB(0, 255, 0)
 
-					textLabel.TextColor3 = distance < 50 and Color3.fromRGB(255, 0, 0)
-						or distance < 100 and Color3.fromRGB(255, 165, 0)
-						or Color3.fromRGB(0, 255, 0)
+				local targetColor = player.Team == nil and distanceColor
+					or (player.Team.TeamColor and player.Team.TeamColor.Color)
+					or Color3.new(1, 1, 1)
 
-					local teamColor = player.Team and player.Team.TeamColor and player.Team.TeamColor.Color
-					if teamColor then
-						highlight.FillColor = teamColor
-						highlight.OutlineColor = Color3.new(1, 1, 1)
+				if textLabel then
+					textLabel.Text = Format("%s | %d/%d HP | %d studs", nameChecker(player), health, maxHealth, distance)
+
+					if textLabel.TextColor3 ~= distanceColor then
+						TweenService:Create(textLabel, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+							TextColor3 = distanceColor
+						}):Play()
 					end
 				end
-			end)
-		end
+
+				if highlight.FillColor ~= targetColor then
+					TweenService:Create(highlight, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+						FillColor = targetColor
+					}):Play()
+				end
+			end
+		end)
 
 		espCONS[player] = {
 			highlight = highlight,
@@ -1433,8 +1452,8 @@ function ESP(player, persistent)
 					espCONS[player] = nil
 				end
 
-				Wait(1)
-				ESP(player, persistent)
+				Wait(.5)
+				NAESP(player, persistent)
 			end)
 
 			storeESP(player, "characterAdded", characterAddedConnection)
@@ -1530,7 +1549,7 @@ function unmobilefly()
 end]]
 
 
-function x(v)
+function xxRAYYYY(v)
 	if v then
 		for _,i in pairs(game:GetService("Workspace"):GetDescendants()) do
 			if i:IsA("BasePart") and not i.Parent:FindFirstChild("Humanoid") and not i.Parent.Parent:FindFirstChild("Humanoid") then
@@ -5842,14 +5861,14 @@ cmd.add({"esp"}, {"esp", "locate where the players are"}, function()
 	chamsEnabled = false
 	for _, player in pairs(Players:GetPlayers()) do
 		if player.Name ~= Players.LocalPlayer.Name then
-			ESP(player)
+			NAESP(player)
 		end
 	end
 
 	if not getgenv().ESPJoinConnection then
 		getgenv().ESPJoinConnection = Players.PlayerAdded:Connect(function(player)
 			if ESPenabled and player.Name ~= Players.LocalPlayer.Name then
-				ESP(player)
+				NAESP(player)
 			end
 		end)
 	end
@@ -5860,14 +5879,14 @@ cmd.add({"chams"}, {"chams", "ESP but without the text :shock:"}, function()
 	chamsEnabled = true
 	for _, player in pairs(Players:GetPlayers()) do
 		if player.Name ~= Players.LocalPlayer.Name then
-			ESP(player)
+			NAESP(player)
 		end
 	end
 
 	if not getgenv().ESPJoinConnection then
 		getgenv().ESPJoinConnection = Players.PlayerAdded:Connect(function(player)
 			if ESPenabled and player.Name ~= Players.LocalPlayer.Name then
-				ESP(player)
+				NAESP(player)
 			end
 		end)
 	end
@@ -5878,7 +5897,7 @@ cmd.add({"locate"}, {"locate <username>", "locate where the players are"}, funct
 	local target = getPlr(username)
 	for _, plr in next, target do
 		if plr then
-			ESP(plr, true)
+			NAESP(plr, true)
 		end
 	end
 end, true)
@@ -7550,13 +7569,13 @@ cmd.add({"circlemath", "cm"}, {"circlemath <mode> <size>", "Gay circle math\nMod
 			end))
 		end
 	end
-end)
+end,true)
 
 cmd.add({"seizure"}, {"seizure", "Gives you a seizure"}, function()
 	Spawn(function()
 		if getgenv().Lzzz == true then return end
 
-		local Anim = Instance.new("Animation")
+		local Anim = InstanceNew("Animation")
 		if LocalPlayer.Character:FindFirstChild("UpperTorso") then
 			Anim.AnimationId = "rbxassetid://507767968"
 		else
@@ -7620,7 +7639,7 @@ cmd.add({"unseizure"}, {"unseizure", "Stops you from having a seizure not in rea
 	spawn(function()
 		if getgenv().Lzzz ~= true then return end
 
-		local Anim = Instance.new("Animation")
+		local Anim = InstanceNew("Animation")
 		if LocalPlayer.Character:FindFirstChild("UpperTorso") then
 			Anim.AnimationId = "rbxassetid://507767968"
 		else
@@ -11792,7 +11811,7 @@ autoRemoveConnection = nil
 function handleDescendantAdd(part)
 	if #autoRemover > 0 then
 		if FindInTable(autoRemover, part.Name:lower()) then
-			task.defer(function()
+			Defer(function()
 				if part and part.Parent then
 					part:Destroy()
 				end
@@ -11842,7 +11861,7 @@ function onAdd(obj)
 	if #autoFinder > 0 then
 		for _, kw in pairs(autoFinder) do
 			if obj.Name:lower():find(kw) then
-				task.defer(function()
+				Defer(function()
 					if obj and obj.Parent then
 						obj:Destroy()
 					end
@@ -11913,7 +11932,7 @@ local autoClassConnection = nil
 function handleClassDescendantAdd(part)
 	if #autoClassRemover > 0 then
 		if FindInTable(autoClassRemover, part.ClassName:lower()) then
-			task.defer(function()
+			Defer(function()
 				if part and part.Parent then
 					part:Destroy()
 				end
@@ -12016,93 +12035,124 @@ cmd.add({"chardeleteclass", "charremoveclass", "chardeleteclassname", "cdc"}, {"
 	end
 end, true)
 
-cmd.add({"gotopart", "topart", "toprt"}, {"gotopart {partname} (topart, toprt)", "Teleports you to a part by name"}, function(...)
+local activeTeleports = {}
+
+cmd.add({"gotopart", "topart", "toprt"}, {"gotopart {partname}", "Teleports you to each matching part by name once"}, function(...)
 	local partName = Concat({...}, " "):lower()
+	local commandKey = "gotopart"
 
-	for _, part in pairs(game:GetService("Workspace"):GetDescendants()) do
-		if part:IsA("BasePart") and part.Name:lower() == partName then
-			if getHum() then
-				getHum().Sit = false
-				Wait(0.1)
-			end
-			if getChar() then
-				getChar():PivotTo(part:GetPivot())
-			end
-			Wait(0.2)
-		end
+	if activeTeleports[commandKey] then
+		activeTeleports[commandKey].active = false
 	end
+
+	local taskState = {active = true}
+	activeTeleports[commandKey] = taskState
+
+	Spawn(function()
+		for _, part in pairs(game:GetService("Workspace"):GetDescendants()) do
+			if not taskState.active then return end
+			if part:IsA("BasePart") and part.Name:lower() == partName then
+				if getHum() then getHum().Sit = false Wait(0.1) end
+				if getChar() then getChar():PivotTo(part:GetPivot()) end
+				Wait(.2)
+			end
+		end
+	end)
 end, true)
 
-cmd.add({"tweengotopart", "tgotopart", "ttopart", "ttoprt"}, {"tweengotopart {partname} (tgotopart, ttopart, ttoprt)", "Tweens your character to a part by name"}, function(...)
+cmd.add({"tweengotopart", "tgotopart", "ttopart", "ttoprt"}, {"tweengotopart {partname}", "Tweens you to each matching part by name once"}, function(...)
 	local partName = Concat({...}, " "):lower()
+	local commandKey = "tweengotopart"
 
-	for _, part in pairs(game:GetService("Workspace"):GetDescendants()) do
-		if part:IsA("BasePart") and part.Name:lower() == partName then
-			if getHum() then
-				getHum().Sit = false
-				Wait(0.1)
-			end
-			TweenService:Create(
-				getRoot(getChar()),
-				TweenInfo.new(1, Enum.EasingStyle.Linear),
-				{CFrame = part.CFrame}
-			):Play()
-			Wait(1)
-		end
+	if activeTeleports[commandKey] then
+		activeTeleports[commandKey].active = false
 	end
+
+	local taskState = {active = true}
+	activeTeleports[commandKey] = taskState
+
+	Spawn(function()
+		for _, part in pairs(game:GetService("Workspace"):GetDescendants()) do
+			if not taskState.active then return end
+			if part:IsA("BasePart") and part.Name:lower() == partName then
+				if getHum() then getHum().Sit = false Wait(0.1) end
+				local tween = TweenService:Create(getRoot(getChar()), TweenInfo.new(1, Enum.EasingStyle.Linear), {CFrame = part.CFrame})
+				tween:Play()
+				Wait(1.1)
+			end
+		end
+	end)
 end, true)
 
-cmd.add({"gotopartfind", "topartfind", "toprtfind"}, {"gotopartfind {name} (topartfind, toprtfind)", "Teleports you to a part with a name containing the given text"}, function(...)
+
+cmd.add({"gotopartfind", "topartfind", "toprtfind"}, {"gotopartfind {name}", "Teleports to each part containing name once"}, function(...)
 	local name = Concat({...}, " "):lower()
+	local commandKey = "gotopartfind"
 
-	for _, part in pairs(game:GetService("Workspace"):GetDescendants()) do
-		if part:IsA("BasePart") and part.Name:lower():find(name) then
-			if getHum() then
-				getHum().Sit = false
-				Wait(0.1)
-			end
-			if getChar() then
-				getChar():PivotTo(part:GetPivot())
-			end
-			Wait(0.2)
-		end
+	if activeTeleports[commandKey] then
+		activeTeleports[commandKey].active = false
 	end
+
+	local taskState = {active = true}
+	activeTeleports[commandKey] = taskState
+
+	Spawn(function()
+		for _, part in pairs(game:GetService("Workspace"):GetDescendants()) do
+			if not taskState.active then return end
+			if part:IsA("BasePart") and part.Name:lower():find(name) then
+				if getHum() then getHum().Sit = false Wait(0.1) end
+				if getChar() then getChar():PivotTo(part:GetPivot()) end
+				Wait(.2)
+			end
+		end
+	end)
 end, true)
 
-cmd.add({"tweengotopartfind", "tgotopartfind", "ttopartfind", "ttoprtfind"}, {"tweengotopartfind {name} (tgotopartfind, ttopartfind, ttoprtfind)", "Tweens your character to a part with a name containing the given text"}, function(...)
+cmd.add({"tweengotopartfind", "tgotopartfind", "ttopartfind", "ttoprtfind"}, {"tweengotopartfind {name}", "Tweens to each part containing name once"}, function(...)
 	local name = Concat({...}, " "):lower()
+	local commandKey = "tweengotopartfind"
 
-	for _, part in pairs(game:GetService("Workspace"):GetDescendants()) do
-		if part:IsA("BasePart") and part.Name:lower():find(name) then
-			if getHum() then
-				getHum().Sit = false
-				Wait(0.1)
-			end
-			TweenService:Create(
-				getRoot(getChar()),
-				TweenInfo.new(1, Enum.EasingStyle.Linear),
-				{CFrame = part.CFrame}
-			):Play()
-			Wait(1)
-		end
+	if activeTeleports[commandKey] then
+		activeTeleports[commandKey].active = false
 	end
+
+	local taskState = {active = true}
+	activeTeleports[commandKey] = taskState
+
+	Spawn(function()
+		for _, part in pairs(game:GetService("Workspace"):GetDescendants()) do
+			if not taskState.active then return end
+			if part:IsA("BasePart") and part.Name:lower():find(name) then
+				if getHum() then getHum().Sit = false Wait(0.1) end
+				local tween = TweenService:Create(getRoot(getChar()), TweenInfo.new(1, Enum.EasingStyle.Linear), {CFrame = part.CFrame})
+				tween:Play()
+				Wait(1.1)
+			end
+		end
+	end)
 end, true)
 
-cmd.add({"gotopartclass", "gpc", "gotopartc", "gotoprtc"}, {"gotopartclass {classname} (gpc, gotopartc, gotoprtc)", "Teleports you to a part by classname"}, function(...)
+cmd.add({"gotopartclass", "gpc", "gotopartc", "gotoprtc"}, {"gotopartclass {classname}", "Teleports to each part of class once"}, function(...)
 	local className = ({...})[1]:lower()
+	local commandKey = "gotopartclass"
 
-	for _, part in pairs(game:GetService("Workspace"):GetDescendants()) do
-		if part:IsA("BasePart") and part.ClassName:lower() == className then
-			if getHum() then
-				getHum().Sit = false
-				Wait(0.1)
-			end
-			if getChar() then
-				getChar():PivotTo(part:GetPivot())
-			end
-			Wait(0.2)
-		end
+	if activeTeleports[commandKey] then
+		activeTeleports[commandKey].active = false
 	end
+
+	local taskState = {active = true}
+	activeTeleports[commandKey] = taskState
+
+	Spawn(function()
+		for _, part in pairs(game:GetService("Workspace"):GetDescendants()) do
+			if not taskState.active then return end
+			if part:IsA("BasePart") and part.ClassName:lower() == className then
+				if getHum() then getHum().Sit = false Wait(0.1) end
+				if getChar() then getChar():PivotTo(part:GetPivot()) end
+				Wait(.2)
+			end
+		end
+	end)
 end, true)
 
 cmd.add({"bringpart", "bpart", "bprt"}, {"bringpart {partname} (bpart, bprt)", "Brings a part to your character by name"}, function(...)
@@ -12129,33 +12179,50 @@ cmd.add({"bringmodel", "bmodel"}, {"bringmodel {modelname} (bmodel)", "Brings a 
 	end
 end, true)
 
-cmd.add({"gotomodel", "tomodel"}, {"gotomodel {modelname} (tomodel)", "Teleports you to a model by name"}, function(...)
+cmd.add({"gotomodel", "tomodel"}, {"gotomodel {modelname}", "Teleports to each model with name once"}, function(...)
 	local modelName = Concat({...}, " "):lower()
+	local commandKey = "gotomodel"
 
-	for _, model in pairs(game:GetService("Workspace"):GetDescendants()) do
-		if model:IsA("Model") and model.Name:lower() == modelName then
-			if getHum() then
-				getHum().Sit = false
-				Wait(0.1)
-			end
-			if getChar() then
-				getChar():PivotTo(model:GetPivot())
-			end
-			Wait(0.2)
-		end
+	if activeTeleports[commandKey] then
+		activeTeleports[commandKey].active = false
 	end
+
+	local taskState = {active = true}
+	activeTeleports[commandKey] = taskState
+
+	Spawn(function()
+		for _, model in pairs(game:GetService("Workspace"):GetDescendants()) do
+			if not taskState.active then return end
+			if model:IsA("Model") and model.Name:lower() == modelName then
+				if getHum() then getHum().Sit = false Wait(0.1) end
+				if getChar() then getChar():PivotTo(model:GetPivot()) end
+				Wait(.2)
+			end
+		end
+	end)
 end, true)
 
-cmd.add({"bringmodelfind", "bmodelfind"}, {"bringmodelfind {name} (bmodelfind)", "Brings a model to your character if its name contains the given text"}, function(...)
+cmd.add({"gotomodelfind", "tomodelfind"}, {"gotomodelfind {name}", "Teleports to each model containing name once"}, function(...)
 	local name = Concat({...}, " "):lower()
+	local commandKey = "gotomodelfind"
 
-	for _, model in pairs(game:GetService("Workspace"):GetDescendants()) do
-		if model:IsA("Model") and model.Name:lower():find(name) then
-			if getChar() then
-				model:PivotTo(getChar():GetPivot())
+	if activeTeleports[commandKey] then
+		activeTeleports[commandKey].active = false
+	end
+
+	local taskState = {active = true}
+	activeTeleports[commandKey] = taskState
+
+	Spawn(function()
+		for _, model in pairs(game:GetService("Workspace"):GetDescendants()) do
+			if not taskState.active then return end
+			if model:IsA("Model") and model.Name:lower():find(name) then
+				if getHum() then getHum().Sit = false Wait(0.1) end
+				if getChar() then getChar():PivotTo(model:GetPivot()) end
+				Wait(.2)
 			end
 		end
-	end
+	end)
 end, true)
 
 cmd.add({"gotomodelfind", "tomodelfind"}, {"gotomodelfind {name} (tomodelfind)", "Teleports you to a model whose name contains the given text"}, function(...)
@@ -12175,41 +12242,50 @@ cmd.add({"gotomodelfind", "tomodelfind"}, {"gotomodelfind {name} (tomodelfind)",
 	end
 end, true)
 
-function setHumanoidStates(humanoid, stateEnabled)
-	local states = {
-		Enum.HumanoidStateType.Climbing,
-		Enum.HumanoidStateType.FallingDown,
-		Enum.HumanoidStateType.Flying,
-		Enum.HumanoidStateType.Freefall,
-		Enum.HumanoidStateType.GettingUp,
-		Enum.HumanoidStateType.Jumping,
-		Enum.HumanoidStateType.Landed,
-		Enum.HumanoidStateType.Physics,
-		Enum.HumanoidStateType.PlatformStanding,
-		Enum.HumanoidStateType.Ragdoll,
-		Enum.HumanoidStateType.Running,
-		Enum.HumanoidStateType.RunningNoPhysics,
-		Enum.HumanoidStateType.Seated,
-		Enum.HumanoidStateType.StrafingNoPhysics,
-		Enum.HumanoidStateType.Swimming
-	}
+OGGRAVV = SafeGetService("Workspace").Gravity
+SWIMMERRRR = false
+BEATMYSWIM = nil
+IDKGRAVRESETTER = nil
 
+function ZEhumSTATE(humanoid, enabled)
+	local states = Enum.HumanoidStateType:GetEnumItems()
+	table.remove(states, Discover(states, Enum.HumanoidStateType.None))
 	for _, state in ipairs(states) do
-		humanoid:SetStateEnabled(state, stateEnabled)
+		humanoid:SetStateEnabled(state, enabled)
 	end
 end
-
-local originalGravity = game:GetService("Workspace").Gravity
 
 cmd.add({"swim"}, {"swim {speed}", "Swim in the air"}, function(speed)
 	local player = Players.LocalPlayer
 	local humanoid = getHum()
 
-	if humanoid then
-		game:GetService("Workspace").Gravity = 3.5
-		setHumanoidStates(humanoid, false)
+	if not SWIMMERRRR and humanoid and humanoid.Parent then
+		local hrp = getRoot(humanoid.Parent)
+		if not hrp then return end
+
+		OGGRAVV = SafeGetService("Workspace").Gravity
+		SafeGetService("Workspace").Gravity = 0
+
+		ZEhumSTATE(humanoid, false)
 		humanoid:ChangeState(Enum.HumanoidStateType.Swimming)
 		humanoid.WalkSpeed = speed or 16
+
+		IDKGRAVRESETTER = humanoid.Died:Connect(function()
+			SafeGetService("Workspace").Gravity = OGGRAVV
+			SWIMMERRRR = false
+		end)
+
+		BEATMYSWIM = RunService.Heartbeat:Connect(function()
+			pcall(function()
+				if humanoid and hrp then
+					local move = humanoid.MoveDirection
+					local velocity = (move.Magnitude > 0 or UserInputService:IsKeyDown(Enum.KeyCode.Space)) and hrp.Velocity or Vector3.zero
+					hrp.Velocity = velocity
+				end
+			end)
+		end)
+
+		SWIMMERRRR = true
 	end
 end, true)
 
@@ -12218,11 +12294,36 @@ cmd.add({"unswim"}, {"unswim", "Stops the swim script"}, function()
 	local humanoid = getHum()
 
 	if humanoid then
-		game:GetService("Workspace").Gravity = originalGravity
-		setHumanoidStates(humanoid, true)
+		SafeGetService("Workspace").Gravity = OGGRAVV
+		SWIMMERRRR = false
+
+		if IDKGRAVRESETTER then IDKGRAVRESETTER:Disconnect() end
+		if BEATMYSWIM then BEATMYSWIM:Disconnect() BEATMYSWIM = nil end
+
+		ZEhumSTATE(humanoid, true)
 		humanoid:ChangeState(Enum.HumanoidStateType.RunningNoPhysics)
 		humanoid.WalkSpeed = 16
 	end
+end)
+
+cmd.add({"tpua", "bringua"}, {"tpua <player> (bringua)", "brings every unanchored part on the map"}, function(target)
+    local targetPlayer = getPlr(target)
+    if not targetPlayer or not getPlrChar(targetPlayer) or not getRoot(getPlrChar(targetPlayer)) then return end
+    local targetCF = getRoot(getPlrChar(targetPlayer)).CFrame
+
+    Spawn(function()
+        while true do
+            RunService.Heartbeat:Wait()
+            sethiddenproperty(LocalPlayer, "SimulationRadius", 1e9)
+            LocalPlayer.MaximumSimulationRadius = 1e9
+        end
+    end)
+
+    for _, v in pairs(SafeGetService("Workspace"):GetDescendants()) do
+        if v:IsA("BasePart") and not v.Anchored and not v:IsDescendantOf(targetPlayer.Character) then
+            v.CFrame = targetCF * CFrame.new(math.random(-10,10), 0, math.random(-10,10))
+        end
+    end
 end)
 
 cmd.add({"swordfighter", "sfighter", "swordf", "swordbot", "sf"},{"swordfighter (sfighter, swordf, swordbot, sf)", "Activates a sword fighting bot that engages in automated PvP combat"},function()
@@ -12762,14 +12863,14 @@ cmd.add({"xray","xrayon"},{"xray (xrayon)","Makes you be able to see through wal
 	Wait();
 
 	DoNotif("Xray enabled")
-	x(true)
+	xxRAYYYY(true)
 end)
 
 cmd.add({"unxray","xrayoff"},{"unxray (xrayoff)","Makes you not be able to see through walls"},function()
 	Wait();
 
 	DoNotif("Xray disabled")
-	x(false)
+	xxRAYYYY(false)
 end)
 
 cmd.add({"pastebinscraper","pastebinscrape"},{"pastebinscraper (pastebinscrape)","Scrapes paste bin posts"},function()
@@ -13595,38 +13696,79 @@ cmd.add({"fireremotes", "fremotes", "frem"}, {"fireremotes (fremotes, frem)", "F
 	DoNotif("Fired "..remoteCount.." remotes")
 end)
 
+cmd.add({"keepna"}, {"keepna", "keep executing "..adminName.." every time you teleport"}, function()
+	QOTRANALREADY=true
+	if not queueteleport then return DoNotif("dogshit executor with QueueOnTeleport this command WONT work") end
+	queueteleport(loader)
+
+	if FileSupport then
+		writefile("Nameless-Admin/QueueOnTeleport.txt", "true")
+		DoNotif(adminName.." will now auto-load after teleport (QueueOnTeleport enabled).")
+	else
+		DoNotif("QueueOnTeleport enabled for this session. File support not available to save this setting.")
+	end
+end)
+
+cmd.add({"unkeepna"}, {"unkeepna", "Stop executing "..adminName.." every time you teleport"}, function()
+	if QOTRANALREADY then
+		DoNotif("QueueOnTeleport has already been activated for this session.\n"..adminName.." will still auto-run on the next teleport.\n\nYour setting has been saved and will take effect after rejoining.",15)
+	end
+
+	if FileSupport then
+		writefile("Nameless-Admin/QueueOnTeleport.txt", "false")
+		if not QOTRANALREADY then
+			DoNotif("QueueOnTeleport has been disabled. "..adminName.." will no longer auto-run after teleport.")
+		end
+	else
+		DoNotif("File support not available. Cannot save QueueOnTeleport state.")
+	end
+end)
+
 local fovcon = nil
 local monitorcon = nil
+local camwatchcon = nil
+local loopedFOV = nil
 
 cmd.add({"fov"}, {"fov <number>", "Sets your FOV to a custom value (1–120)"}, function(num)
 	local field = math.clamp(tonumber(num) or 70, 1, 120)
-	local cam = Workspace.CurrentCamera
+	local cam = SafeGetService("Workspace").CurrentCamera
 	TweenService:Create(cam, TweenInfo.new(0.3, Enum.EasingStyle.Sine), {FieldOfView = field}):Play()
 end, true)
 
 cmd.add({"loopfov", "lfov"}, {"loopfov <number> (lfov)", "Loops your FOV to stay at a custom value (1–120)"}, function(num)
-	local field = math.clamp(tonumber(num) or 70, 1, 120)
-	local cam = Workspace.CurrentCamera
+	loopedFOV = math.clamp(tonumber(num) or 70, 1, 120)
 
-	if fovcon then fovcon:Disconnect() fovcon = nil end
-	if monitorcon then monitorcon:Disconnect() monitorcon = nil end
+	local function apply()
+		if fovcon then fovcon:Disconnect() end
+		if monitorcon then monitorcon:Disconnect() end
+		local cam = SafeGetService("Workspace").CurrentCamera
+		if not cam then return end
+		fovcon = RunService.RenderStepped:Connect(function()
+			if cam.FieldOfView ~= loopedFOV then
+				cam.FieldOfView = loopedFOV
+			end
+		end)
+		monitorcon = cam:GetPropertyChangedSignal("FieldOfView"):Connect(function()
+			if cam.FieldOfView ~= loopedFOV then
+				cam.FieldOfView = loopedFOV
+			end
+		end)
+	end
 
-	fovcon = RunService.RenderStepped:Connect(function()
-		if cam.FieldOfView ~= field then
-			cam.FieldOfView = field
-		end
+	if camwatchcon then camwatchcon:Disconnect() end
+	camwatchcon = SafeGetService("Workspace"):GetPropertyChangedSignal("CurrentCamera"):Connect(function()
+		Wait(0.05)
+		apply()
 	end)
 
-	monitorcon = cam:GetPropertyChangedSignal("FieldOfView"):Connect(function()
-		if cam.FieldOfView ~= field then
-			cam.FieldOfView = field
-		end
-	end)
+	apply()
 end, true)
 
 cmd.add({"unloopfov", "unlfov"}, {"unloopfov (unlfov)", "Stops the looped FOV"}, function()
 	if fovcon then fovcon:Disconnect() fovcon = nil end
 	if monitorcon then monitorcon:Disconnect() monitorcon = nil end
+	if camwatchcon then camwatchcon:Disconnect() camwatchcon = nil end
+	loopedFOV = nil
 end)
 
 cmd.add({"homebrew"},{"homebrew","Executes homebrew admin"},function()
@@ -13688,7 +13830,7 @@ cmd.add({"preventtools", "noequip", "antiequip"}, {"preventtools (noequip,antieq
 	local function onTool(t)
 		if t:IsA("Tool") then
 			t.Enabled = false
-			task.defer(function()
+			Defer(function()
 				h:UnequipTools()
 				DoNotif("Tool "..t.Name.." blocked", 2)
 			end)
@@ -15252,8 +15394,8 @@ function setupPlayer(plr)
 
 	if ESPenabled then
 		Spawn(function()
-			repeat Wait(1) until plr.Character
-			ESP(plr)
+			repeat Wait() until plr.Character
+			NAESP(plr)
 		end)
 	end
 end
@@ -15514,14 +15656,24 @@ Spawn(function()
 
 		DoNotif(notifBody, 6, rngMsg().." "..nameCheck)
 
-		Notify({
-			Title = maybeMock("Would you like to enable QueueOnTeleport?"),
-			Description = maybeMock("With QueueOnTeleport, "..adminName.." will automatically execute itself upon teleporting to a game or place."),
-			Buttons = {
-				{Text = "Yes", Callback = function() queueteleport(loader) end},
-				{Text = "No", Callback = function() end}
-			}
-		})
+		if NAQoTEnabled and queueteleport then
+			queueteleport(loader)
+			QOTRANALREADY = true
+		elseif not FileSupport then
+			warn("NAWWW NO FILE SUPPORT???????")
+			Notify({
+				Title = maybeMock("Would you like to enable QueueOnTeleport?"),
+				Description = maybeMock("With QueueOnTeleport, "..adminName.." will automatically execute itself upon teleporting to a game or place."),
+				Buttons = {
+					{Text = "Yes", Callback = function()
+						queueteleport(loader)
+					end},
+					{Text = "No", Callback = function() end}
+				}
+			})
+		elseif not queueteleport then
+			warn('your executor is dog shit')
+		end
 
 		Wait(1)
 
