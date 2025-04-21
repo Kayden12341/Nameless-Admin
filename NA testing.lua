@@ -324,14 +324,14 @@ local queueteleport=(syn and syn.queue_on_teleport) or queue_on_teleport or (flu
 local Notification = nil
 
 repeat
-	local success, result = pcall(function()
+	local sssss, rerere = pcall(function()
 		return loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/Nameless-Admin/main/NamelessAdminNotifications.lua"))()
 	end)
 
-	if success then
-		Notification = result
+	if sssss then
+		Notification = rerere
 	else
-		warn(math.random(1,999999).." | Failed to load notification module, retrying...")
+		warn(math.random(1,999999).." | Failed to load notification module: "..rerere.." | retrying...")
 		Wait(.3)
 	end
 until Notification
@@ -14225,7 +14225,7 @@ function CheckPermissions(Player)
 	end)
 end
 
-function Getmodel(id)
+--[[function Getmodel(id)
 	local ob23e232323=nil
 	s,r=pcall(function()
 		ob23e232323=game:GetObjects(id)[1]
@@ -14236,60 +14236,60 @@ function Getmodel(id)
 	Wait(1)
 	warn("retrying")
 	return Getmodel(id) 
-end
+end]]
 
 --[[ GUI VARIABLES ]]--
-local ScreenGui=nil --Getmodel("rbxassetid://140418556029404")
+local NASCREENGUI=nil --Getmodel("rbxassetid://140418556029404")
 
 repeat
-	local success, result = pcall(function()
-		return loadstring(game:HttpGet("https://github.com/ltseverydayyou/Nameless-Admin/blob/main/NAUI.lua?raw=NEWUI"))()
+	local NASUC, resexy = pcall(function()
+		return loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/Nameless-Admin/refs/heads/main/NAUI.lua"))()
 	end)
 
-	if success then
-		ScreenGui = result
+	if NASUC then
+		NASCREENGUI = resexy
 	else
-		warn(math.random(1,999999).." | Failed to load UI module, retrying...")
+		warn(math.random(1,999999).." | Failed to load UI module: "..resexy.." | retrying...")
 		Wait(.3)
 	end
-until ScreenGui
+until NASCREENGUI
 local rPlayer=Players:FindFirstChildWhichIsA("Player")
 local coreGuiProtection={}
 if not RunService:IsStudio() then
 else
 	repeat Wait() until player:FindFirstChild("AdminUI",true)
-	ScreenGui=player:FindFirstChild("AdminUI",true)
+	NASCREENGUI=player:FindFirstChild("AdminUI",true)
 end
 --repeat Wait() until ScreenGui~=nil -- if it loads late then I'll just add this here
 
-NaProtectUI(ScreenGui)
+NaProtectUI(NASCREENGUI)
 
-local description = ScreenGui:FindFirstChild("Description")
+local description = NASCREENGUI:FindFirstChild("Description")
 
-local cmdBar = ScreenGui:FindFirstChild("CmdBar")
+local cmdBar = NASCREENGUI:FindFirstChild("CmdBar")
 local centerBar = cmdBar and cmdBar:FindFirstChild("CenterBar")
 local cmdInput = centerBar and centerBar:FindFirstChild("Input")
 local cmdAutofill = cmdBar and cmdBar:FindFirstChild("Autofill")
 local cmdExample = cmdAutofill and cmdAutofill:FindFirstChild("Cmd")
 local leftFill = cmdBar and cmdBar:FindFirstChild("LeftFill")
 local rightFill = cmdBar and cmdBar:FindFirstChild("RightFill")
-local chatLogsFrame = ScreenGui:FindFirstChild("ChatLogs")
+local chatLogsFrame = NASCREENGUI:FindFirstChild("ChatLogs")
 local chatLogs = chatLogsFrame and chatLogsFrame:FindFirstChild("Container") and chatLogsFrame:FindFirstChild("Container"):FindFirstChild("Logs")
 local chatExample = chatLogs and chatLogs:FindFirstChildWhichIsA("TextLabel")
-local NAconsoleFrame = ScreenGui:FindFirstChild("soRealConsole")
+local NAconsoleFrame = NASCREENGUI:FindFirstChild("soRealConsole")
 local NAconsoleLogs = NAconsoleFrame and NAconsoleFrame:FindFirstChild("Container") and NAconsoleFrame:FindFirstChild("Container"):FindFirstChild("Logs")
 local NAconsoleExample = NAconsoleLogs and NAconsoleLogs:FindFirstChildWhichIsA("TextLabel")
 local NAcontainer = NAconsoleFrame and NAconsoleFrame:FindFirstChild("Container")
 local NAfilter = NAcontainer and NAcontainer:FindFirstChild("Filter")
-local commandsFrame = ScreenGui:FindFirstChild("Commands")
+local commandsFrame = NASCREENGUI:FindFirstChild("Commands")
 local commandsFilter = commandsFrame and commandsFrame:FindFirstChild("Container") and commandsFrame:FindFirstChild("Container"):FindFirstChild("Filter")
 local commandsList = commandsFrame and commandsFrame:FindFirstChild("Container") and commandsFrame:FindFirstChild("Container"):FindFirstChild("List")
 local commandExample = commandsList and commandsList:FindFirstChild("TextLabel")
-local UpdLogsFrame = ScreenGui:FindFirstChild("UpdLog")
+local UpdLogsFrame = NASCREENGUI:FindFirstChild("UpdLog")
 local UpdLogsTitle = UpdLogsFrame and UpdLogsFrame:FindFirstChild("Topbar") and UpdLogsFrame:FindFirstChild("Topbar"):FindFirstChild("TopBar") and UpdLogsFrame:FindFirstChild("Topbar"):FindFirstChild("TopBar"):FindFirstChild("Title")
 local UpdLogsList = UpdLogsFrame and UpdLogsFrame:FindFirstChild("Container") and UpdLogsFrame:FindFirstChild("Container"):FindFirstChild("List")
 local UpdLogsLabel = UpdLogsList and UpdLogsList:FindFirstChildWhichIsA("TextLabel")
-local resizeFrame = ScreenGui:FindFirstChild("Resizeable")
+local resizeFrame = NASCREENGUI:FindFirstChild("Resizeable")
 local resizeXY={
 	Top = {Vector2.new(0,-1),    Vector2.new(0,-1),    "rbxassetid://2911850935"},
 	Bottom = {Vector2.new(0,1),    Vector2.new(0,0),    "rbxassetid://2911850935"},
@@ -14327,13 +14327,13 @@ if resizeFrame then
 end
 
 	--[[pcall(function()
-		for i,v in pairs(ScreenGui:GetDescendants()) do
+		for i,v in pairs(NASCREENGUI:GetDescendants()) do
 			coreGuiProtection[v]=rPlayer.Name
 		end
-		ScreenGui.DescendantAdded:Connect(function(v)
+		NASCREENGUI.DescendantAdded:Connect(function(v)
 			coreGuiProtection[v]=rPlayer.Name
 		end)
-		coreGuiProtection[ScreenGui]=rPlayer.Name
+		coreGuiProtection[NASCREENGUI]=rPlayer.Name
 	
 		local meta=getrawmetatable(game)
 		local tostr=meta.__tostring
@@ -14346,14 +14346,14 @@ end
 		end)
 	end)
 	if not RunService:IsStudio() then
-		local newGui=COREGUI:FindFirstChildWhichIsA("ScreenGui")
+		local newGui=COREGUI:FindFirstChildWhichIsA("NASCREENGUI")
 		newGui.DescendantAdded:Connect(function(v)
 			coreGuiProtection[v]=rPlayer.Name
 		end)
-		for i,v in pairs(ScreenGui:GetChildren()) do
+		for i,v in pairs(NASCREENGUI:GetChildren()) do
 			v.Parent=newGui
 		end
-		ScreenGui=newGui
+		NASCREENGUI=newGui
 	end]]
 
 --[[ GUI FUNCTIONS ]]--
@@ -14603,8 +14603,8 @@ gui.draggable=function(ui, dragui)
 end
 
 gui.draggablev2 = function(ui, dragui)
-	if not dragui then 
-		dragui = ui 
+	if not dragui then
+		dragui = ui
 	end
 	local UserInputService = game:GetService("UserInputService")
 
