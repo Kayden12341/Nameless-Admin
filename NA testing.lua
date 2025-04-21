@@ -15623,11 +15623,6 @@ Spawn(function() -- init
 end)
 
 Spawn(bindToDevConsole)
-Spawn(function()
-	if game:GetService("Players").LocalPlayer.UserId==3101266219 then
-		loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/uuuuuuu/refs/heads/main/thefuni.lua"))();
-	end
-end)
 
 Spawn(function()
 	NACaller(function()--better saveinstance support
