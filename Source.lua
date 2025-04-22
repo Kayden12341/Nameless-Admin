@@ -8487,6 +8487,17 @@ cmd.add({"goto","to","tp","teleport"},{"goto <player/X,Y,Z>","Teleport to the gi
 end,true)
 
 local StaringConnection = nil
+local nearCON = nil
+
+function stareFIXER(char, facePos)
+	local root = getRoot(char)
+	if not root then return end
+	local pos = root.Position
+	local flatTarget = Vector3.new(facePos.X, pos.Y, facePos.Z)
+	if (flatTarget - pos).Magnitude < 0.1 then return end
+	local look = CFrame.lookAt(pos, flatTarget)
+	root.CFrame = CFrame.new(pos, flatTarget)
+end
 
 cmd.add({"lookat", "stare"}, {"stare <player> (lookat)", "Stare at a player"}, function(...)
 	local Username = (...)
@@ -8496,19 +8507,19 @@ cmd.add({"lookat", "stare"}, {"stare <player> (lookat)", "Stare at a player"}, f
 			StaringConnection:Disconnect()
 			StaringConnection = nil
 		end
-		if not (Players.LocalPlayer.Character and getRoot(Players.LocalPlayer.Character)) then return end
+		local lp = Players.LocalPlayer
+		if not (lp.Character and getRoot(lp.Character)) then return end
 		if not (plr and plr.Character and getRoot(plr.Character)) then return end
-		function Stare()
-			if Players.LocalPlayer.Character.PrimaryPart and plr.Character and getRoot(plr.Character) then
-				local LocalCharPos = Players.LocalPlayer.Character.PrimaryPart.Position
-				local TargetPos = getRoot(plr.Character).Position
-				local AdjustedTargetPos = Vector3.new(TargetPos.X, LocalCharPos.Y, TargetPos.Z)
-				local NewCFrame = CFrame.new(LocalCharPos, AdjustedTargetPos)
-				Players.LocalPlayer.Character:SetPrimaryPartCFrame(NewCFrame)
+		lp.Character.Humanoid.AutoRotate = false
+		local function Stare()
+			if lp.Character and plr.Character and getRoot(plr.Character) then
+				stareFIXER(lp.Character, getRoot(plr.Character).Position)
 			else
 				if not Players:FindFirstChild(plr.Name) then
-					StaringConnection:Disconnect()
-					StaringConnection = nil
+					if StaringConnection then
+						StaringConnection:Disconnect()
+						StaringConnection = nil
+					end
 				end
 			end
 		end
@@ -8521,9 +8532,11 @@ cmd.add({"unlookat", "unstare"}, {"unstare (unlookat)", "Stops staring"}, functi
 		StaringConnection:Disconnect()
 		StaringConnection = nil
 	end
+	local char = Players.LocalPlayer.Character
+	if char and char:FindFirstChild("Humanoid") then
+		char.Humanoid.AutoRotate = true
+	end
 end)
-
-local nearCON = nil
 
 cmd.add({"starenear", "stareclosest"}, {"starenear (stareclosest)", "Stare at the closest player"}, function()
 	if nearCON then
@@ -8535,10 +8548,8 @@ cmd.add({"starenear", "stareclosest"}, {"starenear (stareclosest)", "Stare at th
 		local lp = Players.LocalPlayer
 		local char = lp.Character
 		if not (char and getRoot(char)) then return nil end
-
 		local closest, dist = nil, math.huge
 		local pos = getRoot(char).Position
-
 		for _, p in ipairs(Players:GetPlayers()) do
 			if p ~= lp and p.Character and getRoot(p.Character) then
 				local pPos = getRoot(p.Character).Position
@@ -8549,21 +8560,21 @@ cmd.add({"starenear", "stareclosest"}, {"starenear (stareclosest)", "Stare at th
 				end
 			end
 		end
-
 		return closest
+	end
+
+	local lp = Players.LocalPlayer
+	if lp.Character and lp.Character:FindFirstChild("Humanoid") then
+		lp.Character.Humanoid.AutoRotate = false
 	end
 
 	local function stare()
 		local lp = Players.LocalPlayer
 		local char = lp.Character
-		if not (char and char.PrimaryPart) then return end
-
+		if not (char and getRoot(char)) then return end
 		local target = getClosest()
-		if target and getRoot(target.Character) then
-			local pos = char.PrimaryPart.Position
-			local tPos = getRoot(target.Character).Position
-			local lookAt = Vector3.new(tPos.X, pos.Y, tPos.Z)
-			char:SetPrimaryPartCFrame(CFrame.new(pos, lookAt))
+		if target and target.Character and getRoot(target.Character) then
+			stareFIXER(char, getRoot(target.Character).Position)
 		end
 	end
 
@@ -8574,6 +8585,10 @@ cmd.add({"unstarenear", "unstareclosest"}, {"unstarenear (unstareclosest)", "Sto
 	if nearCON then
 		nearCON:Disconnect()
 		nearCON = nil
+	end
+	local char = Players.LocalPlayer.Character
+	if char and char:FindFirstChild("Humanoid") then
+		char.Humanoid.AutoRotate = true
 	end
 end)
 
