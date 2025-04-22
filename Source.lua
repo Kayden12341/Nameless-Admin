@@ -4612,50 +4612,72 @@ cmd.add({"antikick", "nokick", "bypasskick", "bk"}, {"antikick (nokick, bypasski
 		return
 	end
 
-	local oldNamecall = meta.__namecall
-	local oldIndex = meta.__index
-	local oldNewIndex = meta.__newindex
+	local player = game:GetService("Players").LocalPlayer
 
-	setReadOnly(meta, false)
+	local function applyAntiKick(mode)
+		local oldNamecall = meta.__namecall
+		local oldIndex = meta.__index
+		local oldNewIndex = meta.__newindex
 
-	meta.__namecall = newcclosure(function(self, ...)
-		local method = getnamecallmethod()
-		if method and self == player then
-			local m = method:lower()
-			if m == "kick" then
-				DoNotif("A kick attempt was blocked.")
-				return
-			elseif m == "destroy" then
-				DoNotif("An attempt to destroy the player was blocked.")
+		setReadOnly(meta, false)
+
+		meta.__namecall = newcclosure(function(self, ...)
+			local method = getnamecallmethod()
+			if method and self == player then
+				local m = method:lower()
+				if m == "kick" then
+					if mode == "fake" then
+						DoNotif("Kick intercepted (Fake Success)",2)
+						return true
+					else
+						DoNotif("Kick attempt blocked (Error)",2)
+						return
+					end
+				elseif m == "destroy" then
+					DoNotif("Destroy attempt blocked",2)
+					return
+				end
+			end
+			return oldNamecall(self, ...)
+		end)
+
+		meta.__index = newcclosure(function(self, key)
+			if self == player then
+				if key == "Kick" then
+					DoNotif("Access to Kick blocked",2)
+					return function() end
+				elseif key == "Destroy" then
+					DoNotif("Access to Destroy blocked",2)
+					return function() end
+				end
+			end
+			return oldIndex(self, key)
+		end)
+
+		meta.__newindex = newcclosure(function(self, key, value)
+			if self == player and (key == "Kick" or key == "Destroy") then
+				DoNotif("Attempt to overwrite "..key.." blocked",2)
 				return
 			end
-		end
-		return oldNamecall(self, ...)
-	end)
+			return oldNewIndex(self, key, value)
+		end)
 
-	meta.__index = newcclosure(function(self, key)
-		if self == player then
-			if key == "Kick" then
-				DoNotif("Access to Kick was blocked.")
-				return function() end
-			elseif key == "Destroy" then
-				DoNotif("Access to Destroy was blocked.")
-				return function() end
-			end
-		end
-		return oldIndex(self, key)
-	end)
+		setReadOnly(meta, true)
+		DoNotif("Anti-Kick Enabled: Mode - "..(mode == "fake" and "Fake Success" or "Error"),2)
+	end
 
-	meta.__newindex = newcclosure(function(self, key, value)
-		if self == player and (key == "Kick" or key == "Destroy") then
-			DoNotif("An attempt to overwrite "..key.." was blocked.")
-			return
-		end
-		return oldNewIndex(self, key, value)
-	end)
-
-	setReadOnly(meta, true)
-	DoNotif("Anti-Kick Enabled")
+	Notify({
+		Title = "Anti-Kick Mode Selection",
+		Description = "Choose how kick attempts should be handled.",
+		Buttons = {
+			{Text = "Fake Success", Callback = function()
+				applyAntiKick("fake")
+			end},
+			{Text = "Error", Callback = function()
+				applyAntiKick("error")
+			end}
+		}
+	})
 end)
 
 acftpCON = {}
@@ -5905,7 +5927,16 @@ cmd.add({"npcesp", "espnpc"}, {"npcesp espnpc", "locate where the npcs are"}, fu
 			NAESP(plr, true)
 		end
 	end
-end, true)
+end)
+
+cmd.add({"unnpcesp", "unespnpc"}, {"unnpcesp unespnpc", "stop locating npcs"}, function()
+	local target = getPlr("npc")
+	for _, plr in next, target do
+		if plr then
+			discPlrESP(plr)
+		end
+	end
+end)
 
 cmd.add({"unesp", "unchams"}, {"unesp (unchams)", "Disables esp/chams"}, function()
 	ESPenabled = false
