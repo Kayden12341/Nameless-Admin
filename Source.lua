@@ -164,7 +164,7 @@ end
 
 
 --[[ Version ]]--
-local curVer = isAprilFools() and Format("%d.%d.%d", math.random(1, 10), math.random(0, 99), math.random(0, 99)) or "2.4"
+local curVer = isAprilFools() and Format("%d.%d.%d", math.random(1, 10), math.random(0, 99), math.random(0, 99)) or "2.4.1"
 
 --[[ Brand ]]--
 local mainName = 'Nameless Admin'
@@ -289,7 +289,6 @@ end
 local githubUrl = ''
 local loader=''
 local NAimageButton=nil
-QOTRANALREADY=false
 
 if getgenv().NATestingVer then
 	loader=[[loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/Nameless-Admin/main/NA%20testing.lua"))();]]
@@ -717,6 +716,12 @@ function loadedResults(res)
 	local formatted = formatTime()
 	return isNegative and ("-"..formatted) or formatted
 end
+
+LocalPlayer.OnTeleport:Connect(function(...)
+	if NAQoTEnabled and queueteleport then
+		queueteleport(loader)
+	end
+end)
 
 --[[ COMMAND FUNCTIONS ]]--
 local commandcount=0
@@ -1371,6 +1376,15 @@ function NAESP(player, persistent)
 			textLabel.Parent = billboardGui
 		end
 
+		local function nuhuhcheck(plr)
+			local name = plr.Name
+			local displayName = name
+			pcall(function()
+				displayName = plr.DisplayName
+			end)
+			return displayName == name and '@'..name or displayName..' (@'..name..')'
+		end
+
 		espLoop = RunService.RenderStepped:Connect(function()
 			if not character:IsDescendantOf(workspace) then
 				espLoop:Disconnect()
@@ -1388,12 +1402,14 @@ function NAESP(player, persistent)
 					or distance < 100 and Color3.fromRGB(255, 165, 0)
 					or Color3.fromRGB(0, 255, 0)
 
-				local targetColor = player.Team == nil and distanceColor
-					or (player.Team.TeamColor and player.Team.TeamColor.Color)
-					or Color3.new(1, 1, 1)
+				local hasTeam, teamColor = pcall(function()
+					return player.Team.TeamColor.Color
+				end)
+
+				local targetColor = hasTeam and teamColor or distanceColor
 
 				if textLabel then
-					textLabel.Text = Format("%s | %d/%d HP | %d studs", nameChecker(player), health, maxHealth, distance)
+					textLabel.Text = Format("%s | %d/%d HP | %d studs", nuhuhcheck(player), health, maxHealth, distance)
 
 					if textLabel.TextColor3 ~= distanceColor then
 						TweenService:Create(textLabel, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
@@ -1433,7 +1449,7 @@ function NAESP(player, persistent)
 					espCONS[player] = nil
 				end
 
-				Wait(.5)
+				Wait(0.5)
 				NAESP(player, persistent)
 			end)
 
@@ -3272,7 +3288,7 @@ cmd.add({"teleporttoplace","toplace","ttp"},{"teleporttoplace (PlaceId) (toplace
 end,true)
 
 --made by the_king.78
-cmd.add({"adonisbypass","bypassadonis","badonis","adonisb"},{"adonisbypass (bypassadonis,badonis,adonisb)","bypasses adonis admin detection"},function()
+--[[cmd.add({"adonisbypass","bypassadonis","badonis","adonisb"},{"adonisbypass (bypassadonis,badonis,adonisb)","bypasses adonis admin detection"},function()
 	local DebugFunc = getinfo or debug.getinfo
 	local IsDebug = false
 	local hooks = {}
@@ -3329,7 +3345,7 @@ cmd.add({"adonisbypass","bypassadonis","badonis","adonisb"},{"adonisbypass (bypa
 
 		return hook(...)
 	end))
-end)
+end)]]
 
 --[ LOCALPLAYER ]--
 function respawn()
@@ -3609,7 +3625,7 @@ cmd.add({"usetools","uset"},{"usetools (uset)","Equips all tools, uses them, and
 		end
 	end
 
-	wait(1);
+	Wait(1);
 
 	for _, tool in pairs(character:GetChildren()) do
 		if tool:IsA("Tool") and not Discover(equippedTools, tool) then
@@ -3762,7 +3778,6 @@ cmd.add({"antivoid2"}, {"antivoid2", "sets FallenPartsDestroyHeight to -inf"}, f
 	end
 
 	game:GetService("Workspace").FallenPartsDestroyHeight = -9e9
-	DoNotif("FallenPartsDestroyHeight set to -inf | Antivoid2 Enabled",2)
 end)
 
 cmd.add({"unantivoid2"}, {"unantivoid2", "reverts FallenPartsDestroyHeight"}, function()
@@ -3833,7 +3848,7 @@ end)
 	end)
 	swimming=true
 	Clip=false
-	wait(0.1)
+	Wait(0.1)
 	function NoclipLoop()
 		if Clip==false and char~=nil then
 			for _,child in pairs(char:GetDescendants()) do
@@ -3895,7 +3910,7 @@ cmd.add({"fpsbooster","lowgraphics","boostfps","lowg"},{"fpsbooster (lowgraphics
 	end
 
 	w.DescendantAdded:Connect(function(v)
-		task.wait()
+		Wait()
 		optimizeInstance(v)
 	end)
 end)
@@ -4005,7 +4020,7 @@ cmd.add({"antilag","boostfps"},{"antilag (boostfps)","Low Graphics"},function()
 	local userSettings = table.clone(defaultSettings)
 
 	local function updateCanvas()
-		task.wait()
+		Wait()
 		scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 20)
 	end
 
@@ -5883,6 +5898,15 @@ cmd.add({"locate"}, {"locate <username>", "locate where the players are"}, funct
 	end
 end, true)
 
+cmd.add({"npcesp", "espnpc"}, {"npcesp espnpc", "locate where the npcs are"}, function()
+	local target = getPlr("npc")
+	for _, plr in next, target do
+		if plr then
+			NAESP(plr, true)
+		end
+	end
+end, true)
+
 cmd.add({"unesp", "unchams"}, {"unesp (unchams)", "Disables esp/chams"}, function()
 	ESPenabled = false
 	chamsEnabled = false
@@ -5903,7 +5927,7 @@ cmd.add({"unlocate"}, {"unlocate <player>"}, function(username)
 	end
 end, true)
 
-cmd.add({"crash"},{"crash","crashes ur client lol"},function()
+cmd.add({"crash"},{"crash","crashes ur client lol (why would you even use this tho)"},function()
 	while true do end
 end)
 
@@ -5958,7 +5982,7 @@ cmd.add({"creep", "scare"}, {"creep <player> (scare)", "Teleports from a player 
 	local tweenInfo = TweenInfo.new(1000, Enum.EasingStyle.Linear)
 	local tween = tweenService:Create(root, tweenInfo, {CFrame = CFrame.new(0, 10000, 0)})
 	tween:Play()
-	wait(1.5)
+	Wait(1.5)
 	tween:Pause()
 
 	root.Anchored = false
@@ -6144,7 +6168,7 @@ cmd.add({"saveinstance","savegame"},{"saveinstance (savegame)","if it bugs out t
 		SSI="saveinstance",
 	}
 	local synsaveinstance=loadstring(game:HttpGet(Params.RepoURL..Params.SSI..".luau",true),Params.SSI)()
-	local Options={}	
+	local Options={}
 	if identifyexecutor()=="Fluxus" then
 		Options={ IgnoreSpecialProperties=true }
 	end
@@ -6160,7 +6184,7 @@ cmd.add({"admin"},{"admin","whitelist someone to allow them to use commands"},fu
 		if plr~=nil and not Admin[plr.UserId] then
 			Admin[plr.UserId]={plr=plr}
 			ChatMessage("[Nameless Admin] You've got admin. Prefix: ';'",plr.Name)
-			wait(0.2)
+			Wait(0.2)
 			DoNotif(nameChecker(plr).." has now been whitelisted to use commands",15)
 		else
 			DoNotif("No player found")
@@ -6539,8 +6563,6 @@ cmd.add({"functionspy"},{"functionspy","Check console"},function()
 	addHoverEffect(clear_2)
 	addHoverEffect(copy)
 
-	gui.draggablev2(Main,Title)
-
 	local shadow = InstanceNew("ImageLabel")
 	shadow.Parent = Main
 	shadow.BackgroundTransparency = 1
@@ -6830,6 +6852,7 @@ cmd.add({"functionspy"},{"functionspy","Check console"},function()
 		end)
 	end
 	coroutine.wrap(PRML_fake_script)()
+	gui.draggablev2(Main,Title)
 end)
 
 function toggleFly()
@@ -7576,7 +7599,7 @@ cmd.add({"seizure"}, {"seizure", "Gives you a seizure"}, function()
 			getgenv().currentnormal = game:GetService("Workspace").Gravity
 			game:GetService("Workspace").Gravity = 196.2
 			LocalPlayer.Character:PivotTo(LocalPlayer.Character:GetPivot() * CFrame.Angles(2, 0, 0))
-			wait(0.5)
+			Wait(0.5)
 			getHum().PlatformStand = true
 			LocalPlayer.Character.Animate.Disabled = true
 
@@ -7600,7 +7623,7 @@ cmd.add({"seizure"}, {"seizure", "Gives you a seizure"}, function()
 			game:GetService'RunService'.Heartbeat:Wait()
 			for i = 1,10 do
 				getRoot(LocalPlayer.Character).AssemblyLinearVelocity = Vector3.new(0, 0, 0)
-				wait(0.1)
+				Wait(0.1)
 			end
 		end
 
@@ -7640,7 +7663,7 @@ cmd.add({"unseizure"}, {"unseizure", "Stops you from having a seizure not in rea
 		game:GetService("RunService").Heartbeat:Wait()
 		for i = 1, 10 do
 			getRoot(LocalPlayer.Character).AssemblyLinearVelocity = Vector3.new(0, 0, 0)
-			wait(0.1)
+			Wait(0.1)
 		end
 	end)
 end)
@@ -7708,7 +7731,7 @@ end
 
 cmd.add({"loopgrabtools"},{"loopgrabtools","Loop grabs dropped tools"},function()
 	loopgrab=true
-	repeat wait(1)
+	repeat Wait(1)
 		local p=Players.LocalPlayer
 		local c=p.Character
 		if c and c:FindFirstChild("Humanoid") then
@@ -8027,7 +8050,7 @@ cmd.add({"fixcam", "fix"}, {"fixcam", "Fix your camera"}, function()
 	local ws = game:GetService("Workspace")
 	local plr = Players.LocalPlayer
 	ws.CurrentCamera:Remove()
-	wait(0.1)
+	Wait(0.1)
 	repeat Wait() until plr.Character
 	local cam = ws.CurrentCamera
 	cam.CameraSubject = plr.Character:FindFirstChildWhichIsA("Humanoid")
@@ -9194,7 +9217,7 @@ cmd.add({"blackhole"}, {"blackhole", "Makes unanchored parts teleport to the bla
 		end
 	end)
 
-	wait()
+	Wait()
 
 	DoNotif("Blackhole has been loaded, "..(IsOnMobile and "tap the button to move it" or "press E to change the position to where your mouse is"))
 end)
@@ -9954,7 +9977,7 @@ cmd.add({"waveat", "wat"}, {"waveat <player> (wat)", "Wave to a player"}, functi
 		end
 		local wave = humanoid:LoadAnimation(waveAnim)
 		wave:Play(-1, 5, -1)
-		wait(1.6)
+		Wait(1.6)
 		wave:Stop()
 		localRoot.CFrame = oldCFrame
 	end
@@ -10997,7 +11020,7 @@ cmd.add({"spook", "scare"}, {"spook <player> (scare)", "Teleports next to a play
 			if targetRoot then
 				root.CFrame = targetRoot.CFrame + targetRoot.CFrame.LookVector * distancepl
 				root.CFrame = CFrame.new(root.Position, targetRoot.Position)
-				wait(0.5)
+				Wait(0.5)
 				root.CFrame = oldCF
 			end
 		end
@@ -13571,7 +13594,7 @@ cmd.add({"invisible", "invis"}, {"invisible (invis)", "Sets invisibility to scar
 				OriginalPosition = root.CFrame
 				root.CFrame = CFrame.new(0, 10000, 0)
 			end
-			wait(0.5)
+			Wait(0.5)
 			Character.Parent = Lighting
 			if OriginalPosition then
 				local invisRoot = getRoot(InvisibleCharacter)
@@ -13678,30 +13701,24 @@ cmd.add({"fireremotes", "fremotes", "frem"}, {"fireremotes (fremotes, frem)", "F
 end)
 
 cmd.add({"keepna"}, {"keepna", "keep executing "..adminName.." every time you teleport"}, function()
-	QOTRANALREADY=true
-	if not queueteleport then return DoNotif("dogshit executor with QueueOnTeleport this command WONT work") end
-	queueteleport(loader)
-
+	NAQoTEnabled=true
 	if FileSupport then
 		writefile("Nameless-Admin/QueueOnTeleport.txt", "true")
-		DoNotif(adminName.." will now auto-load after teleport (QueueOnTeleport enabled).")
+		DoNotif(adminName.." will now auto-load after teleport (QueueOnTeleport enabled)")
 	else
-		DoNotif("QueueOnTeleport enabled for this session. File support not available to save this setting.")
+		DoNotif("QueueOnTeleport enabled for this session. File support not available to save this setting")
 	end
 end)
 
 cmd.add({"unkeepna"}, {"unkeepna", "Stop executing "..adminName.." every time you teleport"}, function()
-	if QOTRANALREADY then
-		DoNotif("QueueOnTeleport has already been activated for this session.\n"..adminName.." will still auto-run on the next teleport.\n\nYour setting has been saved and will take effect after rejoining.",15)
-	end
-
+	NAQoTEnabled=false
 	if FileSupport then
 		writefile("Nameless-Admin/QueueOnTeleport.txt", "false")
-		if not QOTRANALREADY then
-			DoNotif("QueueOnTeleport has been disabled. "..adminName.." will no longer auto-run after teleport.")
+		if not NAQoTEnabled then
+			DoNotif("QueueOnTeleport has been disabled. "..adminName.." will no longer auto-run after teleport")
 		end
 	else
-		DoNotif("File support not available. Cannot save QueueOnTeleport state.")
+		DoNotif("File support not available. Cannot save QueueOnTeleport state")
 	end
 end)
 
@@ -15190,7 +15207,7 @@ function bindToChat(plr, msg)
 	local txtSize = gui.txtSize(chatMsg, chatMsg.AbsoluteSize.X, 100)
 	chatMsg.Size = UDim2.new(1, -5, 0, txtSize.Y)
 
-	local MAX_MESSAGES = 50
+	local MAX_MESSAGES = 100
 	local chatFrames = {}
 	for _, v in pairs(chatLogs:GetChildren()) do
 		if v:IsA("TextLabel") then
@@ -15274,7 +15291,7 @@ function bindToDevConsole()
 		clickZone.Text = ""
 		clickZone.Parent = btnContainer
 
-		clickZone.MouseButton1Click:Connect(function()
+		MouseButtonFix(clickZone,function()
 			toggles[logType] = not toggles[logType]
 			checkbox.Text = toggles[logType] and "✅" or "⬜"
 
@@ -15339,7 +15356,7 @@ function bindToDevConsole()
 		local txtSize = gui.txtSize(logLabel, logLabel.AbsoluteSize.X, 100)
 		logLabel.Size = UDim2.new(1, -5, 0, txtSize.Y)
 
-		local MAX_MESSAGES = 200
+		local MAX_MESSAGES = 300
 		local logFrames = {}
 
 		for _, v in pairs(NAconsoleLogs:GetChildren()) do
@@ -15637,10 +15654,7 @@ Spawn(function()
 
 		DoNotif(notifBody, 6, rngMsg().." "..nameCheck)
 
-		if NAQoTEnabled and queueteleport then
-			queueteleport(loader)
-			QOTRANALREADY = true
-		elseif not FileSupport then
+		if not FileSupport then
 			warn("NAWWW NO FILE SUPPORT???????")
 			Notify({
 				Title = maybeMock("Would you like to enable QueueOnTeleport?"),
@@ -15756,6 +15770,89 @@ Spawn(function() -- init
 end)
 
 Spawn(bindToDevConsole)
+
+Spawn(function()
+    local getgc = getgc or debug.getgc
+    local hookfunction = hookfunction
+    local getrenv = getrenv
+    local debugInfo = (getrenv and getrenv().debug and getrenv().debug.info) or debug.info
+    local newcclosure = newcclosure or function(f) return f end
+
+    if not (getgc and hookfunction and getrenv and debugInfo) then
+        --warn("[Bypass] Required exploit functions not available. Skipping Adonis bypass.")
+        return
+    end
+
+    local IsDebug = false
+    local hooks = {}
+    local DetectedMeth, KillMeth
+    local AdonisFound = false
+
+    for _, value in getgc(true) do
+        if typeof(value) == "table" then
+            local hasDetected = typeof(rawget(value, "Detected")) == "function"
+            local hasKill = typeof(rawget(value, "Kill")) == "function"
+            local hasVars = rawget(value, "Variables") ~= nil
+            local hasProcess = rawget(value, "Process") ~= nil
+
+            if hasDetected or (hasKill and hasVars and hasProcess) then
+                AdonisFound = true
+                break
+            end
+        end
+    end
+
+    if not AdonisFound then
+        --warn("[Bypass] Adonis not found. Bypass skipped.")
+        return
+    end
+
+    for _, value in getgc(true) do
+        if typeof(value) == "table" then
+            local detected = rawget(value, "Detected")
+            local kill = rawget(value, "Kill")
+
+            if typeof(detected) == "function" and not DetectedMeth then
+                DetectedMeth = detected
+                local hook
+                hook = hookfunction(DetectedMeth, function(methodName, methodFunc)
+                    if methodName ~= "_" and IsDebug then
+                        DoNotif("[Bypass] Adonis Detected\nMethod: "..methodName.."\nInfo: "..methodFunc)
+                    end
+                    return true
+                end)
+                Insert(hooks, DetectedMeth)
+                --warn("[Bypass] Hooked Adonis 'Detected' method.")
+            end
+
+            if rawget(value, "Variables") and rawget(value, "Process") and typeof(kill) == "function" and not KillMeth then
+                KillMeth = kill
+                local hook
+                hook = hookfunction(KillMeth, function(killFunc)
+                    if IsDebug then
+                        warn("[Bypass] Adonis tried to kill function: "..killFunc)
+                    end
+                end)
+                Insert(hooks, KillMeth)
+                --warn("[Bypass] Hooked Adonis 'Kill' method.")
+            end
+        end
+    end
+
+    if DetectedMeth and debugInfo then
+        local hook
+        hook = hookfunction(debugInfo, newcclosure(function(...)
+            local functionName = ...
+            if functionName == DetectedMeth then
+                --warn("[Bypass] Adonis detection intercepted. Bypassed by the_king.78.")
+                return coroutine.yield(coroutine.running())
+            end
+            return hook(...)
+        end))
+    end
+
+    --warn("[Bypass] Adonis auto-bypass activated.")
+end)
 
 Spawn(function()
 	NACaller(function()--better saveinstance support
