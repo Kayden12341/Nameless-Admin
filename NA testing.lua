@@ -308,7 +308,6 @@ end
 local githubUrl = ''
 local loader=''
 local NAimageButton=nil
-QOTRANALREADY=false
 
 if getgenv().NATestingVer then
 	loader=[[loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/Nameless-Admin/main/NA%20testing.lua"))();]]
@@ -736,6 +735,12 @@ function loadedResults(res)
 	local formatted = formatTime()
 	return isNegative and ("-"..formatted) or formatted
 end
+
+LocalPlayer.OnTeleport:Connect(function(...)
+	if NAQoTEnabled and queueteleport then
+		queueteleport(loader)
+	end
+end)
 
 --[[ COMMAND FUNCTIONS ]]--
 local commandcount=0
@@ -3781,7 +3786,6 @@ cmd.add({"antivoid2"}, {"antivoid2", "sets FallenPartsDestroyHeight to -inf"}, f
 	end
 
 	game:GetService("Workspace").FallenPartsDestroyHeight = -9e9
-	DoNotif("FallenPartsDestroyHeight set to -inf | Antivoid2 Enabled",2)
 end)
 
 cmd.add({"unantivoid2"}, {"unantivoid2", "reverts FallenPartsDestroyHeight"}, function()
@@ -13697,30 +13701,24 @@ cmd.add({"fireremotes", "fremotes", "frem"}, {"fireremotes (fremotes, frem)", "F
 end)
 
 cmd.add({"keepna"}, {"keepna", "keep executing "..adminName.." every time you teleport"}, function()
-	QOTRANALREADY=true
-	if not queueteleport then return DoNotif("dogshit executor with QueueOnTeleport this command WONT work") end
-	queueteleport(loader)
-
+	NAQoTEnabled=true
 	if FileSupport then
 		writefile("Nameless-Admin/QueueOnTeleport.txt", "true")
-		DoNotif(adminName.." will now auto-load after teleport (QueueOnTeleport enabled).")
+		DoNotif(adminName.." will now auto-load after teleport (QueueOnTeleport enabled)")
 	else
-		DoNotif("QueueOnTeleport enabled for this session. File support not available to save this setting.")
+		DoNotif("QueueOnTeleport enabled for this session. File support not available to save this setting")
 	end
 end)
 
 cmd.add({"unkeepna"}, {"unkeepna", "Stop executing "..adminName.." every time you teleport"}, function()
-	if QOTRANALREADY then
-		DoNotif("QueueOnTeleport has already been activated for this session.\n"..adminName.." will still auto-run on the next teleport.\n\nYour setting has been saved and will take effect after rejoining.",15)
-	end
-
+	NAQoTEnabled=false
 	if FileSupport then
 		writefile("Nameless-Admin/QueueOnTeleport.txt", "false")
-		if not QOTRANALREADY then
-			DoNotif("QueueOnTeleport has been disabled. "..adminName.." will no longer auto-run after teleport.")
+		if not NAQoTEnabled then
+			DoNotif("QueueOnTeleport has been disabled. "..adminName.." will no longer auto-run after teleport")
 		end
 	else
-		DoNotif("File support not available. Cannot save QueueOnTeleport state.")
+		DoNotif("File support not available. Cannot save QueueOnTeleport state")
 	end
 end)
 
@@ -15656,10 +15654,7 @@ Spawn(function()
 
 		DoNotif(notifBody, 6, rngMsg().." "..nameCheck)
 
-		if NAQoTEnabled and queueteleport then
-			queueteleport(loader)
-			QOTRANALREADY = true
-		elseif not FileSupport then
+		if not FileSupport then
 			warn("NAWWW NO FILE SUPPORT???????")
 			Notify({
 				Title = maybeMock("Would you like to enable QueueOnTeleport?"),
