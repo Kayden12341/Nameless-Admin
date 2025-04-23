@@ -1431,5 +1431,6 @@ ModalFix.Parent = AdminUI
 ModalFix.Size = UDim2.new(0,0,0,0)
 ModalFix.Position = UDim2.new(0,0,0,0)
 ModalFix.Modal = false
+ModalFix.Name = "Modal"
 
 return AdminUI
