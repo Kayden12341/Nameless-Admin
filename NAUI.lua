@@ -140,6 +140,7 @@ local Clear_2 = Instance.new("TextButton")
 local ImageLabel_18 = Instance.new("ImageLabel")
 local UICorner_13 = Instance.new("UICorner")
 local UIGradient_11 = Instance.new("UIGradient")
+local ModalFix = Instance.new("ImageButton")
 
 AdminUI.Name = "AdminUI"
 AdminUI.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
@@ -1425,5 +1426,10 @@ UICorner_13.Parent = soRealConsole
 
 UIGradient_11.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(12, 4, 20)), ColorSequenceKeypoint.new(0.38, Color3.fromRGB(4, 4, 4)), ColorSequenceKeypoint.new(0.52, Color3.fromRGB(4, 4, 4)), ColorSequenceKeypoint.new(0.68, Color3.fromRGB(4, 4, 4)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(12, 4, 20))}
 UIGradient_11.Parent = soRealConsole
+
+ModalFix.Parent = AdminUI
+ModalFix.Size = UDim2.new(0,0,0,0)
+ModalFix.Position = UDim2.new(0,0,0,0)
+ModalFix.Modal = false
 
 return AdminUI
