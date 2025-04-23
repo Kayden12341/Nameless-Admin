@@ -3327,7 +3327,7 @@ cmd.add({"teleporttoplace","toplace","ttp"},{"teleporttoplace (PlaceId) (toplace
 end,true)
 
 --made by the_king.78
---[[cmd.add({"adonisbypass","bypassadonis","badonis","adonisb"},{"adonisbypass (bypassadonis,badonis,adonisb)","bypasses adonis admin detection"},function()
+cmd.add({"adonisbypass","bypassadonis","badonis","adonisb"},{"adonisbypass (bypassadonis,badonis,adonisb)","bypasses adonis admin detection"},function()
 	local DebugFunc = getinfo or debug.getinfo
 	local IsDebug = false
 	local hooks = {}
@@ -3346,7 +3346,7 @@ end,true)
 				hook = hookfunction(DetectedMeth, function(methodName, methodFunc, methodInfo)
 					if methodName ~= "_" then
 						if IsDebug then
-							DoNotif("Adonis Detected\nMethod: "..tostring(methodName).."\nInfo: "..tostring(methodFunc))
+							--DoNotif("Adonis Detected\nMethod: "..tostring(methodName).."\nInfo: "..tostring(methodFunc))
 						end
 					end
 
@@ -3361,7 +3361,7 @@ end,true)
 				local hook
 				hook = hookfunction(KillMeth, function(killFunc)
 					if IsDebug then
-						DoNotif("Adonis tried to detect: "..tostring(killFunc))
+						--DoNotif("Adonis tried to detect: "..tostring(killFunc))
 					end
 				end)
 
@@ -3376,7 +3376,7 @@ end,true)
 
 		if DetectedMeth and functionName == DetectedMeth then
 			if IsDebug or not IsDebug then
-				DoNotif("Adonis was bypassed by the_king.78")
+				--DoNotif("Adonis was bypassed by the_king.78")
 			end
 
 			return coroutine.yield(coroutine.running())
@@ -3384,7 +3384,7 @@ end,true)
 
 		return hook(...)
 	end))
-end)]]
+end)
 
 --[ LOCALPLAYER ]--
 function respawn()
@@ -16300,89 +16300,6 @@ Spawn(function() -- init
 end)
 
 Spawn(bindToDevConsole)
-
-Spawn(function()
-    local getgc = getgc or debug.getgc
-    local hookfunction = hookfunction
-    local getrenv = getrenv
-    local debugInfo = (getrenv and getrenv().debug and getrenv().debug.info) or debug.info
-    local newcclosure = newcclosure or function(f) return f end
-
-    if not (getgc and hookfunction and getrenv and debugInfo) then
-        --DoNotif("[Bypass] Required exploit functions not available. Skipping Adonis bypass.")
-        return
-    end
-
-    local IsDebug = false
-    local hooks = {}
-    local DetectedMeth, KillMeth
-    local AdonisFound = false
-
-    for _, value in getgc(true) do
-        if typeof(value) == "table" then
-            local hasDetected = typeof(rawget(value, "Detected")) == "function"
-            local hasKill = typeof(rawget(value, "Kill")) == "function"
-            local hasVars = rawget(value, "Variables") ~= nil
-            local hasProcess = rawget(value, "Process") ~= nil
-
-            if hasDetected or (hasKill and hasVars and hasProcess) then
-                AdonisFound = true
-                break
-            end
-        end
-    end
-
-    if not AdonisFound then
-        --DoNotif("[Bypass] Adonis not found. Bypass skipped.")
-        return
-    end
-
-    for _, value in getgc(true) do
-        if typeof(value) == "table" then
-            local detected = rawget(value, "Detected")
-            local kill = rawget(value, "Kill")
-
-            if typeof(detected) == "function" and not DetectedMeth then
-                DetectedMeth = detected
-                local hook
-                hook = hookfunction(DetectedMeth, function(methodName, methodFunc)
-                    if methodName ~= "_" and IsDebug then
-                        DoNotif("[Bypass] Adonis Detected\nMethod: "..methodName.."\nInfo: "..methodFunc)
-                    end
-                    return true
-                end)
-                Insert(hooks, DetectedMeth)
-                --DoNotif("[Bypass] Hooked Adonis 'Detected' method.")
-            end
-
-            if rawget(value, "Variables") and rawget(value, "Process") and typeof(kill) == "function" and not KillMeth then
-                KillMeth = kill
-                local hook
-                hook = hookfunction(KillMeth, function(killFunc)
-                    if IsDebug then
-                        DoNotif("[Bypass] Adonis tried to kill function: "..killFunc)
-                    end
-                end)
-                Insert(hooks, KillMeth)
-                --DoNotif("[Bypass] Hooked Adonis 'Kill' method.")
-            end
-        end
-    end
-
-    if DetectedMeth and debugInfo then
-        local hook
-        hook = hookfunction(debugInfo, newcclosure(function(...)
-            local functionName = ...
-            if functionName == DetectedMeth then
-                --DoNotif("[Bypass] Adonis detection intercepted. Bypassed by the_king.78.")
-                return coroutine.yield(coroutine.running())
-            end
-            return hook(...)
-        end))
-    end
-
-    --DoNotif("[Bypass] Adonis auto-bypass activated.")
-end)
 
 Spawn(function()
 	NACaller(function()--better saveinstance support
