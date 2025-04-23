@@ -5570,6 +5570,8 @@ cmd.add({"vehiclespeed", "vspeed"}, {"vehiclespeed <amount> (vspeed)", "Change t
 		local corner2 = InstanceNew("UICorner")
 		local corner3 = InstanceNew("UICorner")
 		local aspect = InstanceNew("UIAspectRatioConstraint")
+		local vstopBtn = InstanceNew("TextButton")
+		local vstopCorner = InstanceNew("UICorner")
 
 		NaProtectUI(vspeedBTN)
 
@@ -5625,6 +5627,22 @@ cmd.add({"vehiclespeed", "vspeed"}, {"vehiclespeed <amount> (vspeed)", "Change t
 		corner3.CornerRadius = UDim.new(1, 0)
 		corner3.Parent = toggleBtn
 
+		vstopBtn.Parent = vspeedBTN
+		vstopBtn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+		vstopBtn.BackgroundTransparency = 0.1
+		vstopBtn.Position = UDim2.new(0.9, 0, 0.52, 0)
+		vstopBtn.Size = UDim2.new(0.08, 0, 0.1, 0)
+		vstopBtn.Font = Enum.Font.GothamBold
+		vstopBtn.Text = "vSTOP"
+		vstopBtn.TextColor3 = Color3.new(1, 1, 1)
+		vstopBtn.TextScaled = true
+		vstopBtn.TextWrapped = true
+		vstopBtn.Active = true
+		vstopBtn.AutoButtonColor = true
+
+		vstopCorner.CornerRadius = UDim.new(0.2, 0)
+		vstopCorner.Parent = vstopBtn
+
 		MouseButtonFix(toggleBtn, function()
 			speedBox.Visible = not speedBox.Visible
 			toggleBtn.Text = speedBox.Visible and "-" or "+"
@@ -5672,27 +5690,51 @@ cmd.add({"vehiclespeed", "vspeed"}, {"vehiclespeed <amount> (vspeed)", "Change t
 					end
 		
 					if root then
-						local model = root:FindFirstAncestorOfClass("Model")
-						if model then
-							for _, part in ipairs(model:GetDescendants()) do
-								if part:IsA("BasePart") then
-									part.AssemblyLinearVelocity = Vector3.zero
-									part.AssemblyAngularVelocity = Vector3.zero
-								end
-								if part:IsA("VehicleSeat") then
-									part.Throttle = 0
-									part.Steer = 0
+						Spawn(function()
+							for i = 1, 10 do
+								if root:IsDescendantOf(game) then
+									root.AssemblyLinearVelocity *= .8
+									root.AssemblyAngularVelocity *= .8
+									Wait(0.05)
 								end
 							end
-						else
-							root.AssemblyLinearVelocity = Vector3.zero
-							root.AssemblyAngularVelocity = Vector3.zero
-						end
+						end)
 					end
 				end
 		
 				btn.Text = "vSpeed"
 				btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+			end
+		end)
+
+		MouseButtonFix(vstopBtn, function()
+			local subject = game:GetService("Workspace").CurrentCamera.CameraSubject
+			if subject then
+				local root
+				if subject:IsA("Humanoid") and subject.SeatPart then
+					root = subject.SeatPart
+				elseif subject:IsA("BasePart") then
+					root = subject
+				end
+		
+				if root then
+					local model = root:FindFirstAncestorOfClass("Model")
+					if model then
+						for _, part in ipairs(model:GetDescendants()) do
+							if part:IsA("BasePart") then
+								part.AssemblyLinearVelocity = Vector3.zero
+								part.AssemblyAngularVelocity = Vector3.zero
+							end
+							if part:IsA("VehicleSeat") then
+								part.Throttle = 0
+								part.Steer = 0
+							end
+						end
+					else
+						root.AssemblyLinearVelocity = Vector3.zero
+						root.AssemblyAngularVelocity = Vector3.zero
+					end
+				end
 			end
 		end)
 		
@@ -5720,6 +5762,7 @@ cmd.add({"vehiclespeed", "vspeed"}, {"vehiclespeed <amount> (vspeed)", "Change t
 
 		gui.draggablev2(btn)
 		gui.draggablev2(speedBox)
+		gui.draggablev2(vstopBtn)
 end, true)
 
 cmd.add({"unvehiclespeed", "unvspeed"}, {"unvehiclespeed (unvspeed)", "Stops the vehiclespeed command"}, function()
@@ -16266,7 +16309,7 @@ Spawn(function()
     local newcclosure = newcclosure or function(f) return f end
 
     if not (getgc and hookfunction and getrenv and debugInfo) then
-        --warn("[Bypass] Required exploit functions not available. Skipping Adonis bypass.")
+        --DoNotif("[Bypass] Required exploit functions not available. Skipping Adonis bypass.")
         return
     end
 
@@ -16290,7 +16333,7 @@ Spawn(function()
     end
 
     if not AdonisFound then
-        --warn("[Bypass] Adonis not found. Bypass skipped.")
+        --DoNotif("[Bypass] Adonis not found. Bypass skipped.")
         return
     end
 
@@ -16309,7 +16352,7 @@ Spawn(function()
                     return true
                 end)
                 Insert(hooks, DetectedMeth)
-                --warn("[Bypass] Hooked Adonis 'Detected' method.")
+                --DoNotif("[Bypass] Hooked Adonis 'Detected' method.")
             end
 
             if rawget(value, "Variables") and rawget(value, "Process") and typeof(kill) == "function" and not KillMeth then
@@ -16317,11 +16360,11 @@ Spawn(function()
                 local hook
                 hook = hookfunction(KillMeth, function(killFunc)
                     if IsDebug then
-                        warn("[Bypass] Adonis tried to kill function: "..killFunc)
+                        DoNotif("[Bypass] Adonis tried to kill function: "..killFunc)
                     end
                 end)
                 Insert(hooks, KillMeth)
-                --warn("[Bypass] Hooked Adonis 'Kill' method.")
+                --DoNotif("[Bypass] Hooked Adonis 'Kill' method.")
             end
         end
     end
@@ -16331,14 +16374,14 @@ Spawn(function()
         hook = hookfunction(debugInfo, newcclosure(function(...)
             local functionName = ...
             if functionName == DetectedMeth then
-                --warn("[Bypass] Adonis detection intercepted. Bypassed by the_king.78.")
+                --DoNotif("[Bypass] Adonis detection intercepted. Bypassed by the_king.78.")
                 return coroutine.yield(coroutine.running())
             end
             return hook(...)
         end))
     end
 
-    --warn("[Bypass] Adonis auto-bypass activated.")
+    --DoNotif("[Bypass] Adonis auto-bypass activated.")
 end)
 
 Spawn(function()
