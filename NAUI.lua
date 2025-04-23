@@ -1432,5 +1432,7 @@ ModalFix.Size = UDim2.new(0,0,0,0)
 ModalFix.Position = UDim2.new(0,0,0,0)
 ModalFix.Modal = false
 ModalFix.Name = "Modal"
+ModalFix.Visible = true
+ModalFix.BackgroundTransparency = 1
 
 return AdminUI

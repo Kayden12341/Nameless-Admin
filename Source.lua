@@ -1675,7 +1675,7 @@ function sFLY(vfly, cfly)
 
 		FLYING = true
 
-		spawn(function()
+		Spawn(function()
 			while FLYING do
 				if not vfly then
 					humanoid.PlatformStand = true
@@ -5453,7 +5453,7 @@ cmd.add({"synapsedex","sdex"},{"synapsedex (sdex)","Loads SynapseX's dex explore
 
 		function LoadScripts(Script)
 			if Script.ClassName=="Script" or Script.ClassName=="LocalScript" then
-				spawn(function()
+				Spawn(function()
 					GiveOwnGlobals(loadstring(Script.Source,"="..Script:GetFullName()),Script)()
 				end)
 			end
@@ -8094,7 +8094,7 @@ cmd.add({"seizure"}, {"seizure", "Gives you a seizure"}, function()
 end)
 
 cmd.add({"unseizure"}, {"unseizure", "Stops you from having a seizure not in real life noob"}, function(n)
-	spawn(function()
+	Spawn(function()
 		if getgenv().Lzzz ~= true then return end
 
 		local Anim = InstanceNew("Animation")
@@ -10018,6 +10018,15 @@ cmd.add({"unlockmouse", "unlockm"}, {"unlockmouse (unlockm)", "Unlocks your mous
 	UserInputService.MouseBehavior = Enum.MouseBehavior.Default
 end)
 
+if IsOnPC then
+	cmd.add({"lockmouse2", "lockm2"}, {"lockmouse2 (lockm2)", "Locks your mouse in the center (first person)"}, function()
+		gui.doModal(false)
+	end)
+	cmd.add({"unlockmouse2", "unlockm2"}, {"unlockmouse2 (unlockm2)", "Unlocks your mouse (fr this time)"}, function()
+		gui.doModal(true)
+	end)
+end
+
 --[[cmd.add({"chattag", "ctags", "chatt", "tag"}, {"chattag (ctags, chatt, tag)", "gives you a chat tag (visually)"}, function(...)
 	if not LegacyChat then return DoNotif("this doesn't work with Legacy Chat System please use it on a game that uses the new Chat System",5) end
 	local tag = Concat({...}, " ")
@@ -11844,19 +11853,23 @@ cmd.add({"inspect"}, {"inspect", "checks a user's items"}, function(args)
 	end
 end, true)
 
+function nuhuhprompt(v)
+	pcall(function()
+		for _, o in COREGUI:GetChildren() do
+			if o:IsA("GuiBase") and o.Name:lower():find("purchaseprompt") then
+				o.Enabled = v
+			end
+		end
+	end)
+end
+
 cmd.add({"noprompt","nopurchaseprompts","noprompts"},{"noprompt (nopurchaseprompts,noprompts)","remove the stupid purchase prompt"},function()
-	Wait();
-
-	COREGUI.PurchasePrompt.Enabled=false
-
+	nuhuhprompt(false)
 	DoNotif("Purchase prompts have been disabled")
 end)
 
 cmd.add({"prompt","purchaseprompts","showprompts","showpurchaseprompts"},{"prompt (purchaseprompts,showprompts,showpurchaseprompts)","allows the stupid purchase prompt"},function()
-	Wait();
-
-	COREGUI.PurchasePrompt.Enabled=true
-
+	nuhuhprompt(true)
 	DoNotif("Purchase prompts have been enabled")
 end)
 
@@ -13437,7 +13450,7 @@ cmd.add({"fullbright","fullb","fb"},{"fullbright (fullb,fb)","Makes games that a
 		Lighting.Ambient=Color3.fromRGB(178,178,178)
 
 		local LatestValue=true
-		spawn(function()
+		Spawn(function()
 			repeat
 				Wait()
 			until getgenv().FullBrightEnabled
@@ -14757,6 +14770,7 @@ local UpdLogsTitle = UpdLogsFrame and UpdLogsFrame:FindFirstChild("Topbar") and 
 local UpdLogsList = UpdLogsFrame and UpdLogsFrame:FindFirstChild("Container") and UpdLogsFrame:FindFirstChild("Container"):FindFirstChild("List")
 local UpdLogsLabel = UpdLogsList and UpdLogsList:FindFirstChildWhichIsA("TextLabel")
 local resizeFrame = NASCREENGUI:FindFirstChild("Resizeable")
+local ModalFixer = NASCREENGUI:FindFirstChildWhichIsA("ImageButton")
 local resizeXY={
 	Top = {Vector2.new(0,-1),    Vector2.new(0,-1),    "rbxassetid://2911850935"},
 	Bottom = {Vector2.new(0,1),    Vector2.new(0,0),    "rbxassetid://2911850935"},
@@ -14874,6 +14888,9 @@ gui.chatlogs = function()
 		end
 		chatLogsFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
 	end
+end
+gui.doModal = function(v)
+	ModalFixer.Modal = v
 end
 gui.consoleeee = function()
 	if NAconsoleFrame then
@@ -16236,6 +16253,7 @@ Spawn(function() -- init
 	if UpdLogsFrame then UpdLogsFrame.Name = randomString() end
 	if resizeFrame then resizeFrame.Name = randomString() end
 	if description then description.Name = randomString() end
+	if ModalFixer then ModalFixer.Name = randomString() end
 end)
 
 Spawn(bindToDevConsole)
