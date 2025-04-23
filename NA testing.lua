@@ -1597,6 +1597,13 @@ vToggleKey = "v"
 vFlySpeed = 1
 vKeybindConn = nil
 
+cOn = false
+cFlyGUI = nil
+cFlyEnabled = false
+cToggleKey = "c"
+cFlySpeed = 1
+cKeybindConn = nil
+
 -----------------------------
 
 local cmdlp = Players.LocalPlayer
@@ -1604,41 +1611,93 @@ plr = cmdlp
 local cmdm = plr:GetMouse()
 goofyFLY = nil
 
-function sFLY(vfly)
-	while not cmdlp or not cmdlp.Character or not getRoot(cmdlp.Character) or not cmdlp.Character:FindFirstChild('Humanoid') or not cmdm do
+function sFLY(vfly, cfly)
+	while not cmdlp or not cmdlp.Character or not getRoot(cmdlp.Character) or not cmdlp.Character:FindFirstChild("Humanoid") or not cmdm do
 		Wait()
 	end
 
 	if goofyFLY then goofyFLY:Destroy() end
+	if CFloop then CFloop:Disconnect() CFloop = nil end
 
-	goofyFLY = InstanceNew("Part", game:GetService("Workspace").CurrentCamera)
+	local char = cmdlp.Character
+	local humanoid = char:FindFirstChildOfClass("Humanoid")
+	local Head = char:WaitForChild("Head")
+	local root = getRoot(char)
+	if not root then return end
+
+	local Workspace = game:GetService("Workspace")
+	local Camera = Workspace.CurrentCamera
+
+	goofyFLY = InstanceNew("Part", Camera)
 	goofyFLY.Size = Vector3.new(0.05, 0.05, 0.05)
+	goofyFLY.Transparency = 1
 	goofyFLY.CanCollide = false
+	goofyFLY.Anchored = cfly and true or false
 
 	local CONTROL = { Q = 0, E = 0 }
 	local lCONTROL = { Q = 0, E = 0 }
 	local SPEED = 0
 
-	local function FLY()
-		FLYING = true
+	cmdm.KeyDown:Connect(function(KEY)
+		local key = KEY:lower()
+		if key == 'q' then
+			CONTROL.Q = vfly and -speedofthevfly * 2 or -speedofthefly * 2
+		elseif key == 'e' then
+			CONTROL.E = vfly and speedofthevfly * 2 or speedofthefly * 2
+		end
+	end)
 
-		local BG = InstanceNew('BodyGyro', goofyFLY)
-		local BV = InstanceNew('BodyVelocity', goofyFLY)
+	cmdm.KeyUp:Connect(function(KEY)
+		local key = KEY:lower()
+		if key == 'q' then
+			CONTROL.Q = 0
+		elseif key == 'e' then
+			CONTROL.E = 0
+		end
+	end)
+
+	if cfly then
+		humanoid.PlatformStand = true
+		Head.Anchored = true
+
+		CFloop = RunService.Heartbeat:Connect(function()
+			local moveVec = GetCustomMoveVector()
+			local vertical = (CONTROL.E + CONTROL.Q)
+			local fullMove = Vector3.new(moveVec.X, vertical, -moveVec.Z)
+
+			local moveDirection =
+				(Camera.CFrame.RightVector * fullMove.X) +
+				(Camera.CFrame.UpVector * fullMove.Y) +
+				(Camera.CFrame.LookVector * fullMove.Z)
+
+			if moveDirection.Magnitude > 0 then
+				local newPos = Head.Position + moveDirection.Unit * flySpeed
+				local lookAt = newPos + Camera.CFrame.LookVector
+				Head.CFrame = CFrame.new(newPos, lookAt)
+				goofyFLY.CFrame = Head.CFrame
+			end
+		end)
+	else
 		local Weld = InstanceNew("Weld", goofyFLY)
-
 		Weld.Part0 = goofyFLY
-		Weld.Part1 = cmdlp.Character:FindFirstChildWhichIsA("Humanoid").RootPart
-		Weld.C0 = CFrame.new(0, 0, 0)
+		Weld.Part1 = root
+		Weld.C0 = CFrame.new()
+
+		local BG = InstanceNew("BodyGyro", goofyFLY)
 		BG.P = 9e4
 		BG.maxTorque = Vector3.new(9e9, 9e9, 9e9)
-		BG.cframe = goofyFLY.CFrame
-		BV.velocity = Vector3.new(0, 0, 0)
+		BG.cframe = Camera.CFrame
+
+		local BV = InstanceNew("BodyVelocity", goofyFLY)
+		BV.velocity = Vector3.zero
 		BV.maxForce = Vector3.new(9e9, 9e9, 9e9)
 
-		Spawn(function()
+		FLYING = true
+
+		spawn(function()
 			while FLYING do
 				if not vfly then
-					getHum().PlatformStand = true
+					humanoid.PlatformStand = true
 				end
 
 				local moveVec = GetCustomMoveVector()
@@ -1652,20 +1711,20 @@ function sFLY(vfly)
 				end
 
 				if hasInput then
-					BV.velocity = ((game:GetService("Workspace").CurrentCamera.CoordinateFrame.LookVector * moveVec.Z) +
-						((game:GetService("Workspace").CurrentCamera.CoordinateFrame * CFrame.new(moveVec.X, (moveVec.Z + CONTROL.Q + CONTROL.E) * 0.2, 0).p) -
-							game:GetService("Workspace").CurrentCamera.CoordinateFrame.p)) * SPEED
+					BV.velocity = ((Camera.CoordinateFrame.LookVector * moveVec.Z) +
+						((Camera.CoordinateFrame * CFrame.new(moveVec.X, (moveVec.Z + CONTROL.Q + CONTROL.E) * 0.2, 0).p) -
+							Camera.CoordinateFrame.p)) * SPEED
 					lCONTROL = { Q = CONTROL.Q, E = CONTROL.E }
 				elseif SPEED ~= 0 then
-					BV.velocity = ((game:GetService("Workspace").CurrentCamera.CoordinateFrame.LookVector * moveVec.Z) +
-						((game:GetService("Workspace").CurrentCamera.CoordinateFrame * CFrame.new(moveVec.X, (moveVec.Z + lCONTROL.Q + lCONTROL.E) * 0.2, 0).p) -
-							game:GetService("Workspace").CurrentCamera.CoordinateFrame.p)) * SPEED
+					BV.velocity = ((Camera.CoordinateFrame.LookVector * moveVec.Z) +
+						((Camera.CoordinateFrame * CFrame.new(moveVec.X, (moveVec.Z + lCONTROL.Q + lCONTROL.E) * 0.2, 0).p) -
+							Camera.CoordinateFrame.p)) * SPEED
 				else
 					BV.velocity = Vector3.zero
 				end
 
-				BG.cframe = game:GetService("Workspace").CurrentCamera.CoordinateFrame
-				Wait()
+				BG.cframe = Camera.CoordinateFrame
+				wait()
 			end
 
 			CONTROL = { Q = 0, E = 0 }
@@ -1673,29 +1732,9 @@ function sFLY(vfly)
 			SPEED = 0
 			BG:Destroy()
 			BV:Destroy()
-			getHum().PlatformStand = false
+			humanoid.PlatformStand = false
 		end)
 	end
-
-	cmdm.KeyDown:Connect(function(KEY)
-		local key = KEY:lower()
-		if key == 'q' then
-			CONTROL.Q = vfly and -speedofthevfly * 2 or -speedofthefly * 2
-		elseif key == 'e' then
-			CONTROL.E = vfly and speedofthevfly * 2 or speedofthefly * 2
-		end
-	end)
-	
-	cmdm.KeyUp:Connect(function(KEY)
-		local key = KEY:lower()
-		if key == 'q' then
-			CONTROL.Q = 0
-		elseif key == 'e' then
-			CONTROL.E = 0
-		end
-	end)
-
-	FLY()
 end
 
 local tool=nil
@@ -3457,6 +3496,7 @@ cmd.add({"vfly", "vehiclefly"}, {"vehiclefly (vfly)", "be able to fly vehicles"}
 		vRAHH = nil
 	end
 
+	cmd.run({"uncfly", ''})
 	cmd.run({"unfly", ''})
 
 	if IsOnMobile then
@@ -5981,6 +6021,93 @@ cmd.add({"crash"},{"crash","crashes ur client lol (why would you even use this t
 	while true do end
 end)
 
+VVVVVVVVVVVCARRR = {}
+
+cmd.add({"vehiclenoclip", "vnoclip"}, {"vehiclenoclip (vnoclip)", "Disables vehicle collision"}, function()
+	VVVVVVVVVVVCARRR = {}
+
+	local hum = getHum()
+	if not hum then return DoNotif("no humanoid found",2) end
+	local seat = hum and hum.SeatPart
+
+	local model = seat.Parent
+	while model and not model:IsA("Model") do
+		model = model.Parent
+	end
+
+	Wait(0.1)
+	cmd.run({"noclip"})
+
+	for _, pp in ipairs(model:GetDescendants()) do
+		if pp:IsA("BasePart") and pp.CanCollide then
+			Insert(VVVVVVVVVVVCARRR, pp)
+			pp.CanCollide = false
+		end
+	end
+end)
+
+cmd.add({"vehicleclip", "vclip", "unvnoclip", "unvehiclenoclip"}, {"vehicleclip (vclip, unvnoclip, unvehiclenoclip)", "Enables vehicle collision"}, function()
+	cmd.run({"clip"})
+
+	for _, pppp in ipairs(VVVVVVVVVVVCARRR) do
+		if pppp and pppp:IsA("BasePart") then
+			pppp.CanCollide = true
+		end
+	end
+
+	VVVVVVVVVVVCARRR = {}
+end)
+
+cmd.add({"handlekill", "hkill"}, {"handlekill <player> (hkill)", "Kills a player using a tool that deals damage on touch"}, function(...)
+    local Players = game:GetService("Players")
+    local LocalPlayer = Players.LocalPlayer
+
+    if not firetouchinterest then
+        return DoNotif('Your exploit does not support firetouchinterest to run this command')
+    end
+
+    local function zeTOOL()
+        local character = LocalPlayer.Character
+        if not character then return nil, nil end
+        local tool = character:FindFirstChildWhichIsA("Tool")
+        if not tool then return nil, nil end
+        local handle = tool:FindFirstChild("Handle")
+        return tool, handle
+    end
+
+    local Tool, Handle = zeTOOL()
+    if not Tool or not Handle then
+        return DoNotif('You need to hold a "Tool" that does damage on touch')
+    end
+
+    local username = ...
+	local targets = getPlr(username)
+    if #targets == 0 then
+        return DoNotif("No target found",2)
+    end
+
+    for _, targetPlayer in ipairs(targets) do
+        Spawn(function()
+            while Tool and LocalPlayer.Character and targetPlayer.Character and Tool.Parent == LocalPlayer.Character do
+                local humanoid = targetPlayer.Character:FindFirstChildWhichIsA("Humanoid")
+                if not humanoid or humanoid.Health <= 0 then
+                    break
+                end
+
+                for _, part in ipairs(targetPlayer.Character:GetChildren()) do
+                    if part:IsA("BasePart") then
+                        firetouchinterest(Handle, part, 0)
+                        Wait()
+                        firetouchinterest(Handle, part, 1)
+                    end
+                end
+
+                RunService.RenderStepped:Wait()
+            end
+        end)
+    end
+end, true)
+
 cmd.add({"creep", "scare"}, {"creep <player> (scare)", "Teleports from a player behind them and under the floor to the top"}, function(...)
 	local username = ...
 	local targets = getPlr(username)
@@ -6939,7 +7066,7 @@ cmd.add({"fly"}, {"fly [speed]", "Enable flight"}, function(...)
 		mFlyBruh:Destroy()
 		mFlyBruh = nil
 	end
-
+	cmd.run({"uncfly", ''})
 	cmd.run({"unvfly", ''})
 
 	if IsOnMobile then
@@ -7083,6 +7210,232 @@ if IsOnPC then
 		connectFlyKey()
 
 		DoNotif("Fly keybind set to '"..toggleKey:upper().."'")
+	end)
+end
+
+function toggleCFly()
+	local char = cmdlp.Character
+	local humanoid = char and char:FindFirstChildOfClass("Humanoid")
+	local head = char and char:FindFirstChild("Head")
+
+	if cFlyEnabled then
+		FLYING = false
+		cFlyEnabled = false
+
+		if CFloop then
+			CFloop:Disconnect()
+			CFloop = nil
+		end
+
+		if humanoid then
+			humanoid.PlatformStand = false
+		end
+
+		if head then
+			head.Anchored = false
+		end
+
+		if goofyFLY then
+			goofyFLY:Destroy()
+			goofyFLY = nil
+		end
+	else
+		FLYING = true
+		cFlyEnabled = true
+		sFLY(nil, true)
+	end
+end
+
+function connectCFlyKey()
+	if cKeybindConn then
+		cKeybindConn:Disconnect()
+	end
+	cKeybindConn = cmdm.KeyDown:Connect(function(KEY)
+		if KEY:lower() == cToggleKey then
+			toggleCFly()
+		end
+	end)
+end
+
+cmd.add({"cframefly", "cfly"}, {"cfly [speed]", "Enable CFrame-based flight"}, function(...)
+	local arg = (...) or nil
+	cFlySpeed = tonumber(arg) or cFlySpeed
+	flySpeed = cFlySpeed
+
+	connectCFlyKey()
+	cFlyEnabled = true
+
+	if cFlyGUI then
+		cFlyGUI:Destroy()
+		cFlyGUI = nil
+	end
+
+	cmd.run({"unfly", ''})
+	cmd.run({"unvfly", ''})
+
+	if IsOnMobile then
+		wait()
+		DoNotif(adminName.." detected mobile. CFrame Fly button added.", 2)
+
+		cFlyGUI = InstanceNew("ScreenGui")
+		local btn = InstanceNew("TextButton")
+		local speedBox = InstanceNew("TextBox")
+		local toggleBtn = InstanceNew("TextButton")
+		local corner = InstanceNew("UICorner")
+		local corner2 = InstanceNew("UICorner")
+		local corner3 = InstanceNew("UICorner")
+		local aspect = InstanceNew("UIAspectRatioConstraint")
+
+		NaProtectUI(cFlyGUI)
+		cFlyGUI.ResetOnSpawn = false
+
+		btn.Parent = cFlyGUI
+		btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+		btn.BackgroundTransparency = 0.1
+		btn.Position = UDim2.new(0.9, 0, 0.6, 0)
+		btn.Size = UDim2.new(0.08, 0, 0.1, 0)
+		btn.Font = Enum.Font.GothamBold
+		btn.Text = "CFly"
+		btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+		btn.TextSize = 18
+		btn.TextWrapped = true
+		btn.Active = true
+		btn.TextScaled = true
+
+		corner.CornerRadius = UDim.new(0.2, 0)
+		corner.Parent = btn
+
+		aspect.Parent = btn
+		aspect.AspectRatio = 1.0
+
+		speedBox.Parent = cFlyGUI
+		speedBox.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+		speedBox.BackgroundTransparency = 0.1
+		speedBox.AnchorPoint = Vector2.new(0.5, 0)
+		speedBox.Position = UDim2.new(0.5, 0, 0, 10)
+		speedBox.Size = UDim2.new(0, 75, 0, 35)
+		speedBox.Font = Enum.Font.GothamBold
+		speedBox.Text = tostring(cFlySpeed)
+		speedBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+		speedBox.TextSize = 18
+		speedBox.TextWrapped = true
+		speedBox.ClearTextOnFocus = false
+		speedBox.PlaceholderText = "Speed"
+		speedBox.Visible = false
+
+		corner2.CornerRadius = UDim.new(0.2, 0)
+		corner2.Parent = speedBox
+
+		toggleBtn.Parent = btn
+		toggleBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+		toggleBtn.BackgroundTransparency = 0.1
+		toggleBtn.Position = UDim2.new(0.8, 0, -0.1, 0)
+		toggleBtn.Size = UDim2.new(0.4, 0, 0.4, 0)
+		toggleBtn.Font = Enum.Font.SourceSans
+		toggleBtn.Text = "+"
+		toggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+		toggleBtn.TextScaled = true
+		toggleBtn.TextWrapped = true
+		toggleBtn.Active = true
+		toggleBtn.AutoButtonColor = true
+
+		corner3.CornerRadius = UDim.new(1, 0)
+		corner3.Parent = toggleBtn
+
+		MouseButtonFix(toggleBtn, function()
+			speedBox.Visible = not speedBox.Visible
+			toggleBtn.Text = speedBox.Visible and "-" or "+"
+		end)
+
+		coroutine.wrap(function()
+			MouseButtonFix(btn, function()
+				if not cOn then
+					local newSpeed = tonumber(speedBox.Text) or cFlySpeed
+					cFlySpeed = newSpeed
+					flySpeed = cFlySpeed
+					speedBox.Text = tostring(cFlySpeed)
+					cOn = true
+					btn.Text = "UnCfly"
+					btn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+					sFLY(nil, true)
+				else
+					cOn = false
+					btn.Text = "CFly"
+					btn.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
+					FLYING = false
+					getHum().PlatformStand = false
+					if CFloop then CFloop:Disconnect() CFloop = nil end
+					if goofyFLY then goofyFLY:Destroy() end
+				end
+			end)
+		end)()
+
+		gui.draggablev2(btn)
+		gui.draggablev2(speedBox)
+	else
+		FLYING = false
+		getHum().PlatformStand = false
+		wait()
+		DoNotif("CFrame Fly enabled. Press '"..cToggleKey:upper().."' to toggle.")
+		sFLY(true, true)
+	end
+end, true)
+
+cmd.add({"uncfly"}, {"uncfly", "Disable CFrame-based flight"}, function(bool)
+	Wait()
+	if not bool then DoNotif("CFrame Fly disabled.", 2) end
+	FLYING = false
+
+	local char = cmdlp.Character
+	local hum = char and char:FindFirstChildOfClass("Humanoid")
+	local head = char and char:FindFirstChild("Head")
+
+	if CFloop then
+		CFloop:Disconnect()
+		CFloop = nil
+	end
+
+	if hum then
+		hum.PlatformStand = false
+	end
+
+	if head then
+		head.Anchored = false
+	end
+
+	if goofyFLY then
+		goofyFLY:Destroy()
+	end
+
+	cOn = false
+	if cFlyGUI then
+		cFlyGUI:Destroy()
+		cFlyGUI = nil
+	end
+	if cKeybindConn then
+		cKeybindConn:Disconnect()
+		cKeybindConn = nil
+	end
+end)
+
+if IsOnPC then
+	cmd.add({"cflybind", "cframeflybind", "bindcfly"}, {"cflybind [key]", "Set custom keybind for CFrame fly"}, function(...)
+		local newKey = (...) or ""
+		newKey = newKey:lower()
+		if newKey == "" then
+			DoNotif("Please provide a keybind.")
+			return
+		end
+
+		cToggleKey = newKey
+
+		if cKeybindConn then
+			cKeybindConn:Disconnect()
+			cKeybindConn = nil
+		end
+
+		connectCFlyKey()
+		DoNotif("CFrame fly keybind set to '"..cToggleKey:upper().."'")
 	end)
 end
 
