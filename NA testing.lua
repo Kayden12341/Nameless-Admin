@@ -16320,7 +16320,7 @@ end)
 
 Spawn(bindToDevConsole)
 
-Spawn(function()
+--[[Spawn(function()
     local getgc = getgc or debug.getgc
     local hookfunction = hookfunction
     local getrenv = getrenv
@@ -16401,7 +16401,7 @@ Spawn(function()
     end
 
     --DoNotif("[Bypass] Adonis auto-bypass activated.")
-end)
+end)]]
 
 Spawn(function()
 	NACaller(function()--better saveinstance support
