@@ -1724,7 +1724,7 @@ function sFLY(vfly, cfly)
 				end
 
 				BG.cframe = Camera.CoordinateFrame
-				wait()
+				Wait()
 			end
 
 			CONTROL = { Q = 0, E = 0 }
@@ -7274,7 +7274,7 @@ cmd.add({"cframefly", "cfly"}, {"cfly [speed]", "Enable CFrame-based flight"}, f
 	cmd.run({"unvfly", ''})
 
 	if IsOnMobile then
-		wait()
+		Wait()
 		DoNotif(adminName.." detected mobile. CFrame Fly button added.", 2)
 
 		cFlyGUI = InstanceNew("ScreenGui")
@@ -7375,7 +7375,7 @@ cmd.add({"cframefly", "cfly"}, {"cfly [speed]", "Enable CFrame-based flight"}, f
 	else
 		FLYING = false
 		getHum().PlatformStand = false
-		wait()
+		Wait()
 		DoNotif("CFrame Fly enabled. Press '"..cToggleKey:upper().."' to toggle.")
 		sFLY(true, true)
 	end
