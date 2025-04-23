@@ -4742,20 +4742,26 @@ end)
 acftpCON = {}
 acftpCONN = nil
 acftpCFrames = {}
+acftpGUI = nil
+acftpState = false
 
-cmd.add({"anticframeteleport","acframetp","acftp"},{"anticframeteleport (acframetp,acftp)","Prevents scripts from teleporting you by resetting your CFrame"},function()
+function enableACFTP()
+	acftpState = true
+	local character = LocalPlayer and LocalPlayer.Character
+	if not character then
+		DoNotif("Your character is invalid.", 3)
+		return
+	end
+
 	for _, con in pairs(acftpCON) do
 		con:Disconnect()
 	end
 	acftpCON = {}
 	acftpCFrames = {}
 
-	if acftpCONN then acftpCONN:Disconnect() acftpCONN = nil end
-
-	local character = LocalPlayer and LocalPlayer.Character
-	if not character then
-		DoNotif("Your character is invalid.", 3)
-		return
+	if acftpCONN then
+		acftpCONN:Disconnect()
+		acftpCONN = nil
 	end
 
 	for _, part in pairs(character:GetChildren()) do
@@ -4778,9 +4784,9 @@ cmd.add({"anticframeteleport","acframetp","acftp"},{"anticframeteleport (acframe
 	end)
 
 	DoNotif("Anti CFrame Teleport enabled", 3)
-end)
+end
 
-cmd.add({"unanticframeteleport","unacframetp","unacftp"},{"unanticframeteleport (unacframetp,unacftp)","Disables Anti CFrame Teleport"},function()
+function disableACFTP()
 	for _, con in pairs(acftpCON) do
 		con:Disconnect()
 	end
@@ -4792,7 +4798,68 @@ cmd.add({"unanticframeteleport","unacframetp","unacftp"},{"unanticframeteleport 
 		acftpCONN = nil
 	end
 
+	acftpState = false
 	DoNotif("Anti CFrame Teleport disabled", 3)
+end
+
+cmd.add({"anticframeteleport", "acframetp", "acftp"}, {"anticframeteleport (acframetp,acftp)", "Prevents scripts from teleporting you by resetting your CFrame"}, function()
+	enableACFTP()
+
+	if IsOnMobile then
+		if acftpGUI then
+			acftpGUI:Destroy()
+		end
+
+		acftpGUI = InstanceNew("ScreenGui")
+		local acftpBtn = InstanceNew("TextButton")
+		local corner = InstanceNew("UICorner")
+		local aspect = InstanceNew("UIAspectRatioConstraint")
+
+		NaProtectUI(acftpGUI)
+		acftpGUI.ResetOnSpawn = false
+
+		acftpBtn.Parent = acftpGUI
+		acftpBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+		acftpBtn.BackgroundTransparency = 0.1
+		acftpBtn.Position = UDim2.new(0.9, 0, 0.4, 0)
+		acftpBtn.Size = UDim2.new(0.08, 0, 0.1, 0)
+		acftpBtn.Font = Enum.Font.GothamBold
+		acftpBtn.Text = "UNACFTP"
+		acftpBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+		acftpBtn.TextSize = 18
+		acftpBtn.TextScaled = true
+		acftpBtn.TextWrapped = true
+		acftpBtn.Active = true
+
+		corner.CornerRadius = UDim.new(0.2, 0)
+		corner.Parent = acftpBtn
+		aspect.Parent = acftpBtn
+		aspect.AspectRatio = 1.0
+
+		MouseButtonFix(acftpBtn, function()
+			acftpState = not acftpState
+			if acftpState then
+				enableACFTP()
+				acftpBtn.Text = "UNACFTP"
+				acftpBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+			else
+				disableACFTP()
+				acftpBtn.Text = "ACFTP"
+				acftpBtn.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
+			end
+		end)
+
+		gui.draggablev2(acftpBtn)
+	end
+end)
+
+cmd.add({"unanticframeteleport", "unacframetp", "unacftp"}, {"unanticframeteleport (unacframetp,unacftp)", "Disables Anti CFrame Teleport"}, function()
+	disableACFTP()
+
+	if acftpGUI then
+		acftpGUI:Destroy()
+		acftpGUI = nil
+	end
 end)
 
 cmd.add({"lay"},{"lay","zzzzzzzz"},function()
@@ -7257,7 +7324,7 @@ function connectCFlyKey()
 	end)
 end
 
-cmd.add({"cframefly", "cfly"}, {"cfly [speed]", "Enable CFrame-based flight"}, function(...)
+cmd.add({"cframefly", "cfly"}, {"cframefly [speed] (cfly)", "Enable CFrame-based flight"}, function(...)
 	local arg = (...) or nil
 	cFlySpeed = tonumber(arg) or cFlySpeed
 	flySpeed = cFlySpeed
@@ -7357,13 +7424,16 @@ cmd.add({"cframefly", "cfly"}, {"cfly [speed]", "Enable CFrame-based flight"}, f
 					cOn = true
 					btn.Text = "UnCfly"
 					btn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
-					sFLY(nil, true)
+					sFLY(true, true)
 				else
 					cOn = false
 					btn.Text = "CFly"
 					btn.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
 					FLYING = false
-					getHum().PlatformStand = false
+					local hum = getHum()
+					local head = getChar() and getChar():FindFirstChild("Head")
+					head.Anchored = false
+					hum.PlatformStand = false
 					if CFloop then CFloop:Disconnect() CFloop = nil end
 					if goofyFLY then goofyFLY:Destroy() end
 				end
@@ -7381,7 +7451,7 @@ cmd.add({"cframefly", "cfly"}, {"cfly [speed]", "Enable CFrame-based flight"}, f
 	end
 end, true)
 
-cmd.add({"uncfly"}, {"uncfly", "Disable CFrame-based flight"}, function(bool)
+cmd.add({"uncframefly","uncfly"}, {"uncframefly (uncfly)", "Disable CFrame-based flight"}, function(bool)
 	Wait()
 	if not bool then DoNotif("CFrame Fly disabled.", 2) end
 	FLYING = false
@@ -7419,7 +7489,7 @@ cmd.add({"uncfly"}, {"uncfly", "Disable CFrame-based flight"}, function(bool)
 end)
 
 if IsOnPC then
-	cmd.add({"cflybind", "cframeflybind", "bindcfly"}, {"cflybind [key]", "Set custom keybind for CFrame fly"}, function(...)
+	cmd.add({"cflybind", "cframeflybind", "bindcfly"}, {"cflybind [key] (cframeflybind, bindcfly)", "Set custom keybind for CFrame fly"}, function(...)
 		local newKey = (...) or ""
 		newKey = newKey:lower()
 		if newKey == "" then
