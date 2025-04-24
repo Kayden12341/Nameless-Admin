@@ -2121,13 +2121,23 @@ cmd.add({"loadstring", "ls"}, {"loadstring <code> (ls)", "Run code using loadstr
 	return true, result
 end, true)
 
-cmd.add({"addalias"}, {"addalias <command> <alias>", "Adds a persistent alias for an existing command."}, function(original, alias)
-	if not original or not alias then return end
+cmd.add({"addalias"}, {"addalias <command> <alias>", "Adds a persistent alias for an existing command"}, function(original, alias)
+	if not original or not alias then
+		DoNotif("Usage: addalias <command> <alias>", 2)
+		return
+	end
 
 	original, alias = original:lower(), alias:lower()
 
-	if not Commands[original] then return end
-	if Commands[alias] or Aliases[alias] then return end
+	if not Commands[original] then
+		DoNotif("Command '"..original.."' does not exist", 2)
+		return
+	end
+
+	if Commands[alias] or Aliases[alias] then
+		DoNotif("The name '"..alias.."' is already used by another command or alias", 2)
+		return
+	end
 
 	local command = Commands[original]
 	Aliases[alias] = {command[1], command[2], command[3]}
@@ -2138,13 +2148,15 @@ cmd.add({"addalias"}, {"addalias <command> <alias>", "Adds a persistent alias fo
 		aliasMap[alias] = original
 		writefile(AliasPath, HttpService:JSONEncode(aliasMap))
 	end
+
+	DoNotif("Alias '"..alias.."' has been added for command '"..original.."'", 2)
 end, true)
 
-cmd.add({"removealias"}, {"removealias", "Select and remove a saved alias."}, function()
+cmd.add({"removealias"}, {"removealias", "Select and remove a saved alias"}, function()
 	local aliasMap = FileSupport and readAliasFile() or {}
 
 	if next(aliasMap) == nil then
-		DoNotif("No saved aliases to remove.", 2)
+		DoNotif("No saved aliases to remove", 2)
 		return
 	end
 
@@ -2152,7 +2164,7 @@ cmd.add({"removealias"}, {"removealias", "Select and remove a saved alias."}, fu
 
 	for alias, original in pairs(aliasMap) do
 		Insert(buttons, {
-			Text = alias.." → "..original,
+			Text = 'Alias: '..alias.." | Command: "..original,
 			Callback = function()
 				Aliases[alias] = nil
 				aliasMap[alias] = nil
@@ -2167,7 +2179,7 @@ cmd.add({"removealias"}, {"removealias", "Select and remove a saved alias."}, fu
 	Insert(buttons, {
 		Text = "Cancel",
 		Callback = function()
-			DoNotif("Alias removal cancelled.", 2)
+			DoNotif("Alias removal cancelled", 2)
 		end
 	})
 
@@ -2187,7 +2199,7 @@ cmd.add({"clearaliases"}, {"clearaliases", "Removes all aliases created using ad
 
 	NASAVEDALIASES = {}
 	writefile(AliasPath, "{}")
-	DoNotif("All aliases created with addalias have been removed.", 2)
+	DoNotif("All aliases have been removed", 2)
 end)
 
 cmd.add({"executor","exec"},{"executor (exec)","Very simple executor"},function()
