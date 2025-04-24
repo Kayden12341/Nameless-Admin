@@ -1111,55 +1111,47 @@ local PlayerArgs = {
 		return Targets
 	end,
 
-	["closest"] = function()
-		local Targets = {}
-		local ClosestDistance, ClosestPlayer = 9e9, nil
-
-		Foreach(Players:GetPlayers(), function(Index, Player)
-			local Distance = Player:DistanceFromCharacter(getRoot(Local.Character).Position)
-
-			if Player ~= LocalPlayer and Distance < ClosestDistance then
-				ClosestDistance = Distance
-				ClosestPlayer = Player
+	["nearest"] = function()
+		if not LocalPlayer.Character or not getRoot(LocalPlayer.Character) then return {} end
+		local lowest = math.huge
+		local Targets = nil
+	
+		Foreach(Players:GetPlayers(), function(_, plr)
+			if plr ~= LocalPlayer and plr.Character and getRoot(plr.Character) then
+				local distance = (getRoot(plr.Character).Position - getRoot(LocalPlayer.Character).Position).Magnitude
+				if distance < lowest then
+					lowest = distance
+					Targets = plr
+				end
 			end
 		end)
-
-		return { ClosestPlayer }
+	
+		return Targets and {Targets} or {}
 	end,
-
+	
 	["farthest"] = function()
-		local Targets = {}
-		local FurthestDistance, FurthestPlayer = 0, nil
-
-		Foreach(Players:GetPlayers(), function(Index, Player)
-			local Distance = Player:DistanceFromCharacter(GetRoot(Local.Character).Position)
-
-			if Player ~= LocalPlayer and Distance > FurthestDistance then
-				FurthestDistance = Distance
-				FurthestPlayer = Player
+		if not LocalPlayer.Character or not getRoot(LocalPlayer.Character) then return {} end
+		local highest = 0
+		local Targets = nil
+	
+		Foreach(Players:GetPlayers(), function(_, plr)
+			if plr ~= LocalPlayer and plr.Character and getRoot(plr.Character) then
+				local distance = (getRoot(plr.Character).Position - getRoot(LocalPlayer.Character).Position).Magnitude
+				if distance > highest then
+					highest = distance
+					Targets = plr
+				end
 			end
 		end)
-
-		return { FurthestPlayer }
-	end,
-
-	["enemies"] = function()
-		local Targets = {}
-
-		Foreach(Players:GetPlayers(), function(Index, Player)
-			if Player.Team ~= LocalPlayer.Team then
-				Insert(Targets, Player)
-			end
-		end)
-
-		return Targets
+	
+		return Targets and {Targets} or {}
 	end,
 
 	["dead"] = function()
 		local Targets = {}
 
 		Foreach(Players:GetPlayers(), function(Index, Player)
-			if GetHumanoid(Player.Character).Health == 0 then
+			if getPlrHum(Player.Character).Health == 0 then
 				Insert(Targets, Player)
 			end
 		end)
@@ -1167,12 +1159,11 @@ local PlayerArgs = {
 		return Targets
 	end,
 
-
 	["alive"] = function()
 		local Targets = {}
 
 		Foreach(Players:GetPlayers(), function(Index, Player)
-			if GetHumanoid(Player.Character).Health > 0 then
+			if getPlrHum(Player.Character).Health > 0 then
 				Insert(Targets, Player)
 			end
 		end)
@@ -1198,6 +1189,150 @@ local PlayerArgs = {
 		Foreach(Players:GetPlayers(), function(Index, Player)
 			if not Player:IsFriendsWith(LocalPlayer.UserId) and LocalPlayer ~= Player then
 				Insert(Targets, Player)
+			end
+		end)
+
+		return Targets
+	end,
+
+	["team"] = function()
+		local Targets = {}
+
+		Foreach(Players:GetPlayers(), function(_, Player)
+			if Player.Team == LocalPlayer.Team and Player ~= LocalPlayer then
+				Insert(Targets, Player)
+			end
+		end)
+
+		return Targets
+	end,
+
+	["nonteam"] = function()
+		local Targets = {}
+
+		Foreach(Players:GetPlayers(), function(_, Player)
+			if Player.Team ~= LocalPlayer.Team and Player ~= LocalPlayer then
+				Insert(Targets, Player)
+			end
+		end)
+
+		return Targets
+	end,
+
+	["r15"] = function()
+		local Targets = {}
+
+		Foreach(Players:GetPlayers(), function(_, Player)
+			local Hum = getPlrHum(Player.Character)
+			if Hum and Hum.RigType == Enum.HumanoidRigType.R15 then
+				Insert(Targets, Player)
+			end
+		end)
+
+		return Targets
+	end,
+
+	["r6"] = function()
+		local Targets = {}
+
+		Foreach(Players:GetPlayers(), function(_, Player)
+			local Hum = getPlrHum(Player.Character)
+			if Hum and Hum.RigType == Enum.HumanoidRigType.R6 then
+				Insert(Targets, Player)
+			end
+		end)
+
+		return Targets
+	end,
+
+	["invisible"] = function()
+		local Targets = {}
+
+		Foreach(Players:GetPlayers(), function(_, Player)
+			local Char = Player.Character
+			if Char then
+				local isInvisible = true
+				for _, part in ipairs(Char:GetChildren()) do
+					if part:IsA("BasePart") and part.Transparency < 1 then
+						isInvisible = false
+						break
+					end
+				end
+				if isInvisible then
+					Insert(Targets, Player)
+				end
+			end
+		end)
+
+		return Targets
+	end,
+
+	["bacon"] = function()
+		local Targets = {}
+
+		Foreach(Players:GetPlayers(), function(_, Player)
+			local Char = Player.Character
+			if Char then
+				for _, v in ipairs(Char:GetChildren()) do
+					if v:IsA("Accessory") and v.Name:lower():find("pal") or v.Name:lower():find("kate") then
+						Insert(Targets, Player)
+						break
+					end
+				end
+			end
+		end)
+
+		return Targets
+	end,
+
+	["slenders"] = function()
+		local Targets = {}
+
+		Foreach(Players:GetPlayers(), function(_, Player)
+			local Hum = getPlrHum(Player.Character)
+			if Hum and Hum.RigType == Enum.HumanoidRigType.R15 then
+				local desc = Hum:GetAppliedDescription()
+				if desc and tonumber(desc.BodyHeightScale) > 1.05 then
+					Insert(Targets, Player)
+				end
+			end
+		end)
+
+		return Targets
+	end,
+
+	["short"] = function()
+		local Targets = {}
+
+		Foreach(Players:GetPlayers(), function(_, Player)
+			local Hum = getPlrHum(Player.Character)
+			if Hum and Hum.RigType == Enum.HumanoidRigType.R15 then
+				local desc = Hum:GetAppliedDescription()
+				if desc and tonumber(desc.BodyHeightScale) < 0.9 then
+					Insert(Targets, Player)
+				end
+			end
+		end)
+
+		return Targets
+	end,
+
+	["alts"] = function() -- scuffed one
+		local Targets = {}
+
+		Foreach(Players:GetPlayers(), function(_, Player)
+			local Char = Player.Character
+			if Char then
+				local accCount = 0
+				for _, item in ipairs(Char:GetChildren()) do
+					if item:IsA("Accessory") then
+						accCount += 1
+					end
+				end
+
+				if accCount <= 1 then
+					Insert(Targets, Player)
+				end
 			end
 		end)
 
@@ -6179,13 +6314,13 @@ cmd.add({"handlekill", "hkill"}, {"handlekill <player> (hkill)", "Kills a player
 
     for _, targetPlayer in ipairs(targets) do
         Spawn(function()
-            while Tool and LocalPlayer.Character and targetPlayer.Character and Tool.Parent == LocalPlayer.Character do
-                local humanoid = targetPlayer.Character:FindFirstChildWhichIsA("Humanoid")
+            while Tool and getPlrChar(LocalPlayer) and getPlrChar(targetPlayer) and Tool.Parent == LocalPlayer.Character do
+                local humanoid = getPlrChar(targetPlayer):FindFirstChildWhichIsA("Humanoid")
                 if not humanoid or humanoid.Health <= 0 then
                     break
                 end
 
-                for _, part in ipairs(targetPlayer.Character:GetChildren()) do
+                for _, part in ipairs(getPlrChar(targetPlayer):GetChildren()) do
                     if part:IsA("BasePart") then
                         firetouchinterest(Handle, part, 0)
                         Wait()
@@ -11696,10 +11831,14 @@ bringc = {}
 cmd.add({"cbring", "clientbring"}, {"clientbring <player> (cbring)", "Brings the player on your client"}, function(...)
 	local username = (...)
 	local target = getPlr(username)
+	if #target == 0 then return end
 	if connections["noclip"] then
 		lib.disconnect("noclip")
-		return
 	end
+	for _, conn in ipairs(bringc) do
+		conn:Disconnect()
+	end
+	bringc = {}
 	lib.connect("noclip", RunService.Stepped:Connect(function()
 		local char = getChar()
 		if not char then return end
@@ -11712,8 +11851,8 @@ cmd.add({"cbring", "clientbring"}, {"clientbring <player> (cbring)", "Brings the
 	for _, plr in next, target do
 		if not plr then return end
 		local conn = RunService.RenderStepped:Connect(function()
-			if plr.Character then
-				local targetRoot = getRoot(plr.Character)
+			if getPlrChar(plr) then
+				local targetRoot = getRoot(getPlrChar(plr))
 				local localRoot = getRoot(getChar())
 				if targetRoot and localRoot then
 					targetRoot.CFrame = localRoot.CFrame + localRoot.CFrame.LookVector * 3
@@ -11737,6 +11876,7 @@ end)
 cmd.add({"mute", "muteboombox"}, {"mute <player> (muteboombox)", "Mutes the player's boombox"}, function(...)
 	local uuuu = ...
 	local pp = getPlr(uuuu)
+	if #pp == 0 then return end
 
 	local function NONOSOUND(container)
 		for _, descendant in ipairs(container:GetDescendants()) do
@@ -11798,6 +11938,7 @@ muteLOOP = {}
 cmd.add({"loopmute", "loopmuteboombox"}, {"loopmute <player> (loopmuteboombox)", "Loop mutes the player's boombox"}, function(...)
 	local u = ...
 	local pls = getPlr(u)
+	if #pls == 0 then return end
 
 	local function mute(p)
 		if p and p.Character then
@@ -11837,6 +11978,7 @@ end, true)
 cmd.add({"unloopmute", "unloopmuteboombox"}, {"unloopmute <player> (unloopmuteboombox)", "Unloop mutes the player's boombox"}, function(...)
 	local u = ...
 	local pls = getPlr(u)
+	if #pls == 0 then return end
 
 	for _, p in ipairs(pls) do
 		local id = p.UserId
@@ -11854,10 +11996,10 @@ end, true)
 cmd.add({"getmass"},{"getmass <player>","Get your mass"},function(...)
 	target=getPlr(...)
 	for _, plr in next, target do
-		local mass=getRoot(plr.Character).AssemblyMass 
+		local mass=getRoot(plr.Character).AssemblyMass
 		Wait();
 
-		DoNotif(plr.Name.."'s mass is "..mass)
+		DoNotif(nameChecker(plr).."'s mass is "..mass)
 	end
 end,true)
 
