@@ -415,7 +415,10 @@ local opt={
 local lastPrefix = opt.prefix
 
 --[[ Update Logs ]]--
-local updLogs = {}
+local updLogs = {
+	log1='updlogs have been abandoned for now';
+	log2='join the discord using the command "Discord" to view the update logs';
+}
 
 local updDate="unknown" --month,day,year
 
@@ -2422,7 +2425,7 @@ cmd.add({"updatelog","updlog","updates"},{"updatelog (updlog,updates)","show the
 	gui.updateLogs()
 end)
 
-cmd.add({"discord", "invite"}, {"discord (invite)", "Copy an invite link to the official Nameless Admin Discord server"}, function()
+cmd.add({"discord", "invite", "support", "help"}, {"discord (invite, support, help)", "Copy an invite link to the official Nameless Admin Discord server"}, function()
 	local inviteLink = "https://discord.gg/zS7TpV3p64"
 
 	if setclipboard then
