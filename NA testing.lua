@@ -352,6 +352,7 @@ end
 --Custom file functions checker checker
 --local CustomFunctionSupport=isfile and isfolder and writefile and readfile and listfiles;
 local FileSupport = isfile and isfolder and writefile and readfile and makefolder
+local AliasPath = "Nameless-Admin/Aliases.json"
 
 -- Creates folder & files for Prefix, Plugins, and QoT toggle
 if FileSupport then
@@ -366,9 +367,13 @@ if FileSupport then
 	if not isfile("Nameless-Admin/ImageButtonSize.txt") then
 		writefile("Nameless-Admin/ImageButtonSize.txt", "1")
 	end
-	
+
 	if not isfile("Nameless-Admin/QueueOnTeleport.txt") then
 		writefile("Nameless-Admin/QueueOnTeleport.txt", "false")
+	end
+
+	if not isfile(AliasPath) then
+		writefile(AliasPath, "{}")
 	end
 end
 
@@ -503,6 +508,7 @@ local camera=game:GetService("Workspace").CurrentCamera
 local Commands,Aliases={},{}
 local player,plr,lp=Players.LocalPlayer,Players.LocalPlayer,Players.LocalPlayer
 local ctrlModule = nil
+NASAVEDALIASES = {} --swift is ass and when i use "local" on this, it makes my client crash :skull:
 
 Spawn(function()
 	ppDSCRIPTSS = Players.LocalPlayer:FindFirstChildOfClass("PlayerScripts")
@@ -1872,6 +1878,29 @@ function sFLY(vfly, cfly)
 	end
 end
 
+function readAliasFile()
+	if FileSupport and isfile(AliasPath) then
+		local success, data = pcall(function()
+			return HttpService:JSONDecode(readfile(AliasPath))
+		end)
+		if success and type(data) == "table" then
+			return data
+		end
+	end
+	return {}
+end
+
+function loadAliases()
+	local aliasMap = readAliasFile()
+	for alias, original in pairs(aliasMap) do
+		if Commands[original:lower()] then
+			local command = Commands[original:lower()]
+			Aliases[alias:lower()] = {command[1], command[2], command[3]}
+			NASAVEDALIASES[alias:lower()] = true
+		end
+	end
+end
+
 local tool=nil
 if getChar() then tool=getBp():FindFirstChildOfClass("Tool") or getChar():FindFirstChildOfClass("Tool") or nil end
 
@@ -1882,7 +1911,7 @@ chatmsgshooks={}
 Playerchats={}
 
 lib.LocalPlayerChat=function(...)
-	local args={...} 
+	local args={...}
 	if TextChatService:FindFirstChild("TextChannels") then
 		local sendto=TextChatService.TextChannels.RBXGeneral
 		if args[2]~=nil and  args[2]~="All"  then
@@ -2088,6 +2117,75 @@ cmd.add({"loadstring", "ls"}, {"loadstring <code> (ls)", "Run code using loadstr
 
 	return true, result
 end, true)
+
+cmd.add({"addalias"}, {"addalias <command> <alias>", "Adds a persistent alias for an existing command."}, function(original, alias)
+	if not original or not alias then return end
+
+	original, alias = original:lower(), alias:lower()
+
+	if not Commands[original] then return end
+	if Commands[alias] or Aliases[alias] then return end
+
+	local command = Commands[original]
+	Aliases[alias] = {command[1], command[2], command[3]}
+	NASAVEDALIASES[alias] = true
+
+	if FileSupport then
+		local aliasMap = readAliasFile()
+		aliasMap[alias] = original
+		writefile(AliasPath, HttpService:JSONEncode(aliasMap))
+	end
+end, true)
+
+cmd.add({"removealias"}, {"removealias", "Select and remove a saved alias."}, function()
+	local aliasMap = FileSupport and readAliasFile() or {}
+
+	if next(aliasMap) == nil then
+		DoNotif("No saved aliases to remove.", 2)
+		return
+	end
+
+	local buttons = {}
+
+	for alias, original in pairs(aliasMap) do
+		Insert(buttons, {
+			Text = alias.." → "..original,
+			Callback = function()
+				Aliases[alias] = nil
+				aliasMap[alias] = nil
+				if FileSupport then
+					writefile(AliasPath, HttpService:JSONEncode(aliasMap))
+				end
+				DoNotif("Removed alias '"..alias.."'", 2)
+			end
+		})
+	end
+
+	Insert(buttons, {
+		Text = "Cancel",
+		Callback = function()
+			DoNotif("Alias removal cancelled.", 2)
+		end
+	})
+
+	Notify({
+		Title = "Remove Alias",
+		Description = "Select an alias to remove:",
+		Buttons = buttons
+	})
+end)
+
+cmd.add({"clearaliases"}, {"clearaliases", "Removes all aliases created using addalias."}, function()
+	if not FileSupport then return end
+
+	for alias in pairs(NASAVEDALIASES) do
+		Aliases[alias] = nil
+	end
+
+	NASAVEDALIASES = {}
+	writefile(AliasPath, "{}")
+	DoNotif("All aliases created with addalias have been removed.", 2)
+end)
 
 cmd.add({"executor","exec"},{"executor (exec)","Very simple executor"},function()
 	loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/Nameless-Admin/main/NAexecutor.lua"))()
@@ -5237,8 +5335,11 @@ stationaryRespawn = false
 needsRespawning = false
 hasPosition = false
 spawnPosition = CFrame.new()
+spawnCONNECTION = nil
+spawnCHARCON = nil
 
 cmd.add({"setspawn", "spawnpoint", "ss"}, {"setspawn (spawnpoint, ss)", "Sets your spawn point to the current character's position"}, function()
+	if spawnCONNECTION and spawnCHARCON then return DoNotif("spawn point is already running",3) end
 	DoNotif("Spawn has been set")
 	stationaryRespawn = true
 
@@ -5256,10 +5357,10 @@ cmd.add({"setspawn", "spawnpoint", "ss"}, {"setspawn (spawnpoint, ss)", "Sets yo
 		end
 	end
 
-	RunService.Stepped:Connect(handleRespawn)
+	spawnCONNECTION=RunService.Stepped:Connect(handleRespawn)
 
-	LocalPlayer.CharacterAdded:Connect(function()
-		Wait(0.6)
+	spawnCHARCON=LocalPlayer.CharacterAdded:Connect(function()
+		Wait(1)
 		needsRespawning = false
 		hasPosition = false
 	end)
@@ -5267,6 +5368,14 @@ end)
 
 cmd.add({"disablespawn", "unsetspawn", "ds"}, {"disablespawn (unsetspawn, ds)", "Disables the previously set spawn point"}, function()
 	DoNotif("Spawn point has been disabled")
+	if spawnCONNECTION then
+		spawnCONNECTION:Disconnect()
+		spawnCONNECTION = nil
+	end
+	if spawnCHARCON then
+		spawnCHARCON:Disconnect()
+		spawnCHARCON = nil
+	end
 	stationaryRespawn = false
 	needsRespawning = false
 	hasPosition = false
@@ -6663,7 +6772,7 @@ cmd.add({"serverhop","shop"},{"serverhop (shop)","serverhop"},function()
 	local Number=0
 	local SomeSRVS={}
 	local found=0
-	for _,v in ipairs(SafeGetService("HttpService"):JSONDecode(game:HttpGetAsync("https://games.roblox.com/v1/games/"..PlaceId.."/servers/Public?sortOrder=Asc&limit=100")).data) do
+	for _,v in ipairs(HttpService:JSONDecode(game:HttpGetAsync("https://games.roblox.com/v1/games/"..PlaceId.."/servers/Public?sortOrder=Asc&limit=100")).data) do
 		if type(v)=="table" and v.maxPlayers>v.playing and v.id~=JobId then
 			if v.playing>Number then
 				Number=v.playing
@@ -6687,7 +6796,7 @@ cmd.add({"smallserverhop","sshop"},{"smallserverhop (sshop)","serverhop to a sma
 	local SomeSRVS={}
 	local found=0
 
-	for _,v in ipairs(SafeGetService("HttpService"):JSONDecode(game:HttpGetAsync("https://games.roblox.com/v1/games/"..PlaceId.."/servers/Public?sortOrder=Asc&limit=100")).data) do
+	for _,v in ipairs(HttpService:JSONDecode(game:HttpGetAsync("https://games.roblox.com/v1/games/"..PlaceId.."/servers/Public?sortOrder=Asc&limit=100")).data) do
 		if type(v)=="table" and v.maxPlayers>v.playing and v.id~=JobId then
 			if v.playing<Number then
 				Number=v.playing
@@ -12125,7 +12234,7 @@ cmd.add({"spin"}, {"spin {amount}", "Makes your character spin as fast as you wa
 	spinPart.CanCollide = false
 	spinPart.Transparency = 1
 	spinPart.Size = Vector3.new(1, 1, 1)
-	spinPart.Parent = workspace.CurrentCamera
+	spinPart.Parent = game:GetService("Workspace").CurrentCamera
 	spinPart.CFrame = getRoot(LocalPlayer.Character).CFrame
 
 	spinThingy = InstanceNew("BodyAngularVelocity")
@@ -13284,7 +13393,7 @@ cmd.add({"hitbox", "hbox"}, {"hitbox {amount}", "Modifies everyone's hitbox to t
 	local hitboxSize = tonumber(size) or 10
 
 	for _, plr in pairs(targetPlayers) do
-		local character = plr.Character
+		local character = getPlrChar(plr)
 		local root = character and getRoot(character)
 		if root then
 			if not ogSIZES[plr] then
@@ -13301,7 +13410,7 @@ cmd.add({"hitbox", "hbox"}, {"hitbox {amount}", "Modifies everyone's hitbox to t
 			end
 
 			hbCON[plr] = RunService.Stepped:Connect(function()
-				local r = plr.Character and getRoot(plr.Character)
+				local r = getPlrChar(plr) and getRoot(getPlrChar(plr))
 				if r then
 					r.Size = Vector3.new(hitboxSize, hitboxSize, hitboxSize)
 					r.Transparency = 0.9
@@ -13317,7 +13426,7 @@ cmd.add({"unhitbox", "unhbox"}, {"unhitbox", "Disables hitbox modifications"}, f
 	local targetPlayers = getPlr(playerName)
 
 	for _, plr in pairs(targetPlayers) do
-		local character = plr.Character
+		local character = getPlrChar(plr)
 		local root = character and getRoot(character)
 		if root then
 			local original = ogSIZES[plr] or Vector3.new(2, 2, 1)
@@ -13476,7 +13585,7 @@ cmd.add({"infjump", "infinitejump"}, {"infjump (infinitejump)", "Enables infinit
 		return character:WaitForChild("Humanoid")
 	end
 
-	local function enableInfiniteJump()
+	local function doINFJUMPY()
 		if jumpyCON then
 			jumpyCON:Disconnect()
 			jumpyCON = nil
@@ -13497,7 +13606,7 @@ cmd.add({"infjump", "infinitejump"}, {"infjump (infinitejump)", "Enables infinit
 		end)
 	end
 
-	enableInfiniteJump()
+	doINFJUMPY()
 
 	if jumpyChar then
 		jumpyChar:Disconnect()
@@ -13505,7 +13614,7 @@ cmd.add({"infjump", "infinitejump"}, {"infjump (infinitejump)", "Enables infinit
 
 	jumpyChar = plr.CharacterAdded:Connect(function(char)
 		char:WaitForChild("Humanoid")
-		enableInfiniteJump()
+		doINFJUMPY()
 	end)
 end)
 
@@ -13871,6 +13980,29 @@ end)
 cmd.add({"gamma", "exposure"},{"gamma (exposure)","gamma vision (real)"},function(num)
 	expose = tonumber(num) or 0
 	Lighting.ExposureCompensation = expose
+end)
+
+gammaLoop = nil
+
+cmd.add({"loopgamma", "loopexposure"},{"loopgamma (loopexposure)","loop gamma vision (mega real)"},function(num)
+	expose = tonumber(num) or 0
+	if gammaLoop then
+		gammaLoop:Disconnect()
+	end
+
+	Lighting.ExposureCompensation = expose
+
+	gammaLoop = Lighting:GetPropertyChangedSignal("ExposureCompensation"):Connect(function()
+		if Lighting.ExposureCompensation ~= expose then
+			Lighting.ExposureCompensation = expose
+		end
+	end)
+end)
+
+cmd.add({"unloopgamma", "unlgamma", "unloopexposure", "unlexposure"},{"unloopgamma (unlgamma, unloopexposure, unlexposure)","stop gamma vision (real)"},function()
+	if gammaLoop then
+		gammaLoop:Disconnect()
+	end
 end)
 
 cmd.add({"unsuspendvc", "fixvc", "rejoinvc", "restorevc"},{"unsuspendvc (fixvc, rejoinvc, restorevc)","allows you to use Voice Chat again"},function(...)
@@ -16461,6 +16593,7 @@ Spawn(function() -- init
 end)
 
 Spawn(bindToDevConsole)
+Spawn(loadAliases)
 
 Spawn(function()
 	NACaller(function()--better saveinstance support
