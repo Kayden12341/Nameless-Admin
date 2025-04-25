@@ -1944,6 +1944,80 @@ function RenderUserButtons()
 	end
 	table.clear(UserButtonGuiList)
 
+	local SavedArguments = {}
+
+	function ButtonInputPrompt(commandName, callback)
+		local promptGui = InstanceNew("ScreenGui")
+		promptGui.IgnoreGuiInset = true
+		promptGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+		promptGui.Parent = NASCREENGUI
+
+		local frame = InstanceNew("Frame")
+		frame.Size = UDim2.new(0, 260, 0, 140)
+		frame.Position = UDim2.new(0.5, -130, 0.5, -70)
+		frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+		frame.BorderSizePixel = 0
+		frame.Parent = promptGui
+
+		local corner = InstanceNew("UICorner")
+		corner.CornerRadius = UDim.new(0.1, 0)
+		corner.Parent = frame
+
+		local title = InstanceNew("TextLabel")
+		title.Size = UDim2.new(1, -20, 0, 30)
+		title.Position = UDim2.new(0, 10, 0, 10)
+		title.BackgroundTransparency = 1
+		title.Text = "Arguments for: "..commandName
+		title.TextColor3 = Color3.fromRGB(255, 255, 255)
+		title.Font = Enum.Font.GothamBold
+		title.TextSize = 16
+		title.TextWrapped = true
+		title.Parent = frame
+
+		local textbox = InstanceNew("TextBox")
+		textbox.Size = UDim2.new(1, -20, 0, 30)
+		textbox.Position = UDim2.new(0, 10, 0, 50)
+		textbox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+		textbox.TextColor3 = Color3.fromRGB(255, 255, 255)
+		textbox.PlaceholderText = "Type arguments here"
+		textbox.Text = ""
+		textbox.TextSize = 16
+		textbox.Font = Enum.Font.Gotham
+		textbox.ClearTextOnFocus = false
+		textbox.Parent = frame
+
+		local submit = InstanceNew("TextButton")
+		submit.Size = UDim2.new(0.5, -15, 0, 30)
+		submit.Position = UDim2.new(0, 10, 1, -40)
+		submit.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+		submit.Text = "Submit"
+		submit.TextColor3 = Color3.fromRGB(255, 255, 255)
+		submit.Font = Enum.Font.GothamBold
+		submit.TextSize = 14
+		submit.Parent = frame
+
+		local cancel = InstanceNew("TextButton")
+		cancel.Size = UDim2.new(0.5, -15, 0, 30)
+		cancel.Position = UDim2.new(0.5, 5, 1, -40)
+		cancel.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+		cancel.Text = "Cancel"
+		cancel.TextColor3 = Color3.fromRGB(255, 255, 255)
+		cancel.Font = Enum.Font.GothamBold
+		cancel.TextSize = 14
+		cancel.Parent = frame
+
+		MouseButtonFix(submit,function()
+			callback(textbox.Text)
+			promptGui:Destroy()
+		end)
+
+		MouseButtonFix(cancel,function()
+			promptGui:Destroy()
+		end)
+
+		gui.draggablev2(frame)
+	end
+
 	local totalButtons = #NAUserButtons
 	local totalWidth = totalButtons * (100 + 10)
 	local startX = 0.5 - (totalWidth/2) / NASCREENGUI.AbsoluteSize.X
@@ -1974,13 +2048,79 @@ function RenderUserButtons()
 		gui.draggablev2(btn)
 
 		local toggled = false
+		local saveEnabled = false
+
+		local cmdToRun = data.Cmd1
+		local commandData = Commands[cmdToRun:lower()] or Aliases[cmdToRun:lower()]
+		local requiresArgs = commandData and commandData[3]
+
+		if requiresArgs then
+			local saveToggle = InstanceNew("TextButton")
+			saveToggle.Size = UDim2.new(0, 20, 0, 20)
+			saveToggle.Position = UDim2.new(1, -15, 0, -10)
+			saveToggle.AnchorPoint = Vector2.new(0.5, 0)
+			saveToggle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+			saveToggle.TextColor3 = Color3.fromRGB(255, 255, 255)
+			saveToggle.TextSize = 12
+			saveToggle.Font = Enum.Font.Gotham
+			saveToggle.Text = "N"
+			saveToggle.ZIndex = 10000
+			saveToggle.Parent = btn
+
+			MouseButtonFix(saveToggle, function()
+				saveEnabled = not saveEnabled
+				saveToggle.Text = saveEnabled and "S" or "N"
+			end)
+		end
+
+		local ActivePrompts = {}
+
 		MouseButtonFix(btn, function()
+			local cmdToRunNow
 			if not toggled or not data.Cmd2 then
-				cmd.run({data.Cmd1})
+				cmdToRunNow = data.Cmd1
 			else
-				cmd.run({data.Cmd2})
+				cmdToRunNow = data.Cmd2
 			end
-			toggled = not toggled
+
+			local commandDataNow = Commands[cmdToRunNow:lower()] or Aliases[cmdToRunNow:lower()]
+			local requiresArgsNow = commandDataNow and commandDataNow[3]
+
+			local function runCommand(parsedArguments)
+				local finalArgs = {cmdToRunNow}
+				if parsedArguments then
+					for _, v in ipairs(parsedArguments) do
+						Insert(finalArgs, v)
+					end
+				end
+				cmd.run(finalArgs)
+				toggled = not toggled
+			end
+
+			if requiresArgsNow then
+				if saveEnabled and SavedArguments[id] then
+					runCommand(SavedArguments[id])
+				else
+					if ActivePrompts[cmdToRunNow] then
+						return
+					end
+
+					ActivePrompts[cmdToRunNow] = true
+
+					ButtonInputPrompt(cmdToRunNow, function(input)
+						ActivePrompts[cmdToRunNow] = nil
+						local parsedArguments = ParseArguments(input)
+						if parsedArguments then
+							SavedArguments[id] = parsedArguments
+							runCommand(parsedArguments)
+						else
+							runCommand(nil)
+						end
+					end)
+				end
+			else
+				runCommand(nil)
+			end
 		end)
 
 		Insert(UserButtonGuiList, btn)
