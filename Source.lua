@@ -9419,8 +9419,8 @@ end)
 timeCHARcons = {}
 timePlayerCon = nil
 
-cmd.add({"timestop", "tstop"}, {"timestop (tstop)", "freezes all players (ZA WARUDO)"}, function(arg)
-	local target = getPlr(arg)
+cmd.add({"timestop", "tstop"}, {"timestop (tstop)", "freezes all players (ZA WARUDO)"}, function()
+	local target = getPlr("others")
 	if #target == 0 then return end
 
 	for _, con in pairs(timeCHARcons) do
@@ -9463,8 +9463,8 @@ cmd.add({"timestop", "tstop"}, {"timestop (tstop)", "freezes all players (ZA WAR
 	end)
 end,true)
 
-cmd.add({"untimestop", "untstop"}, {"untimestop (untstop)", "unfreeze all players"}, function(arg)
-	local target = getPlr(arg)
+cmd.add({"untimestop", "untstop"}, {"untimestop (untstop)", "unfreeze all players"}, function()
+	local target = getPlr("all")
 	if #target == 0 then return end
 
 	for _, con in pairs(timeCHARcons) do
