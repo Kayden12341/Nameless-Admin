@@ -9461,7 +9461,7 @@ cmd.add({"timestop", "tstop"}, {"timestop (tstop)", "freezes all players (ZA WAR
 			end
 		end)
 	end)
-end,true)
+end)
 
 cmd.add({"untimestop", "untstop"}, {"untimestop (untstop)", "unfreeze all players"}, function()
 	local target = getPlr("all")
@@ -9487,7 +9487,7 @@ cmd.add({"untimestop", "untstop"}, {"untimestop (untstop)", "unfreeze all player
 			end
 		end
 	end
-end,true)
+end)
 
 cmd.add({"goto","to","tp","teleport"},{"goto <player/X,Y,Z>","Teleport to the given player or X,Y,Z coordinates"},function(...)
 	Username=(...)
