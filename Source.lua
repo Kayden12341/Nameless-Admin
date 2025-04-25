@@ -1,7 +1,5 @@
 if getgenv().RealNamelessLoaded then return end
 
-local req = request or http_request or (syn and syn.request) or function() end
-
 function NACaller(pp)--helps me log better
 	local s,err=pcall(pp)
 	if not s then print("NA script err: "..err) end
@@ -28,6 +26,7 @@ local Wait = task.wait;
 local Discover = table.find;
 local Concat = table.concat;
 local Defer = task.defer;
+local NASCREENGUI=nil --Getmodel("rbxassetid://140418556029404")
 
 function blankfunction(...)
 	return ...
@@ -38,6 +37,8 @@ local cloneref = cloneref or blankfunction
 function SafeGetService(service)
 	return cloneref(game:GetService(service)) or game:GetService(service)
 end
+
+local HttpService=SafeGetService('HttpService');
 
 function isAprilFools()
 	local d = os.date("*t")
@@ -254,7 +255,7 @@ if not gethui then
 end
 
 if (identifyexecutor() == "Solara" or identifyexecutor() == "Xeno") or not fireproximityprompt then
-    getgenv().fireproximityprompt=function(pp)
+	getgenv().fireproximityprompt=function(pp)
 		local oldenabled=pp.Enabled
 		local oldhold=pp.HoldDuration
 		local oldrlos=pp.RequiresLineOfSight
@@ -281,7 +282,7 @@ if not game:IsLoaded() then
 	message.Text = adminName.." is waiting for the game to load"
 	NaProtectUI(message)
 	game.Loaded:Wait()
-	
+
 	repeat Wait() until game:GetService("Players").LocalPlayer
 	message:Destroy()
 end
@@ -333,43 +334,65 @@ end
 --Custom file functions checker checker
 --local CustomFunctionSupport=isfile and isfolder and writefile and readfile and listfiles;
 local FileSupport = isfile and isfolder and writefile and readfile and makefolder
-local AliasPath = "Nameless-Admin/Aliases.json"
+NAFILEPATH = "Nameless-Admin"
+NAPREFIXPATH = "Nameless-Admin/Prefix.txt"
+NAIMAGEBUTTONSIZEPATH = "Nameless-Admin/ImageButtonSize.txt"
+NAQOTPATH = "Nameless-Admin/QueueOnTeleport.txt"
+NAALIASPATH = "Nameless-Admin/Aliases.json"
+NAICONPOSPATH = "Nameless-Admin/IconPosition.json"
+NAUSERBUTTONSPATH = "Nameless-Admin/UserButtons.json"
+NAUserButtons = {}
+UserButtonGuiList = {}
 
 -- Creates folder & files for Prefix, Plugins, and QoT toggle
 if FileSupport then
-	if not isfolder("Nameless-Admin") then
-		makefolder("Nameless-Admin")
+	if not isfolder(NAFILEPATH) then
+		makefolder(NAFILEPATH)
 	end
 
-	if not isfile("Nameless-Admin/Prefix.txt") then
-		writefile("Nameless-Admin/Prefix.txt", ";")
+	if not isfile(NAPREFIXPATH) then
+		writefile(NAPREFIXPATH, ";")
 	end
 
-	if not isfile("Nameless-Admin/ImageButtonSize.txt") then
-		writefile("Nameless-Admin/ImageButtonSize.txt", "1")
+	if not isfile(NAIMAGEBUTTONSIZEPATH) then
+		writefile(NAIMAGEBUTTONSIZEPATH, "1")
 	end
 
-	if not isfile("Nameless-Admin/QueueOnTeleport.txt") then
-		writefile("Nameless-Admin/QueueOnTeleport.txt", "false")
+	if not isfile(NAQOTPATH) then
+		writefile(NAQOTPATH, "false")
 	end
 
-	if not isfile(AliasPath) then
-		writefile(AliasPath, "{}")
+	if not isfile(NAALIASPATH) then
+		writefile(NAALIASPATH, "{}")
+	end
+
+	if not isfile(NAICONPOSPATH) then
+		writefile(NAICONPOSPATH, HttpService:JSONEncode({
+			X = 0.5,
+			Y = 0.1,
+			Save = false
+		}))
+	end
+
+	if not isfile(NAUSERBUTTONSPATH) then
+		writefile(NAUSERBUTTONSPATH, HttpService:JSONEncode({}))
 	end
 end
 
 local prefixCheck = ";"
 local NAScale = 1
-local NAQoTEnabled = false
+NAQoTEnabled = nil
+NAiconSaveEnabled = nil
+NAREQUEST = request or http_request or (syn and syn.request) or function() end
 
 if FileSupport then
-	prefixCheck = readfile("Nameless-Admin/Prefix.txt")
-	NAsavedScale = tonumber(readfile("Nameless-Admin/ImageButtonSize.txt"))
-	NAQoTEnabled = readfile("Nameless-Admin/QueueOnTeleport.txt") == "true"
+	prefixCheck = readfile(NAPREFIXPATH)
+	NAsavedScale = tonumber(readfile(NAIMAGEBUTTONSIZEPATH))
+	NAQoTEnabled = readfile(NAQOTPATH) == "true"
 
 	if prefixCheck:match("[a-zA-Z0-9]") then
 		prefixCheck = ";"
-		writefile("Nameless-Admin/Prefix.txt", ";")
+		writefile(NAPREFIXPATH, ";")
 		DoNotif("Your prefix has been reset to the default (;) because it contained letters or numbers")
 	end
 
@@ -377,14 +400,34 @@ if FileSupport then
 		NAScale = NAsavedScale
 	else
 		NAScale = 1
-		writefile("Nameless-Admin/ImageButtonSize.txt", "1")
+		writefile(NAIMAGEBUTTONSIZEPATH, "1")
 		DoNotif("ImageButton size has been reset to default due to invalid data.")
+	end
+
+	if isfile(NAICONPOSPATH) then
+		local success, data = pcall(function()
+			return HttpService:JSONDecode(readfile(NAICONPOSPATH))
+		end)
+		if success and data then
+			if data.Save ~= nil then
+				NAiconSaveEnabled = data.Save
+			else
+				NAiconSaveEnabled = false
+			end
+		else
+			NAiconSaveEnabled = false
+		end
+	else
+		NAiconSaveEnabled = false
 	end
 else
 	prefixCheck = ";"
 	NAScale = 1
+	NAQoTEnabled = false
+	NAiconSaveEnabled = false
 	DoNotif("Your exploit does not support read/write file")
 end
+
 --[[ PREFIX AND OTHER STUFF. ]]--
 local opt={
 	prefix=prefixCheck,
@@ -396,24 +439,24 @@ local opt={
 local lastPrefix = opt.prefix
 
 --[[ Update Logs ]]--
-local updLogs = {
+NAupdLogs = {
 	log1='updlogs have been abandoned for now';
 	log2='join the discord using the command "Discord" to view the update logs';
 }
 
-local updDate="unknown" --month,day,year
+NAupdDate="unknown" --month,day,year
 
 NACaller(function()
-	local response = req({
+	local response = NAREQUEST({
 		Url = githubUrl,
 		Method = "GET"
 	})
 
 	if response and response.StatusCode == 200 then
-		local json = SafeGetService("HttpService"):JSONDecode(response.Body)
+		local json = HttpService:JSONDecode(response.Body)
 		if json and json[1] and json[1].commit and json[1].commit.author and json[1].commit.author.date then
 			local year, month, day = json[1].commit.author.date:match("(%d+)-(%d+)-(%d+)")
-			updDate = month.."/"..day.."/"..year
+			NAupdDate = month.."/"..day.."/"..year
 		end
 	end
 end)
@@ -427,7 +470,6 @@ local ProximityPromptService=game:GetService("ProximityPromptService");
 local TweenService=SafeGetService("TweenService");
 local RunService=SafeGetService("RunService");
 local TeleportService=SafeGetService("TeleportService");
-local HttpService=SafeGetService('HttpService');
 local StarterGui=SafeGetService("StarterGui");
 local SoundService=SafeGetService("SoundService");
 local Lighting=SafeGetService("Lighting");
@@ -492,7 +534,7 @@ local camera=game:GetService("Workspace").CurrentCamera
 local Commands,Aliases={},{}
 local player,plr,lp=Players.LocalPlayer,Players.LocalPlayer,Players.LocalPlayer
 local ctrlModule = nil
-NASAVEDALIASES = {} --swift is ass and when i use "local" on this, it makes my client crash :skull:
+NASAVEDALIASES = {}
 
 Spawn(function()
 	ppDSCRIPTSS = Players.LocalPlayer:FindFirstChildOfClass("PlayerScripts")
@@ -1124,7 +1166,7 @@ local PlayerArgs = {
 		if not LocalPlayer.Character or not getRoot(LocalPlayer.Character) then return {} end
 		local lowest = math.huge
 		local Targets = nil
-	
+
 		Foreach(Players:GetPlayers(), function(_, plr)
 			if plr ~= LocalPlayer and plr.Character and getRoot(plr.Character) then
 				local distance = (getRoot(plr.Character).Position - getRoot(LocalPlayer.Character).Position).Magnitude
@@ -1134,15 +1176,15 @@ local PlayerArgs = {
 				end
 			end
 		end)
-	
+
 		return Targets and {Targets} or {}
 	end,
-	
+
 	["farthest"] = function()
 		if not LocalPlayer.Character or not getRoot(LocalPlayer.Character) then return {} end
 		local highest = 0
 		local Targets = nil
-	
+
 		Foreach(Players:GetPlayers(), function(_, plr)
 			if plr ~= LocalPlayer and plr.Character and getRoot(plr.Character) then
 				local distance = (getRoot(plr.Character).Position - getRoot(LocalPlayer.Character).Position).Magnitude
@@ -1152,7 +1194,7 @@ local PlayerArgs = {
 				end
 			end
 		end)
-	
+
 		return Targets and {Targets} or {}
 	end,
 
@@ -1863,9 +1905,9 @@ function sFLY(vfly, cfly)
 end
 
 function readAliasFile()
-	if FileSupport and isfile(AliasPath) then
+	if FileSupport and isfile(NAALIASPATH) then
 		local success, data = pcall(function()
-			return HttpService:JSONDecode(readfile(AliasPath))
+			return HttpService:JSONDecode(readfile(NAALIASPATH))
 		end)
 		if success and type(data) == "table" then
 			return data
@@ -1882,6 +1924,67 @@ function loadAliases()
 			Aliases[alias:lower()] = {command[1], command[2], command[3]}
 			NASAVEDALIASES[alias:lower()] = true
 		end
+	end
+end
+
+function loadButtonIDS()
+	if FileSupport and isfile(NAUSERBUTTONSPATH) then
+		local success, data = pcall(function()
+			return HttpService:JSONDecode(readfile(NAUSERBUTTONSPATH))
+		end)
+		if success and type(data) == "table" then
+			NAUserButtons = data
+		end
+	end
+end
+
+function RenderUserButtons()
+	for _, btn in pairs(UserButtonGuiList) do
+		btn:Destroy()
+	end
+	table.clear(UserButtonGuiList)
+
+	local totalButtons = #NAUserButtons
+	local totalWidth = totalButtons * (100 + 10)
+	local startX = 0.5 - (totalWidth/2) / NASCREENGUI.AbsoluteSize.X
+
+	local spacing = 110
+
+	local index = 0
+	for id, data in pairs(NAUserButtons) do
+		local btn = InstanceNew("TextButton")
+		btn.Name = "NAUserButton_"..id
+		btn.Text = data.Label
+		btn.Size = UDim2.new(0, 100, 0, 40)
+		btn.AnchorPoint = Vector2.new(0.5, 0)
+		btn.Position = UDim2.new(startX + (spacing * index) / NASCREENGUI.AbsoluteSize.X, 0, 0.9, 0)
+		btn.Parent = NASCREENGUI
+		btn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+		btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+		btn.TextSize = 16
+		btn.Font = Enum.Font.GothamBold
+		btn.BorderSizePixel = 0
+		btn.ZIndex = 9999
+		btn.AutoButtonColor = true
+
+		local corner = InstanceNew("UICorner")
+		corner.CornerRadius = UDim.new(0.25, 0)
+		corner.Parent = btn
+
+		gui.draggablev2(btn)
+
+		local toggled = false
+		MouseButtonFix(btn, function()
+			if not toggled or not data.Cmd2 then
+				cmd.run({data.Cmd1})
+			else
+				cmd.run({data.Cmd2})
+			end
+			toggled = not toggled
+		end)
+
+		Insert(UserButtonGuiList, btn)
+		index += 1
 	end
 end
 
@@ -2127,7 +2230,7 @@ cmd.add({"addalias"}, {"addalias <command> <alias>", "Adds a persistent alias fo
 	if FileSupport then
 		local aliasMap = readAliasFile()
 		aliasMap[alias] = original
-		writefile(AliasPath, HttpService:JSONEncode(aliasMap))
+		writefile(NAALIASPATH, HttpService:JSONEncode(aliasMap))
 	end
 
 	DoNotif("Alias '"..alias.."' has been added for command '"..original.."'", 2)
@@ -2150,7 +2253,7 @@ cmd.add({"removealias"}, {"removealias", "Select and remove a saved alias"}, fun
 				Aliases[alias] = nil
 				aliasMap[alias] = nil
 				if FileSupport then
-					writefile(AliasPath, HttpService:JSONEncode(aliasMap))
+					writefile(NAALIASPATH, HttpService:JSONEncode(aliasMap))
 				end
 				DoNotif("Removed alias '"..alias.."'", 2)
 			end
@@ -2179,8 +2282,59 @@ cmd.add({"clearaliases"}, {"clearaliases", "Removes all aliases created using ad
 	end
 
 	NASAVEDALIASES = {}
-	writefile(AliasPath, "{}")
+	writefile(NAALIASPATH, "{}")
 	DoNotif("All aliases have been removed", 2)
+end)
+
+cmd.add({"addbutton", "ab"}, {"addbutton <command> <label> [<command2>] (ab)", "Add a mobile button"}, function(arg1, arg2, arg3)
+	if not arg1 or not arg2 then
+		DoNotif("Usage: ;addbutton <command> <label> [<command2>]", 2)
+		return
+	end
+
+	local id = #NAUserButtons + 1
+	NAUserButtons[id] = {
+		Cmd1 = arg1,
+		Label = arg2,
+		Cmd2 = arg3
+	}
+
+	if FileSupport then
+		writefile(NAUSERBUTTONSPATH, HttpService:JSONEncode(NAUserButtons))
+	end
+
+	RenderUserButtons()
+
+	DoNotif("Added button with id "..id, 2)
+end)
+
+cmd.add({"removebutton", "rb"}, {"removebutton <id> (rb)", "Remove a user button"}, function(arg1)
+	local id = tonumber(arg1)
+	if not id or not NAUserButtons[id] then
+		DoNotif("Invalid button ID", 2)
+		return
+	end
+
+	NAUserButtons[id] = nil
+
+	if FileSupport then
+		writefile(NAUSERBUTTONSPATH, HttpService:JSONEncode(NAUserButtons))
+	end
+
+	RenderUserButtons()
+
+	DoNotif("Removed button with id "..id, 2)
+end)
+
+cmd.add({"buttonlist", "bl"}, {"buttonlist (bl)", "List user buttons"}, function()
+	local msg = ""
+	for id, data in pairs(NAUserButtons) do
+		msg = msg.."\n["..id.."] "..data.Label.." ("..data.Cmd1
+		if data.Cmd2 then msg = msg.." / "..data.Cmd2 end
+		msg = msg..")"
+	end
+	if msg == "" then msg = "No buttons added" end
+	DoNotif(msg, 5)
 end)
 
 cmd.add({"executor","exec"},{"executor (exec)","Very simple executor"},function()
@@ -2312,7 +2466,7 @@ if IsOnMobile then
 					if input.UserInputState == Enum.UserInputState.End then
 						dragging = false
 						if FileSupport then
-							writefile("Nameless-Admin/ImageButtonSize.txt", tostring(NAScale))
+							writefile(NAIMAGEBUTTONSIZEPATH, tostring(NAScale))
 						end
 					end
 				end)
@@ -2335,6 +2489,35 @@ if IsOnMobile then
 
 		gui.draggablev2(frame)
 	end)
+
+	cmd.add({"keepiconpos", "kip", "saveicon", "kpos"}, {"keepiconpos (kip, saveicon, kpos)", "Save current icon position"}, function()
+		if FileSupport then
+			local pos = NAimageButton.Position
+			writefile(NAICONPOSPATH, HttpService:JSONEncode({
+				X = pos.X.Scale,
+				Y = pos.Y.Scale,
+				Save = true
+			}))
+			NAiconSaveEnabled = true
+			DoNotif("Icon position saved", 2)
+		else
+			DoNotif("Your exploit does not support file saving", 2)
+		end
+	end)
+
+	cmd.add({"forgeticonpos", "fip", "reseticon", "rpos"}, {"forgeticonpos (fip, reseticon, rpos)", "Reset icon position to default"}, function()
+		if FileSupport then
+			writefile(NAICONPOSPATH, HttpService:JSONEncode({
+				X = 0.5,
+				Y = 0.1,
+				Save = false
+			}))
+		end
+		NAimageButton.Position = UDim2.new(0.5, 0, 0.1, 0)
+		NAiconSaveEnabled = false
+		DoNotif("Icon position reset to default", 2)
+	end)
+
 end
 
 cmd.add({"scripthub","hub"},{"scripthub (hub)","Thanks to scriptblox api"},function()
@@ -2379,7 +2562,7 @@ cmd.add({"saveprefix"}, {"saveprefix <symbol>", "Saves the prefix to a file and 
 	elseif newPrefix:match("&amp;") or newPrefix:match("&lt;") or newPrefix:match("&gt;") or newPrefix:match("&quot;") or newPrefix:match("&#x27;") or newPrefix:match("&#x60;") then
 		DoNotif("Encoded/HTML characters are not allowed as a prefix")
 	else
-		writefile("Nameless-Admin/Prefix.txt", newPrefix)
+		writefile(NAPREFIXPATH, newPrefix)
 		opt.prefix = newPrefix
 		DoNotif("Prefix saved to: "..newPrefix)
 	end
@@ -4153,7 +4336,7 @@ end)]]
 cmd.add({"fpsbooster","lowgraphics","boostfps","lowg"},{"fpsbooster (lowgraphics, boostfps, lowg)","Enables low graphics mode to improve performance."},function()
 	local decalsEnabled = false
 	local w = game:GetService("Workspace")
-	local l = SafeGetService("Lighting")
+	local l = Lighting
 	local t = w.Terrain
 
 	local function optimizeInstance(v)
@@ -4522,9 +4705,9 @@ cmd.add({"throttle"}, {"throttle", "Set PhysicsEnvironmentalThrottle (1 = defaul
 end, true)
 
 cmd.add({"quality"}, {"quality", "Set Rendering QualityLevel (1-10)"}, function(level)
-    level = tonumber(level) or 5
-    level = math.clamp(level, 1, 10)
-    settings().Rendering.QualityLevel = level
+	level = tonumber(level) or 5
+	level = math.clamp(level, 1, 10)
+	settings().Rendering.QualityLevel = level
 end, true)
 
 cmd.add({"logphysics"}, {"logphysics", "Enable Physics Error Logging"}, function()
@@ -5380,7 +5563,7 @@ end)
 
 cmd.add({"hamster"}, {"hamster <number>", "Hamster ball"}, function(...)
 	local UserInputService = game:GetService("UserInputService")
-	local RunService = game:GetService("RunService")
+	local RunService = RunService
 	local Camera = game:GetService("Workspace").CurrentCamera
 
 	local SPEED_MULTIPLIER = (...) or 30
@@ -5608,7 +5791,7 @@ cmd.add({"Decompiler"},{"Decompiler","Allows you to decompile LocalScript/Module
 			if time_elapsed <= .5 then
 				Wait(.5 - time_elapsed)
 			end
-			local httpResult = req({
+			local httpResult = NAREQUEST({
 				Url = API..konstantType,
 				Body = bytecode,
 				Method = "POST",
@@ -5819,188 +6002,103 @@ cmd.add({"vehiclespeed", "vspeed"}, {"vehiclespeed <amount> (vspeed)", "Change t
 
 	DoNotif("Vehicle speed set to "..intens)
 
-		Wait()
+	Wait()
 
-		vspeedBTN = InstanceNew("ScreenGui")
-		local btn = InstanceNew("TextButton")
-		local speedBox = InstanceNew("TextBox")
-		local toggleBtn = InstanceNew("TextButton")
-		local corner = InstanceNew("UICorner")
-		local corner2 = InstanceNew("UICorner")
-		local corner3 = InstanceNew("UICorner")
-		local aspect = InstanceNew("UIAspectRatioConstraint")
-		local vstopBtn = InstanceNew("TextButton")
-		local vstopCorner = InstanceNew("UICorner")
+	vspeedBTN = InstanceNew("ScreenGui")
+	local btn = InstanceNew("TextButton")
+	local speedBox = InstanceNew("TextBox")
+	local toggleBtn = InstanceNew("TextButton")
+	local corner = InstanceNew("UICorner")
+	local corner2 = InstanceNew("UICorner")
+	local corner3 = InstanceNew("UICorner")
+	local aspect = InstanceNew("UIAspectRatioConstraint")
+	local vstopBtn = InstanceNew("TextButton")
+	local vstopCorner = InstanceNew("UICorner")
 
-		NaProtectUI(vspeedBTN)
+	NaProtectUI(vspeedBTN)
 
-		btn.Parent = vspeedBTN
-		btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-		btn.BackgroundTransparency = 0.1
-		btn.Position = UDim2.new(0.9, 0, 0.4, 0)
-		btn.Size = UDim2.new(0.08, 0, 0.1, 0)
-		btn.Font = Enum.Font.GothamBold
-		btn.Text = "vSpeed"
-		btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-		btn.TextScaled = true
-		btn.TextWrapped = true
-		btn.Active = true
+	btn.Parent = vspeedBTN
+	btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+	btn.BackgroundTransparency = 0.1
+	btn.Position = UDim2.new(0.9, 0, 0.4, 0)
+	btn.Size = UDim2.new(0.08, 0, 0.1, 0)
+	btn.Font = Enum.Font.GothamBold
+	btn.Text = "vSpeed"
+	btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	btn.TextScaled = true
+	btn.TextWrapped = true
+	btn.Active = true
 
-		corner.CornerRadius = UDim.new(0.2, 0)
-		corner.Parent = btn
+	corner.CornerRadius = UDim.new(0.2, 0)
+	corner.Parent = btn
 
-		aspect.Parent = btn
-		aspect.AspectRatio = 1.0
+	aspect.Parent = btn
+	aspect.AspectRatio = 1.0
 
-		speedBox.Parent = vspeedBTN
-		speedBox.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-		speedBox.BackgroundTransparency = 0.1
-		speedBox.AnchorPoint = Vector2.new(0.5, 0)
-		speedBox.Position = UDim2.new(0.5, 0, 0, 10)
-		speedBox.Size = UDim2.new(0, 75, 0, 35)
-		speedBox.Font = Enum.Font.GothamBold
-		speedBox.Text = tostring(intens)
-		speedBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-		speedBox.TextSize = 18
-		speedBox.TextWrapped = true
-		speedBox.ClearTextOnFocus = false
-		speedBox.PlaceholderText = "Speed"
-		speedBox.Visible = false
+	speedBox.Parent = vspeedBTN
+	speedBox.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+	speedBox.BackgroundTransparency = 0.1
+	speedBox.AnchorPoint = Vector2.new(0.5, 0)
+	speedBox.Position = UDim2.new(0.5, 0, 0, 10)
+	speedBox.Size = UDim2.new(0, 75, 0, 35)
+	speedBox.Font = Enum.Font.GothamBold
+	speedBox.Text = tostring(intens)
+	speedBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+	speedBox.TextSize = 18
+	speedBox.TextWrapped = true
+	speedBox.ClearTextOnFocus = false
+	speedBox.PlaceholderText = "Speed"
+	speedBox.Visible = false
 
-		corner2.CornerRadius = UDim.new(0.2, 0)
-		corner2.Parent = speedBox
+	corner2.CornerRadius = UDim.new(0.2, 0)
+	corner2.Parent = speedBox
 
-		toggleBtn.Parent = btn
-		toggleBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-		toggleBtn.BackgroundTransparency = 0.1
-		toggleBtn.Position = UDim2.new(0.8, 0, -0.1, 0)
-		toggleBtn.Size = UDim2.new(0.4, 0, 0.4, 0)
-		toggleBtn.Font = Enum.Font.SourceSans
-		toggleBtn.Text = "+"
-		toggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-		toggleBtn.TextScaled = true
-		toggleBtn.TextWrapped = true
-		toggleBtn.Active = true
-		toggleBtn.AutoButtonColor = true
+	toggleBtn.Parent = btn
+	toggleBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+	toggleBtn.BackgroundTransparency = 0.1
+	toggleBtn.Position = UDim2.new(0.8, 0, -0.1, 0)
+	toggleBtn.Size = UDim2.new(0.4, 0, 0.4, 0)
+	toggleBtn.Font = Enum.Font.SourceSans
+	toggleBtn.Text = "+"
+	toggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	toggleBtn.TextScaled = true
+	toggleBtn.TextWrapped = true
+	toggleBtn.Active = true
+	toggleBtn.AutoButtonColor = true
 
-		corner3.CornerRadius = UDim.new(1, 0)
-		corner3.Parent = toggleBtn
+	corner3.CornerRadius = UDim.new(1, 0)
+	corner3.Parent = toggleBtn
 
-		vstopBtn.Parent = vspeedBTN
-		vstopBtn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-		vstopBtn.BackgroundTransparency = 0.1
-		vstopBtn.Position = UDim2.new(0.9, 0, 0.52, 0)
-		vstopBtn.Size = UDim2.new(0.08, 0, 0.1, 0)
-		vstopBtn.Font = Enum.Font.GothamBold
-		vstopBtn.Text = "vSTOP"
-		vstopBtn.TextColor3 = Color3.new(1, 1, 1)
-		vstopBtn.TextScaled = true
-		vstopBtn.TextWrapped = true
-		vstopBtn.Active = true
-		vstopBtn.AutoButtonColor = true
+	vstopBtn.Parent = vspeedBTN
+	vstopBtn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+	vstopBtn.BackgroundTransparency = 0.1
+	vstopBtn.Position = UDim2.new(0.9, 0, 0.52, 0)
+	vstopBtn.Size = UDim2.new(0.08, 0, 0.1, 0)
+	vstopBtn.Font = Enum.Font.GothamBold
+	vstopBtn.Text = "vSTOP"
+	vstopBtn.TextColor3 = Color3.new(1, 1, 1)
+	vstopBtn.TextScaled = true
+	vstopBtn.TextWrapped = true
+	vstopBtn.Active = true
+	vstopBtn.AutoButtonColor = true
 
-		vstopCorner.CornerRadius = UDim.new(0.2, 0)
-		vstopCorner.Parent = vstopBtn
+	vstopCorner.CornerRadius = UDim.new(0.2, 0)
+	vstopCorner.Parent = vstopBtn
 
-		MouseButtonFix(toggleBtn, function()
-			speedBox.Visible = not speedBox.Visible
-			toggleBtn.Text = speedBox.Visible and "-" or "+"
-		end)
+	MouseButtonFix(toggleBtn, function()
+		speedBox.Visible = not speedBox.Visible
+		toggleBtn.Text = speedBox.Visible and "-" or "+"
+	end)
 
-		local vSpeedOn = true
-		btn.Text = "vSpeed ON"
-		btn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+	local vSpeedOn = true
+	btn.Text = "vSpeed ON"
+	btn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
 
-		MouseButtonFix(btn, function()
-			vSpeedOn = not vSpeedOn
-		
-			if vSpeedOn then
-				local newIntens = tonumber(speedBox.Text) or 1
-				intens = newIntens
-		
-				if vehicleloopspeed then
-					vehicleloopspeed:Disconnect()
-				end
-		
-				vehicleloopspeed = RunService.Stepped:Connect(function()
-					local subject = game:GetService("Workspace").CurrentCamera.CameraSubject
-					if subject and subject:IsA("Humanoid") and subject.SeatPart then
-						subject.SeatPart:ApplyImpulse(subject.SeatPart.CFrame.LookVector * Vector3.new(intens, 0, intens))
-					elseif subject and subject:IsA("BasePart") then
-						subject:ApplyImpulse(subject.CFrame.LookVector * Vector3.new(intens, 0, intens))
-					end
-				end)
-		
-				btn.Text = "vSpeed ON"
-				btn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
-			else
-				if vehicleloopspeed then
-					vehicleloopspeed:Disconnect()
-					vehicleloopspeed = nil
-				end
-		
-				local subject = game:GetService("Workspace").CurrentCamera.CameraSubject
-				if subject then
-					local root
-					if subject:IsA("Humanoid") and subject.SeatPart then
-						root = subject.SeatPart
-					elseif subject:IsA("BasePart") then
-						root = subject
-					end
-		
-					if root then
-						Spawn(function()
-							for i = 1, 10 do
-								if root:IsDescendantOf(game) then
-									root.AssemblyLinearVelocity *= .8
-									root.AssemblyAngularVelocity *= .8
-									Wait(0.05)
-								end
-							end
-						end)
-					end
-				end
-		
-				btn.Text = "vSpeed"
-				btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-			end
-		end)
+	MouseButtonFix(btn, function()
+		vSpeedOn = not vSpeedOn
 
-		MouseButtonFix(vstopBtn, function()
-			local subject = game:GetService("Workspace").CurrentCamera.CameraSubject
-			if subject then
-				local root
-				if subject:IsA("Humanoid") and subject.SeatPart then
-					root = subject.SeatPart
-				elseif subject:IsA("BasePart") then
-					root = subject
-				end
-		
-				if root then
-					local model = root:FindFirstAncestorOfClass("Model")
-					if model then
-						for _, part in ipairs(model:GetDescendants()) do
-							if part:IsA("BasePart") then
-								part.AssemblyLinearVelocity = Vector3.zero
-								part.AssemblyAngularVelocity = Vector3.zero
-							end
-							if part:IsA("VehicleSeat") then
-								part.Throttle = 0
-								part.Steer = 0
-							end
-						end
-					else
-						root.AssemblyLinearVelocity = Vector3.zero
-						root.AssemblyAngularVelocity = Vector3.zero
-					end
-				end
-			end
-		end)
-		
-		speedBox.FocusLost:Connect(function()
-			if not vSpeedOn then return end
+		if vSpeedOn then
 			local newIntens = tonumber(speedBox.Text) or 1
-
 			intens = newIntens
 
 			if vehicleloopspeed then
@@ -6016,12 +6114,97 @@ cmd.add({"vehiclespeed", "vspeed"}, {"vehiclespeed <amount> (vspeed)", "Change t
 				end
 			end)
 
-			DoNotif("vSpeed updated to "..intens, 2)
+			btn.Text = "vSpeed ON"
+			btn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+		else
+			if vehicleloopspeed then
+				vehicleloopspeed:Disconnect()
+				vehicleloopspeed = nil
+			end
+
+			local subject = game:GetService("Workspace").CurrentCamera.CameraSubject
+			if subject then
+				local root
+				if subject:IsA("Humanoid") and subject.SeatPart then
+					root = subject.SeatPart
+				elseif subject:IsA("BasePart") then
+					root = subject
+				end
+
+				if root then
+					Spawn(function()
+						for i = 1, 10 do
+							if root:IsDescendantOf(game) then
+								root.AssemblyLinearVelocity *= .8
+								root.AssemblyAngularVelocity *= .8
+								Wait(0.05)
+							end
+						end
+					end)
+				end
+			end
+
+			btn.Text = "vSpeed"
+			btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+		end
+	end)
+
+	MouseButtonFix(vstopBtn, function()
+		local subject = game:GetService("Workspace").CurrentCamera.CameraSubject
+		if subject then
+			local root
+			if subject:IsA("Humanoid") and subject.SeatPart then
+				root = subject.SeatPart
+			elseif subject:IsA("BasePart") then
+				root = subject
+			end
+
+			if root then
+				local model = root:FindFirstAncestorOfClass("Model")
+				if model then
+					for _, part in ipairs(model:GetDescendants()) do
+						if part:IsA("BasePart") then
+							part.AssemblyLinearVelocity = Vector3.zero
+							part.AssemblyAngularVelocity = Vector3.zero
+						end
+						if part:IsA("VehicleSeat") then
+							part.Throttle = 0
+							part.Steer = 0
+						end
+					end
+				else
+					root.AssemblyLinearVelocity = Vector3.zero
+					root.AssemblyAngularVelocity = Vector3.zero
+				end
+			end
+		end
+	end)
+
+	speedBox.FocusLost:Connect(function()
+		if not vSpeedOn then return end
+		local newIntens = tonumber(speedBox.Text) or 1
+
+		intens = newIntens
+
+		if vehicleloopspeed then
+			vehicleloopspeed:Disconnect()
+		end
+
+		vehicleloopspeed = RunService.Stepped:Connect(function()
+			local subject = game:GetService("Workspace").CurrentCamera.CameraSubject
+			if subject and subject:IsA("Humanoid") and subject.SeatPart then
+				subject.SeatPart:ApplyImpulse(subject.SeatPart.CFrame.LookVector * Vector3.new(intens, 0, intens))
+			elseif subject and subject:IsA("BasePart") then
+				subject:ApplyImpulse(subject.CFrame.LookVector * Vector3.new(intens, 0, intens))
+			end
 		end)
 
-		gui.draggablev2(btn)
-		gui.draggablev2(speedBox)
-		gui.draggablev2(vstopBtn)
+		DoNotif("vSpeed updated to "..intens, 2)
+	end)
+
+	gui.draggablev2(btn)
+	gui.draggablev2(speedBox)
+	gui.draggablev2(vstopBtn)
 end, true)
 
 cmd.add({"unvehiclespeed", "unvspeed"}, {"unvehiclespeed (unvspeed)", "Stops the vehiclespeed command"}, function()
@@ -6409,53 +6592,53 @@ cmd.add({"vehicleclip", "vclip", "unvnoclip", "unvehiclenoclip"}, {"vehicleclip 
 end)
 
 cmd.add({"handlekill", "hkill"}, {"handlekill <player> (hkill)", "Kills a player using a tool that deals damage on touch"}, function(...)
-    local Players = game:GetService("Players")
-    local LocalPlayer = Players.LocalPlayer
+	local Players = game:GetService("Players")
+	local LocalPlayer = Players.LocalPlayer
 
-    if not firetouchinterest then
-        return DoNotif('Your exploit does not support firetouchinterest to run this command')
-    end
+	if not firetouchinterest then
+		return DoNotif('Your exploit does not support firetouchinterest to run this command')
+	end
 
-    local function zeTOOL()
-        local character = LocalPlayer.Character
-        if not character then return nil, nil end
-        local tool = character:FindFirstChildWhichIsA("Tool")
-        if not tool then return nil, nil end
-        local handle = tool:FindFirstChild("Handle")
-        return tool, handle
-    end
+	local function zeTOOL()
+		local character = LocalPlayer.Character
+		if not character then return nil, nil end
+		local tool = character:FindFirstChildWhichIsA("Tool")
+		if not tool then return nil, nil end
+		local handle = tool:FindFirstChild("Handle")
+		return tool, handle
+	end
 
-    local Tool, Handle = zeTOOL()
-    if not Tool or not Handle then
-        return DoNotif('You need to hold a "Tool" that does damage on touch')
-    end
+	local Tool, Handle = zeTOOL()
+	if not Tool or not Handle then
+		return DoNotif('You need to hold a "Tool" that does damage on touch')
+	end
 
-    local username = ...
+	local username = ...
 	local targets = getPlr(username)
-    if #targets == 0 then
-        return DoNotif("No target found",2)
-    end
+	if #targets == 0 then
+		return DoNotif("No target found",2)
+	end
 
-    for _, targetPlayer in ipairs(targets) do
-        Spawn(function()
-            while Tool and getPlrChar(LocalPlayer) and getPlrChar(targetPlayer) and Tool.Parent == LocalPlayer.Character do
-                local humanoid = getPlrChar(targetPlayer):FindFirstChildWhichIsA("Humanoid")
-                if not humanoid or humanoid.Health <= 0 then
-                    break
-                end
+	for _, targetPlayer in ipairs(targets) do
+		Spawn(function()
+			while Tool and getPlrChar(LocalPlayer) and getPlrChar(targetPlayer) and Tool.Parent == LocalPlayer.Character do
+				local humanoid = getPlrChar(targetPlayer):FindFirstChildWhichIsA("Humanoid")
+				if not humanoid or humanoid.Health <= 0 then
+					break
+				end
 
-                for _, part in ipairs(getPlrChar(targetPlayer):GetChildren()) do
-                    if part:IsA("BasePart") then
-                        firetouchinterest(Handle, part, 0)
-                        Wait()
-                        firetouchinterest(Handle, part, 1)
-                    end
-                end
+				for _, part in ipairs(getPlrChar(targetPlayer):GetChildren()) do
+					if part:IsA("BasePart") then
+						firetouchinterest(Handle, part, 0)
+						Wait()
+						firetouchinterest(Handle, part, 1)
+					end
+				end
 
-                RunService.RenderStepped:Wait()
-            end
-        end)
-    end
+				RunService.RenderStepped:Wait()
+			end
+		end)
+	end
 end, true)
 
 cmd.add({"creep", "scare"}, {"creep <player> (scare)", "Teleports from a player behind them and under the floor to the top"}, function(...)
@@ -7431,10 +7614,10 @@ cmd.add({"fly"}, {"fly [speed]", "Enable flight"}, function(...)
 		local corner2 = InstanceNew("UICorner")
 		local corner3 = InstanceNew("UICorner")
 		local aspect = InstanceNew("UIAspectRatioConstraint")
-	
+
 		NaProtectUI(mFlyBruh)
 		mFlyBruh.ResetOnSpawn = false
-	
+
 		btn.Parent = mFlyBruh
 		btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 		btn.BackgroundTransparency = 0.1
@@ -7447,13 +7630,13 @@ cmd.add({"fly"}, {"fly [speed]", "Enable flight"}, function(...)
 		btn.TextWrapped = true
 		btn.Active = true
 		btn.TextScaled = true
-	
+
 		corner.CornerRadius = UDim.new(0.2, 0)
 		corner.Parent = btn
-	
+
 		aspect.Parent = btn
 		aspect.AspectRatio = 1.0
-	
+
 		speedBox.Parent = mFlyBruh
 		speedBox.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 		speedBox.BackgroundTransparency = 0.1
@@ -7468,10 +7651,10 @@ cmd.add({"fly"}, {"fly [speed]", "Enable flight"}, function(...)
 		speedBox.ClearTextOnFocus = false
 		speedBox.PlaceholderText = "Speed"
 		speedBox.Visible = false
-	
+
 		corner2.CornerRadius = UDim.new(0.2, 0)
 		corner2.Parent = speedBox
-	
+
 		toggleBtn.Parent = btn
 		toggleBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 		toggleBtn.BackgroundTransparency = 0.1
@@ -7484,15 +7667,15 @@ cmd.add({"fly"}, {"fly [speed]", "Enable flight"}, function(...)
 		toggleBtn.TextWrapped = true
 		toggleBtn.Active = true
 		toggleBtn.AutoButtonColor = true
-	
+
 		corner3.CornerRadius = UDim.new(1, 0)
 		corner3.Parent = toggleBtn
-	
+
 		MouseButtonFix(toggleBtn, function()
 			speedBox.Visible = not speedBox.Visible
 			toggleBtn.Text = speedBox.Visible and "-" or "+"
 		end)
-	
+
 		coroutine.wrap(function()
 			MouseButtonFix(btn, function()
 				if not mOn then
@@ -7513,7 +7696,7 @@ cmd.add({"fly"}, {"fly [speed]", "Enable flight"}, function(...)
 				end
 			end)
 		end)()
-	
+
 		gui.draggablev2(btn)
 		gui.draggablev2(speedBox)
 	else
@@ -7890,7 +8073,7 @@ cmd.add({"antibang"}, {"antibang", "prevents users to bang you (still WORK IN PR
 		root = getRoot(char)
 	end)
 
-	bangCon = game:GetService("RunService").Stepped:Connect(function()
+	bangCon = RunService.Stepped:Connect(function()
 		for _, p in pairs(game:GetService("Players"):GetPlayers()) do
 			if p ~= LocalPlayer and p.Character and getRoot(p.Character) then
 				if (getRoot(p.Character).Position - root.Position).Magnitude <= 10 then
@@ -8209,7 +8392,7 @@ cmd.add({"permadeath", "pdeath"}, {"permadeath (pdeath)", "be death permanently"
 
 	replicatesignal(LocalPlayer.ConnectDiedSignalBackend)
 	Wait(Players.RespawnTime + 0.1)
-	
+
 	local humanoid = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
 	if humanoid then
 		humanoid:ChangeState(Enum.HumanoidStateType.Dead)
@@ -8278,41 +8461,41 @@ cmd.add({"circlemath", "cm"}, {"circlemath <mode> <size>", "Gay circle math\nMod
 			local cpos, g = (math.pi*2)*(i/#tools), CFrame.new()
 			local tcon = {}
 			tool.Parent = backpack
-			
+
 			if mode == "a" then
 				size = tonumber(size) or 2
 				g = (
 					CFrame.new(0, 0, size)*
-					CFrame.Angles(rad(90), 0, cpos)
+						CFrame.Angles(rad(90), 0, cpos)
 				)
 			elseif mode == "b" then
 				size = tonumber(size) or 2
 				g = (
 					CFrame.new(i - #tools/2, 0, 0)*
-					CFrame.Angles(rad(90), 0, 0)
+						CFrame.Angles(rad(90), 0, 0)
 				)
 			elseif mode == "c" then
 				size = tonumber(size) or 2
 				g = (
 					CFrame.new(cpos/3, 0, 0)*
-					CFrame.Angles(rad(90), 0, cpos*2)
+						CFrame.Angles(rad(90), 0, cpos*2)
 				)
 			elseif mode == "d" then
 				size = tonumber(size) or 2
 				g = (
 					CFrame.new(clamp(tan(cpos), -3, 3), 0, 0)*
-					CFrame.Angles(rad(90), 0, cpos)
+						CFrame.Angles(rad(90), 0, cpos)
 				)
 			elseif mode == "e" then
 				size = tonumber(size) or 2
 				g = (
 					CFrame.new(0, 0, clamp(tan(cpos), -5, 5))*
-					CFrame.Angles(rad(90), 0, cpos)
+						CFrame.Angles(rad(90), 0, cpos)
 				)
 			end
 			tool.Grip = g
 			tool.Parent = character
-			
+
 			tcon[#tcon] = lib.connect("cm", mouse.Button1Down:Connect(function()
 				tool:Activate()
 			end))
@@ -8321,7 +8504,7 @@ cmd.add({"circlemath", "cm"}, {"circlemath <mode> <size>", "Gay circle math\nMod
 					tool.Grip = g
 				end
 			end))
-			
+
 			lib.connect("cm", tool.AncestryChanged:Connect(function()
 				for i = 1, #tcon do
 					tcon[i]:Disconnect()
@@ -8383,7 +8566,7 @@ cmd.add({"seizure"}, {"seizure", "Gives you a seizure"}, function()
 			end
 		end
 
-		game:GetService("RunService").RenderStepped:Connect(function()
+		RunService.RenderStepped:Connect(function()
 			if Lzzz == true then
 				getRoot(LocalPlayer.Character).CFrame = getRoot(LocalPlayer.Character).CFrame * CFrame.new(
 					.075 * math.sin(45 * tick()),
@@ -8416,7 +8599,7 @@ cmd.add({"unseizure"}, {"unseizure", "Stops you from having a seizure not in rea
 
 		LocalPlayer.Character.Animate.Disabled = false
 
-		game:GetService("RunService").Heartbeat:Wait()
+		RunService.Heartbeat:Wait()
 		for i = 1, 10 do
 			getRoot(LocalPlayer.Character).AssemblyLinearVelocity = Vector3.new(0, 0, 0)
 			Wait(0.1)
@@ -9233,6 +9416,79 @@ cmd.add({"torandom","tr"},{"torandom (tr)","Teleports to a random player"},funct
 	end
 end)
 
+timeCHARcons = {}
+timePlayerCon = nil
+
+cmd.add({"timestop", "tstop"}, {"timestop (tstop)", "freezes all players (ZA WARUDO)"}, function(arg)
+	local target = getPlr(arg)
+	if #target == 0 then return end
+
+	for _, con in pairs(timeCHARcons) do
+		con:Disconnect()
+	end
+	timeCHARcons = {}
+
+	for _, plr in pairs(target) do
+		local char = getPlrChar(plr)
+		if char then
+			for _, v in pairs(char:GetDescendants()) do
+				if v:IsA("BasePart") then
+					v.Anchored = true
+				end
+			end
+		end
+		timeCHARcons[plr] = plr.CharacterAdded:Connect(function(char)
+			char:WaitForChild("HumanoidRootPart", 3)
+			for _, v in pairs(char:GetDescendants()) do
+				if v:IsA("BasePart") then
+					v.Anchored = true
+				end
+			end
+		end)
+	end
+
+	if timePlayerCon then
+		timePlayerCon:Disconnect()
+	end
+
+	timePlayerCon = Players.PlayerAdded:Connect(function(plr)
+		timeCHARcons[plr] = plr.CharacterAdded:Connect(function(char)
+			char:WaitForChild("HumanoidRootPart", 3)
+			for _, v in pairs(char:GetDescendants()) do
+				if v:IsA("BasePart") then
+					v.Anchored = true
+				end
+			end
+		end)
+	end)
+end,true)
+
+cmd.add({"untimestop", "untstop"}, {"untimestop (untstop)", "unfreeze all players"}, function(arg)
+	local target = getPlr(arg)
+	if #target == 0 then return end
+
+	for _, con in pairs(timeCHARcons) do
+		con:Disconnect()
+	end
+	timeCHARcons = {}
+
+	if timePlayerCon then
+		timePlayerCon:Disconnect()
+		timePlayerCon = nil
+	end
+
+	for _, plr in pairs(target) do
+		local char = getPlrChar(plr)
+		if char then
+			for _, v in pairs(char:GetDescendants()) do
+				if v:IsA("BasePart") then
+					v.Anchored = false
+				end
+			end
+		end
+	end
+end,true)
+
 cmd.add({"goto","to","tp","teleport"},{"goto <player/X,Y,Z>","Teleport to the given player or X,Y,Z coordinates"},function(...)
 	Username=(...)
 
@@ -9974,7 +10230,7 @@ cmd.add({"blackhole"}, {"blackhole", "Makes unanchored parts teleport to the bla
 
 		UICorner.CornerRadius = UDim.new(0.25, 0)
 		UICorner.Parent = button
-		
+
 		MouseButtonFix(button,function()
 			Updated = Mouse.Hit + Vector3.new(0, 5, 0)
 		end)
@@ -10258,12 +10514,12 @@ cmd.add({"unloopfling"}, {"unloopfling", "Stops loop flinging a player"}, functi
 end)
 
 cmd.add({"freegamepass", "freegp"},{"freegamepass (freegp)", "Returns true if the UserOwnsGamePassAsync function gets used"},function()
-    local Hook
-    Hook = hookfunction(MarketplaceService.UserOwnsGamePassAsync, newcclosure(function(self, ...)
-        return true
-    end))
+	local Hook
+	Hook = hookfunction(MarketplaceService.UserOwnsGamePassAsync, newcclosure(function(self, ...)
+		return true
+	end))
 
-    DoNotif("✅ Free gamepasses enabled! Rejoin to disable. Note: This only works in some games.")
+	DoNotif("✅ Free gamepasses enabled! Rejoin to disable. Note: This only works in some games.")
 end)
 
 --[[cmd.add({"freedevproduct", "freedp"},{"freedevproduct (freedp)", "Simulates a successful Developer Product purchase"},function()
@@ -10429,7 +10685,7 @@ cmd.add({"wallhop"},{"wallhop","wallhop helper"},function()
 
 	local canHop = true
 
-	wallhopConn = game:GetService("RunService").Heartbeat:Connect(function()
+	wallhopConn = RunService.Heartbeat:Connect(function()
 		if not char or not root or not hum or hum.Health <= 0 then
 			wallhopConn:Disconnect()
 			wallhopConn = nil
@@ -10890,7 +11146,7 @@ cmd.add({"jerkuser", "jorkuser"}, {"jerkuser <player> (jorkuser)", "Lay under th
 		part:Destroy()
 	end
 	jerkParts = {}
-	
+
 	local thick = 0.2
 	local halfWidth = 2
 	local halfDepth = 2
@@ -10903,7 +11159,7 @@ cmd.add({"jerkuser", "jorkuser"}, {"jerkuser <player> (jorkuser)", "Lay under th
 		{offset = CFrame.new(0, halfHeight + thick / 500, 0), size = Vector3.new(4, thick, 4)},
 		{offset = CFrame.new(0, -(halfHeight + thick / 500), 0), size = Vector3.new(4, thick, 4)}
 	}
-	
+
 	for i, wall in ipairs(walls) do
 		local part = InstanceNew("Part")
 		part.Size = wall.size
@@ -10969,131 +11225,131 @@ doSUCKING = nil
 SUCKYSUCKY = {}
 
 cmd.add({"suck", "dicksuck"}, {"suck <player> <number> (dicksuck)", "suck it"}, function(h, d)
-    if suckLOOP then
-        suckLOOP = nil
-    end
-    if doSUCKING then
-        doSUCKING:Stop()
-    end
-    if suckANIM then
-        suckANIM:Destroy()
-    end
-    if suckDIED then
-        suckDIED:Disconnect()
-    end
-    for _, p in pairs(SUCKYSUCKY) do
-        p:Destroy()
-    end
-    SUCKYSUCKY = {}
-    
-    local speed = d or 10
-    local tweenDuration = 1 / speed
-    local tweenInfo = TweenInfo.new(tweenDuration, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
-    local username = h
-    local targets = getPlr(username)
-    if #targets == 0 then return end
-    local plr = targets[1]
-    
-    suckANIM = InstanceNew("Animation")
-    local isR15 = IsR15(Players.LocalPlayer)
-    if not isR15 then
-        suckANIM.AnimationId = "rbxassetid://189854234"
-    else
-        suckANIM.AnimationId = "rbxassetid://5918726674"
-    end
-    local hum = getChar():FindFirstChildOfClass("Humanoid")
-    doSUCKING = hum:LoadAnimation(suckANIM)
-    doSUCKING:Play(0.1, 1, 1)
-    doSUCKING:AdjustSpeed(speed)
-    
-    suckDIED = hum.Died:Connect(function()
-        if suckLOOP then
-            suckLOOP = nil
-        end
-        doSUCKING:Stop()
-        suckANIM:Destroy()
-        if suckDIED then
-            suckDIED:Disconnect()
-        end
-        for _, part in pairs(SUCKYSUCKY) do
-            part:Destroy()
-        end
-        SUCKYSUCKY = {}
-    end)
-    
-    local thick = 0.2
-    local halfWidth = 2
-    local halfDepth = 2
-    local halfHeight = 3
-    local walls = {
-        {offset = CFrame.new(0, 0, halfDepth + thick/500), size = Vector3.new(4, 6, thick)},
-        {offset = CFrame.new(0, 0, -(halfDepth + thick/500)), size = Vector3.new(4, 6, thick)},
-        {offset = CFrame.new(halfWidth + thick/500, 0, 0), size = Vector3.new(thick, 6, 4)},
-        {offset = CFrame.new(-(halfWidth + thick/500), 0, 0), size = Vector3.new(thick, 6, 4)},
-        {offset = CFrame.new(0, halfHeight + thick/500, 0), size = Vector3.new(4, thick, 4)},
-        {offset = CFrame.new(0, -(halfHeight + thick/500), 0), size = Vector3.new(4, thick, 4)}
-    }
-    for i, wall in ipairs(walls) do
-        local part = InstanceNew("Part")
-        part.Size = wall.size
-        part.Anchored = true
-        part.CanCollide = true
-        part.Transparency = 1
-        part.Parent = game:GetService("Workspace").CurrentCamera
-        Insert(SUCKYSUCKY, part)
-    end
-    
-    suckLOOP = coroutine.wrap(function()
-        while true do
-            local targetCharacter = plr.Character
-            local localCharacter = getChar()
-            if targetCharacter and getRoot(targetCharacter) and localCharacter and getRoot(localCharacter) then
-                local targetHRP = getRoot(targetCharacter)
-                local localHRP = getRoot(localCharacter)
-                local forwardCFrame = targetHRP.CFrame * CFrame.new(0, -2.3, -2.5) * CFrame.Angles(0, math.pi, 0)
-                local backwardCFrame = targetHRP.CFrame * CFrame.new(0, -2.3, -1.3) * CFrame.Angles(0, math.pi, 0)
-                local tweenForward = TweenService:Create(
-                    localHRP,
-                    TweenInfo.new(0.15, Enum.EasingStyle.Linear, Enum.EasingDirection.Out),
-                    {CFrame = forwardCFrame}
-                )
-                tweenForward:Play()
-                tweenForward.Completed:Wait()
-                local tweenBackward = TweenService:Create(
-                    localHRP,
-                    TweenInfo.new(0.15, Enum.EasingStyle.Linear, Enum.EasingDirection.Out),
-                    {CFrame = backwardCFrame}
-                )
-                tweenBackward:Play()
-                tweenBackward.Completed:Wait()
-                for i, wall in ipairs(walls) do
-                    SUCKYSUCKY[i].CFrame = localHRP.CFrame * wall.offset
-                end
-            else
-                break
-            end
-        end
-    end)
-    suckLOOP()
+	if suckLOOP then
+		suckLOOP = nil
+	end
+	if doSUCKING then
+		doSUCKING:Stop()
+	end
+	if suckANIM then
+		suckANIM:Destroy()
+	end
+	if suckDIED then
+		suckDIED:Disconnect()
+	end
+	for _, p in pairs(SUCKYSUCKY) do
+		p:Destroy()
+	end
+	SUCKYSUCKY = {}
+
+	local speed = d or 10
+	local tweenDuration = 1 / speed
+	local tweenInfo = TweenInfo.new(tweenDuration, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
+	local username = h
+	local targets = getPlr(username)
+	if #targets == 0 then return end
+	local plr = targets[1]
+
+	suckANIM = InstanceNew("Animation")
+	local isR15 = IsR15(Players.LocalPlayer)
+	if not isR15 then
+		suckANIM.AnimationId = "rbxassetid://189854234"
+	else
+		suckANIM.AnimationId = "rbxassetid://5918726674"
+	end
+	local hum = getChar():FindFirstChildOfClass("Humanoid")
+	doSUCKING = hum:LoadAnimation(suckANIM)
+	doSUCKING:Play(0.1, 1, 1)
+	doSUCKING:AdjustSpeed(speed)
+
+	suckDIED = hum.Died:Connect(function()
+		if suckLOOP then
+			suckLOOP = nil
+		end
+		doSUCKING:Stop()
+		suckANIM:Destroy()
+		if suckDIED then
+			suckDIED:Disconnect()
+		end
+		for _, part in pairs(SUCKYSUCKY) do
+			part:Destroy()
+		end
+		SUCKYSUCKY = {}
+	end)
+
+	local thick = 0.2
+	local halfWidth = 2
+	local halfDepth = 2
+	local halfHeight = 3
+	local walls = {
+		{offset = CFrame.new(0, 0, halfDepth + thick/500), size = Vector3.new(4, 6, thick)},
+		{offset = CFrame.new(0, 0, -(halfDepth + thick/500)), size = Vector3.new(4, 6, thick)},
+		{offset = CFrame.new(halfWidth + thick/500, 0, 0), size = Vector3.new(thick, 6, 4)},
+		{offset = CFrame.new(-(halfWidth + thick/500), 0, 0), size = Vector3.new(thick, 6, 4)},
+		{offset = CFrame.new(0, halfHeight + thick/500, 0), size = Vector3.new(4, thick, 4)},
+		{offset = CFrame.new(0, -(halfHeight + thick/500), 0), size = Vector3.new(4, thick, 4)}
+	}
+	for i, wall in ipairs(walls) do
+		local part = InstanceNew("Part")
+		part.Size = wall.size
+		part.Anchored = true
+		part.CanCollide = true
+		part.Transparency = 1
+		part.Parent = game:GetService("Workspace").CurrentCamera
+		Insert(SUCKYSUCKY, part)
+	end
+
+	suckLOOP = coroutine.wrap(function()
+		while true do
+			local targetCharacter = plr.Character
+			local localCharacter = getChar()
+			if targetCharacter and getRoot(targetCharacter) and localCharacter and getRoot(localCharacter) then
+				local targetHRP = getRoot(targetCharacter)
+				local localHRP = getRoot(localCharacter)
+				local forwardCFrame = targetHRP.CFrame * CFrame.new(0, -2.3, -2.5) * CFrame.Angles(0, math.pi, 0)
+				local backwardCFrame = targetHRP.CFrame * CFrame.new(0, -2.3, -1.3) * CFrame.Angles(0, math.pi, 0)
+				local tweenForward = TweenService:Create(
+					localHRP,
+					TweenInfo.new(0.15, Enum.EasingStyle.Linear, Enum.EasingDirection.Out),
+					{CFrame = forwardCFrame}
+				)
+				tweenForward:Play()
+				tweenForward.Completed:Wait()
+				local tweenBackward = TweenService:Create(
+					localHRP,
+					TweenInfo.new(0.15, Enum.EasingStyle.Linear, Enum.EasingDirection.Out),
+					{CFrame = backwardCFrame}
+				)
+				tweenBackward:Play()
+				tweenBackward.Completed:Wait()
+				for i, wall in ipairs(walls) do
+					SUCKYSUCKY[i].CFrame = localHRP.CFrame * wall.offset
+				end
+			else
+				break
+			end
+		end
+	end)
+	suckLOOP()
 end, true)
 
 cmd.add({"unsuck", "undicksuck"}, {"unsuck (undicksuck)", "no more fun"}, function()
-    if suckLOOP then
-        suckLOOP = nil
-    end
-    if doSUCKING then
-        doSUCKING:Stop()
-    end
-    if suckANIM then
-        suckANIM:Destroy()
-    end
-    if suckDIED then
-        suckDIED:Disconnect()
-    end
-    for _, p in pairs(SUCKYSUCKY) do
-        p:Destroy()
-    end
-    SUCKYSUCKY = {}
+	if suckLOOP then
+		suckLOOP = nil
+	end
+	if doSUCKING then
+		doSUCKING:Stop()
+	end
+	if suckANIM then
+		suckANIM:Destroy()
+	end
+	if suckDIED then
+		suckDIED:Disconnect()
+	end
+	for _, p in pairs(SUCKYSUCKY) do
+		p:Destroy()
+	end
+	SUCKYSUCKY = {}
 end)
 
 cmd.add({"improvetextures"},{"improvetextures","Switches Textures"},function()
@@ -11176,110 +11432,110 @@ doBang = nil
 BANGPARTS = {}
 
 cmd.add({"bang", "fuck"}, {"bang <player> <number> (fuck)", "fucks the player by attaching to them"}, function(h, d)
-    if bangLoop then
-        bangLoop:Disconnect()
-    end
-    if doBang then
-        doBang:Stop()
-    end
-    if bangAnim then
-        bangAnim:Destroy()
-    end
-    if bangDied then
-        bangDied:Disconnect()
-    end
-    for _, p in pairs(BANGPARTS) do
-        p:Destroy()
-    end
-    BANGPARTS = {}
-    
-    local speed = d or 10
-    local username = h
-    local targets = getPlr(username)
-    if #targets == 0 then return end
-    local plr = targets[1]
-    
-    bangAnim = InstanceNew("Animation")
-    if not IsR15(Players.LocalPlayer) then
-        bangAnim.AnimationId = "rbxassetid://148840371"
-    else
-        bangAnim.AnimationId = "rbxassetid://5918726674"
-    end
-    local hum = getChar():FindFirstChildOfClass("Humanoid")
-    doBang = hum:LoadAnimation(bangAnim)
-    doBang:Play(0.1, 1, 1)
-    doBang:AdjustSpeed(speed)
-    
-    local bangplr = plr.Name
-    bangDied = hum.Died:Connect(function()
-        if bangLoop then
-            bangLoop:Disconnect()
-        end
-        doBang:Stop()
-        bangAnim:Destroy()
-        if bangDied then
-            bangDied:Disconnect()
-        end
-        for _, part in pairs(BANGPARTS) do
-            part:Destroy()
-        end
-        BANGPARTS = {}
-    end)
-    
-    local thick = 0.2
-    local halfWidth = 2
-    local halfDepth = 2
-    local halfHeight = 3
-    local walls = {
-        {offset = CFrame.new(0, 0, halfDepth + thick/500), size = Vector3.new(4, 6, thick)},
-        {offset = CFrame.new(0, 0, -(halfDepth + thick/500)), size = Vector3.new(4, 6, thick)},
-        {offset = CFrame.new(halfWidth + thick/500, 0, 0), size = Vector3.new(thick, 6, 4)},
-        {offset = CFrame.new(-(halfWidth + thick/500), 0, 0), size = Vector3.new(thick, 6, 4)},
-        {offset = CFrame.new(0, halfHeight + thick/500, 0), size = Vector3.new(4, thick, 4)},
-        {offset = CFrame.new(0, -(halfHeight + thick/500), 0), size = Vector3.new(4, thick, 4)}
-    }
-    for i, wall in ipairs(walls) do
-        local part = InstanceNew("Part")
-        part.Size = wall.size
-        part.Anchored = true
-        part.CanCollide = true
-        part.Transparency = 1
-        part.Parent = game:GetService("Workspace").CurrentCamera
-        Insert(BANGPARTS, part)
-    end
+	if bangLoop then
+		bangLoop:Disconnect()
+	end
+	if doBang then
+		doBang:Stop()
+	end
+	if bangAnim then
+		bangAnim:Destroy()
+	end
+	if bangDied then
+		bangDied:Disconnect()
+	end
+	for _, p in pairs(BANGPARTS) do
+		p:Destroy()
+	end
+	BANGPARTS = {}
 
-    local bangOffset = CFrame.new(0, 0, 1.1)
-    bangLoop = RunService.Stepped:Connect(function()
-        pcall(function()
-            local targetRoot = getRoot(Players[bangplr].Character)
-            local localRoot = getRoot(getChar())
-            if targetRoot and localRoot then
-                localRoot.CFrame = targetRoot.CFrame * bangOffset
-                for i, wall in ipairs(walls) do
-                    BANGPARTS[i].CFrame = localRoot.CFrame * wall.offset
-                end
-            end
-        end)
-    end)
+	local speed = d or 10
+	local username = h
+	local targets = getPlr(username)
+	if #targets == 0 then return end
+	local plr = targets[1]
+
+	bangAnim = InstanceNew("Animation")
+	if not IsR15(Players.LocalPlayer) then
+		bangAnim.AnimationId = "rbxassetid://148840371"
+	else
+		bangAnim.AnimationId = "rbxassetid://5918726674"
+	end
+	local hum = getChar():FindFirstChildOfClass("Humanoid")
+	doBang = hum:LoadAnimation(bangAnim)
+	doBang:Play(0.1, 1, 1)
+	doBang:AdjustSpeed(speed)
+
+	local bangplr = plr.Name
+	bangDied = hum.Died:Connect(function()
+		if bangLoop then
+			bangLoop:Disconnect()
+		end
+		doBang:Stop()
+		bangAnim:Destroy()
+		if bangDied then
+			bangDied:Disconnect()
+		end
+		for _, part in pairs(BANGPARTS) do
+			part:Destroy()
+		end
+		BANGPARTS = {}
+	end)
+
+	local thick = 0.2
+	local halfWidth = 2
+	local halfDepth = 2
+	local halfHeight = 3
+	local walls = {
+		{offset = CFrame.new(0, 0, halfDepth + thick/500), size = Vector3.new(4, 6, thick)},
+		{offset = CFrame.new(0, 0, -(halfDepth + thick/500)), size = Vector3.new(4, 6, thick)},
+		{offset = CFrame.new(halfWidth + thick/500, 0, 0), size = Vector3.new(thick, 6, 4)},
+		{offset = CFrame.new(-(halfWidth + thick/500), 0, 0), size = Vector3.new(thick, 6, 4)},
+		{offset = CFrame.new(0, halfHeight + thick/500, 0), size = Vector3.new(4, thick, 4)},
+		{offset = CFrame.new(0, -(halfHeight + thick/500), 0), size = Vector3.new(4, thick, 4)}
+	}
+	for i, wall in ipairs(walls) do
+		local part = InstanceNew("Part")
+		part.Size = wall.size
+		part.Anchored = true
+		part.CanCollide = true
+		part.Transparency = 1
+		part.Parent = game:GetService("Workspace").CurrentCamera
+		Insert(BANGPARTS, part)
+	end
+
+	local bangOffset = CFrame.new(0, 0, 1.1)
+	bangLoop = RunService.Stepped:Connect(function()
+		pcall(function()
+			local targetRoot = getRoot(Players[bangplr].Character)
+			local localRoot = getRoot(getChar())
+			if targetRoot and localRoot then
+				localRoot.CFrame = targetRoot.CFrame * bangOffset
+				for i, wall in ipairs(walls) do
+					BANGPARTS[i].CFrame = localRoot.CFrame * wall.offset
+				end
+			end
+		end)
+	end)
 end, true)
 
 cmd.add({"unbang", "unfuck"}, {"unbang (unfuck)", "Unbangs the player"}, function()
-    if bangLoop then
-        bangLoop:Disconnect()
-    end
-    if doBang then
-        doBang:Stop()
-    end
-    if bangAnim then
-        bangAnim:Destroy()
-    end
-    if bangDied then
-        bangDied:Disconnect()
-    end
-    for _, p in pairs(BANGPARTS) do
-        p:Destroy()
-    end
-    BANGPARTS = {}
+	if bangLoop then
+		bangLoop:Disconnect()
+	end
+	if doBang then
+		doBang:Stop()
+	end
+	if bangAnim then
+		bangAnim:Destroy()
+	end
+	if bangDied then
+		bangDied:Disconnect()
+	end
+	for _, p in pairs(BANGPARTS) do
+		p:Destroy()
+	end
+	BANGPARTS = {}
 end)
 
 inversebangLoop = nil
@@ -11291,148 +11547,148 @@ doInversebang2 = nil
 INVERSEBANGPARTS = {}
 
 cmd.add({"inversebang", "ibang", "inverseb"}, {"inversebang <player> <number> (inversebang/inverseb)", "you're the one getting fucked today ;)"},function(h, d)
-    if inversebangLoop then
-        inversebangLoop = nil
-    end
-    if doInversebang then
-        doInversebang:Stop()
-    end
-    if inversebangAnim then
-        inversebangAnim:Destroy()
-    end
-    if inversebangAnim2 then
-        inversebangAnim2:Destroy()
-    end
-    if inversebangDied then
-        inversebangDied:Disconnect()
-    end
-    for _, p in pairs(INVERSEBANGPARTS) do
-        p:Destroy()
-    end
-    INVERSEBANGPARTS = {}
-    
-    local speed = d or 10
-    local username = h
-    local targets = getPlr(username)
-    if #targets == 0 then return end
-    local plr = targets[1]
-    
-    inversebangAnim = InstanceNew("Animation")
-    local isR15 = IsR15(Players.LocalPlayer)
-    if not isR15 then
-        inversebangAnim.AnimationId = "rbxassetid://189854234"
-        inversebangAnim2 = InstanceNew("Animation")
-        inversebangAnim2.AnimationId = "rbxassetid://106772613"
-    else
-        inversebangAnim.AnimationId = "rbxassetid://10714360343"
-        inversebangAnim2 = nil
-    end
-    local hum = getChar():FindFirstChildOfClass("Humanoid")
-    doInversebang = hum:LoadAnimation(inversebangAnim)
-    doInversebang:Play(0.1, 1, 1)
-    doInversebang:AdjustSpeed(speed)
-    if not isR15 and inversebangAnim2 then
-        doInversebang2 = hum:LoadAnimation(inversebangAnim2)
-        doInversebang2:Play(0.1, 1, 1)
-        doInversebang2:AdjustSpeed(speed)
-    end
-    
-    inversebangDied = hum.Died:Connect(function()
-        if inversebangLoop then
-            inversebangLoop = nil
-        end
-        doInversebang:Stop()
-        if doInversebang2 then
-            doInversebang2:Stop()
-        end
-        inversebangAnim:Destroy()
-        if inversebangDied then
-            inversebangDied:Disconnect()
-        end
-        for _, part in pairs(INVERSEBANGPARTS) do
-            part:Destroy()
-        end
-        INVERSEBANGPARTS = {}
-    end)
-    
-    local thick = 0.2
-    local halfWidth = 2
-    local halfDepth = 2
-    local halfHeight = 3
-    local walls = {
-        {offset = CFrame.new(0, 0, halfDepth + thick/500), size = Vector3.new(4, 6, thick)},
-        {offset = CFrame.new(0, 0, -(halfDepth + thick/500)), size = Vector3.new(4, 6, thick)},
-        {offset = CFrame.new(halfWidth + thick/500, 0, 0), size = Vector3.new(thick, 6, 4)},
-        {offset = CFrame.new(-(halfWidth + thick/500), 0, 0), size = Vector3.new(thick, 6, 4)},
-        {offset = CFrame.new(0, halfHeight + thick/500, 0), size = Vector3.new(4, thick, 4)},
-        {offset = CFrame.new(0, -(halfHeight + thick/500), 0), size = Vector3.new(4, thick, 4)}
-    }
-    for i, wall in ipairs(walls) do
-        local part = InstanceNew("Part")
-        part.Size = wall.size
-        part.Anchored = true
-        part.CanCollide = true
-        part.Transparency = 1
-        part.Parent = game:GetService("Workspace").CurrentCamera
-        Insert(INVERSEBANGPARTS, part)
-    end
+	if inversebangLoop then
+		inversebangLoop = nil
+	end
+	if doInversebang then
+		doInversebang:Stop()
+	end
+	if inversebangAnim then
+		inversebangAnim:Destroy()
+	end
+	if inversebangAnim2 then
+		inversebangAnim2:Destroy()
+	end
+	if inversebangDied then
+		inversebangDied:Disconnect()
+	end
+	for _, p in pairs(INVERSEBANGPARTS) do
+		p:Destroy()
+	end
+	INVERSEBANGPARTS = {}
 
-    local bangOffset = CFrame.new(0, 0, 1.1)
-    
-    inversebangLoop = coroutine.wrap(function()
-        while true do
-            local targetCharacter = plr.Character
-            local localCharacter = getChar()
-            if targetCharacter and getRoot(targetCharacter) and localCharacter and getRoot(localCharacter) then
-                local targetHRP = getRoot(targetCharacter)
-                local localHRP = getRoot(localCharacter)
-                local forwardCFrame = targetHRP.CFrame * CFrame.new(0, 0, -2.5)
-                local backwardCFrame = targetHRP.CFrame * CFrame.new(0, 0, -1.3)
-                local tweenForward = TweenService:Create(
-                    localHRP,
-                    TweenInfo.new(0.15, Enum.EasingStyle.Linear, Enum.EasingDirection.Out),
-                    {CFrame = forwardCFrame}
-                )
-                tweenForward:Play()
-                tweenForward.Completed:Wait()
-                local tweenBackward = TweenService:Create(
-                    localHRP,
-                    TweenInfo.new(0.15, Enum.EasingStyle.Linear, Enum.EasingDirection.Out),
-                    {CFrame = backwardCFrame}
-                )
-                tweenBackward:Play()
-                tweenBackward.Completed:Wait()
-                for i, wall in ipairs(walls) do
-                    INVERSEBANGPARTS[i].CFrame = localHRP.CFrame * wall.offset
-                end
-            else
-                break
-            end
-        end
-    end)
-    inversebangLoop()
+	local speed = d or 10
+	local username = h
+	local targets = getPlr(username)
+	if #targets == 0 then return end
+	local plr = targets[1]
+
+	inversebangAnim = InstanceNew("Animation")
+	local isR15 = IsR15(Players.LocalPlayer)
+	if not isR15 then
+		inversebangAnim.AnimationId = "rbxassetid://189854234"
+		inversebangAnim2 = InstanceNew("Animation")
+		inversebangAnim2.AnimationId = "rbxassetid://106772613"
+	else
+		inversebangAnim.AnimationId = "rbxassetid://10714360343"
+		inversebangAnim2 = nil
+	end
+	local hum = getChar():FindFirstChildOfClass("Humanoid")
+	doInversebang = hum:LoadAnimation(inversebangAnim)
+	doInversebang:Play(0.1, 1, 1)
+	doInversebang:AdjustSpeed(speed)
+	if not isR15 and inversebangAnim2 then
+		doInversebang2 = hum:LoadAnimation(inversebangAnim2)
+		doInversebang2:Play(0.1, 1, 1)
+		doInversebang2:AdjustSpeed(speed)
+	end
+
+	inversebangDied = hum.Died:Connect(function()
+		if inversebangLoop then
+			inversebangLoop = nil
+		end
+		doInversebang:Stop()
+		if doInversebang2 then
+			doInversebang2:Stop()
+		end
+		inversebangAnim:Destroy()
+		if inversebangDied then
+			inversebangDied:Disconnect()
+		end
+		for _, part in pairs(INVERSEBANGPARTS) do
+			part:Destroy()
+		end
+		INVERSEBANGPARTS = {}
+	end)
+
+	local thick = 0.2
+	local halfWidth = 2
+	local halfDepth = 2
+	local halfHeight = 3
+	local walls = {
+		{offset = CFrame.new(0, 0, halfDepth + thick/500), size = Vector3.new(4, 6, thick)},
+		{offset = CFrame.new(0, 0, -(halfDepth + thick/500)), size = Vector3.new(4, 6, thick)},
+		{offset = CFrame.new(halfWidth + thick/500, 0, 0), size = Vector3.new(thick, 6, 4)},
+		{offset = CFrame.new(-(halfWidth + thick/500), 0, 0), size = Vector3.new(thick, 6, 4)},
+		{offset = CFrame.new(0, halfHeight + thick/500, 0), size = Vector3.new(4, thick, 4)},
+		{offset = CFrame.new(0, -(halfHeight + thick/500), 0), size = Vector3.new(4, thick, 4)}
+	}
+	for i, wall in ipairs(walls) do
+		local part = InstanceNew("Part")
+		part.Size = wall.size
+		part.Anchored = true
+		part.CanCollide = true
+		part.Transparency = 1
+		part.Parent = game:GetService("Workspace").CurrentCamera
+		Insert(INVERSEBANGPARTS, part)
+	end
+
+	local bangOffset = CFrame.new(0, 0, 1.1)
+
+	inversebangLoop = coroutine.wrap(function()
+		while true do
+			local targetCharacter = plr.Character
+			local localCharacter = getChar()
+			if targetCharacter and getRoot(targetCharacter) and localCharacter and getRoot(localCharacter) then
+				local targetHRP = getRoot(targetCharacter)
+				local localHRP = getRoot(localCharacter)
+				local forwardCFrame = targetHRP.CFrame * CFrame.new(0, 0, -2.5)
+				local backwardCFrame = targetHRP.CFrame * CFrame.new(0, 0, -1.3)
+				local tweenForward = TweenService:Create(
+					localHRP,
+					TweenInfo.new(0.15, Enum.EasingStyle.Linear, Enum.EasingDirection.Out),
+					{CFrame = forwardCFrame}
+				)
+				tweenForward:Play()
+				tweenForward.Completed:Wait()
+				local tweenBackward = TweenService:Create(
+					localHRP,
+					TweenInfo.new(0.15, Enum.EasingStyle.Linear, Enum.EasingDirection.Out),
+					{CFrame = backwardCFrame}
+				)
+				tweenBackward:Play()
+				tweenBackward.Completed:Wait()
+				for i, wall in ipairs(walls) do
+					INVERSEBANGPARTS[i].CFrame = localHRP.CFrame * wall.offset
+				end
+			else
+				break
+			end
+		end
+	end)
+	inversebangLoop()
 end, true)
 
 cmd.add({"uninversebang", "unibang", "uninverseb"}, {"uninversebang (unibang)", "no more fun"}, function()
-    if inversebangLoop then
-        inversebangLoop = nil
-    end
-    if doInversebang then
-        doInversebang:Stop()
-    end
-    if doInversebang2 then
-        doInversebang2:Stop()
-    end
-    if inversebangAnim then
-        inversebangAnim:Destroy()
-    end
-    if inversebangDied then
-        inversebangDied:Disconnect()
-    end
-    for _, p in pairs(INVERSEBANGPARTS) do
-        p:Destroy()
-    end
-    INVERSEBANGPARTS = {}
+	if inversebangLoop then
+		inversebangLoop = nil
+	end
+	if doInversebang then
+		doInversebang:Stop()
+	end
+	if doInversebang2 then
+		doInversebang2:Stop()
+	end
+	if inversebangAnim then
+		inversebangAnim:Destroy()
+	end
+	if inversebangDied then
+		inversebangDied:Disconnect()
+	end
+	for _, p in pairs(INVERSEBANGPARTS) do
+		p:Destroy()
+	end
+	INVERSEBANGPARTS = {}
 end)
 
 sussyID = "rbxassetid://106772613"
@@ -11495,49 +11751,49 @@ end)
 
 cmd.add({"jerk", "jork"}, {"jerk (jork)", "jorking it"}, function()
 	local humanoid = getChar():FindFirstChildWhichIsA("Humanoid")
-    local backpack = LocalPlayer:FindFirstChildWhichIsA("Backpack")
-    if not humanoid or not backpack then return end
+	local backpack = LocalPlayer:FindFirstChildWhichIsA("Backpack")
+	if not humanoid or not backpack then return end
 
-    local tool = InstanceNew("Tool")
-    tool.Name = "Jerk"
-    tool.ToolTip = "oh yes i am feeling it COMING OUT AHHHHHHHHHHHHHHHHHHHHH"
-    tool.RequiresHandle = false
-    tool.Parent = backpack
+	local tool = InstanceNew("Tool")
+	tool.Name = "Jerk"
+	tool.ToolTip = "oh yes i am feeling it COMING OUT AHHHHHHHHHHHHHHHHHHHHH"
+	tool.RequiresHandle = false
+	tool.Parent = backpack
 
-    local jorkin = false
-    local track = nil
+	local jorkin = false
+	local track = nil
 
-    local function stopTomfoolery()
-        jorkin = false
-        if track then
-            track:Stop()
-            track = nil
-        end
-    end
+	local function stopTomfoolery()
+		jorkin = false
+		if track then
+			track:Stop()
+			track = nil
+		end
+	end
 
-    tool.Equipped:Connect(function() jorkin = true end)
-    tool.Unequipped:Connect(stopTomfoolery)
-    humanoid.Died:Connect(stopTomfoolery)
+	tool.Equipped:Connect(function() jorkin = true end)
+	tool.Unequipped:Connect(stopTomfoolery)
+	humanoid.Died:Connect(stopTomfoolery)
 
-    while Wait() do
-        if not jorkin then continue end
+	while Wait() do
+		if not jorkin then continue end
 
-        if not track then
-            local anim = InstanceNew("Animation")
-            anim.AnimationId = not IsR15() and "rbxassetid://72042024" or "rbxassetid://698251653"
-            track = humanoid:LoadAnimation(anim)
-        end
+		if not track then
+			local anim = InstanceNew("Animation")
+			anim.AnimationId = not IsR15() and "rbxassetid://72042024" or "rbxassetid://698251653"
+			track = humanoid:LoadAnimation(anim)
+		end
 
-        track:Play()
-        track:AdjustSpeed(IsR15() and 0.7 or 0.65)
-        track.TimePosition = 0.6
-        Wait(0.2)
-        while track and track.TimePosition < (not IsR15() and 0.65 or 0.7) do Wait(0.2) end
-        if track then
-            track:Stop()
-            track = nil
-        end
-    end
+		track:Play()
+		track:AdjustSpeed(IsR15() and 0.7 or 0.65)
+		track.TimePosition = 0.6
+		Wait(0.2)
+		while track and track.TimePosition < (not IsR15() and 0.65 or 0.7) do Wait(0.2) end
+		if track then
+			track:Stop()
+			track = nil
+		end
+	end
 end)
 
 huggiePARTS = {}
@@ -12595,9 +12851,9 @@ cmd.add({"deletefind", "removefind", "delfind"}, {"deletefind {partname} (remove
 end, true)
 
 cmd.add({"deletelighting", "removelighting", "removel", "ldel"},{"deletelighting (removelighting, removel, ldel)","Removes all descendants (objects) within Lighting."},function()
-    for _, l in ipairs(game:GetService("Lighting"):GetDescendants()) do
-        l:Destroy()
-    end
+	for _, l in ipairs(Lighting:GetDescendants()) do
+		l:Destroy()
+	end
 end)
 
 autoRemover = {}
@@ -13102,23 +13358,23 @@ cmd.add({"unswim"}, {"unswim", "Stops the swim script"}, function()
 end)
 
 cmd.add({"tpua", "bringua"}, {"tpua <player> (bringua)", "brings every unanchored part on the map"}, function(target)
-    local targetPlayer = getPlr(target)
-    if not targetPlayer or not getPlrChar(targetPlayer) or not getRoot(getPlrChar(targetPlayer)) then return end
-    local targetCF = getRoot(getPlrChar(targetPlayer)).CFrame
+	local targetPlayer = getPlr(target)
+	if not targetPlayer or not getPlrChar(targetPlayer) or not getRoot(getPlrChar(targetPlayer)) then return end
+	local targetCF = getRoot(getPlrChar(targetPlayer)).CFrame
 
-    Spawn(function()
-        while true do
-            RunService.Heartbeat:Wait()
-            sethiddenproperty(LocalPlayer, "SimulationRadius", 1e9)
-            LocalPlayer.MaximumSimulationRadius = 1e9
-        end
-    end)
+	Spawn(function()
+		while true do
+			RunService.Heartbeat:Wait()
+			sethiddenproperty(LocalPlayer, "SimulationRadius", 1e9)
+			LocalPlayer.MaximumSimulationRadius = 1e9
+		end
+	end)
 
-    for _, v in pairs(SafeGetService("Workspace"):GetDescendants()) do
-        if v:IsA("BasePart") and not v.Anchored and not v:IsDescendantOf(targetPlayer.Character) then
-            v.CFrame = targetCF * CFrame.new(math.random(-10,10), 0, math.random(-10,10))
-        end
-    end
+	for _, v in pairs(SafeGetService("Workspace"):GetDescendants()) do
+		if v:IsA("BasePart") and not v.Anchored and not v:IsDescendantOf(targetPlayer.Character) then
+			v.CFrame = targetCF * CFrame.new(math.random(-10,10), 0, math.random(-10,10))
+		end
+	end
 end)
 
 cmd.add({"swordfighter", "sfighter", "swordf", "swordbot", "sf"},{"swordfighter (sfighter, swordf, swordbot, sf)", "Activates a sword fighting bot that engages in automated PvP combat"},function()
@@ -13313,35 +13569,35 @@ cmd.add({"unclickesp", "uncesp"}, {"unclickesp (uncesp)", "Removes ESP from part
 end)
 
 cmd.add({"viewpart", "viewp", "vpart"}, {"viewpart {partName} (viewp, vpart)", "Focuses camera on a part, model, or folder"},function(...)
-        local partName = Concat({...}, " "):lower()
-        local ws = game:GetService("Workspace")
-        local camera = ws.CurrentCamera
+	local partName = Concat({...}, " "):lower()
+	local ws = game:GetService("Workspace")
+	local camera = ws.CurrentCamera
 
-        for _, obj in ipairs(ws:GetDescendants()) do
-            if obj.Name:lower() == partName then
-                if obj:IsA("BasePart") then
-                    camera.CameraSubject = obj
-                    return
-                elseif obj:IsA("Model") or obj:IsA("Folder") then
-                    for _, child in ipairs(obj:GetDescendants()) do
-                        if child:IsA("BasePart") then
-                            camera.CameraSubject = child
-                            return
-                        end
-                    end
-                end
-            end
-        end
+	for _, obj in ipairs(ws:GetDescendants()) do
+		if obj.Name:lower() == partName then
+			if obj:IsA("BasePart") then
+				camera.CameraSubject = obj
+				return
+			elseif obj:IsA("Model") or obj:IsA("Folder") then
+				for _, child in ipairs(obj:GetDescendants()) do
+					if child:IsA("BasePart") then
+						camera.CameraSubject = child
+						return
+					end
+				end
+			end
+		end
+	end
 
-        DoNotif("No matching part, model, or folder with a BasePart found named '"..partName.."'")
+	DoNotif("No matching part, model, or folder with a BasePart found named '"..partName.."'")
 end,true)
 
 cmd.add({"unviewpart", "unviewp"}, {"unviewpart (unviewp)", "Resets the camera to the local humanoid"}, function()
-    local camera = game:GetService("Workspace").CurrentCamera
-    local humanoid = getHum()
-    if humanoid then
-        camera.CameraSubject = humanoid
-    end
+	local camera = game:GetService("Workspace").CurrentCamera
+	local humanoid = getHum()
+	if humanoid then
+		camera.CameraSubject = humanoid
+	end
 end)
 
 cmd.add({"viewpartfind", "viewpfind", "vpartfind"}, {"viewpartfind {name} (viewpfind, vpartfind)", "Focuses camera on a part, model, or folder with name containing the given text"}, function(...)
@@ -13487,9 +13743,9 @@ cmd.add({"breakcars", "bcars"}, {"breakcars (bcars)", "Breaks any car"}, functio
 
 		for _, v in ipairs(part:GetChildren()) do
 			if v:IsA("BodyAngularVelocity") or v:IsA("BodyForce") or v:IsA("BodyGyro")
-			or v:IsA("BodyPosition") or v:IsA("BodyThrust") or v:IsA("BodyVelocity")
-			or v:IsA("RocketPropulsion") or v:IsA("Torque") or v:IsA("AlignPosition")
-			or v:IsA("Attachment") then
+				or v:IsA("BodyPosition") or v:IsA("BodyThrust") or v:IsA("BodyVelocity")
+				or v:IsA("RocketPropulsion") or v:IsA("Torque") or v:IsA("AlignPosition")
+				or v:IsA("Attachment") then
 				v:Destroy()
 			end
 		end
@@ -14005,11 +14261,11 @@ cmd.add({"unsuspendvc", "fixvc", "rejoinvc", "restorevc"},{"unsuspendvc (fixvc, 
 	SafeGetService("VoiceChatService"):joinVoice()
 
 	if typeof(onVoiceModerated) ~= "RBXScriptConnection" then
-        onVoiceModerated = SafeGetService("VoiceChatInternal").LocalPlayerModerated:Connect(function()
-            Wait(1)
-            SafeGetService("VoiceChatService"):joinVoice()
-        end)
-    end
+		onVoiceModerated = SafeGetService("VoiceChatInternal").LocalPlayerModerated:Connect(function()
+			Wait(1)
+			SafeGetService("VoiceChatService"):joinVoice()
+		end)
+	end
 end)
 
 --[[cmd.add({"iy"},{"iy {command}","Executes infinite yield scripts"},function(...)
@@ -14517,7 +14773,7 @@ end)
 cmd.add({"keepna"}, {"keepna", "keep executing "..adminName.." every time you teleport"}, function()
 	NAQoTEnabled=true
 	if FileSupport then
-		writefile("Nameless-Admin/QueueOnTeleport.txt", "true")
+		writefile(NAQOTPATH, "true")
 		DoNotif(adminName.." will now auto-load after teleport (QueueOnTeleport enabled)")
 	else
 		DoNotif("QueueOnTeleport enabled for this session. File support not available to save this setting")
@@ -14527,7 +14783,7 @@ end)
 cmd.add({"unkeepna"}, {"unkeepna", "Stop executing "..adminName.." every time you teleport"}, function()
 	NAQoTEnabled=false
 	if FileSupport then
-		writefile("Nameless-Admin/QueueOnTeleport.txt", "false")
+		writefile(NAQOTPATH, "false")
 		if not NAQoTEnabled then
 			DoNotif("QueueOnTeleport has been disabled. "..adminName.." will no longer auto-run after teleport")
 		end
@@ -15051,8 +15307,6 @@ end
 end]]
 
 --[[ GUI VARIABLES ]]--
-local NASCREENGUI=nil --Getmodel("rbxassetid://140418556029404")
-
 repeat
 	local NASUC, resexy = pcall(function()
 		return loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/Nameless-Admin/refs/heads/main/NAUI.lua"))()
@@ -15234,9 +15488,9 @@ gui.consoleeee = function()
 end
 gui.updateLogs = function()
 	if UpdLogsFrame then
-		if not UpdLogsFrame.Visible and next(updLogs) then
+		if not UpdLogsFrame.Visible and next(NAupdLogs) then
 			UpdLogsFrame.Visible = true
-		elseif not next(updLogs) then
+		elseif not next(NAupdLogs) then
 			DoNotif("no upd logs for now...")
 		else
 			warn("huh?")
@@ -15851,15 +16105,15 @@ if IsOnPC then
 	if chatLogsFrame then
 		gui.resizeable(chatLogsFrame)
 	end
-	
+
 	if NAconsoleFrame then
 		gui.resizeable(NAconsoleFrame)
 	end
-	
+
 	if commandsFrame then
 		gui.resizeable(commandsFrame)
 	end
-	
+
 	if UpdLogsFrame then
 		gui.resizeable(UpdLogsFrame)
 	end
@@ -16247,15 +16501,15 @@ RunService.Stepped:Connect(function()
 	if chatLogs then
 		updateCanvasSize(chatLogs)
 	end
-	
+
 	if NAconsoleLogs then
 		updateCanvasSize(NAconsoleLogs)
 	end
-	
+
 	if commandsList then
 		updateCanvasSize(commandsList)
 	end
-	
+
 	if UpdLogsList then
 		updateCanvasSize(UpdLogsList)
 	end
@@ -16279,10 +16533,10 @@ RunService.RenderStepped:Connect(function()
 			DoNotif("Invalid prefix detected. Resetting to default ';'")
 			lastPrefix = ";"
 
-			if FileSupport and isfile("Nameless-Admin/Prefix.txt") then
-				local filePrefix = readfile("Nameless-Admin/Prefix.txt")
+			if FileSupport and isfile(NAPREFIXPATH) then
+				local filePrefix = readfile(NAPREFIXPATH)
 				if isInvalid(filePrefix) then
-					writefile("Nameless-Admin/Prefix.txt", ";")
+					writefile(NAPREFIXPATH, ";")
 				end
 			end
 		end
@@ -16295,10 +16549,10 @@ Spawn(function()
 	local template = UpdLogsLabel
 	local list = UpdLogsList
 
-	UpdLogsTitle.Text = UpdLogsTitle.Text.." "..updDate
+	UpdLogsTitle.Text = UpdLogsTitle.Text.." "..NAupdDate
 
-	if next(updLogs) then
-		for name, txt in pairs(updLogs) do
+	if next(NAupdLogs) then
+		for name, txt in pairs(NAupdLogs) do
 			local btn = template:Clone()
 			btn.Parent = list
 			btn.Name = name
@@ -16378,10 +16632,41 @@ if IsOnMobile then
 	end)
 end
 
+swooshySWOOSH = false
+
 function Swoosh()
-	local targetRotation = isAprilFools() and math.random(1, 1000) or 720
-	TweenService:Create(ImageButton, TweenInfo.new(1.2, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Rotation = targetRotation}):Play()
-	gui.draggablev2(ImageButton)
+	local targetRotation = isAprilFools() and math.random(500, 2000) or 720
+	TweenService:Create(NAimageButton, TweenInfo.new(1.2, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+		Rotation = targetRotation
+	}):Play()
+
+	gui.draggablev2(NAimageButton)
+
+	if swooshySWOOSH then
+		return
+	end
+	swooshySWOOSH = true
+
+	local dragging = false
+
+	NAimageButton.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			dragging = true
+			input.Changed:Connect(function()
+				if input.UserInputState == Enum.UserInputState.End then
+					dragging = false
+					if FileSupport and NAiconSaveEnabled then
+						local pos = NAimageButton.Position
+						writefile(NAICONPOSPATH, HttpService:JSONEncode({
+							X = pos.X.Scale,
+							Y = pos.Y.Scale,
+							Save = NAiconSaveEnabled
+						}))
+					end
+				end
+			end)
+		end
+	end)
 end
 
 function mainNameless()
@@ -16405,15 +16690,26 @@ function mainNameless()
 
 	if IsOnMobile then
 		ImageButton.Size = UDim2.new(0, 0, 0, 0)
-		ImageButton.Position = UDim2.new(0.5, 0, -0.1, -20)
 		ImageButton.ImageTransparency = 1
+
+		local targetPos = UDim2.new(0.5, 0, 0.1, 0)
+
+		if FileSupport and isfile(NAICONPOSPATH) then
+			local data = HttpService:JSONDecode(readfile(NAICONPOSPATH))
+			if data and data.X and data.Y then
+				targetPos = UDim2.new(data.X, 0, data.Y, 0)
+			end
+		end
+
+		ImageButton.Position = UDim2.new(targetPos.X.Scale, 0, targetPos.Y.Scale - 0.15, -20)
 
 		local appearTween = TweenService:Create(ImageButton, TweenInfo.new(1, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
 			Size = UDim2.new(0, 32 * NAScale, 0, 33 * NAScale),
-			Position = UDim2.new(0.5, 0, 0.1, 0),
+			Position = targetPos,
 			ImageTransparency = 0
 		})
 		appearTween:Play()
+
 		Swoosh()
 	else
 		ImageButton:Destroy()
@@ -16467,7 +16763,7 @@ Spawn(function()
 
 		local notifBody = welcomeMessage..
 			(identifyexecutor and ("\nExecutor: "..executorName) or "")..
-			"\nUpdated on: "..updDate..
+			"\nUpdated on: "..NAupdDate..
 			"\nTime Taken To Load: "..loadedResults(NAresult)
 
 		DoNotif(notifBody, 6, rngMsg().." "..nameCheck)
@@ -16590,6 +16886,8 @@ end)
 
 Spawn(bindToDevConsole)
 Spawn(loadAliases)
+Spawn(loadButtonIDS)
+Spawn(RenderUserButtons)
 
 Spawn(function()
 	NACaller(function()--better saveinstance support
