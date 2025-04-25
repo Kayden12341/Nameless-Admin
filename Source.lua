@@ -1945,24 +1945,25 @@ function RenderUserButtons()
 	table.clear(UserButtonGuiList)
 
 	local SavedArguments = {}
+	local ActivePrompts = {}
 
 	function ButtonInputPrompt(commandName, callback)
 		local promptGui = InstanceNew("ScreenGui")
 		promptGui.IgnoreGuiInset = true
 		promptGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 		promptGui.Parent = NASCREENGUI
-
+	
 		local frame = InstanceNew("Frame")
 		frame.Size = UDim2.new(0, 260, 0, 140)
 		frame.Position = UDim2.new(0.5, -130, 0.5, -70)
 		frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 		frame.BorderSizePixel = 0
 		frame.Parent = promptGui
-
+	
 		local corner = InstanceNew("UICorner")
 		corner.CornerRadius = UDim.new(0.1, 0)
 		corner.Parent = frame
-
+	
 		local title = InstanceNew("TextLabel")
 		title.Size = UDim2.new(1, -20, 0, 30)
 		title.Position = UDim2.new(0, 10, 0, 10)
@@ -1973,7 +1974,7 @@ function RenderUserButtons()
 		title.TextSize = 16
 		title.TextWrapped = true
 		title.Parent = frame
-
+	
 		local textbox = InstanceNew("TextBox")
 		textbox.Size = UDim2.new(1, -20, 0, 30)
 		textbox.Position = UDim2.new(0, 10, 0, 50)
@@ -1985,7 +1986,7 @@ function RenderUserButtons()
 		textbox.Font = Enum.Font.Gotham
 		textbox.ClearTextOnFocus = false
 		textbox.Parent = frame
-
+	
 		local submit = InstanceNew("TextButton")
 		submit.Size = UDim2.new(0.5, -15, 0, 30)
 		submit.Position = UDim2.new(0, 10, 1, -40)
@@ -1995,7 +1996,7 @@ function RenderUserButtons()
 		submit.Font = Enum.Font.GothamBold
 		submit.TextSize = 14
 		submit.Parent = frame
-
+	
 		local cancel = InstanceNew("TextButton")
 		cancel.Size = UDim2.new(0.5, -15, 0, 30)
 		cancel.Position = UDim2.new(0.5, 5, 1, -40)
@@ -2005,16 +2006,22 @@ function RenderUserButtons()
 		cancel.Font = Enum.Font.GothamBold
 		cancel.TextSize = 14
 		cancel.Parent = frame
-
+	
 		MouseButtonFix(submit,function()
 			callback(textbox.Text)
+			if ActivePrompts then
+				ActivePrompts[commandName] = nil
+			end
 			promptGui:Destroy()
 		end)
-
+	
 		MouseButtonFix(cancel,function()
+			if ActivePrompts then
+				ActivePrompts[commandName] = nil
+			end
 			promptGui:Destroy()
 		end)
-
+	
 		gui.draggablev2(frame)
 	end
 
@@ -2072,8 +2079,6 @@ function RenderUserButtons()
 				saveToggle.Text = saveEnabled and "S" or "N"
 			end)
 		end
-
-		local ActivePrompts = {}
 
 		MouseButtonFix(btn, function()
 			local cmdToRunNow
