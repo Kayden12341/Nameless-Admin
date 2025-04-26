@@ -1,3 +1,22 @@
+--[[
+
+
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+─██████████████─██████████████─██████████████─██████████████────██████████████───██████──██████─██████████─██████─────────████████████───
+─██░░░░░░░░░░██─██░░░░░░░░░░██─██░░░░░░░░░░██─██░░░░░░░░░░██────██░░░░░░░░░░██───██░░██──██░░██─██░░░░░░██─██░░██─────────██░░░░░░░░████─
+─██████░░██████─██░░██████████─██░░██████████─██████░░██████────██░░██████░░██───██░░██──██░░██─████░░████─██░░██─────────██░░████░░░░██─
+─────██░░██─────██░░██─────────██░░██─────────────██░░██────────██░░██──██░░██───██░░██──██░░██───██░░██───██░░██─────────██░░██──██░░██─
+─────██░░██─────██░░██████████─██░░██████████─────██░░██────────██░░██████░░████─██░░██──██░░██───██░░██───██░░██─────────██░░██──██░░██─
+─────██░░██─────██░░░░░░░░░░██─██░░░░░░░░░░██─────██░░██────────██░░░░░░░░░░░░██─██░░██──██░░██───██░░██───██░░██─────────██░░██──██░░██─
+─────██░░██─────██░░██████████─██████████░░██─────██░░██────────██░░████████░░██─██░░██──██░░██───██░░██───██░░██─────────██░░██──██░░██─
+─────██░░██─────██░░██─────────────────██░░██─────██░░██────────██░░██────██░░██─██░░██──██░░██───██░░██───██░░██─────────██░░██──██░░██─
+─────██░░██─────██░░██████████─██████████░░██─────██░░██────────██░░████████░░██─██░░██████░░██─████░░████─██░░██████████─██░░████░░░░██─
+─────██░░██─────██░░░░░░░░░░██─██░░░░░░░░░░██─────██░░██────────██░░░░░░░░░░░░██─██░░░░░░░░░░██─██░░░░░░██─██░░░░░░░░░░██─██░░░░░░░░████─
+─────██████─────██████████████─██████████████─────██████────────████████████████─██████████████─██████████─██████████████─████████████───
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+
+]]
 if getgenv().RealNamelessLoaded then return end
 
 function NACaller(pp)--helps me log better
@@ -6,7 +25,7 @@ function NACaller(pp)--helps me log better
 end
 
 NACaller(function() getgenv().RealNamelessLoaded=true end)
-NACaller(function() getgenv().NATestingVer=false end)
+NACaller(function() getgenv().NATestingVer=true end)
 
 NAbegin=tick()
 CMDAUTOFILL = {}
@@ -341,8 +360,10 @@ NAQOTPATH = "Nameless-Admin/QueueOnTeleport.txt"
 NAALIASPATH = "Nameless-Admin/Aliases.json"
 NAICONPOSPATH = "Nameless-Admin/IconPosition.json"
 NAUSERBUTTONSPATH = "Nameless-Admin/UserButtons.json"
+NAAUTOEXECPATH = "Nameless-Admin/AutoExecCommands.json"
 NAUserButtons = {}
 UserButtonGuiList = {}
+NAEXECDATA = NAEXECDATA or {commands = {}, args = {}}
 
 -- Creates folder & files for Prefix, Plugins, and QoT toggle
 if FileSupport then
@@ -377,6 +398,10 @@ if FileSupport then
 	if not isfile(NAUSERBUTTONSPATH) then
 		writefile(NAUSERBUTTONSPATH, HttpService:JSONEncode({}))
 	end
+
+	if not isfile(NAAUTOEXECPATH) then
+        writefile(NAAUTOEXECPATH, "[]")
+    end
 end
 
 local prefixCheck = ";"
@@ -1938,6 +1963,26 @@ function loadButtonIDS()
 	end
 end
 
+function loadAutoExec()
+    NAEXECDATA = {commands = {}, args = {}}
+
+    if FileSupport and isfile(NAAUTOEXECPATH) then
+        local success, decoded = pcall(function()
+            return HttpService:JSONDecode(readfile(NAAUTOEXECPATH))
+        end)
+        if success and type(decoded) == "table" then
+            NAEXECDATA = decoded
+
+            if not NAEXECDATA.commands then
+                NAEXECDATA.commands = {}
+            end
+            if not NAEXECDATA.args then
+                NAEXECDATA.args = {}
+            end
+        end
+    end
+end
+
 function RenderUserButtons()
 	for _, btn in pairs(UserButtonGuiList) do
 		btn:Destroy()
@@ -2453,33 +2498,184 @@ cmd.add({"addbutton", "ab"}, {"addbutton <command> <label> [<command2>] (ab)", "
 	DoNotif("Added button with id "..id, 2)
 end)
 
-cmd.add({"removebutton", "rb"}, {"removebutton <id> (rb)", "Remove a user button"}, function(arg1)
-	local id = tonumber(arg1)
-	if not id or not NAUserButtons[id] then
-		DoNotif("Invalid button ID", 2)
-		return
-	end
+cmd.add({"removebutton", "rb"}, {"removebutton (rb)", "Remove a user button"}, function()
+    if not next(NAUserButtons) then
+        DoNotif("No user buttons to remove", 2)
+        return
+    end
 
-	NAUserButtons[id] = nil
+    local options = {}
+    for id, data in pairs(NAUserButtons) do
+        local label = data.Label or ("Button "..id)
+        local cmdDisplay = data.Cmd1 or "?"
+        if data.Cmd2 then
+            cmdDisplay = cmdDisplay.." / "..data.Cmd2
+        end
 
-	if FileSupport then
-		writefile(NAUSERBUTTONSPATH, HttpService:JSONEncode(NAUserButtons))
-	end
+        Insert(options, {
+            Text = "["..id.."] "..label.." ("..cmdDisplay..")",
+            Callback = function()
+                NAUserButtons[id] = nil
 
-	RenderUserButtons()
+                if FileSupport then
+                    writefile(NAUSERBUTTONSPATH, HttpService:JSONEncode(NAUserButtons))
+                end
 
-	DoNotif("Removed button with id "..id, 2)
+                RenderUserButtons()
+
+                DoNotif("Removed user button: ["..id.."] "..label, 2)
+            end
+        })
+    end
+
+    Insert(options, {
+        Text = "Cancel",
+        Callback = function()
+            DoNotif("Cancelled removing button", 2)
+        end
+    })
+
+    Notify({
+        Title = "Remove User Button",
+        Description = "Select a button to remove:",
+        Buttons = options
+    })
 end)
 
-cmd.add({"buttonlist", "bl"}, {"buttonlist (bl)", "List user buttons"}, function()
-	local msg = ""
-	for id, data in pairs(NAUserButtons) do
-		msg = msg.."\n["..id.."] "..data.Label.." ("..data.Cmd1
-		if data.Cmd2 then msg = msg.." / "..data.Cmd2 end
-		msg = msg..")"
-	end
-	if msg == "" then msg = "No buttons added" end
-	DoNotif(msg, 5)
+cmd.add({"clearbuttons", "clearbtns", "cb"}, {"clearbuttons (clearbtns, cb)", "Clear all user buttons"}, function()
+    if not next(NAUserButtons) then
+        DoNotif("No user buttons to clear", 2)
+        return
+    end
+
+    Notify({
+        Title = "Clear All Buttons",
+        Description = "Are you sure you want to clear all user buttons?",
+        Buttons = {
+            {
+                Text = "Yes",
+                Callback = function()
+                    table.clear(NAUserButtons)
+
+                    if FileSupport then
+                        writefile(NAUSERBUTTONSPATH, HttpService:JSONEncode(NAUserButtons))
+                    end
+
+                    RenderUserButtons()
+
+                    DoNotif("Cleared all user buttons", 2)
+                end
+            },
+            {
+                Text = "Cancel",
+                Callback = function()
+                    DoNotif("Cancelled clearing buttons", 2)
+                end
+            }
+        }
+    })
+end)
+
+cmd.add({"addautoexec", "aaexec", "addae", "addauto", "aexecadd"}, {"addautoexec <command> [arguments] (aaexec, addae, addauto, aexecadd)", "Add a command to autoexecute"}, function(arg1, ...)
+    if not arg1 then
+        DoNotif("Usage: ;addautoexec <command> [arguments...]", 2)
+        return
+    end
+
+    local args = {...}
+    local commandName = arg1:lower()
+
+    if not Commands[commandName] and not Aliases[commandName] then
+        DoNotif("Command ["..commandName.."] does not exist", 2)
+        return
+    end
+
+    NAEXECDATA = NAEXECDATA or {commands = {}, args = {}}
+    if not NAEXECDATA.commands then
+        NAEXECDATA.commands = {}
+    end
+    if not NAEXECDATA.args then
+        NAEXECDATA.args = {}
+    end
+
+    local exists = false
+    for _, cmd in ipairs(NAEXECDATA.commands) do
+        if cmd == commandName then
+            exists = true
+            break
+        end
+    end
+    if not exists then
+        Insert(NAEXECDATA.commands, commandName)
+    end
+
+    if #args > 0 then
+        local argumentString = Concat(args, " ")
+        NAEXECDATA.args[commandName] = argumentString
+    else
+        NAEXECDATA.args[commandName] = ""
+    end
+
+    if FileSupport then
+        writefile(NAAUTOEXECPATH, HttpService:JSONEncode(NAEXECDATA))
+    end
+
+    DoNotif("Added to AutoExec: "..arg1.." "..(args[1] or ""), 2)
+end)
+
+cmd.add({"removeautoexec", "raexec", "removeae", "removeauto", "aexecremove"}, {"removeautoexec (raexec, removeae, removeauto, aexecremove)", "Remove a command from autoexecute"}, function()
+    if #NAEXECDATA.commands == 0 then
+        DoNotif("No AutoExec commands to remove", 2)
+        return
+    end
+
+    local options = {}
+    for i, cmdName in ipairs(NAEXECDATA.commands) do
+        local args = NAEXECDATA.args[cmdName]
+        local display = args and args ~= "" and (cmdName.." "..args) or cmdName
+        Insert(options, {
+            Text = display,
+            Callback = function()
+                local removedCommand = table.remove(NAEXECDATA.commands, i)
+                NAEXECDATA.args[removedCommand] = nil
+
+                if FileSupport then
+                    writefile(NAAUTOEXECPATH, HttpService:JSONEncode(NAEXECDATA))
+                end
+
+                DoNotif("Removed AutoExec command: "..display, 2)
+            end
+        })
+    end
+
+	Insert(options, {
+        Text = "Cancel",
+        Callback = function()
+            DoNotif("Cancelled removing AutoExec", 2)
+        end
+    })
+
+    Notify({
+        Title = "Remove AutoExec Command",
+        Description = "Select which AutoExec to remove:",
+        Buttons = options
+    })
+end)
+
+cmd.add({"autoexecclear", "aexecclear", "aeclear"}, {"autoexecclear (aexecclear, aeclear)", "Clear all AutoExec commands"}, function()
+    if #NAEXECDATA.commands == 0 then
+        DoNotif("No AutoExec commands to clear", 2)
+        return
+    end
+
+    NAEXECDATA.commands = {}
+    NAEXECDATA.args = {}
+
+    if FileSupport then
+        writefile(NAAUTOEXECPATH, HttpService:JSONEncode(NAEXECDATA))
+    end
+
+    DoNotif("Cleared all AutoExec commands", 2)
 end)
 
 cmd.add({"executor","exec"},{"executor (exec)","Very simple executor"},function()
@@ -15420,6 +15616,75 @@ cmd.add({"unactnpc", "stopnpc"}, {"unactnpc (stopnpc)", "Stop acting like an NPC
 	end
 end)
 
+clickkillUI = nil
+clickKillConnections = {}
+clickkillEnabled = false
+
+cmd.add({"clickkillnpc", "cknpc"}, {"clickkillnpc (cknpc)", "Click on an NPC to kill it"}, function()
+	clickkillEnabled = true
+	if clickkillUI then clickkillUI:Destroy() end
+	for _, conn in ipairs(clickKillConnections) do
+		if conn then
+			conn:Disconnect()
+		end
+	end
+
+	local Mouse = player:GetMouse()
+
+	clickkillUI = InstanceNew("ScreenGui")
+	NaProtectUI(clickkillUI)
+
+	local toggleButton = InstanceNew("TextButton")
+	toggleButton.Size = UDim2.new(0, 120, 0, 40)
+	toggleButton.Text = "ClickKill: ON"
+	toggleButton.Position = UDim2.new(0.5, -60, 0, 10)
+	toggleButton.TextScaled = 16
+	toggleButton.TextColor3 = Color3.new(1, 1, 1)
+	toggleButton.Font = Enum.Font.GothamBold
+	toggleButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+	toggleButton.BackgroundTransparency = 0.2
+	toggleButton.Parent = clickkillUI
+
+	local uiCorner = InstanceNew("UICorner")
+	uiCorner.CornerRadius = UDim.new(0, 8)
+	uiCorner.Parent = toggleButton
+
+	gui.draggablev2(toggleButton)
+
+	MouseButtonFix(toggleButton, function()
+		clickkillEnabled = not clickkillEnabled
+		toggleButton.Text = clickkillEnabled and "ClickKill: ON" or "ClickKill: OFF"
+	end)
+
+	local conn = Mouse.Button1Down:Connect(function()
+		if not clickkillEnabled then return end
+
+		local Target = Mouse.Target
+		if Target and Target.Parent then
+			local Character = Target.Parent
+			if CheckIfNPC(Character) then
+				local Humanoid = Character:FindFirstChildOfClass("Humanoid")
+				if Humanoid then
+					Humanoid.Health = 0
+				end
+			end
+		end
+	end)
+
+	Insert(clickKillConnections, conn)
+end)
+
+cmd.add({"unclickkillnpc", "uncknpc"}, {"unclickkillnpc (uncknpc)", "Disable clickkillnpc"}, function()
+	clickkillEnabled = false
+	if clickkillUI then clickkillUI:Destroy() end
+	for _, conn in ipairs(clickKillConnections) do
+		if conn then
+			conn:Disconnect()
+		end
+	end
+	clickKillConnections = {}
+end)
+
 --[[ FUNCTIONALITY ]]--
 localPlayer.Chatted:Connect(function(str)
 	lib.parseCommand(str)
@@ -16941,6 +17206,20 @@ Spawn(function()
 		--[[local updateLogMessage = maybeMock('Added "updlog" command (displays any new changes added into '..adminName..')')
 		DoNotif(updateLogMessage, nil, "Info")]]
 	end)
+	Spawn(function()
+		Wait(.5)
+		for _, commandName in ipairs(NAEXECDATA.commands) do
+			local fullRun = {commandName}
+			local argsString = NAEXECDATA.args[commandName]
+			if argsString and argsString ~= "" then
+				local extraArgs = ParseArguments(argsString)
+				for _, v in ipairs(extraArgs) do
+					Insert(fullRun, v)
+				end
+			end
+			cmd.run(fullRun)
+		end
+	end)
 	cmdInput.ZIndex = 10
 	cmdInput.PlaceholderText = isAprilFools() and '🤡 '..adminName.." V"..curVer..' 🤡' or getSeasonEmoji()..' '..adminName.." V"..curVer..' '..getSeasonEmoji()
 end)
@@ -17033,6 +17312,7 @@ Spawn(bindToDevConsole)
 Spawn(loadAliases)
 Spawn(loadButtonIDS)
 Spawn(RenderUserButtons)
+Spawn(loadAutoExec)
 
 Spawn(function()
 	NACaller(function()--better saveinstance support
