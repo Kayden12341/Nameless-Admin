@@ -2496,7 +2496,7 @@ cmd.add({"addbutton", "ab"}, {"addbutton <command> <label> [<command2>] (ab)", "
 	RenderUserButtons()
 
 	DoNotif("Added button with id "..id, 2)
-end)
+end,true)
 
 cmd.add({"removebutton", "rb"}, {"removebutton (rb)", "Remove a user button"}, function()
     if not next(NAUserButtons) then
@@ -2621,7 +2621,7 @@ cmd.add({"addautoexec", "aaexec", "addae", "addauto", "aexecadd"}, {"addautoexec
     end
 
     DoNotif("Added to AutoExec: "..arg1.." "..(args[1] or ""), 2)
-end)
+end,true)
 
 cmd.add({"removeautoexec", "raexec", "removeae", "removeauto", "aexecremove"}, {"removeautoexec (raexec, removeae, removeauto, aexecremove)", "Remove a command from autoexecute"}, function()
     if #NAEXECDATA.commands == 0 then
@@ -2693,7 +2693,7 @@ cmd.add({"commandloop", "cmdloop"}, {"commandloop <command> {arguments} (cmdloop
 	end
 
 	cmd.loop(commandName, args)
-end)
+end,true)
 
 cmd.add({"stoploop"}, {"stoploop", "Stop a running loop"}, function()
 	cmd.stopLoop()
