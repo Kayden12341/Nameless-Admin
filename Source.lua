@@ -4375,7 +4375,7 @@ if IsOnPC then
 		connectVFlyKey()
 
 		DoNotif("vFly keybind set to '"..vToggleKey:upper().."'")
-	end)
+	end,true)
 end
 
 cmd.add({"equiptools","equipall"},{"equiptools","Equip all of your tools"},function()
@@ -5017,11 +5017,11 @@ end, true)
 
 cmd.add({"sleepon"}, {"sleepon", "Enable AllowSleep"}, function()
 	settings():GetService("PhysicsSettings").AllowSleep = true
-end, true)
+end)
 
 cmd.add({"unsleepon"}, {"unsleepon", "Disable AllowSleep"}, function()
 	settings():GetService("PhysicsSettings").AllowSleep = false
-end, true)
+end)
 
 cmd.add({"throttle"}, {"throttle", "Set PhysicsEnvironmentalThrottle (1 = default, 2 = disabled)"}, function(num)
 	settings():GetService("PhysicsSettings").PhysicsEnvironmentalThrottle = tonumber(num) or 1
@@ -5035,11 +5035,11 @@ end, true)
 
 cmd.add({"logphysics"}, {"logphysics", "Enable Physics Error Logging"}, function()
 	settings():GetService("NetworkSettings").PrintPhysicsErrors = true
-end, true)
+end)
 
 cmd.add({"nologphysics"}, {"nologphysics", "Disable Physics Error Logging"}, function()
 	settings():GetService("NetworkSettings").PrintPhysicsErrors = false
-end, true)
+end)
 
 cmd.add({"norender"},{"norender","Disable 3d Rendering to decrease the amount of CPU the client uses"},function()
 	RunService:Set3dRenderingEnabled(false)
@@ -7039,7 +7039,7 @@ end, true)
 
 cmd.add({"netless","net"},{"netless (net)","Executes netless which makes scripts more stable"},function()
 	for i,v in next,getChar():GetDescendants() do
-		if v:IsA("BasePart") and v.Name~="HumanoidRootPart" then 
+		if v:IsA("BasePart") and v.Name~="HumanoidRootPart" then
 			RunService.Heartbeat:connect(function()
 				v.Velocity=Vector3.new(-30,0,0)
 			end)
@@ -8079,7 +8079,7 @@ if IsOnPC then
 		connectFlyKey()
 
 		DoNotif("Fly keybind set to '"..toggleKey:upper().."'")
-	end)
+	end,true)
 end
 
 function toggleCFly()
@@ -8308,7 +8308,7 @@ if IsOnPC then
 
 		connectCFlyKey()
 		DoNotif("CFrame fly keybind set to '"..cToggleKey:upper().."'")
-	end)
+	end,true)
 end
 
 TFlyEnabled = false
@@ -8914,7 +8914,7 @@ cmd.add({"seizure"}, {"seizure", "Gives you a seizure"}, function()
 	end)
 end)
 
-cmd.add({"unseizure"}, {"unseizure", "Stops you from having a seizure not in real life noob"}, function(n)
+cmd.add({"unseizure"}, {"unseizure", "Stops you from having a seizure not in real life noob"}, function()
 	Spawn(function()
 		if getgenv().Lzzz ~= true then return end
 
@@ -9741,7 +9741,7 @@ cmd.add({"volume","vol"},{"volume <1-10> (vol)","Changes your volume"},function(
 	UserSettings():GetService("UserGameSettings").MasterVolume=amount
 end,true)
 
-cmd.add({"sensitivity","sens"},{"sensitivity <1-10> (tr)","Changes your sensitivity"},function(ss)
+cmd.add({"sensitivity","sens"},{"sensitivity <1-10> (sens)","Changes your sensitivity"},function(ss)
 	UserInputService.MouseDeltaSensitivity=ss
 end,true)
 
@@ -13118,7 +13118,7 @@ cmd.add({"friend"}, {"friend", "Sends a friend request to your target"}, functio
 	for Index, Target in next, Targets do
 		LocalPlayer:RequestFriendship(Target)
 	end
-end)
+end,true)
 
 cmd.add({"tweengotocampos","tweentocampos","tweentcp"},{"tweengotocampos (tweentcp)","Another version of goto camera position but bypassing more anti-cheats"},function()
 	local player=Players.LocalPlayer
@@ -13711,7 +13711,7 @@ cmd.add({"tpua", "bringua"}, {"tpua <player> (bringua)", "brings every unanchore
 			v.CFrame = targetCF * CFrame.new(math.random(-10,10), 0, math.random(-10,10))
 		end
 	end
-end)
+end,true)
 
 cmd.add({"swordfighter", "sfighter", "swordf", "swordbot", "sf"},{"swordfighter (sfighter, swordf, swordbot, sf)", "Activates a sword fighting bot that engages in automated PvP combat"},function()
 	loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/uuuuuuu/refs/heads/main/Sword%20Fight%20Bot"))()
@@ -14031,7 +14031,7 @@ cmd.add({"unhitbox", "unhbox"}, {"unhitbox", "Disables hitbox modifications"}, f
 
 		ogSIZES[plr] = nil
 	end
-end)
+end,true)
 
 cmd.add({"breakcars", "bcars"}, {"breakcars (bcars)", "Breaks any car"}, function()
 	DoNotif("Car breaker loaded, sit on a vehicle and be the driver")
@@ -14568,7 +14568,7 @@ end)
 cmd.add({"gamma", "exposure"},{"gamma (exposure)","gamma vision (real)"},function(num)
 	expose = tonumber(num) or 0
 	Lighting.ExposureCompensation = expose
-end)
+end,true)
 
 gammaLoop = nil
 
@@ -14585,7 +14585,7 @@ cmd.add({"loopgamma", "loopexposure"},{"loopgamma (loopexposure)","loop gamma vi
 			Lighting.ExposureCompensation = expose
 		end
 	end)
-end)
+end,true)
 
 cmd.add({"unloopgamma", "unlgamma", "unloopexposure", "unlexposure"},{"unloopgamma (unlgamma, unloopexposure, unlexposure)","stop gamma vision (real)"},function()
 	if gammaLoop then
@@ -14593,7 +14593,7 @@ cmd.add({"unloopgamma", "unlgamma", "unloopexposure", "unlexposure"},{"unloopgam
 	end
 end)
 
-cmd.add({"unsuspendvc", "fixvc", "rejoinvc", "restorevc"},{"unsuspendvc (fixvc, rejoinvc, restorevc)","allows you to use Voice Chat again"},function(...)
+cmd.add({"unsuspendvc", "fixvc", "rejoinvc", "restorevc"},{"unsuspendvc (fixvc, rejoinvc, restorevc)","allows you to use Voice Chat again"},function()
 	SafeGetService("VoiceChatService"):joinVoice()
 
 	if typeof(onVoiceModerated) ~= "RBXScriptConnection" then
@@ -15082,7 +15082,7 @@ cmd.add({"invisbind", "invisiblebind","bindinvis"}, {"invisbind (invisiblebind, 
 	else
 		DoNotif("No keybind provided")
 	end
-end)
+end,true)
 
 cmd.add({"fireremotes", "fremotes", "frem"}, {"fireremotes (fremotes, frem)", "Fires every remote"}, function()
 	local remoteCount = 0
@@ -16322,144 +16322,155 @@ end
 
 --[[ AUTOFILL SEARCHER ]]--
 searchedSEARCH=false
-gui.searchCommands = function()
-	local searchTerm = cmdInput.Text:gsub(";", ""):lower()
+lastSearchText = ""
+searchHeartbeat = nil
 
-	if searchTerm:find("%s") then
-		if not searchedSEARCH then
-			for _, frame in ipairs(CMDAUTOFILL) do
-				frame.Visible = false
-			end
-			searchedSEARCH=true
-		end
+gui.searchCommands = function()
+	local inputText = cmdInput.Text:gsub(";", ""):lower()
+
+	if inputText == lastSearchText then
 		return
 	end
 
-	local index = 0
-	local lastFramePos
-	local results = {}
-	local searchTermLength = #searchTerm
-	searchedSEARCH=false
+	lastSearchText = inputText
 
-	for _, frame in ipairs(CMDAUTOFILL) do
-		local cmdName = frame.Name:lower()
-		local command = Commands[cmdName]
-		if not command then continue end
+	if searchHeartbeat then
+		searchHeartbeat:Disconnect()
+	end
 
-		local displayName = command[2][1] or ""
-		local score = 999
-		local matchText = displayName
+	searchHeartbeat = game:GetService("RunService").Heartbeat:Connect(function()
+		searchHeartbeat:Disconnect()
 
-		if cmdName == searchTerm or displayName:lower() == searchTerm or 
-			(Aliases[searchTerm] and Aliases[searchTerm] == cmdName) then
-			score = 1
-			matchText = cmdName
-		elseif cmdName:sub(1, searchTermLength) == searchTerm then
-			score = 2
-			matchText = cmdName
-		elseif displayName:lower():sub(1, searchTermLength) == searchTerm then
-			score = 3
-			matchText = displayName
-		else
-			for alias, cmd in pairs(Aliases) do
-				if cmd == cmdName and alias:sub(1, searchTermLength) == searchTerm then
-					score = 3
-					matchText = alias
-					break
+		local searchTerm = inputText
+		if searchTerm:find("%s") then
+			if not searchedSEARCH then
+				for _, frame in ipairs(CMDAUTOFILL) do
+					frame.Visible = false
 				end
+				searchedSEARCH = true
 			end
+			return
 		end
 
-		if score == 999 and searchTermLength >= 2 then
-			if cmdName:find(searchTerm, 1, true) then
-				score = 4
+		searchedSEARCH = false
+
+		local searchTermLength = #searchTerm
+		local results = {}
+		local maxResults = 5
+
+		for _, frame in ipairs(CMDAUTOFILL) do
+			local cmdName = frame.Name:lower()
+			local command = Commands[cmdName]
+			if not command then continue end
+
+			local displayInfo = command[2] and command[2][1] or ""
+			local displayName = displayInfo:lower():gsub("<[^>]+>", ""):gsub("%([^%)]+%)", ""):gsub("%s+", " "):gsub("^%s*(.-)%s*$", "%1")
+
+			local extraAliases = {}
+			for alias in displayInfo:gmatch("%(([^%)]+)%)") do
+				Insert(extraAliases, alias:lower())
+			end
+
+			local score = 999
+			local matchText = cmdName
+
+			if cmdName == searchTerm or (Aliases[searchTerm] == cmdName) or (NASAVEDALIASES[searchTerm] == cmdName) then
+				score = 1
 				matchText = cmdName
-			elseif displayName:lower():find(searchTerm, 1, true) then
-				score = 5
-				matchText = displayName
+			elseif cmdName:sub(1, searchTermLength) == searchTerm then
+				score = 2
+				matchText = cmdName
 			else
-				for alias, cmd in pairs(Aliases) do
-					if cmd == cmdName and alias:find(searchTerm, 1, true) then
-						score = 5
+				for alias, realCmd in pairs(Aliases) do
+					if realCmd == cmdName and alias:sub(1, searchTermLength) == searchTerm then
+						score = 3
+						matchText = alias
+						break
+					end
+				end
+				for alias, realCmd in pairs(NASAVEDALIASES) do
+					if realCmd == cmdName and alias:sub(1, searchTermLength) == searchTerm then
+						score = 3
 						matchText = alias
 						break
 					end
 				end
 			end
-		end
 
-		if score == 999 and searchTermLength >= 2 then
-			local cmdDistance = levenshtein(searchTerm, cmdName)
-			local displayDistance = levenshtein(searchTerm, displayName:lower())
-
-			local bestAlias, bestAliasDistance = "", math.huge
-			for alias, cmd in pairs(Aliases) do
-				if cmd == cmdName then
-					local aliasDistance = levenshtein(searchTerm, alias)
-					if aliasDistance < bestAliasDistance then
-						bestAliasDistance = aliasDistance
-						bestAlias = alias
+			if score == 999 then
+				for _, extraAlias in ipairs(extraAliases) do
+					if extraAlias == searchTerm then
+						score = 3
+						matchText = cmdName
+						break
+					elseif extraAlias:sub(1, searchTermLength) == searchTerm then
+						score = 4
+						matchText = cmdName
+						break
+					elseif extraAlias:find(searchTerm, 1, true) then
+						score = 5
+						matchText = cmdName
+						break
 					end
 				end
 			end
 
-			local allowedDistance = math.min(2, searchTermLength - 1)
-			if cmdDistance <= allowedDistance then
-				score = 6 + cmdDistance
-				matchText = cmdName
-			elseif bestAliasDistance <= allowedDistance then
-				score = 6 + bestAliasDistance
-				matchText = bestAlias
-			elseif displayDistance <= allowedDistance then
-				score = 9 + displayDistance
-				matchText = displayName
+			if score == 999 and searchTermLength >= 2 then
+				if cmdName:find(searchTerm, 1, true) then
+					score = 6
+					matchText = cmdName
+				elseif displayName:find(searchTerm, 1, true) then
+					score = 7
+					matchText = displayInfo
+				end
+			end
+
+			if score < 999 then
+				Insert(results, {
+					frame = frame,
+					score = score,
+					text = matchText,
+					name = cmdName,
+				})
 			end
 		end
 
-		if score < 999 then
-			Insert(results, {
-				frame = frame,
-				score = score,
-				text = matchText,
-				name = cmdName
-			})
+		table.sort(results, function(a, b)
+			if a.score == b.score then
+				return a.name < b.name
+			end
+			return a.score < b.score
+		end)
+
+		for _, frame in ipairs(CMDAUTOFILL) do
+			frame.Visible = false
 		end
-	end
 
-	table.sort(results, function(a, b)
-		if a.score == b.score then
-			return a.name < b.name
-		end
-		return a.score < b.score
-	end)
-
-	for _, frame in ipairs(CMDAUTOFILL) do
-		frame.Visible = false
-	end
-
-	for i, result in ipairs(results) do
-		if i <= 5 then
+		for i, result in ipairs(results) do
+			if i > maxResults then break end
+		
 			local frame = result.frame
+		
 			if result.text and result.text ~= "" then
-				frame.Input.Text = result.text
+				local displayText = Commands[result.name] and Commands[result.name][2] and Commands[result.name][2][1]
+				frame.Input.Text = displayText or result.name
 				frame.Visible = true
-
-				local newSize = UDim2.new(0.5, math.sqrt(i) * 125, 0, 25)
-				local newYPos = (i - 1) * 28
-				local newPosition = UDim2.new(0.5, 0, 0, newYPos)
-
+		
+				local width = math.sqrt(i) * 125
+				local yOffset = (i - 1) * 28
+				local newPos = UDim2.new(0.5, 0, 0, yOffset)
+		
 				gui.tween(frame, "Quint", "Out", 0.3, {
-					Size = newSize,
-					Position = lastFramePos and newPosition or UDim2.new(0.5, 0, 0, newYPos)
+					Size = UDim2.new(0.5, width, 0, 25),
+					Position = newPos,
 				})
-
-				lastFramePos = newPosition
 			else
 				frame.Visible = false
 			end
 		end
-	end
+	end)
 end
+
 
 --[[ OPEN THE COMMAND BAR ]]--
 mouse.KeyDown:Connect(function(k)
@@ -16524,117 +16535,44 @@ if IsOnPC then
 end
 
 --[[ CMDS COMMANDS SEARCH FUNCTION ]]--
-commandsFilter.Changed:Connect(function(p)
-	if p ~= "Text" then return end
+commandsFilter:GetPropertyChangedSignal("Text"):Connect(function()
+	local searchText = commandsFilter.Text:lower():gsub(";", "")
+	
+	for _, label in ipairs(commandsList:GetChildren()) do
+		if label:IsA("TextLabel") then
+			local cmdName = label.Name:lower()
+			local displayInfo = Commands[cmdName] and Commands[cmdName][2] and Commands[cmdName][2][1] or ""
+			displayInfo = displayInfo:lower()
 
-	local searchQuery = commandsFilter.Text:lower():gsub("%s+", "")
-	if searchQuery == "" then
-		for _, v in pairs(commandsList:GetChildren()) do
-			if v:IsA("TextLabel") then
-				v.Visible = true
+			local extraAliases = {}
+			for alias, realCmd in pairs(Aliases) do
+				if realCmd == cmdName then
+					Insert(extraAliases, alias:lower())
+				end
 			end
-		end
-		return
-	end
-
-	local results = {}
-
-	for _, v in pairs(commandsList:GetChildren()) do
-		if v:IsA("TextLabel") then
-			local commandName = v.Name:lower()
-			local command = Commands[commandName]
-			if not command then continue end
-
-			local displayName = command[2][1] or ""
-			local score = 999
-
-			if commandName == searchQuery then
-				score = 1
-			elseif displayName:lower() == searchQuery then
-				score = 1
-			elseif Aliases[searchQuery] and Aliases[searchQuery] == commandName then
-				score = 1
+			for alias, realCmd in pairs(NASAVEDALIASES) do
+				if realCmd == cmdName then
+					Insert(extraAliases, alias:lower())
+				end
 			end
 
-			if score == 999 then
-				if commandName:sub(1, #searchQuery) == searchQuery then
-					score = 2
-				elseif displayName:lower():sub(1, #searchQuery) == searchQuery then
-					score = 3
-				else
-					for alias, cmd in pairs(Aliases) do
-						if cmd == commandName and alias:sub(1, #searchQuery) == searchQuery then
-							score = 3
-							break
-						end
+			local matches = false
+
+			if cmdName:sub(1, #searchText) == searchText then
+				matches = true
+			elseif displayInfo:find(searchText, 1, true) then
+				matches = true
+			else
+				for _, alias in ipairs(extraAliases) do
+					if alias:sub(1, #searchText) == searchText or alias:find(searchText, 1, true) then
+						matches = true
+						break
 					end
 				end
 			end
 
-			if score == 999 and #searchQuery >= 2 then
-				if commandName:find(searchQuery, 1, true) then
-					score = 4
-				elseif displayName:lower():find(searchQuery, 1, true) then
-					score = 5
-				else
-					for alias, cmd in pairs(Aliases) do
-						if cmd == commandName and alias:find(searchQuery, 1, true) then
-							score = 5
-							break
-						end
-					end
-				end
-			end
-
-			if score == 999 and #searchQuery >= 2 then
-				local cmdDistance = levenshtein(searchQuery, commandName)
-				local displayDistance = levenshtein(searchQuery, displayName:lower())
-
-				local bestAlias, bestAliasDistance = "", math.huge
-				for alias, cmd in pairs(Aliases) do
-					if cmd == commandName then
-						local aliasDistance = levenshtein(searchQuery, alias)
-						if aliasDistance < bestAliasDistance then
-							bestAliasDistance = aliasDistance
-							bestAlias = alias
-						end
-					end
-				end
-
-				if cmdDistance <= math.min(2, #searchQuery - 1) then
-					score = 6 + cmdDistance
-				elseif bestAliasDistance <= math.min(2, #searchQuery - 1) then
-					score = 6 + bestAliasDistance
-				elseif displayDistance <= math.min(2, #searchQuery - 1) then
-					score = 9 + displayDistance
-				end
-			end
-
-			if score < 999 then
-				Insert(results, {
-					label = v,
-					score = score,
-					name = commandName
-				})
-			end
+			label.Visible = matches
 		end
-	end
-
-	table.sort(results, function(a, b)
-		if a.score == b.score then
-			return a.name < b.name
-		end
-		return a.score < b.score
-	end)
-
-	for _, v in pairs(commandsList:GetChildren()) do
-		if v:IsA("TextLabel") then
-			v.Visible = false
-		end
-	end
-
-	for _, result in ipairs(results) do
-		result.label.Visible = true
 	end
 end)
 
