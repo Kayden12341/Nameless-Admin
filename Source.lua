@@ -16827,7 +16827,8 @@ Players.PlayerRemoving:Connect(function(plr)
 end)
 
 function setupFLASHBACK(c)
-	c:WaitForChild("Humanoid").Died:Connect(function()
+	if not c then return end
+	c:WaitForChild("Humanoid",5).Died:Connect(function()
 		local root = getRoot(character)
 		if root then
 			deathCFrame = root.CFrame
