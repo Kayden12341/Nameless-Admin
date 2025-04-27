@@ -1444,10 +1444,11 @@ end
 plr=Player
 speaker=Player
 char=plr.Character
+deathCFrame = nil
 local JSONEncode,JSONDecode=HttpService.JSONEncode,HttpService.JSONDecode
 
 NACaller(function()
-	Players.LocalPlayer.CharacterAdded:Connect(function(c)
+	LocalPlayer.CharacterAdded:Connect(function(c)
 		character=c
 		Character=c
 		char=c
@@ -4173,7 +4174,7 @@ function respawn()
 	end
 
 	local newChar = player.CharacterAdded:Wait()
-	newChar:WaitForChild("HumanoidRootPart")
+	newChar:WaitForChild("HumanoidRootPart",3)
 
 	Wait(0.2)
 
@@ -5900,6 +5901,19 @@ cmd.add({"disablespawn", "unsetspawn", "ds"}, {"disablespawn (unsetspawn, ds)", 
 	needsRespawning = false
 	hasPosition = false
 	spawnPosition = CFrame.new()
+end)
+
+cmd.add({"flashback", "deathpos", "deathtp"}, {"flashback (deathpos, deathtp)", "Teleports you to your last death point"}, function()
+    if deathCFrame then
+        local character = getChar()
+        if character and getRoot(character) then
+            getRoot(character).CFrame = deathCFrame
+        else
+            DoNotif("Could not teleport, root is missing", 3)
+        end
+    else
+        DoNotif("No available death location to teleport to! You need to die first", 3)
+    end
 end)
 
 cmd.add({"hamster"}, {"hamster <number>", "Hamster ball"}, function(...)
@@ -16510,7 +16524,6 @@ end
 
 --[[ GUI RESIZE FUNCTION ]]--
 
---Discover({Enum.Platform.IOS,Enum.Platform.Android},UserInputService:GetPlatform()) | searches if the player is on mobile.
 if IsOnPC then
 	if chatLogsFrame then
 		gui.resizeable(chatLogsFrame)
@@ -16618,7 +16631,7 @@ commandsFilter.Changed:Connect(function(p)
 
 			if score < 999 then
 				Insert(results, {
-					label = v, 
+					label = v,
 					score = score,
 					name = commandName
 				})
@@ -16893,6 +16906,18 @@ Players.PlayerRemoving:Connect(function(plr)
 	end
 	removeESPonLEAVE(plr)
 end)
+
+function setupFLASHBACK(c)
+	c:WaitForChild("Humanoid").Died:Connect(function()
+		local root = getRoot(character)
+		if root then
+			deathCFrame = root.CFrame
+		end
+	end)
+end
+
+setupFLASHBACK(LocalPlayer.Character)
+LocalPlayer.CharacterAdded:Connect(setupFLASHBACK)
 
 mouse.Move:Connect(function()
 	description.Position = UDim2.new(0, mouse.X, 0, mouse.Y)
