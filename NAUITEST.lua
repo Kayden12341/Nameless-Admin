@@ -302,7 +302,6 @@ Autofill.ClipsDescendants = false
 Autofill.Position = UDim2.new(0.5, 0, 0, -10)
 Autofill.Size = UDim2.new(0, 400, 0, 150)
 Autofill.ZIndex = 4
-Autofill.CanvasSize = UDim2.new(0, 0, 0, 0)
 
 UICorner_7.CornerRadius = UDim.new(0, 9)
 UICorner_7.Parent = Autofill
