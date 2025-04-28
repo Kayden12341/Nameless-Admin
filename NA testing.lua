@@ -16368,7 +16368,7 @@ gui.barDeselect = function(speed)
 end
 
 --[[ AUTOFILL SEARCHER ]]--
-searchedSEARCH = false
+searchedSEARCH=false
 lastSearchText = ""
 searchHeartbeat = nil
 
@@ -16385,7 +16385,7 @@ gui.searchCommands = function()
 		searchHeartbeat:Disconnect()
 	end
 
-	searchHeartbeat = RunService.Heartbeat:Connect(function()
+	searchHeartbeat = game:GetService("RunService").Heartbeat:Connect(function()
 		searchHeartbeat:Disconnect()
 
 		local searchTerm = inputText
@@ -16401,7 +16401,9 @@ gui.searchCommands = function()
 
 		searchedSEARCH = false
 
+		local searchTermLength = #searchTerm
 		local results = {}
+		local maxResults = 5
 
 		for _, frame in ipairs(CMDAUTOFILL) do
 			local cmdName = frame.Name:lower()
@@ -16409,21 +16411,109 @@ gui.searchCommands = function()
 			if not command then continue end
 
 			local displayInfo = command[2] and command[2][1] or ""
+			local displayName = displayInfo:lower():gsub("<[^>]+>", ""):gsub("%([^%)]+%)", ""):gsub("%s+", " "):gsub("^%s*(.-)%s*$", "%1")
 
-			if cmdName:sub(1, #searchTerm) == searchTerm then
-				Insert(results, {frame = frame, displayText = displayInfo})
+			local extraAliases = {}
+			for alias in displayInfo:gmatch("%(([^%)]+)%)") do
+				Insert(extraAliases, alias:lower())
+			end
+
+			local score = 999
+			local matchText = cmdName
+
+			if cmdName == searchTerm or (Aliases[searchTerm] == cmdName) or (NASAVEDALIASES[searchTerm] == cmdName) then
+				score = 1
+				matchText = cmdName
+			elseif cmdName:sub(1, searchTermLength) == searchTerm then
+				score = 2
+				matchText = cmdName
+			else
+				for alias, realCmd in pairs(Aliases) do
+					if realCmd == cmdName and alias:sub(1, searchTermLength) == searchTerm then
+						score = 3
+						matchText = alias
+						break
+					end
+				end
+				for alias, realCmd in pairs(NASAVEDALIASES) do
+					if realCmd == cmdName and alias:sub(1, searchTermLength) == searchTerm then
+						score = 3
+						matchText = alias
+						break
+					end
+				end
+			end
+
+			if score == 999 then
+				for _, extraAlias in ipairs(extraAliases) do
+					if extraAlias == searchTerm then
+						score = 3
+						matchText = cmdName
+						break
+					elseif extraAlias:sub(1, searchTermLength) == searchTerm then
+						score = 4
+						matchText = cmdName
+						break
+					elseif extraAlias:find(searchTerm, 1, true) then
+						score = 5
+						matchText = cmdName
+						break
+					end
+				end
+			end
+
+			if score == 999 and searchTermLength >= 2 then
+				if cmdName:find(searchTerm, 1, true) then
+					score = 6
+					matchText = cmdName
+				elseif displayName:find(searchTerm, 1, true) then
+					score = 7
+					matchText = displayInfo
+				end
+			end
+
+			if score < 999 then
+				Insert(results, {
+					frame = frame,
+					score = score,
+					text = matchText,
+					name = cmdName,
+				})
 			end
 		end
+
+		table.sort(results, function(a, b)
+			if a.score == b.score then
+				return a.name < b.name
+			end
+			return a.score < b.score
+		end)
 
 		for _, frame in ipairs(CMDAUTOFILL) do
 			frame.Visible = false
 		end
 
 		for i, result in ipairs(results) do
-			if i > 5 then break end
+			if i > maxResults then break end
+		
 			local frame = result.frame
-			frame.Input.Text = result.displayText
-			frame.Visible = true
+		
+			if result.text and result.text ~= "" then
+				local displayText = Commands[result.name] and Commands[result.name][2] and Commands[result.name][2][1]
+				frame.Input.Text = displayText or result.name
+				frame.Visible = true
+		
+				local width = math.sqrt(i) * 125
+				local yOffset = (i - 1) * 28
+				local newPos = UDim2.new(0.5, 0, 0, yOffset)
+		
+				gui.tween(frame, "Quint", "Out", 0.3, {
+					Size = UDim2.new(0.5, width, 0, 25),
+					Position = newPos,
+				})
+			else
+				frame.Visible = false
+			end
 		end
 	end)
 end
