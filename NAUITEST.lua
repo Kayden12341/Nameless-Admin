@@ -613,6 +613,7 @@ ChatLogs.BackgroundTransparency = 0.400
 ChatLogs.BorderSizePixel = 0
 ChatLogs.Position = UDim2.new(0.5, 0, 0.699999988, 0)
 ChatLogs.Size = UDim2.new(0, 400, 0, 300)
+ChatLogs.ClipsDescendants = true
 
 UICorner_4.Parent = ChatLogs
 
@@ -621,6 +622,7 @@ Topbar.Parent = ChatLogs
 Topbar.BackgroundTransparency = 1.000
 Topbar.BorderSizePixel = 0
 Topbar.Size = UDim2.new(1, 0, 0, 30)
+Topbar.Activate = true
 
 Title.Name = "Title"
 Title.Parent = Topbar
@@ -734,6 +736,7 @@ Commands.BackgroundTransparency = 0.400
 Commands.BorderSizePixel = 0
 Commands.Position = UDim2.new(0.100000001, 0, 0.5, 0)
 Commands.Size = UDim2.new(0, 280, 0, 320)
+Commands.ClipsDescendants = true
 
 UICorner_10.Parent = Commands
 
@@ -742,6 +745,7 @@ Topbar_2.Parent = Commands
 Topbar_2.BackgroundTransparency = 1.000
 Topbar_2.BorderSizePixel = 0
 Topbar_2.Size = UDim2.new(1, 0, 0, 30)
+Topbar_2.Activate = true
 
 Title_2.Name = "Title"
 Title_2.Parent = Topbar_2
@@ -873,6 +877,7 @@ UpdLog.BackgroundTransparency = 0.400
 UpdLog.BorderSizePixel = 0
 UpdLog.Position = UDim2.new(0.899999976, -140, 0.200000003, 0)
 UpdLog.Size = UDim2.new(0, 280, 0, 320)
+UpdLog.ClipsDescendants = true
 
 UICorner_17.Parent = UpdLog
 
@@ -881,6 +886,7 @@ Topbar_3.Parent = UpdLog
 Topbar_3.BackgroundTransparency = 1.000
 Topbar_3.BorderSizePixel = 0
 Topbar_3.Size = UDim2.new(1, 0, 0, 30)
+Topbar_3.Activate = true
 
 Title_3.Name = "Title"
 Title_3.Parent = Topbar_3
@@ -995,6 +1001,7 @@ soRealConsole.BackgroundTransparency = 0.400
 soRealConsole.BorderSizePixel = 0
 soRealConsole.Position = UDim2.new(0.305859059, 0, 0.525355697, 0)
 soRealConsole.Size = UDim2.new(0, 400, 0, 300)
+soRealConsole.ClipsDescendants = true
 
 UICorner_23.Parent = soRealConsole
 
@@ -1003,6 +1010,7 @@ Topbar_4.Parent = soRealConsole
 Topbar_4.BackgroundTransparency = 1.000
 Topbar_4.BorderSizePixel = 0
 Topbar_4.Size = UDim2.new(1, 0, 0, 30)
+Topbar_4.Activate = true
 
 Title_4.Name = "Title"
 Title_4.Parent = Topbar_4
