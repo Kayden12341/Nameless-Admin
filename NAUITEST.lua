@@ -622,7 +622,7 @@ Topbar.Parent = ChatLogs
 Topbar.BackgroundTransparency = 1.000
 Topbar.BorderSizePixel = 0
 Topbar.Size = UDim2.new(1, 0, 0, 30)
-Topbar.Activate = true
+Topbar.Active = true
 
 Title.Name = "Title"
 Title.Parent = Topbar
@@ -745,7 +745,7 @@ Topbar_2.Parent = Commands
 Topbar_2.BackgroundTransparency = 1.000
 Topbar_2.BorderSizePixel = 0
 Topbar_2.Size = UDim2.new(1, 0, 0, 30)
-Topbar_2.Activate = true
+Topbar_2.Active = true
 
 Title_2.Name = "Title"
 Title_2.Parent = Topbar_2
@@ -886,7 +886,7 @@ Topbar_3.Parent = UpdLog
 Topbar_3.BackgroundTransparency = 1.000
 Topbar_3.BorderSizePixel = 0
 Topbar_3.Size = UDim2.new(1, 0, 0, 30)
-Topbar_3.Activate = true
+Topbar_3.Active = true
 
 Title_3.Name = "Title"
 Title_3.Parent = Topbar_3
@@ -1010,7 +1010,7 @@ Topbar_4.Parent = soRealConsole
 Topbar_4.BackgroundTransparency = 1.000
 Topbar_4.BorderSizePixel = 0
 Topbar_4.Size = UDim2.new(1, 0, 0, 30)
-Topbar_4.Activate = true
+Topbar_4.Active = true
 
 Title_4.Name = "Title"
 Title_4.Parent = Topbar_4
