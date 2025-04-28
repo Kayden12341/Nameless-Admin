@@ -29,7 +29,7 @@ local Edge_4 = Instance.new("ImageLabel")
 local Autofill = Instance.new("ScrollingFrame")
 local UICorner_7 = Instance.new("UICorner")
 local UIGradient_6 = Instance.new("UIGradient")
-local Frame_3 = Instance.new("Frame")
+local Cmd = Instance.new("Frame")
 local UICorner_8 = Instance.new("UICorner")
 local Input_2 = Instance.new("TextLabel")
 local UIListLayout = Instance.new("UIListLayout")
@@ -167,6 +167,7 @@ Input.Active = false
 Input.AnchorPoint = Vector2.new(0.5, 0.5)
 Input.BackgroundColor3 = Color3.fromRGB(17, 17, 17)
 Input.BackgroundTransparency = 0.300
+Input.ClipsDescendants = true
 Input.Position = UDim2.new(0.5, 0, 0.5, 0)
 Input.Size = UDim2.new(1, -10, 0.699999988, 0)
 Input.ZIndex = 3
@@ -174,9 +175,8 @@ Input.Font = Enum.Font.SourceSans
 Input.PlaceholderText = "placeholder"
 Input.Text = ""
 Input.TextColor3 = Color3.fromRGB(225, 225, 225)
-Input.TextScaled = true
+Input.TextSize = 24.000
 Input.TextWrapped = true
-Input.ClipsDescendants = true
 
 UICorner_2.CornerRadius = UDim.new(0, 6)
 UICorner_2.Parent = Input
@@ -298,11 +298,11 @@ Autofill.AnchorPoint = Vector2.new(0.5, 1)
 Autofill.BackgroundColor3 = Color3.fromRGB(12, 4, 20)
 Autofill.BackgroundTransparency = 1.000
 Autofill.BorderSizePixel = 0
+Autofill.ClipsDescendants = false
 Autofill.Position = UDim2.new(0.5, 0, 0, -10)
 Autofill.Size = UDim2.new(0, 400, 0, 150)
 Autofill.ZIndex = 4
 Autofill.CanvasSize = UDim2.new(0, 0, 0, 0)
-Autofill.ClipsDescendants = false
 
 UICorner_7.CornerRadius = UDim.new(0, 9)
 UICorner_7.Parent = Autofill
@@ -311,19 +311,19 @@ UIGradient_6.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fr
 UIGradient_6.Rotation = 90
 UIGradient_6.Parent = Autofill
 
-Frame_3.Name = "Cmd"
-Frame_3.Parent = Autofill
-Frame_3.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-Frame_3.BackgroundTransparency = 0.100
-Frame_3.BorderSizePixel = 0
-Frame_3.Size = UDim2.new(0.899999976, 0, 0, 30)
-Frame_3.ClipsDescendants = true
+Cmd.Name = "Cmd"
+Cmd.Parent = Autofill
+Cmd.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+Cmd.BackgroundTransparency = 0.100
+Cmd.BorderSizePixel = 0
+Cmd.ClipsDescendants = true
+Cmd.Size = UDim2.new(0.899999976, 0, 0, 30)
 
 UICorner_8.CornerRadius = UDim.new(0, 6)
-UICorner_8.Parent = Frame_3
+UICorner_8.Parent = Cmd
 
 Input_2.Name = "Input"
-Input_2.Parent = Frame_3
+Input_2.Parent = Cmd
 Input_2.BackgroundTransparency = 1.000
 Input_2.Position = UDim2.new(0, 5, 0, 0)
 Input_2.Size = UDim2.new(1, -10, 1, 0)
@@ -331,6 +331,7 @@ Input_2.Font = Enum.Font.SourceSans
 Input_2.Text = "example <player> <text>"
 Input_2.TextColor3 = Color3.fromRGB(240, 240, 240)
 Input_2.TextScaled = true
+Input_2.TextSize = 24.000
 Input_2.TextWrapped = true
 
 UIListLayout.Parent = Autofill
@@ -442,7 +443,7 @@ ChatLogs.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
 ChatLogs.BackgroundTransparency = 0.400
 ChatLogs.BorderSizePixel = 0
 ChatLogs.ClipsDescendants = true
-ChatLogs.Position = UDim2.new(0.5, 0, 0.699999988, 0)
+ChatLogs.Position = UDim2.new(0.654038072, 0, 0.596248388, 0)
 ChatLogs.Size = UDim2.new(0, 400, 0, 300)
 
 UICorner_10.Parent = ChatLogs
@@ -452,6 +453,7 @@ Topbar.Parent = ChatLogs
 Topbar.BackgroundTransparency = 1.000
 Topbar.BorderSizePixel = 0
 Topbar.Size = UDim2.new(1, 0, 0, 30)
+Topbar.ZIndex = 10
 
 Title.Name = "Title"
 Title.Parent = Topbar
@@ -566,7 +568,7 @@ Commands.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
 Commands.BackgroundTransparency = 0.400
 Commands.BorderSizePixel = 0
 Commands.ClipsDescendants = true
-Commands.Position = UDim2.new(0.100000001, 0, 0.5, 0)
+Commands.Position = UDim2.new(0.0477434583, 0, 0.556921065, 0)
 Commands.Size = UDim2.new(0, 280, 0, 320)
 
 UICorner_16.Parent = Commands
@@ -576,6 +578,7 @@ Topbar_2.Parent = Commands
 Topbar_2.BackgroundTransparency = 1.000
 Topbar_2.BorderSizePixel = 0
 Topbar_2.Size = UDim2.new(1, 0, 0, 30)
+Topbar_2.ZIndex = 10
 
 Title_2.Name = "Title"
 Title_2.Parent = Topbar_2
@@ -708,7 +711,7 @@ UpdLog.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
 UpdLog.BackgroundTransparency = 0.400
 UpdLog.BorderSizePixel = 0
 UpdLog.ClipsDescendants = true
-UpdLog.Position = UDim2.new(0.899999976, -140, 0.200000003, 0)
+UpdLog.Position = UDim2.new(0.68653208, 0, 0.0209573247, 0)
 UpdLog.Size = UDim2.new(0, 280, 0, 320)
 
 UICorner_23.Parent = UpdLog
@@ -718,6 +721,7 @@ Topbar_3.Parent = UpdLog
 Topbar_3.BackgroundTransparency = 1.000
 Topbar_3.BorderSizePixel = 0
 Topbar_3.Size = UDim2.new(1, 0, 0, 30)
+Topbar_3.ZIndex = 10
 
 Title_3.Name = "Title"
 Title_3.Parent = Topbar_3
@@ -833,7 +837,7 @@ soRealConsole.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
 soRealConsole.BackgroundTransparency = 0.400
 soRealConsole.BorderSizePixel = 0
 soRealConsole.ClipsDescendants = true
-soRealConsole.Position = UDim2.new(0.305859059, 0, 0.525355697, 0)
+soRealConsole.Position = UDim2.new(0.321694374, 0, 0.570633888, 0)
 soRealConsole.Size = UDim2.new(0, 400, 0, 300)
 
 UICorner_29.Parent = soRealConsole
@@ -843,6 +847,7 @@ Topbar_4.Parent = soRealConsole
 Topbar_4.BackgroundTransparency = 1.000
 Topbar_4.BorderSizePixel = 0
 Topbar_4.Size = UDim2.new(1, 0, 0, 30)
+Topbar_4.ZIndex = 10
 
 Title_4.Name = "Title"
 Title_4.Parent = Topbar_4
