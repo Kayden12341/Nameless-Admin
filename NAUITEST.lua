@@ -682,7 +682,6 @@ Container.Parent = ChatLogs
 Container.BackgroundTransparency = 1.000
 Container.Position = UDim2.new(0, 10, 0, 35)
 Container.Size = UDim2.new(1, -20, 1, -40)
-Container.ScrollBarThickness = 4
 
 UIListLayout_2.Parent = Container
 UIListLayout_2.Padding = UDim.new(0, 5)
@@ -804,7 +803,6 @@ Container_2.Parent = Commands
 Container_2.BackgroundTransparency = 1.000
 Container_2.Position = UDim2.new(0, 10, 0, 35)
 Container_2.Size = UDim2.new(1, -20, 1, -40)
-Container_2.ScrollBarThickness = 4
 
 UIListLayout_4.Parent = Container_2
 UIListLayout_4.Padding = UDim.new(0, 5)
@@ -944,7 +942,6 @@ Container_3.Parent = UpdLog
 Container_3.BackgroundTransparency = 1.000
 Container_3.Position = UDim2.new(0, 10, 0, 35)
 Container_3.Size = UDim2.new(1, -20, 1, -40)
-Container_3.ScrollBarThickness = 4
 
 UIListLayout_6.Parent = Container_3
 UIListLayout_6.Padding = UDim.new(0, 5)
@@ -1067,7 +1064,6 @@ Container_4.Parent = soRealConsole
 Container_4.BackgroundTransparency = 1.000
 Container_4.Position = UDim2.new(0, 10, 0, 35)
 Container_4.Size = UDim2.new(1, -20, 1, -40)
-Container_4.ScrollBarThickness = 4
 
 UIListLayout_8.Parent = Container_4
 UIListLayout_8.Padding = UDim.new(0, 5)
