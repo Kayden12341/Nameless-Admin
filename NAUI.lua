@@ -2,48 +2,36 @@ local AdminUI = Instance.new("ScreenGui")
 local CmdBar = Instance.new("Frame")
 local CenterBar = Instance.new("Frame")
 local Horizontal = Instance.new("Frame")
+local UIGradient = Instance.new("UIGradient")
+local UICorner = Instance.new("UICorner")
 local Input = Instance.new("TextBox")
-local Aesthetic = Instance.new("Folder")
+local UICorner_2 = Instance.new("UICorner")
+local LeftFill = Instance.new("Frame")
+local Frame = Instance.new("Frame")
+local UIGradient_2 = Instance.new("UIGradient")
+local UICorner_3 = Instance.new("UICorner")
+local Horizontal_2 = Instance.new("Frame")
+local UIGradient_3 = Instance.new("UIGradient")
+local UICorner_4 = Instance.new("UICorner")
 local Edge = Instance.new("Frame")
 local UIAspectRatioConstraint = Instance.new("UIAspectRatioConstraint")
 local Edge_2 = Instance.new("ImageLabel")
-local Edge_3 = Instance.new("ImageLabel")
-local Edge_4 = Instance.new("Frame")
-local UIAspectRatioConstraint_2 = Instance.new("UIAspectRatioConstraint")
-local Edge_5 = Instance.new("ImageLabel")
-local Edge_6 = Instance.new("ImageLabel")
-local Edge_7 = Instance.new("Frame")
-local Edge_8 = Instance.new("ImageLabel")
-local UIAspectRatioConstraint_3 = Instance.new("UIAspectRatioConstraint")
-local Edge_9 = Instance.new("Frame")
-local Edge_10 = Instance.new("ImageLabel")
-local UIAspectRatioConstraint_4 = Instance.new("UIAspectRatioConstraint")
-local LeftFill = Instance.new("Frame")
-local Horizontal_2 = Instance.new("Frame")
-local UIGradient = Instance.new("UIGradient")
-local UICorner = Instance.new("UICorner")
-local Edge_11 = Instance.new("Frame")
-local UIAspectRatioConstraint_5 = Instance.new("UIAspectRatioConstraint")
-local Edge_12 = Instance.new("ImageLabel")
 local RightFill = Instance.new("Frame")
+local Frame_2 = Instance.new("Frame")
+local UIGradient_4 = Instance.new("UIGradient")
+local UICorner_5 = Instance.new("UICorner")
 local Horizontal_3 = Instance.new("Frame")
-local UIGradient_2 = Instance.new("UIGradient")
-local UICorner_2 = Instance.new("UICorner")
-local Edge_13 = Instance.new("Frame")
-local UIAspectRatioConstraint_6 = Instance.new("UIAspectRatioConstraint")
-local Edge_14 = Instance.new("ImageLabel")
+local UIGradient_5 = Instance.new("UIGradient")
+local UICorner_6 = Instance.new("UICorner")
+local Edge_3 = Instance.new("Frame")
+local UIAspectRatioConstraint_2 = Instance.new("UIAspectRatioConstraint")
+local Edge_4 = Instance.new("ImageLabel")
 local Autofill = Instance.new("ScrollingFrame")
-local Cmd = Instance.new("Frame")
+local UICorner_7 = Instance.new("UICorner")
+local UIGradient_6 = Instance.new("UIGradient")
+local Frame_3 = Instance.new("Frame")
+local UICorner_8 = Instance.new("UICorner")
 local Input_2 = Instance.new("TextLabel")
-local Background = Instance.new("Frame")
-local Horizontal_4 = Instance.new("Frame")
-local UIGradient_3 = Instance.new("UIGradient")
-local Edge_15 = Instance.new("Frame")
-local UIAspectRatioConstraint_7 = Instance.new("UIAspectRatioConstraint")
-local Edge_16 = Instance.new("ImageLabel")
-local Edge_17 = Instance.new("Frame")
-local UIAspectRatioConstraint_8 = Instance.new("UIAspectRatioConstraint")
-local Edge_18 = Instance.new("ImageLabel")
 local UIListLayout = Instance.new("UIListLayout")
 local Resizeable = Instance.new("Frame")
 local Left = Instance.new("Frame")
@@ -55,88 +43,88 @@ local TopRight = Instance.new("Frame")
 local BottomLeft = Instance.new("Frame")
 local BottomRight = Instance.new("Frame")
 local Description = Instance.new("TextLabel")
-local UICorner_3 = Instance.new("UICorner")
+local UICorner_9 = Instance.new("UICorner")
 local Modal = Instance.new("ImageButton")
 local ChatLogs = Instance.new("Frame")
-local UICorner_4 = Instance.new("UICorner")
+local UICorner_10 = Instance.new("UICorner")
 local Topbar = Instance.new("Frame")
 local Title = Instance.new("TextLabel")
 local Minimize = Instance.new("TextButton")
-local UICorner_5 = Instance.new("UICorner")
+local UICorner_11 = Instance.new("UICorner")
 local Exit = Instance.new("TextButton")
-local UICorner_6 = Instance.new("UICorner")
+local UICorner_12 = Instance.new("UICorner")
 local Clear = Instance.new("TextButton")
-local UICorner_7 = Instance.new("UICorner")
+local UICorner_13 = Instance.new("UICorner")
 local Container = Instance.new("Frame")
 local UIListLayout_2 = Instance.new("UIListLayout")
 local Logs = Instance.new("ScrollingFrame")
 local UIListLayout_3 = Instance.new("UIListLayout")
 local TextLabel = Instance.new("TextLabel")
-local UICorner_8 = Instance.new("UICorner")
-local UIGradient_4 = Instance.new("UIGradient")
-local UICorner_9 = Instance.new("UICorner")
-local UIGradient_5 = Instance.new("UIGradient")
+local UICorner_14 = Instance.new("UICorner")
+local UIGradient_7 = Instance.new("UIGradient")
+local UICorner_15 = Instance.new("UICorner")
+local UIGradient_8 = Instance.new("UIGradient")
 local Commands = Instance.new("Frame")
-local UICorner_10 = Instance.new("UICorner")
+local UICorner_16 = Instance.new("UICorner")
 local Topbar_2 = Instance.new("Frame")
 local Title_2 = Instance.new("TextLabel")
 local Minimize_2 = Instance.new("TextButton")
-local UICorner_11 = Instance.new("UICorner")
+local UICorner_17 = Instance.new("UICorner")
 local Exit_2 = Instance.new("TextButton")
-local UICorner_12 = Instance.new("UICorner")
+local UICorner_18 = Instance.new("UICorner")
 local Clear_2 = Instance.new("TextButton")
-local UICorner_13 = Instance.new("UICorner")
+local UICorner_19 = Instance.new("UICorner")
 local Container_2 = Instance.new("Frame")
 local UIListLayout_4 = Instance.new("UIListLayout")
 local List = Instance.new("ScrollingFrame")
 local UIListLayout_5 = Instance.new("UIListLayout")
 local TextLabel_2 = Instance.new("TextLabel")
 local Filter = Instance.new("TextBox")
-local UICorner_14 = Instance.new("UICorner")
-local UICorner_15 = Instance.new("UICorner")
-local UIGradient_6 = Instance.new("UIGradient")
-local UICorner_16 = Instance.new("UICorner")
-local UIGradient_7 = Instance.new("UIGradient")
+local UICorner_20 = Instance.new("UICorner")
+local UICorner_21 = Instance.new("UICorner")
+local UIGradient_9 = Instance.new("UIGradient")
+local UICorner_22 = Instance.new("UICorner")
+local UIGradient_10 = Instance.new("UIGradient")
 local UpdLog = Instance.new("Frame")
-local UICorner_17 = Instance.new("UICorner")
+local UICorner_23 = Instance.new("UICorner")
 local Topbar_3 = Instance.new("Frame")
 local Title_3 = Instance.new("TextLabel")
 local Minimize_3 = Instance.new("TextButton")
-local UICorner_18 = Instance.new("UICorner")
+local UICorner_24 = Instance.new("UICorner")
 local Exit_3 = Instance.new("TextButton")
-local UICorner_19 = Instance.new("UICorner")
+local UICorner_25 = Instance.new("UICorner")
 local Clear_3 = Instance.new("TextButton")
-local UICorner_20 = Instance.new("UICorner")
+local UICorner_26 = Instance.new("UICorner")
 local Container_3 = Instance.new("Frame")
 local UIListLayout_6 = Instance.new("UIListLayout")
 local List_2 = Instance.new("ScrollingFrame")
 local UIListLayout_7 = Instance.new("UIListLayout")
 local TextLabel_3 = Instance.new("TextLabel")
-local UICorner_21 = Instance.new("UICorner")
-local UIGradient_8 = Instance.new("UIGradient")
-local UICorner_22 = Instance.new("UICorner")
-local UIGradient_9 = Instance.new("UIGradient")
+local UICorner_27 = Instance.new("UICorner")
+local UIGradient_11 = Instance.new("UIGradient")
+local UICorner_28 = Instance.new("UICorner")
+local UIGradient_12 = Instance.new("UIGradient")
 local soRealConsole = Instance.new("Frame")
-local UICorner_23 = Instance.new("UICorner")
+local UICorner_29 = Instance.new("UICorner")
 local Topbar_4 = Instance.new("Frame")
 local Title_4 = Instance.new("TextLabel")
 local Minimize_4 = Instance.new("TextButton")
-local UICorner_24 = Instance.new("UICorner")
+local UICorner_30 = Instance.new("UICorner")
 local Exit_4 = Instance.new("TextButton")
-local UICorner_25 = Instance.new("UICorner")
+local UICorner_31 = Instance.new("UICorner")
 local Clear_4 = Instance.new("TextButton")
-local UICorner_26 = Instance.new("UICorner")
+local UICorner_32 = Instance.new("UICorner")
 local Container_4 = Instance.new("Frame")
 local UIListLayout_8 = Instance.new("UIListLayout")
 local Logs_2 = Instance.new("ScrollingFrame")
 local UIListLayout_9 = Instance.new("UIListLayout")
 local TextLabel_4 = Instance.new("TextLabel")
-local UICorner_27 = Instance.new("UICorner")
-local UIGradient_10 = Instance.new("UIGradient")
+local UICorner_33 = Instance.new("UICorner")
+local UIGradient_13 = Instance.new("UIGradient")
 local Filter_2 = Instance.new("TextBox")
-local UICorner_28 = Instance.new("UICorner")
-local UICorner_29 = Instance.new("UICorner")
-local UIGradient_11 = Instance.new("UIGradient")
+local UICorner_34 = Instance.new("UICorner")
+local UICorner_35 = Instance.new("UICorner")
+local UIGradient_14 = Instance.new("UIGradient")
 
 AdminUI.Name = "AdminUI"
 AdminUI.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
@@ -167,33 +155,71 @@ Horizontal.BorderColor3 = Color3.fromRGB(27, 27, 27)
 Horizontal.BorderSizePixel = 0
 Horizontal.Size = UDim2.new(1, 0, 1, 0)
 
+UIGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(12, 4, 20)), ColorSequenceKeypoint.new(0.50, Color3.fromRGB(4, 4, 4)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(12, 4, 20))}
+UIGradient.Parent = Horizontal
+
+UICorner.CornerRadius = UDim.new(0, 9)
+UICorner.Parent = Horizontal
+
 Input.Name = "Input"
 Input.Parent = CenterBar
 Input.Active = false
 Input.AnchorPoint = Vector2.new(0.5, 0.5)
-Input.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-Input.BackgroundTransparency = 1.000
-Input.ClipsDescendants = true
+Input.BackgroundColor3 = Color3.fromRGB(17, 17, 17)
+Input.BackgroundTransparency = 0.300
 Input.Position = UDim2.new(0.5, 0, 0.5, 0)
-Input.Size = UDim2.new(1, -5, 0.699999988, 0)
-Input.ZIndex = 2
+Input.Size = UDim2.new(1, -10, 0.699999988, 0)
+Input.ZIndex = 3
 Input.Font = Enum.Font.SourceSans
+Input.PlaceholderText = "placeholder"
 Input.Text = ""
 Input.TextColor3 = Color3.fromRGB(225, 225, 225)
 Input.TextScaled = true
-Input.TextSize = 24.000
 Input.TextWrapped = true
+Input.ClipsDescendants = true
 
-Aesthetic.Name = "Aesthetic"
-Aesthetic.Parent = CenterBar
+UICorner_2.CornerRadius = UDim.new(0, 6)
+UICorner_2.Parent = Input
+
+LeftFill.Name = "LeftFill"
+LeftFill.Parent = CmdBar
+LeftFill.AnchorPoint = Vector2.new(0, 0.5)
+LeftFill.BackgroundTransparency = 1.000
+LeftFill.Position = UDim2.new(0, 0, 0.5, 0)
+LeftFill.Size = UDim2.new(0.5, -125, 1, 0)
+
+Frame.Parent = LeftFill
+Frame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+Frame.BackgroundTransparency = 0.140
+Frame.Size = UDim2.new(1, 0, 1, 0)
+
+UIGradient_2.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(12, 4, 20)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(4, 4, 4))}
+UIGradient_2.Parent = Frame
+
+UICorner_3.CornerRadius = UDim.new(0, 9)
+UICorner_3.Parent = Frame
+
+Horizontal_2.Name = "Horizontal"
+Horizontal_2.Parent = LeftFill
+Horizontal_2.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+Horizontal_2.BackgroundTransparency = 0.140
+Horizontal_2.BorderColor3 = Color3.fromRGB(27, 27, 27)
+Horizontal_2.BorderSizePixel = 0
+Horizontal_2.Size = UDim2.new(1.005988, 0, 1, 0)
+
+UIGradient_3.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(12, 4, 20)), ColorSequenceKeypoint.new(0.05, Color3.fromRGB(12, 4, 20)), ColorSequenceKeypoint.new(0.49, Color3.fromRGB(12, 4, 20)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(4, 4, 4))}
+UIGradient_3.Parent = Horizontal_2
+
+UICorner_4.Parent = Horizontal_2
 
 Edge.Name = "Edge"
-Edge.Parent = Aesthetic
-Edge.AnchorPoint = Vector2.new(1, 0.5)
+Edge.Parent = LeftFill
+Edge.AnchorPoint = Vector2.new(0, 0.5)
 Edge.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 Edge.BackgroundTransparency = 1.000
 Edge.BorderSizePixel = 0
-Edge.Position = UDim2.new(0, 0, 0.5, 0)
+Edge.ClipsDescendants = true
+Edge.Position = UDim2.new(1, 0, 0.5, 0)
 Edge.Size = UDim2.new(0.185000002, 0, 1, 0)
 
 UIAspectRatioConstraint.Parent = Edge
@@ -204,163 +230,29 @@ Edge_2.AnchorPoint = Vector2.new(0.5, 0.5)
 Edge_2.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 Edge_2.BackgroundTransparency = 1.000
 Edge_2.BorderSizePixel = 0
-Edge_2.ClipsDescendants = true
-Edge_2.Position = UDim2.new(1, 0, 0.5, 0)
+Edge_2.Position = UDim2.new(0, 0, 0.5, 0)
 Edge_2.Size = UDim2.new(1, 12, 1, 0)
 Edge_2.Image = "rbxassetid://483281072"
-Edge_2.ImageColor3 = Color3.fromRGB(0, 0, 0)
-Edge_2.ImageTransparency = 1.000
-
-Edge_3.Name = "Edge"
-Edge_3.Parent = Edge_2
-Edge_3.AnchorPoint = Vector2.new(0.5, 0.5)
-Edge_3.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-Edge_3.BackgroundTransparency = 1.000
-Edge_3.BorderSizePixel = 0
-Edge_3.Position = UDim2.new(0.466346145, 1, 0.5, 0)
-Edge_3.Size = UDim2.new(1.06730771, -20, 1, -14)
-Edge_3.ZIndex = 5
-Edge_3.Image = "rbxassetid://483281072"
-Edge_3.ImageColor3 = Color3.fromRGB(4, 4, 4)
-Edge_3.ImageTransparency = 0.140
-
-Edge_4.Name = "Edge"
-Edge_4.Parent = Aesthetic
-Edge_4.AnchorPoint = Vector2.new(0, 0.5)
-Edge_4.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-Edge_4.BackgroundTransparency = 1.000
-Edge_4.BorderSizePixel = 0
-Edge_4.Position = UDim2.new(1, 0, 0.5, 0)
-Edge_4.Size = UDim2.new(0.185000002, 0, 1, 0)
-
-UIAspectRatioConstraint_2.Parent = Edge_4
-
-Edge_5.Name = "Edge"
-Edge_5.Parent = Edge_4
-Edge_5.AnchorPoint = Vector2.new(0.5, 0.5)
-Edge_5.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-Edge_5.BackgroundTransparency = 1.000
-Edge_5.BorderSizePixel = 0
-Edge_5.ClipsDescendants = true
-Edge_5.Position = UDim2.new(0, 0, 0.5, 0)
-Edge_5.Size = UDim2.new(1, 12, 1, 0)
-Edge_5.Image = "rbxassetid://483281072"
-Edge_5.ImageColor3 = Color3.fromRGB(0, 0, 0)
-Edge_5.ImageTransparency = 1.000
-
-Edge_6.Name = "Edge"
-Edge_6.Parent = Edge_5
-Edge_6.AnchorPoint = Vector2.new(0.5, 0.5)
-Edge_6.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-Edge_6.BackgroundTransparency = 1.000
-Edge_6.BorderSizePixel = 0
-Edge_6.Position = UDim2.new(0.5, -1, 0.5, 0)
-Edge_6.Size = UDim2.new(1, -20, 1, -14)
-Edge_6.ZIndex = 5
-Edge_6.Image = "rbxassetid://483281072"
-Edge_6.ImageColor3 = Color3.fromRGB(4, 4, 4)
-Edge_6.ImageTransparency = 0.140
-
-Edge_7.Name = "Edge"
-Edge_7.Parent = Aesthetic
-Edge_7.AnchorPoint = Vector2.new(0, 0.5)
-Edge_7.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-Edge_7.BackgroundTransparency = 1.000
-Edge_7.BorderSizePixel = 0
-Edge_7.ClipsDescendants = true
-Edge_7.Position = UDim2.new(1, 0, 0.5, 0)
-Edge_7.Size = UDim2.new(0.185000002, 0, 1, 0)
-
-Edge_8.Name = "Edge"
-Edge_8.Parent = Edge_7
-Edge_8.AnchorPoint = Vector2.new(0.5, 0.5)
-Edge_8.BackgroundColor3 = Color3.fromRGB(4, 4, 4)
-Edge_8.BackgroundTransparency = 1.000
-Edge_8.BorderSizePixel = 0
-Edge_8.Position = UDim2.new(0, 0, 0.5, 0)
-Edge_8.Size = UDim2.new(1, 12, 1, 0)
-Edge_8.Image = "rbxassetid://483281072"
-Edge_8.ImageColor3 = Color3.fromRGB(4, 4, 4)
-Edge_8.ImageTransparency = 0.140
-
-UIAspectRatioConstraint_3.Parent = Edge_7
-
-Edge_9.Name = "Edge"
-Edge_9.Parent = Aesthetic
-Edge_9.AnchorPoint = Vector2.new(1, 0.5)
-Edge_9.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-Edge_9.BackgroundTransparency = 1.000
-Edge_9.BorderSizePixel = 0
-Edge_9.ClipsDescendants = true
-Edge_9.Position = UDim2.new(0, 0, 0.5, 0)
-Edge_9.Size = UDim2.new(0.185000002, 0, 1, 0)
-
-Edge_10.Name = "Edge"
-Edge_10.Parent = Edge_9
-Edge_10.AnchorPoint = Vector2.new(0.5, 0.5)
-Edge_10.BackgroundColor3 = Color3.fromRGB(4, 4, 4)
-Edge_10.BackgroundTransparency = 1.000
-Edge_10.BorderSizePixel = 0
-Edge_10.Position = UDim2.new(1, 0, 0.5, 0)
-Edge_10.Size = UDim2.new(1, 12, 1, 0)
-Edge_10.Image = "rbxassetid://483281072"
-Edge_10.ImageColor3 = Color3.fromRGB(4, 4, 4)
-Edge_10.ImageTransparency = 0.140
-
-UIAspectRatioConstraint_4.Parent = Edge_9
-
-LeftFill.Name = "LeftFill"
-LeftFill.Parent = CmdBar
-LeftFill.AnchorPoint = Vector2.new(0, 0.5)
-LeftFill.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-LeftFill.BackgroundTransparency = 1.000
-LeftFill.Position = UDim2.new(0, 0, 0.5, 0)
-LeftFill.Size = UDim2.new(0.5, -125, 1, 0)
-
-Horizontal_2.Name = "Horizontal"
-Horizontal_2.Parent = LeftFill
-Horizontal_2.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-Horizontal_2.BackgroundTransparency = 0.140
-Horizontal_2.BorderColor3 = Color3.fromRGB(27, 27, 27)
-Horizontal_2.BorderSizePixel = 0
-Horizontal_2.Size = UDim2.new(1.005988, 0, 1, 0)
-
-UIGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(12, 4, 20)), ColorSequenceKeypoint.new(0.05, Color3.fromRGB(12, 4, 20)), ColorSequenceKeypoint.new(0.49, Color3.fromRGB(12, 4, 20)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(4, 4, 4))}
-UIGradient.Parent = Horizontal_2
-
-UICorner.Parent = Horizontal_2
-
-Edge_11.Name = "Edge"
-Edge_11.Parent = LeftFill
-Edge_11.AnchorPoint = Vector2.new(0, 0.5)
-Edge_11.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-Edge_11.BackgroundTransparency = 1.000
-Edge_11.BorderSizePixel = 0
-Edge_11.ClipsDescendants = true
-Edge_11.Position = UDim2.new(1, 0, 0.5, 0)
-Edge_11.Size = UDim2.new(0.185000002, 0, 1, 0)
-
-UIAspectRatioConstraint_5.Parent = Edge_11
-
-Edge_12.Name = "Edge"
-Edge_12.Parent = Edge_11
-Edge_12.AnchorPoint = Vector2.new(0.5, 0.5)
-Edge_12.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-Edge_12.BackgroundTransparency = 1.000
-Edge_12.BorderSizePixel = 0
-Edge_12.Position = UDim2.new(0, 0, 0.5, 0)
-Edge_12.Size = UDim2.new(1, 12, 1, 0)
-Edge_12.Image = "rbxassetid://483281072"
-Edge_12.ImageColor3 = Color3.fromRGB(4, 4, 4)
-Edge_12.ImageTransparency = 0.140
+Edge_2.ImageColor3 = Color3.fromRGB(4, 4, 4)
+Edge_2.ImageTransparency = 0.140
 
 RightFill.Name = "RightFill"
 RightFill.Parent = CmdBar
 RightFill.AnchorPoint = Vector2.new(1, 0.5)
-RightFill.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 RightFill.BackgroundTransparency = 1.000
 RightFill.Position = UDim2.new(1, 0, 0.5, 0)
 RightFill.Size = UDim2.new(0.5, -125, 1, 0)
+
+Frame_2.Parent = RightFill
+Frame_2.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+Frame_2.BackgroundTransparency = 0.140
+Frame_2.Size = UDim2.new(1, 0, 1, 0)
+
+UIGradient_4.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(4, 4, 4)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(12, 4, 20))}
+UIGradient_4.Parent = Frame_2
+
+UICorner_5.CornerRadius = UDim.new(0, 9)
+UICorner_5.Parent = Frame_2
 
 Horizontal_3.Name = "Horizontal"
 Horizontal_3.Parent = RightFill
@@ -371,137 +263,75 @@ Horizontal_3.BorderSizePixel = 0
 Horizontal_3.Position = UDim2.new(-0.00798403192, 0, 0, 0)
 Horizontal_3.Size = UDim2.new(1.00798404, 0, 1, 0)
 
-UIGradient_2.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(4, 4, 4)), ColorSequenceKeypoint.new(0.49, Color3.fromRGB(12, 4, 20)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(12, 4, 20))}
-UIGradient_2.Parent = Horizontal_3
+UIGradient_5.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(4, 4, 4)), ColorSequenceKeypoint.new(0.49, Color3.fromRGB(12, 4, 20)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(12, 4, 20))}
+UIGradient_5.Parent = Horizontal_3
 
-UICorner_2.Parent = Horizontal_3
+UICorner_6.Parent = Horizontal_3
 
-Edge_13.Name = "Edge"
-Edge_13.Parent = RightFill
-Edge_13.AnchorPoint = Vector2.new(1, 0.5)
-Edge_13.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-Edge_13.BackgroundTransparency = 1.000
-Edge_13.BorderSizePixel = 0
-Edge_13.ClipsDescendants = true
-Edge_13.Position = UDim2.new(0, 0, 0.5, 0)
-Edge_13.Size = UDim2.new(0.185000002, 0, 1, 0)
+Edge_3.Name = "Edge"
+Edge_3.Parent = RightFill
+Edge_3.AnchorPoint = Vector2.new(1, 0.5)
+Edge_3.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+Edge_3.BackgroundTransparency = 1.000
+Edge_3.BorderSizePixel = 0
+Edge_3.ClipsDescendants = true
+Edge_3.Position = UDim2.new(0, 0, 0.5, 0)
+Edge_3.Size = UDim2.new(0.185000002, 0, 1, 0)
 
-UIAspectRatioConstraint_6.Parent = Edge_13
+UIAspectRatioConstraint_2.Parent = Edge_3
 
-Edge_14.Name = "Edge"
-Edge_14.Parent = Edge_13
-Edge_14.AnchorPoint = Vector2.new(0.5, 0.5)
-Edge_14.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-Edge_14.BackgroundTransparency = 1.000
-Edge_14.BorderSizePixel = 0
-Edge_14.Position = UDim2.new(1, 0, 0.5, 0)
-Edge_14.Size = UDim2.new(1, 12, 1, 0)
-Edge_14.Image = "rbxassetid://483281072"
-Edge_14.ImageColor3 = Color3.fromRGB(4, 4, 4)
-Edge_14.ImageTransparency = 0.140
+Edge_4.Name = "Edge"
+Edge_4.Parent = Edge_3
+Edge_4.AnchorPoint = Vector2.new(0.5, 0.5)
+Edge_4.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+Edge_4.BackgroundTransparency = 1.000
+Edge_4.BorderSizePixel = 0
+Edge_4.Position = UDim2.new(1, 0, 0.5, 0)
+Edge_4.Size = UDim2.new(1, 12, 1, 0)
+Edge_4.Image = "rbxassetid://483281072"
+Edge_4.ImageColor3 = Color3.fromRGB(4, 4, 4)
+Edge_4.ImageTransparency = 0.140
 
 Autofill.Name = "Autofill"
 Autofill.Parent = CmdBar
-Autofill.AnchorPoint = Vector2.new(0.5, 0)
-Autofill.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+Autofill.AnchorPoint = Vector2.new(0.5, 1)
+Autofill.BackgroundColor3 = Color3.fromRGB(12, 4, 20)
 Autofill.BackgroundTransparency = 1.000
-Autofill.Position = UDim2.new(0.5, 0, -6.51999998, 10)
-Autofill.Selectable = false
-Autofill.Size = UDim2.new(1, 0, 0, 138)
-Autofill.CanvasSize = UDim2.new(0, 0, 5, 0)
-Autofill.ScrollingEnabled = false
+Autofill.BorderSizePixel = 0
+Autofill.Position = UDim2.new(0.5, 0, 0, -10)
+Autofill.Size = UDim2.new(0, 400, 0, 150)
+Autofill.ZIndex = 4
+Autofill.CanvasSize = UDim2.new(0, 0, 0, 0)
+Autofill.ClipsDescendants = false
 
-Cmd.Name = "Cmd"
-Cmd.Parent = Autofill
-Cmd.AnchorPoint = Vector2.new(0.5, 0)
-Cmd.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-Cmd.BackgroundTransparency = 1.000
-Cmd.Position = UDim2.new(0.5, 0, 0.818840563, 0)
-Cmd.Size = UDim2.new(0.5, 0, 0, 25)
+UICorner_7.CornerRadius = UDim.new(0, 9)
+UICorner_7.Parent = Autofill
+
+UIGradient_6.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(12, 4, 20)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(4, 4, 4))}
+UIGradient_6.Rotation = 90
+UIGradient_6.Parent = Autofill
+
+Frame_3.Name = "Cmd"
+Frame_3.Parent = Autofill
+Frame_3.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+Frame_3.BackgroundTransparency = 0.100
+Frame_3.BorderSizePixel = 0
+Frame_3.Size = UDim2.new(0.899999976, 0, 0, 30)
+Frame_3.ClipsDescendants = true
+
+UICorner_8.CornerRadius = UDim.new(0, 6)
+UICorner_8.Parent = Frame_3
 
 Input_2.Name = "Input"
-Input_2.Parent = Cmd
-Input_2.Active = true
-Input_2.AnchorPoint = Vector2.new(0, 0.5)
-Input_2.BackgroundColor3 = Color3.fromRGB(17, 17, 17)
+Input_2.Parent = Frame_3
 Input_2.BackgroundTransparency = 1.000
-Input_2.ClipsDescendants = true
-Input_2.Position = UDim2.new(0, 0, 0.5, 0)
-Input_2.Selectable = true
-Input_2.Size = UDim2.new(1, 0, 1, -5)
-Input_2.ZIndex = 2
+Input_2.Position = UDim2.new(0, 5, 0, 0)
+Input_2.Size = UDim2.new(1, -10, 1, 0)
 Input_2.Font = Enum.Font.SourceSans
 Input_2.Text = "example <player> <text>"
-Input_2.TextColor3 = Color3.fromRGB(237, 238, 244)
+Input_2.TextColor3 = Color3.fromRGB(240, 240, 240)
 Input_2.TextScaled = true
-Input_2.TextSize = 24.000
 Input_2.TextWrapped = true
-
-Background.Name = "Background"
-Background.Parent = Cmd
-Background.AnchorPoint = Vector2.new(0.5, 0)
-Background.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-Background.BackgroundTransparency = 1.000
-Background.Position = UDim2.new(0.5, 0, 0, 0)
-Background.Size = UDim2.new(1, 0, 1, 0)
-
-Horizontal_4.Name = "Horizontal"
-Horizontal_4.Parent = Background
-Horizontal_4.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-Horizontal_4.BackgroundTransparency = 0.140
-Horizontal_4.BorderSizePixel = 0
-Horizontal_4.Size = UDim2.new(1, 0, 1, 0)
-
-UIGradient_3.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(12, 4, 20)), ColorSequenceKeypoint.new(0.08, Color3.fromRGB(12, 4, 20)), ColorSequenceKeypoint.new(0.15, Color3.fromRGB(4, 4, 4)), ColorSequenceKeypoint.new(0.50, Color3.fromRGB(4, 4, 4)), ColorSequenceKeypoint.new(0.79, Color3.fromRGB(4, 4, 4)), ColorSequenceKeypoint.new(0.91, Color3.fromRGB(12, 4, 20)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(12, 4, 20))}
-UIGradient_3.Parent = Horizontal_4
-
-Edge_15.Name = "Edge"
-Edge_15.Parent = Background
-Edge_15.AnchorPoint = Vector2.new(0, 0.5)
-Edge_15.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-Edge_15.BackgroundTransparency = 1.000
-Edge_15.BorderSizePixel = 0
-Edge_15.ClipsDescendants = true
-Edge_15.Position = UDim2.new(1, 0, 0.5, 0)
-Edge_15.Size = UDim2.new(0.185000002, 0, 1, 0)
-
-UIAspectRatioConstraint_7.Parent = Edge_15
-
-Edge_16.Name = "Edge"
-Edge_16.Parent = Edge_15
-Edge_16.AnchorPoint = Vector2.new(0.5, 0.5)
-Edge_16.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-Edge_16.BackgroundTransparency = 1.000
-Edge_16.BorderSizePixel = 0
-Edge_16.Position = UDim2.new(0, 0, 0.5, 0)
-Edge_16.Size = UDim2.new(1, 12, 1, 0)
-Edge_16.Image = "rbxassetid://483281072"
-Edge_16.ImageColor3 = Color3.fromRGB(12, 4, 20)
-Edge_16.ImageTransparency = 0.140
-
-Edge_17.Name = "Edge"
-Edge_17.Parent = Background
-Edge_17.AnchorPoint = Vector2.new(1, 0.5)
-Edge_17.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-Edge_17.BackgroundTransparency = 1.000
-Edge_17.BorderSizePixel = 0
-Edge_17.ClipsDescendants = true
-Edge_17.Position = UDim2.new(0, 0, 0.5, 0)
-Edge_17.Size = UDim2.new(0.185000002, 0, 1, 0)
-
-UIAspectRatioConstraint_8.Parent = Edge_17
-
-Edge_18.Name = "Edge"
-Edge_18.Parent = Edge_17
-Edge_18.AnchorPoint = Vector2.new(0.5, 0.5)
-Edge_18.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-Edge_18.BackgroundTransparency = 1.000
-Edge_18.BorderSizePixel = 0
-Edge_18.Position = UDim2.new(1, 0, 0.5, 0)
-Edge_18.Size = UDim2.new(1, 12, 1, 0)
-Edge_18.Image = "rbxassetid://483281072"
-Edge_18.ImageColor3 = Color3.fromRGB(12, 4, 20)
-Edge_18.ImageTransparency = 0.140
 
 UIListLayout.Parent = Autofill
 UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
@@ -600,7 +430,7 @@ Description.TextColor3 = Color3.fromRGB(255, 255, 255)
 Description.TextSize = 13.000
 Description.TextWrapped = true
 
-UICorner_3.Parent = Description
+UICorner_9.Parent = Description
 
 Modal.Name = "Modal"
 Modal.Parent = AdminUI
@@ -611,18 +441,18 @@ ChatLogs.Parent = AdminUI
 ChatLogs.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
 ChatLogs.BackgroundTransparency = 0.400
 ChatLogs.BorderSizePixel = 0
+ChatLogs.ClipsDescendants = true
 ChatLogs.Position = UDim2.new(0.5, 0, 0.699999988, 0)
 ChatLogs.Size = UDim2.new(0, 400, 0, 300)
-ChatLogs.ClipsDescendants = true
 
-UICorner_4.Parent = ChatLogs
+UICorner_10.Parent = ChatLogs
 
 Topbar.Name = "Topbar"
 Topbar.Parent = ChatLogs
+Topbar.Active = true
 Topbar.BackgroundTransparency = 1.000
 Topbar.BorderSizePixel = 0
 Topbar.Size = UDim2.new(1, 0, 0, 30)
-Topbar.Active = true
 
 Title.Name = "Title"
 Title.Parent = Topbar
@@ -632,7 +462,9 @@ Title.Size = UDim2.new(1, -100, 1, 0)
 Title.Font = Enum.Font.GothamBold
 Title.Text = "Chat Logs"
 Title.TextColor3 = Color3.fromRGB(0, 255, 255)
+Title.TextScaled = true
 Title.TextSize = 20.000
+Title.TextWrapped = true
 Title.TextXAlignment = Enum.TextXAlignment.Left
 
 Minimize.Name = "Minimize"
@@ -646,8 +478,8 @@ Minimize.Text = "-"
 Minimize.TextColor3 = Color3.fromRGB(10, 10, 10)
 Minimize.TextSize = 18.000
 
-UICorner_5.CornerRadius = UDim.new(0, 6)
-UICorner_5.Parent = Minimize
+UICorner_11.CornerRadius = UDim.new(0, 6)
+UICorner_11.Parent = Minimize
 
 Exit.Name = "Exit"
 Exit.Parent = Topbar
@@ -660,8 +492,8 @@ Exit.Text = "X"
 Exit.TextColor3 = Color3.fromRGB(10, 10, 10)
 Exit.TextSize = 18.000
 
-UICorner_6.CornerRadius = UDim.new(0, 6)
-UICorner_6.Parent = Exit
+UICorner_12.CornerRadius = UDim.new(0, 6)
+UICorner_12.Parent = Exit
 
 Clear.Name = "Clear"
 Clear.Parent = Topbar
@@ -675,8 +507,8 @@ Clear.Text = "C"
 Clear.TextColor3 = Color3.fromRGB(10, 10, 10)
 Clear.TextSize = 18.000
 
-UICorner_7.CornerRadius = UDim.new(0, 6)
-UICorner_7.Parent = Clear
+UICorner_13.CornerRadius = UDim.new(0, 6)
+UICorner_13.Parent = Clear
 
 Container.Name = "Container"
 Container.Parent = ChatLogs
@@ -717,35 +549,35 @@ TextLabel.TextSize = 14.000
 TextLabel.TextStrokeTransparency = 0.800
 TextLabel.TextWrapped = true
 
-UICorner_8.CornerRadius = UDim.new(0, 9)
-UICorner_8.Parent = Container
+UICorner_14.CornerRadius = UDim.new(0, 9)
+UICorner_14.Parent = Container
 
-UIGradient_4.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(12, 4, 20)), ColorSequenceKeypoint.new(0.50, Color3.fromRGB(12, 4, 20)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(12, 4, 20))}
-UIGradient_4.Parent = Container
+UIGradient_7.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(12, 4, 20)), ColorSequenceKeypoint.new(0.50, Color3.fromRGB(12, 4, 20)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(12, 4, 20))}
+UIGradient_7.Parent = Container
 
-UICorner_9.CornerRadius = UDim.new(0, 9)
-UICorner_9.Parent = ChatLogs
+UICorner_15.CornerRadius = UDim.new(0, 9)
+UICorner_15.Parent = ChatLogs
 
-UIGradient_5.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(12, 4, 20)), ColorSequenceKeypoint.new(0.38, Color3.fromRGB(4, 4, 4)), ColorSequenceKeypoint.new(0.52, Color3.fromRGB(4, 4, 4)), ColorSequenceKeypoint.new(0.68, Color3.fromRGB(4, 4, 4)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(12, 4, 20))}
-UIGradient_5.Parent = ChatLogs
+UIGradient_8.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(12, 4, 20)), ColorSequenceKeypoint.new(0.38, Color3.fromRGB(4, 4, 4)), ColorSequenceKeypoint.new(0.52, Color3.fromRGB(4, 4, 4)), ColorSequenceKeypoint.new(0.68, Color3.fromRGB(4, 4, 4)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(12, 4, 20))}
+UIGradient_8.Parent = ChatLogs
 
 Commands.Name = "Commands"
 Commands.Parent = AdminUI
 Commands.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
 Commands.BackgroundTransparency = 0.400
 Commands.BorderSizePixel = 0
+Commands.ClipsDescendants = true
 Commands.Position = UDim2.new(0.100000001, 0, 0.5, 0)
 Commands.Size = UDim2.new(0, 280, 0, 320)
-Commands.ClipsDescendants = true
 
-UICorner_10.Parent = Commands
+UICorner_16.Parent = Commands
 
 Topbar_2.Name = "Topbar"
 Topbar_2.Parent = Commands
+Topbar_2.Active = true
 Topbar_2.BackgroundTransparency = 1.000
 Topbar_2.BorderSizePixel = 0
 Topbar_2.Size = UDim2.new(1, 0, 0, 30)
-Topbar_2.Active = true
 
 Title_2.Name = "Title"
 Title_2.Parent = Topbar_2
@@ -755,7 +587,9 @@ Title_2.Size = UDim2.new(1, -100, 1, 0)
 Title_2.Font = Enum.Font.GothamBold
 Title_2.Text = "Commands"
 Title_2.TextColor3 = Color3.fromRGB(0, 255, 255)
+Title_2.TextScaled = true
 Title_2.TextSize = 20.000
+Title_2.TextWrapped = true
 Title_2.TextXAlignment = Enum.TextXAlignment.Left
 
 Minimize_2.Name = "Minimize"
@@ -769,8 +603,8 @@ Minimize_2.Text = "-"
 Minimize_2.TextColor3 = Color3.fromRGB(10, 10, 10)
 Minimize_2.TextSize = 18.000
 
-UICorner_11.CornerRadius = UDim.new(0, 6)
-UICorner_11.Parent = Minimize_2
+UICorner_17.CornerRadius = UDim.new(0, 6)
+UICorner_17.Parent = Minimize_2
 
 Exit_2.Name = "Exit"
 Exit_2.Parent = Topbar_2
@@ -783,8 +617,8 @@ Exit_2.Text = "X"
 Exit_2.TextColor3 = Color3.fromRGB(10, 10, 10)
 Exit_2.TextSize = 18.000
 
-UICorner_12.CornerRadius = UDim.new(0, 6)
-UICorner_12.Parent = Exit_2
+UICorner_18.CornerRadius = UDim.new(0, 6)
+UICorner_18.Parent = Exit_2
 
 Clear_2.Name = "Clear"
 Clear_2.Parent = Topbar_2
@@ -798,8 +632,8 @@ Clear_2.Text = "C"
 Clear_2.TextColor3 = Color3.fromRGB(10, 10, 10)
 Clear_2.TextSize = 18.000
 
-UICorner_13.CornerRadius = UDim.new(0, 6)
-UICorner_13.Parent = Clear_2
+UICorner_19.CornerRadius = UDim.new(0, 6)
+UICorner_19.Parent = Clear_2
 
 Container_2.Name = "Container"
 Container_2.Parent = Commands
@@ -855,38 +689,38 @@ Filter.Text = ""
 Filter.TextColor3 = Color3.fromRGB(229, 229, 229)
 Filter.TextSize = 18.000
 
-UICorner_14.CornerRadius = UDim.new(0, 9)
-UICorner_14.Parent = Filter
+UICorner_20.CornerRadius = UDim.new(0, 9)
+UICorner_20.Parent = Filter
 
-UICorner_15.CornerRadius = UDim.new(0, 9)
-UICorner_15.Parent = Container_2
+UICorner_21.CornerRadius = UDim.new(0, 9)
+UICorner_21.Parent = Container_2
 
-UIGradient_6.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(12, 4, 20)), ColorSequenceKeypoint.new(0.50, Color3.fromRGB(12, 4, 20)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(12, 4, 20))}
-UIGradient_6.Parent = Container_2
+UIGradient_9.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(12, 4, 20)), ColorSequenceKeypoint.new(0.50, Color3.fromRGB(12, 4, 20)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(12, 4, 20))}
+UIGradient_9.Parent = Container_2
 
-UICorner_16.CornerRadius = UDim.new(0, 9)
-UICorner_16.Parent = Commands
+UICorner_22.CornerRadius = UDim.new(0, 9)
+UICorner_22.Parent = Commands
 
-UIGradient_7.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(12, 4, 20)), ColorSequenceKeypoint.new(0.52, Color3.fromRGB(4, 4, 4)), ColorSequenceKeypoint.new(0.52, Color3.fromRGB(4, 4, 4)), ColorSequenceKeypoint.new(0.53, Color3.fromRGB(4, 4, 4)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(12, 4, 20))}
-UIGradient_7.Parent = Commands
+UIGradient_10.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(12, 4, 20)), ColorSequenceKeypoint.new(0.52, Color3.fromRGB(4, 4, 4)), ColorSequenceKeypoint.new(0.52, Color3.fromRGB(4, 4, 4)), ColorSequenceKeypoint.new(0.53, Color3.fromRGB(4, 4, 4)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(12, 4, 20))}
+UIGradient_10.Parent = Commands
 
 UpdLog.Name = "UpdLog"
 UpdLog.Parent = AdminUI
 UpdLog.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
 UpdLog.BackgroundTransparency = 0.400
 UpdLog.BorderSizePixel = 0
+UpdLog.ClipsDescendants = true
 UpdLog.Position = UDim2.new(0.899999976, -140, 0.200000003, 0)
 UpdLog.Size = UDim2.new(0, 280, 0, 320)
-UpdLog.ClipsDescendants = true
 
-UICorner_17.Parent = UpdLog
+UICorner_23.Parent = UpdLog
 
 Topbar_3.Name = "Topbar"
 Topbar_3.Parent = UpdLog
+Topbar_3.Active = true
 Topbar_3.BackgroundTransparency = 1.000
 Topbar_3.BorderSizePixel = 0
 Topbar_3.Size = UDim2.new(1, 0, 0, 30)
-Topbar_3.Active = true
 
 Title_3.Name = "Title"
 Title_3.Parent = Topbar_3
@@ -896,7 +730,9 @@ Title_3.Size = UDim2.new(1, -100, 1, 0)
 Title_3.Font = Enum.Font.GothamBold
 Title_3.Text = "Update Log"
 Title_3.TextColor3 = Color3.fromRGB(0, 255, 255)
+Title_3.TextScaled = true
 Title_3.TextSize = 20.000
+Title_3.TextWrapped = true
 Title_3.TextXAlignment = Enum.TextXAlignment.Left
 
 Minimize_3.Name = "Minimize"
@@ -910,8 +746,8 @@ Minimize_3.Text = "-"
 Minimize_3.TextColor3 = Color3.fromRGB(10, 10, 10)
 Minimize_3.TextSize = 18.000
 
-UICorner_18.CornerRadius = UDim.new(0, 6)
-UICorner_18.Parent = Minimize_3
+UICorner_24.CornerRadius = UDim.new(0, 6)
+UICorner_24.Parent = Minimize_3
 
 Exit_3.Name = "Exit"
 Exit_3.Parent = Topbar_3
@@ -924,8 +760,8 @@ Exit_3.Text = "X"
 Exit_3.TextColor3 = Color3.fromRGB(10, 10, 10)
 Exit_3.TextSize = 18.000
 
-UICorner_19.CornerRadius = UDim.new(0, 6)
-UICorner_19.Parent = Exit_3
+UICorner_25.CornerRadius = UDim.new(0, 6)
+UICorner_25.Parent = Exit_3
 
 Clear_3.Name = "Clear"
 Clear_3.Parent = Topbar_3
@@ -939,8 +775,8 @@ Clear_3.Text = "C"
 Clear_3.TextColor3 = Color3.fromRGB(10, 10, 10)
 Clear_3.TextSize = 18.000
 
-UICorner_20.CornerRadius = UDim.new(0, 6)
-UICorner_20.Parent = Clear_3
+UICorner_26.CornerRadius = UDim.new(0, 6)
+UICorner_26.Parent = Clear_3
 
 Container_3.Name = "Container"
 Container_3.Parent = UpdLog
@@ -982,35 +818,35 @@ TextLabel_3.TextScaled = true
 TextLabel_3.TextSize = 14.000
 TextLabel_3.TextWrapped = true
 
-UICorner_21.CornerRadius = UDim.new(0, 9)
-UICorner_21.Parent = Container_3
+UICorner_27.CornerRadius = UDim.new(0, 9)
+UICorner_27.Parent = Container_3
 
-UIGradient_8.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(12, 4, 20)), ColorSequenceKeypoint.new(0.50, Color3.fromRGB(12, 4, 20)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(12, 4, 20))}
-UIGradient_8.Parent = Container_3
+UIGradient_11.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(12, 4, 20)), ColorSequenceKeypoint.new(0.50, Color3.fromRGB(12, 4, 20)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(12, 4, 20))}
+UIGradient_11.Parent = Container_3
 
-UICorner_22.CornerRadius = UDim.new(0, 9)
-UICorner_22.Parent = UpdLog
+UICorner_28.CornerRadius = UDim.new(0, 9)
+UICorner_28.Parent = UpdLog
 
-UIGradient_9.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(12, 4, 20)), ColorSequenceKeypoint.new(0.52, Color3.fromRGB(4, 4, 4)), ColorSequenceKeypoint.new(0.52, Color3.fromRGB(4, 4, 4)), ColorSequenceKeypoint.new(0.53, Color3.fromRGB(4, 4, 4)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(12, 4, 20))}
-UIGradient_9.Parent = UpdLog
+UIGradient_12.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(12, 4, 20)), ColorSequenceKeypoint.new(0.52, Color3.fromRGB(4, 4, 4)), ColorSequenceKeypoint.new(0.52, Color3.fromRGB(4, 4, 4)), ColorSequenceKeypoint.new(0.53, Color3.fromRGB(4, 4, 4)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(12, 4, 20))}
+UIGradient_12.Parent = UpdLog
 
 soRealConsole.Name = "soRealConsole"
 soRealConsole.Parent = AdminUI
 soRealConsole.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
 soRealConsole.BackgroundTransparency = 0.400
 soRealConsole.BorderSizePixel = 0
+soRealConsole.ClipsDescendants = true
 soRealConsole.Position = UDim2.new(0.305859059, 0, 0.525355697, 0)
 soRealConsole.Size = UDim2.new(0, 400, 0, 300)
-soRealConsole.ClipsDescendants = true
 
-UICorner_23.Parent = soRealConsole
+UICorner_29.Parent = soRealConsole
 
 Topbar_4.Name = "Topbar"
 Topbar_4.Parent = soRealConsole
+Topbar_4.Active = true
 Topbar_4.BackgroundTransparency = 1.000
 Topbar_4.BorderSizePixel = 0
 Topbar_4.Size = UDim2.new(1, 0, 0, 30)
-Topbar_4.Active = true
 
 Title_4.Name = "Title"
 Title_4.Parent = Topbar_4
@@ -1020,7 +856,9 @@ Title_4.Size = UDim2.new(1, -100, 1, 0)
 Title_4.Font = Enum.Font.GothamBold
 Title_4.Text = "Console"
 Title_4.TextColor3 = Color3.fromRGB(0, 255, 255)
+Title_4.TextScaled = true
 Title_4.TextSize = 20.000
+Title_4.TextWrapped = true
 Title_4.TextXAlignment = Enum.TextXAlignment.Left
 
 Minimize_4.Name = "Minimize"
@@ -1034,8 +872,8 @@ Minimize_4.Text = "-"
 Minimize_4.TextColor3 = Color3.fromRGB(10, 10, 10)
 Minimize_4.TextSize = 18.000
 
-UICorner_24.CornerRadius = UDim.new(0, 6)
-UICorner_24.Parent = Minimize_4
+UICorner_30.CornerRadius = UDim.new(0, 6)
+UICorner_30.Parent = Minimize_4
 
 Exit_4.Name = "Exit"
 Exit_4.Parent = Topbar_4
@@ -1048,8 +886,8 @@ Exit_4.Text = "X"
 Exit_4.TextColor3 = Color3.fromRGB(10, 10, 10)
 Exit_4.TextSize = 18.000
 
-UICorner_25.CornerRadius = UDim.new(0, 6)
-UICorner_25.Parent = Exit_4
+UICorner_31.CornerRadius = UDim.new(0, 6)
+UICorner_31.Parent = Exit_4
 
 Clear_4.Name = "Clear"
 Clear_4.Parent = Topbar_4
@@ -1063,8 +901,8 @@ Clear_4.Text = "C"
 Clear_4.TextColor3 = Color3.fromRGB(10, 10, 10)
 Clear_4.TextSize = 18.000
 
-UICorner_26.CornerRadius = UDim.new(0, 6)
-UICorner_26.Parent = Clear_4
+UICorner_32.CornerRadius = UDim.new(0, 6)
+UICorner_32.Parent = Clear_4
 
 Container_4.Name = "Container"
 Container_4.Parent = soRealConsole
@@ -1105,11 +943,11 @@ TextLabel_4.TextSize = 14.000
 TextLabel_4.TextStrokeTransparency = 0.800
 TextLabel_4.TextWrapped = true
 
-UICorner_27.CornerRadius = UDim.new(0, 9)
-UICorner_27.Parent = Container_4
+UICorner_33.CornerRadius = UDim.new(0, 9)
+UICorner_33.Parent = Container_4
 
-UIGradient_10.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(12, 4, 20)), ColorSequenceKeypoint.new(0.50, Color3.fromRGB(12, 4, 20)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(12, 4, 20))}
-UIGradient_10.Parent = Container_4
+UIGradient_13.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(12, 4, 20)), ColorSequenceKeypoint.new(0.50, Color3.fromRGB(12, 4, 20)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(12, 4, 20))}
+UIGradient_13.Parent = Container_4
 
 Filter_2.Name = "Filter"
 Filter_2.Parent = Container_4
@@ -1126,13 +964,13 @@ Filter_2.Text = ""
 Filter_2.TextColor3 = Color3.fromRGB(229, 229, 229)
 Filter_2.TextSize = 18.000
 
-UICorner_28.CornerRadius = UDim.new(0, 9)
-UICorner_28.Parent = Filter_2
+UICorner_34.CornerRadius = UDim.new(0, 9)
+UICorner_34.Parent = Filter_2
 
-UICorner_29.CornerRadius = UDim.new(0, 9)
-UICorner_29.Parent = soRealConsole
+UICorner_35.CornerRadius = UDim.new(0, 9)
+UICorner_35.Parent = soRealConsole
 
-UIGradient_11.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(12, 4, 20)), ColorSequenceKeypoint.new(0.38, Color3.fromRGB(4, 4, 4)), ColorSequenceKeypoint.new(0.52, Color3.fromRGB(4, 4, 4)), ColorSequenceKeypoint.new(0.68, Color3.fromRGB(4, 4, 4)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(12, 4, 20))}
-UIGradient_11.Parent = soRealConsole
+UIGradient_14.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(12, 4, 20)), ColorSequenceKeypoint.new(0.38, Color3.fromRGB(4, 4, 4)), ColorSequenceKeypoint.new(0.52, Color3.fromRGB(4, 4, 4)), ColorSequenceKeypoint.new(0.68, Color3.fromRGB(4, 4, 4)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(12, 4, 20))}
+UIGradient_14.Parent = soRealConsole
 
 return AdminUI

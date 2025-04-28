@@ -20,8 +20,8 @@
 if getgenv().RealNamelessLoaded then return end
 
 function NACaller(pp)--helps me log better
-	local s,err=pcall(pp)
-	if not s then print("NA script err: "..err) end
+	local NAsss,NAerr=pcall(pp)
+	if not NAsss then warn("NA script error: "..NAerr) end
 end
 
 NACaller(function() getgenv().RealNamelessLoaded=true end)
@@ -179,7 +179,7 @@ end
 
 
 --[[ Version ]]--
-local curVer = isAprilFools() and Format("%d.%d.%d", math.random(1, 10), math.random(0, 99), math.random(0, 99)) or "2.4.1"
+local curVer = isAprilFools() and Format("%d.%d.%d", math.random(1, 99), math.random(0, 99), math.random(0, 99)) or "2.4.2"
 
 --[[ Brand ]]--
 local mainName = 'Nameless Admin'
@@ -560,16 +560,16 @@ local ctrlModule = nil
 NASAVEDALIASES = {}
 
 Spawn(function()
-	ppDSCRIPTSS = Players.LocalPlayer:FindFirstChildOfClass("PlayerScripts")
-	if not ppDSCRIPTSS then return end
+	NACaller(function()
+        local playerScripts = LocalPlayer:WaitForChild("PlayerScripts", 5)
+        local playerModule = playerScripts:WaitForChild("PlayerModule", 5)
+        local controlModule = playerModule:WaitForChild("ControlModule", 5)
 
-	PPMODULEEEE = ppDSCRIPTSS:WaitForChild("PlayerModule", 5)
-	if not PPMODULEEEE then return end
-
-	controllermodellllLLL = PPMODULEEEE:WaitForChild("ControlModule", 5)
-	if not controllermodellllLLL then return end
-
-	ctrlModule = require(controllermodellllLLL)
+        local ok, result = pcall(require, controlModule)
+        if ok then
+            ctrlModule = result
+        end
+    end)
 end)
 
 customVECTORMOVE = Vector3.zero
@@ -794,6 +794,9 @@ end
 LocalPlayer.OnTeleport:Connect(function(...)
 	if NAQoTEnabled and queueteleport then
 		queueteleport(loader)
+	end
+	if isAprilFools() then
+		queueteleport("getgenv().ActivateAprilMode=true")
 	end
 end)
 
@@ -8575,7 +8578,7 @@ cmd.add({"freecam","fc","fcam"},{"freecam [speed] (fc,fcam)","Enable free camera
 	if connections["freecam"] then
 		lib.disconnect("freecam")
 		camera.CameraSubject = character
-		wrap(function() character.PrimaryPart.Anchored = false end)
+		coroutine.wrap(function() character.PrimaryPart.Anchored = false end)
 	end
 
 	if fcBTNTOGGLE then fcBTNTOGGLE:Destroy() fcBTNTOGGLE = nil end
@@ -8587,7 +8590,7 @@ cmd.add({"freecam","fc","fcam"},{"freecam [speed] (fc,fcam)","Enable free camera
 		camPart.Anchored = true
 		camPart.CFrame = camera.CFrame
 
-		wrap(function()
+		coroutine.wrap(function()
 			character.PrimaryPart.Anchored = true
 		end)
 
@@ -8708,7 +8711,7 @@ cmd.add({"freecam","fc","fcam"},{"freecam [speed] (fc,fcam)","Enable free camera
 						lib.disconnect("freecam")
 					end
 					camera.CameraSubject = character
-					wrap(function() character.PrimaryPart.Anchored = false end)
+					coroutine.wrap(function() character.PrimaryPart.Anchored = false end)
 				end
 			end)
 		end)()
@@ -8724,7 +8727,7 @@ end, true)
 cmd.add({"unfreecam","unfc","unfcam"},{"unfreecam (unfc,unfcam)","Disable free camera"},function()
 	lib.disconnect("freecam")
 	camera.CameraSubject = character
-	wrap(function()
+	coroutine.wrap(function()
 		character.PrimaryPart.Anchored = false
 	end)
 	if fcBTNTOGGLE then fcBTNTOGGLE:Destroy() fcBTNTOGGLE = nil end
@@ -16338,30 +16341,32 @@ end
 
 gui.barSelect = function(speed)
 	speed = speed or 0.4
+	
 	centerBar.Visible = true
-
 	centerBar.Size = UDim2.new(0, 0, 1, 15)
-	gui.tween(centerBar, "Back", "Out", speed, {Size = UDim2.new(0, 250, 1, 15)})
 
-	leftFill.Position = UDim2.new(-0.3, 0, 0.5, 0)
-	rightFill.Position = UDim2.new(1.3, 0, 0.5, 0)
+	gui.tween(centerBar, "Quint", "Out", speed, {Size = UDim2.new(0, 250, 1, 15)})
 
-	gui.tween(leftFill, "Elastic", "Out", speed, {Position = UDim2.new(0, 0, 0.5, 0)})
-	gui.tween(rightFill, "Elastic", "Out", speed, {Position = UDim2.new(1, 0, 0.5, 0)})
+	leftFill.Position = UDim2.new(-0.5, 0, 0.5, 0)
+	rightFill.Position = UDim2.new(1.5, 0, 0.5, 0)
+
+	gui.tween(leftFill, "Quart", "Out", speed, {Position = UDim2.new(0, 0, 0.5, 0)})
+	gui.tween(rightFill, "Quart", "Out", speed, {Position = UDim2.new(1, 0, 0.5, 0)})
 end
 
 gui.barDeselect = function(speed)
 	speed = speed or 0.4
 
-	gui.tween(centerBar, "Sine", "InOut", speed, {Size = UDim2.new(0, 250, 0, 0)})
-	gui.tween(leftFill, "Cubic", "InOut", speed, {Position = UDim2.new(-0.5, 100, 0.5, 0)})
-	gui.tween(rightFill, "Cubic", "InOut", speed, {Position = UDim2.new(1.5, -100, 0.5, 0)})
+	gui.tween(centerBar, "Back", "InOut", speed, {Size = UDim2.new(0, 250, 0, 0)})
+
+	gui.tween(leftFill, "Quart", "In", speed * 0.9, {Position = UDim2.new(-0.5, -125, 0.5, 0)})
+	gui.tween(rightFill, "Quart", "In", speed * 0.9, {Position = UDim2.new(1.5, 125, 0.5, 0)})
 
 	for i, v in ipairs(cmdAutofill:GetChildren()) do
 		if v:IsA("Frame") then
 			wrap(function()
 				Wait(math.random(50, 120) / 1000)
-				gui.tween(v, "Exponential", "In", 0.3, {Size = UDim2.new(0, 0, 0, 25)})
+				gui.tween(v, "Exponential", "In", 0.25, {Size = UDim2.new(0, 0, 0, 25)})
 			end)
 		end
 	end
@@ -16981,7 +16986,7 @@ TextLabel.Text = getSeasonEmoji().." "..adminName.." V"..curVer.." "..getSeasonE
 TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 TextLabel.TextSize = 22
 TextLabel.TextWrapped = true
-TextLabel.TextStrokeTransparency = 0.8
+TextLabel.TextStrokeTransparency = 0.7
 TextLabel.TextTransparency = 1
 TextLabel.ZIndex = 9999
 
@@ -16989,9 +16994,9 @@ UICorner2.CornerRadius = UDim.new(0.25, 0)
 UICorner2.Parent = TextLabel
 
 UIStroke.Parent = TextLabel
-UIStroke.Thickness = 1
+UIStroke.Thickness = 2
 UIStroke.Color = Color3.fromRGB(0, 0, 0)
-UIStroke.Transparency = 0.6
+UIStroke.Transparency = 0.4
 UIStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
 UIGradient.Parent = TextLabel
@@ -17001,17 +17006,17 @@ UIGradient.Color = ColorSequence.new{
 }
 UIGradient.Transparency = NumberSequence.new{
 	NumberSequenceKeypoint.new(0, 0),
-	NumberSequenceKeypoint.new(0.5, 0.3),
+	NumberSequenceKeypoint.new(0.5, 0.25),
 	NumberSequenceKeypoint.new(1, 0)
 }
-UIGradient.Rotation = 45
+UIGradient.Rotation = 55
 
 ImageButton.Parent = NASCREENGUI
 ImageButton.BackgroundTransparency = 1
 ImageButton.AnchorPoint = Vector2.new(0.5, 0)
 ImageButton.BorderSizePixel = 0
 ImageButton.Position = UDim2.new(0.5, 0, -1, 0)
-ImageButton.Size = UDim2.new(0, 32 * NAScale, 0, 33 * NAScale)
+ImageButton.Size = UDim2.new(0, 32 * NAScale, 0, 32 * NAScale)
 ImageButton.Image = "rbxassetid://77352376040674"
 ImageButton.ZIndex = 9999
 
@@ -17022,13 +17027,13 @@ NAimageButton = ImageButton
 
 if IsOnMobile then
 	ImageButton.MouseEnter:Connect(function()
-		TweenService:Create(ImageButton, TweenInfo.new(0.25), {
-			Size = UDim2.new(0, 34 * NAScale, 0, 35 * NAScale)
+		TweenService:Create(ImageButton, TweenInfo.new(0.25, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
+			Size = UDim2.new(0, 35 * NAScale, 0, 35 * NAScale)
 		}):Play()
 	end)
 	ImageButton.MouseLeave:Connect(function()
-		TweenService:Create(ImageButton, TweenInfo.new(0.25), {
-			Size = UDim2.new(0, 32 * NAScale, 0, 33 * NAScale)
+		TweenService:Create(ImageButton, TweenInfo.new(0.25, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
+			Size = UDim2.new(0, 32 * NAScale, 0, 32 * NAScale)
 		}):Play()
 	end)
 end
@@ -17036,28 +17041,24 @@ end
 swooshySWOOSH = false
 
 function Swoosh()
-	local targetRotation = isAprilFools() and math.random(500, 2000) or 720
-	TweenService:Create(NAimageButton, TweenInfo.new(1.2, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+	local targetRotation = isAprilFools() and math.random(540, 1440) or 720
+	TweenService:Create(ImageButton, TweenInfo.new(1.2, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out), {
 		Rotation = targetRotation
 	}):Play()
 
-	gui.draggablev2(NAimageButton)
+	gui.draggablev2(ImageButton)
 
 	if swooshySWOOSH then
 		return
 	end
 	swooshySWOOSH = true
 
-	local dragging = false
-
-	NAimageButton.InputBegan:Connect(function(input)
+	ImageButton.InputBegan:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-			dragging = true
 			input.Changed:Connect(function()
 				if input.UserInputState == Enum.UserInputState.End then
-					dragging = false
 					if FileSupport and NAiconSaveEnabled then
-						local pos = NAimageButton.Position
+						local pos = ImageButton.Position
 						writefile(NAICONPOSPATH, HttpService:JSONEncode({
 							X = pos.X.Scale,
 							Y = pos.Y.Scale,
@@ -17072,18 +17073,17 @@ end
 
 function mainNameless()
 	local txtLabel = TextLabel
-
 	local textWidth = TextService:GetTextSize(txtLabel.Text, txtLabel.TextSize, txtLabel.Font, Vector2.new(math.huge, math.huge)).X
 	local finalSize = UDim2.new(0, textWidth + 80, 0, 40)
 
-	local appearTween = TweenService:Create(txtLabel, TweenInfo.new(1, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out), {
+	local appearTween = TweenService:Create(txtLabel, TweenInfo.new(0.8, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out), {
 		Size = finalSize,
-		BackgroundTransparency = 0.14,
+		BackgroundTransparency = 0.1,
 		TextTransparency = 0,
 	})
 
-	local riseTween = TweenService:Create(txtLabel, TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
-		Position = UDim2.new(0.5, 0, 0.5, -10)
+	local riseTween = TweenService:Create(txtLabel, TweenInfo.new(0.4, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out), {
+		Position = UDim2.new(0.5, 0, 0.48, 0)
 	})
 
 	appearTween:Play()
@@ -17104,12 +17104,12 @@ function mainNameless()
 
 		ImageButton.Position = UDim2.new(targetPos.X.Scale, 0, targetPos.Y.Scale - 0.15, -20)
 
-		local appearTween = TweenService:Create(ImageButton, TweenInfo.new(1, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-			Size = UDim2.new(0, 32 * NAScale, 0, 33 * NAScale),
+		local appearBtnTween = TweenService:Create(ImageButton, TweenInfo.new(1, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out), {
+			Size = UDim2.new(0, 32 * NAScale, 0, 32 * NAScale),
 			Position = targetPos,
 			ImageTransparency = 0
 		})
-		appearTween:Play()
+		appearBtnTween:Play()
 
 		Swoosh()
 	else
@@ -17118,16 +17118,15 @@ function mainNameless()
 
 	Wait(2.5)
 
-	local fadeOutTween = TweenService:Create(txtLabel, TweenInfo.new(0.6, Enum.EasingStyle.Quint, Enum.EasingDirection.InOut), {
+	local fadeOutTween = TweenService:Create(txtLabel, TweenInfo.new(0.6, Enum.EasingStyle.Elastic, Enum.EasingDirection.InOut), {
 		TextTransparency = 1,
 		BackgroundTransparency = 1,
-		Position = UDim2.new(0.5, 0, 0.5, 20),
+		Position = UDim2.new(0.5, 0, 0.52, 20),
 		Size = UDim2.new(0, 0, 0, 0)
 	})
 
 	fadeOutTween:Play()
-
-	fadeOutTween.Completed:Connect(function()
+	fadeOutTween.Completed:Once(function()
 		txtLabel:Destroy()
 	end)
 end
@@ -17274,8 +17273,6 @@ print([[
 ██║░░██║██████╔╝██║░╚═╝░██║██║██║░╚███║
 ╚═╝░░╚═╝╚═════╝░╚═╝░░░░░╚═╝╚═╝╚═╝░░╚══╝
 ]])
-
-if isAprilFools() then queueteleport("getgenv().ActivateAprilMode=true") end
 
 math.randomseed(os.time())
 
