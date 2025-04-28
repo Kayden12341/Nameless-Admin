@@ -16385,7 +16385,7 @@ gui.searchCommands = function()
 		searchHeartbeat:Disconnect()
 	end
 
-	searchHeartbeat = game:GetService("RunService").Heartbeat:Connect(function()
+	searchHeartbeat = RunService.Heartbeat:Connect(function()
 		searchHeartbeat:Disconnect()
 
 		local searchTerm = inputText
