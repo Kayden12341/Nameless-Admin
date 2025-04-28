@@ -176,6 +176,7 @@ Input.Text = ""
 Input.TextColor3 = Color3.fromRGB(225, 225, 225)
 Input.TextScaled = true
 Input.TextWrapped = true
+Input.ClipsDescendants = true
 
 UICorner_2.CornerRadius = UDim.new(0, 6)
 UICorner_2.Parent = Input
@@ -310,11 +311,13 @@ UIGradient_6.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fr
 UIGradient_6.Rotation = 90
 UIGradient_6.Parent = Autofill
 
+Frame_3.Name = "Cmd"
 Frame_3.Parent = Autofill
 Frame_3.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 Frame_3.BackgroundTransparency = 0.100
 Frame_3.BorderSizePixel = 0
 Frame_3.Size = UDim2.new(0.899999976, 0, 0, 30)
+Frame_3.ClipsDescendants = true
 
 UICorner_8.CornerRadius = UDim.new(0, 6)
 UICorner_8.Parent = Frame_3
