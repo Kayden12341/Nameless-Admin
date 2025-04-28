@@ -16208,20 +16208,6 @@ gui.menuify = function(menu)
 		end
 	end
 
-	minimizeButton.MouseEnter:Connect(function()
-		TweenService:Create(minimizeButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(0, 200, 255)}):Play()
-	end)
-	minimizeButton.MouseLeave:Connect(function()
-		TweenService:Create(minimizeButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(0, 255, 255)}):Play()
-	end)
-
-	exitButton.MouseEnter:Connect(function()
-		TweenService:Create(exitButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(255, 0, 0)}):Play()
-	end)
-	exitButton.MouseLeave:Connect(function()
-		TweenService:Create(exitButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(0, 255, 255)}):Play()
-	end)
-
 	MouseButtonFix(minimizeButton, toggleMinimize)
 	MouseButtonFix(exitButton, function()
 		menu.Visible = false
@@ -16259,20 +16245,6 @@ gui.menuifyv2 = function(menu)
             end)
         end
     end
-
-	minimizeButton.MouseEnter:Connect(function()
-		TweenService:Create(minimizeButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(0, 200, 255)}):Play()
-	end)
-	minimizeButton.MouseLeave:Connect(function()
-		TweenService:Create(minimizeButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(0, 255, 255)}):Play()
-	end)
-
-	exitButton.MouseEnter:Connect(function()
-		TweenService:Create(exitButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(255, 0, 0)}):Play()
-	end)
-	exitButton.MouseLeave:Connect(function()
-		TweenService:Create(exitButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(0, 255, 255)}):Play()
-	end)
 
     MouseButtonFix(minimizeButton, toggleMinimize)
     MouseButtonFix(exitButton, function()
