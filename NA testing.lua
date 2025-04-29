@@ -15104,9 +15104,9 @@ cmd.add({"invisible", "invis"}, {"invisible (invis)", "Sets invisibility to scar
 			local root = getRoot(Character)
 			if root then
 				OriginalPosition = root.CFrame
-				root.CFrame = CFrame.new(0, 10000, 0)
+				root.CFrame = CFrame.new(0, math.pi*1000000, 0)
 			end
-			Wait(0.5)
+			Wait(0.1)
 			Character.Parent = Lighting
 			if OriginalPosition then
 				local invisRoot = getRoot(InvisibleCharacter)
