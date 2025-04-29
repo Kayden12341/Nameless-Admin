@@ -430,6 +430,7 @@ Description.Text = "Name"
 Description.TextColor3 = Color3.fromRGB(255, 255, 255)
 Description.TextSize = 13.000
 Description.TextWrapped = true
+Description.ZIndex = 99
 
 UICorner_9.Parent = Description
 
