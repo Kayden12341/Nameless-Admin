@@ -59,6 +59,10 @@ function isAprilFools()
 	return (d.month == 4 and d.day == 1) or getgenv().ActivateAprilMode or false
 end
 
+function loadOldNAUI()
+	return getgenv().USEOLDNAUI or false
+end
+
 function MockText(text)
 	local result = {}
 	local toggle = true
@@ -287,8 +291,6 @@ if (identifyexecutor() == "Solara" or identifyexecutor() == "Xeno") or not firep
 	end
 end
 
-local GetService=game.GetService
-
 NA_storage=InstanceNew("ScreenGui")--Stupid Ahh script removing folders
 
 if not game:IsLoaded() then
@@ -314,6 +316,10 @@ else
 	loader=[[loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/Nameless-Admin/main/Source.lua"))();]]
 	githubUrl="https://api.github.com/repos/ltseverydayyou/Nameless-Admin/commits?path=Source.lua"
 	NAUILOADER="https://raw.githubusercontent.com/ltseverydayyou/Nameless-Admin/refs/heads/main/NAUI.lua"
+end
+
+if loadOldNAUI() then
+	NAUILOADER="https://raw.githubusercontent.com/ltseverydayyou/Nameless-Admin/refs/heads/main/NAUIOLD.lua"
 end
 
 local queueteleport=(syn and syn.queue_on_teleport) or queue_on_teleport or (fluxus and fluxus.queue_on_teleport) or function() end
@@ -797,6 +803,9 @@ LocalPlayer.OnTeleport:Connect(function(...)
 	end
 	if isAprilFools() then
 		queueteleport("getgenv().ActivateAprilMode=true")
+	end
+	if loadOldNAUI() then
+		queueteleport("getgenv().USEOLDNAUI=true")
 	end
 end)
 
@@ -1999,18 +2008,18 @@ function RenderUserButtons()
 		promptGui.IgnoreGuiInset = true
 		promptGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 		promptGui.Parent = NASCREENGUI
-	
+
 		local frame = InstanceNew("Frame")
 		frame.Size = UDim2.new(0, 260, 0, 140)
 		frame.Position = UDim2.new(0.5, -130, 0.5, -70)
 		frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 		frame.BorderSizePixel = 0
 		frame.Parent = promptGui
-	
+
 		local corner = InstanceNew("UICorner")
 		corner.CornerRadius = UDim.new(0.1, 0)
 		corner.Parent = frame
-	
+
 		local title = InstanceNew("TextLabel")
 		title.Size = UDim2.new(1, -20, 0, 30)
 		title.Position = UDim2.new(0, 10, 0, 10)
@@ -2021,7 +2030,7 @@ function RenderUserButtons()
 		title.TextSize = 16
 		title.TextWrapped = true
 		title.Parent = frame
-	
+
 		local textbox = InstanceNew("TextBox")
 		textbox.Size = UDim2.new(1, -20, 0, 30)
 		textbox.Position = UDim2.new(0, 10, 0, 50)
@@ -2033,7 +2042,7 @@ function RenderUserButtons()
 		textbox.Font = Enum.Font.Gotham
 		textbox.ClearTextOnFocus = false
 		textbox.Parent = frame
-	
+
 		local submit = InstanceNew("TextButton")
 		submit.Size = UDim2.new(0.5, -15, 0, 30)
 		submit.Position = UDim2.new(0, 10, 1, -40)
@@ -2043,7 +2052,7 @@ function RenderUserButtons()
 		submit.Font = Enum.Font.GothamBold
 		submit.TextSize = 14
 		submit.Parent = frame
-	
+
 		local cancel = InstanceNew("TextButton")
 		cancel.Size = UDim2.new(0.5, -15, 0, 30)
 		cancel.Position = UDim2.new(0.5, 5, 1, -40)
@@ -2053,7 +2062,7 @@ function RenderUserButtons()
 		cancel.Font = Enum.Font.GothamBold
 		cancel.TextSize = 14
 		cancel.Parent = frame
-	
+
 		MouseButtonFix(submit,function()
 			callback(textbox.Text)
 			if ActivePrompts then
@@ -2061,14 +2070,14 @@ function RenderUserButtons()
 			end
 			promptGui:Destroy()
 		end)
-	
+
 		MouseButtonFix(cancel,function()
 			if ActivePrompts then
 				ActivePrompts[commandName] = nil
 			end
 			promptGui:Destroy()
 		end)
-	
+
 		gui.draggablev2(frame)
 	end
 
@@ -2077,8 +2086,8 @@ function RenderUserButtons()
 	local startX = 0.5 - (totalWidth/2) / NASCREENGUI.AbsoluteSize.X
 
 	local spacing = 110
-
 	local index = 0
+
 	for id, data in pairs(NAUserButtons) do
 		local btn = InstanceNew("TextButton")
 		btn.Name = "NAUserButton_"..id
@@ -2102,7 +2111,8 @@ function RenderUserButtons()
 		gui.draggablev2(btn)
 
 		local toggled = false
-		local saveEnabled = false
+		local saveEnabled = data.RunMode == "S"
+		SavedArguments[id] = data.Args or {}
 
 		local cmdToRun = data.Cmd1
 		local commandData = Commands[cmdToRun:lower()] or Aliases[cmdToRun:lower()]
@@ -2117,13 +2127,18 @@ function RenderUserButtons()
 			saveToggle.TextColor3 = Color3.fromRGB(255, 255, 255)
 			saveToggle.TextSize = 12
 			saveToggle.Font = Enum.Font.Gotham
-			saveToggle.Text = "N"
+			saveToggle.Text = saveEnabled and "S" or "N"
 			saveToggle.ZIndex = 10000
 			saveToggle.Parent = btn
 
 			MouseButtonFix(saveToggle, function()
 				saveEnabled = not saveEnabled
 				saveToggle.Text = saveEnabled and "S" or "N"
+				data.RunMode = saveEnabled and "S" or "N"
+
+				if FileSupport then
+					writefile(NAUSERBUTTONSPATH, HttpService:JSONEncode(NAUserButtons))
+				end
 			end)
 		end
 
@@ -2150,8 +2165,8 @@ function RenderUserButtons()
 			end
 
 			if requiresArgsNow then
-				if saveEnabled and SavedArguments[id] then
-					runCommand(SavedArguments[id])
+				if saveEnabled and data.Args and #data.Args > 0 then
+					runCommand(data.Args)
 				else
 					if ActivePrompts[cmdToRunNow] then
 						return
@@ -2164,6 +2179,12 @@ function RenderUserButtons()
 						local parsedArguments = ParseArguments(input)
 						if parsedArguments then
 							SavedArguments[id] = parsedArguments
+							data.Args = parsedArguments
+
+							if FileSupport then
+								writefile(NAUSERBUTTONSPATH, HttpService:JSONEncode(NAUserButtons))
+							end
+
 							runCommand(parsedArguments)
 						else
 							runCommand(nil)
@@ -3902,7 +3923,7 @@ if IsOnMobile then
 	end)
 
 	cmd.add({"DefaultRotaionScreen","DefaultScreen","Defscreen"},{"DefaultRotaionScreen (DefaultScreen or Defscreen)","Changes ScreenOrientation to Portrait"},function()
-		PlrGui.ScreenOrientation=StarterGui.ScreenOrientation 
+		PlrGui.ScreenOrientation=StarterGui.ScreenOrientation
 	end)
 end
 cmd.add({"commandcount","cc"},{"commandcount (cc)","Counds how many commands NA has"},function()
@@ -3910,15 +3931,15 @@ cmd.add({"commandcount","cc"},{"commandcount (cc)","Counds how many commands NA 
 end)
 
 cmd.add({"flyfling","ff"}, {"flyfling (ff)", "makes you fly and fling"}, function()
-	cmd.run({'unwalkfling'})
-	cmd.run({'unvfly'})
-	cmd.run({'walkfling'})
-	cmd.run({'vfly'})
+	cmd.run({"unwalkfling"})
+	cmd.run({"unvfly", ''})
+	cmd.run({"walkfling"})
+	cmd.run({"vfly"})
 end)
 
 cmd.add({"unflyfling","unff"}, {"unflyfling (unff)", "stops fly and fling"}, function()
-	cmd.run({'unwalkfling'})
-	cmd.run({'unvfly'})
+	cmd.run({"unwalkfling"})
+	cmd.run({"unvfly", ''})
 end)
 
 hiddenfling = false
@@ -8577,8 +8598,8 @@ cmd.add({"freecam","fc","fcam"},{"freecam [speed] (fc,fcam)","Enable free camera
 
 	if connections["freecam"] then
 		lib.disconnect("freecam")
-		camera.CameraSubject = character
-		coroutine.wrap(function() character.PrimaryPart.Anchored = false end)
+		camera.CameraSubject = getChar()
+		Spawn(function() getRoot(getChar()).Anchored = false end)
 	end
 
 	if fcBTNTOGGLE then fcBTNTOGGLE:Destroy() fcBTNTOGGLE = nil end
@@ -8590,8 +8611,8 @@ cmd.add({"freecam","fc","fcam"},{"freecam [speed] (fc,fcam)","Enable free camera
 		camPart.Anchored = true
 		camPart.CFrame = camera.CFrame
 
-		coroutine.wrap(function()
-			character.PrimaryPart.Anchored = true
+		Spawn(function()
+			getRoot(getChar()).Anchored = true
 		end)
 
 		lib.connect("freecam", RunService.RenderStepped:Connect(function(dt)
@@ -8710,8 +8731,8 @@ cmd.add({"freecam","fc","fcam"},{"freecam [speed] (fc,fcam)","Enable free camera
 					if connections["freecam"] then
 						lib.disconnect("freecam")
 					end
-					camera.CameraSubject = character
-					coroutine.wrap(function() character.PrimaryPart.Anchored = false end)
+					camera.CameraSubject = getChar()
+					Spawn(function() getRoot(getChar()).Anchored = false end)
 				end
 			end)
 		end)()
@@ -8726,15 +8747,15 @@ end, true)
 
 cmd.add({"unfreecam","unfc","unfcam"},{"unfreecam (unfc,unfcam)","Disable free camera"},function()
 	lib.disconnect("freecam")
-	camera.CameraSubject = character
-	coroutine.wrap(function()
-		character.PrimaryPart.Anchored = false
+	camera.CameraSubject = getChar()
+	Spawn(function()
+		getRoot(getChar()).Anchored = false
 	end)
 	if fcBTNTOGGLE then fcBTNTOGGLE:Destroy() fcBTNTOGGLE = nil end
 end)
 
 cmd.add({"nohats","drophats"},{"nohats (drophats)","Drop all of your hats"},function()
-	for _,hat in pairs(character:GetChildren()) do
+	for _,hat in pairs(getChar():GetChildren()) do
 		if hat:IsA("Accoutrement") then
 			hat:FindFirstChildWhichIsA("Weld",true):Destroy()
 		end
@@ -10483,19 +10504,84 @@ cmd.add({"pathfind"}, {"pathfind <player>", "Follow a player using the pathfinde
 	end
 end, true)
 
-cmd.add({"freeze","thaw","anchor","fr"},{"freeze (thaw,anchor,fr)","Freezes your character"},function()
-	for _,char in ipairs(LocalPlayer.Character:GetChildren()) do
-		if char:IsA("BasePart") then
-			char.Anchored=true
+freezeBTNTOGGLE = nil
+isFrozennn = false
+
+cmd.add({"freeze","thaw","anchor","fr"},{"freeze (thaw,anchor,fr)","Freezes your character"}, function()
+	local char = getChar()
+	if not char then return end
+
+	for _, part in ipairs(char:GetChildren()) do
+		if part:IsA("BasePart") then
+			part.Anchored = true
 		end
+	end
+	isFrozennn = true
+
+	if IsOnMobile then
+		if freezeBTNTOGGLE then freezeBTNTOGGLE:Destroy() freezeBTNTOGGLE = nil end
+
+		freezeBTNTOGGLE = InstanceNew("ScreenGui")
+		local btn = InstanceNew("TextButton")
+		local corner = InstanceNew("UICorner")
+		local aspect = InstanceNew("UIAspectRatioConstraint")
+
+		NaProtectUI(freezeBTNTOGGLE)
+		freezeBTNTOGGLE.ResetOnSpawn = false
+
+		btn.Parent = freezeBTNTOGGLE
+		btn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+		btn.BackgroundTransparency = 0.1
+		btn.Position = UDim2.new(0.9, 0, 0.6, 0)
+		btn.Size = UDim2.new(0.08, 0, 0.1, 0)
+		btn.Font = Enum.Font.GothamBold
+		btn.Text = "UNFRZ"
+		btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+		btn.TextSize = 18
+		btn.TextWrapped = true
+		btn.Active = true
+		btn.TextScaled = true
+
+		corner.CornerRadius = UDim.new(0.2, 0)
+		corner.Parent = btn
+
+		aspect.Parent = btn
+		aspect.AspectRatio = 1.0
+
+		gui.draggablev2(btn)
+
+		MouseButtonFix(btn, function()
+			local char = getChar()
+			if not char then return end
+
+			for _, part in ipairs(char:GetChildren()) do
+				if part:IsA("BasePart") then
+					part.Anchored = not isFrozennn
+				end
+			end
+
+			isFrozennn = not isFrozennn
+			btn.Text = isFrozennn and "UNFRZ" or "FRZ"
+			btn.BackgroundColor3 = isFrozennn and Color3.fromRGB(0, 170, 0) or Color3.fromRGB(170, 0, 0)
+		end)
 	end
 end)
 
-cmd.add({"unfreeze","unthaw","unanchor","unfr"},{"unfreeze (unthaw,unanchor,unfr)","Unfreezes your character"},function()
-	for _,char in ipairs(LocalPlayer.Character:GetChildren()) do
-		if char:IsA("BasePart") then
-			char.Anchored=false
+cmd.add({"unfreeze","unthaw","unanchor","unfr"},{"unfreeze (unthaw,unanchor,unfr)","Unfreezes your character"}, function()
+	local char = getChar()
+	if not char then return end
+
+	for _, part in ipairs(char:GetChildren()) do
+		if part:IsA("BasePart") then
+			part.Anchored = false
 		end
+	end
+
+	isFrozennn = false
+
+	if freezeBTNTOGGLE then
+		freezeBTNTOGGLE:Destroy()
+		freezeBTNTOGGLE = nil
 	end
 end)
 
@@ -15777,7 +15863,7 @@ local commandsFilter = commandsFrame and commandsFrame:FindFirstChild("Container
 local commandsList = commandsFrame and commandsFrame:FindFirstChild("Container") and commandsFrame:FindFirstChild("Container"):FindFirstChild("List")
 local commandExample = commandsList and commandsList:FindFirstChild("TextLabel")
 local UpdLogsFrame = NASCREENGUI:FindFirstChild("UpdLog")
-local UpdLogsTitle = UpdLogsFrame and UpdLogsFrame:FindFirstChild("Topbar") and UpdLogsFrame:FindFirstChild("Topbar"):FindFirstChild("TopBar") and UpdLogsFrame:FindFirstChild("Topbar"):FindFirstChild("TopBar"):FindFirstChild("Title")
+local UpdLogsTitle = loadOldNAUI() and UpdLogsFrame and UpdLogsFrame:FindFirstChild("Topbar") and UpdLogsFrame:FindFirstChild("Topbar"):FindFirstChild("TopBar") and UpdLogsFrame:FindFirstChild("Topbar"):FindFirstChild("TopBar"):FindFirstChild("Title") or UpdLogsFrame and UpdLogsFrame:FindFirstChild("Topbar") and UpdLogsFrame:FindFirstChild("Topbar"):FindFirstChild("Title")
 local UpdLogsList = UpdLogsFrame and UpdLogsFrame:FindFirstChild("Container") and UpdLogsFrame:FindFirstChild("Container"):FindFirstChild("List")
 local UpdLogsLabel = UpdLogsList and UpdLogsList:FindFirstChildWhichIsA("TextLabel")
 local resizeFrame = NASCREENGUI:FindFirstChild("Resizeable")
