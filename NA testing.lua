@@ -15808,7 +15808,7 @@ cmd.add({"unclickkillnpc", "uncknpc"}, {"unclickkillnpc (uncknpc)", "Disable cli
 	clickKillConnections = {}
 end)
 
-cmd.add({"voidnpc", "vnpc"}, {"voidnpc (vnpc)", "Teleports NPC's to void"}, function()
+cmd.add({"voidnpcs", "vnpcs"}, {"voidnpcs (vnpcs)", "Teleports NPC's to void"}, function()
 	for _, d in ipairs(SafeGetService("Workspace"):GetDescendants()) do
 		if d:IsA("Humanoid") and not Players:GetPlayerFromCharacter(d.Parent) then
 			local root = getPlrHum(d.Parent)
