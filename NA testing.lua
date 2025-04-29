@@ -15242,17 +15242,17 @@ end)
 
 cmd.add({"prediction", "predict"}, {"prediction (predict)", "prompts command prediction if you spelled it wrong"}, function()
 	doPREDICTION=true
+	DoNotif("predictions enabled",2)
 	if FileSupport then
 		writefile(NAPREDICTIONPATH, "true")
-		DoNotif("predictions enabled",2)
 	end
 end)
 
 cmd.add({"unprediction", "unpredict"}, {"unprediction (unpredict)", "disable command predictions"}, function()
 	doPREDICTION=false
+	DoNotif("predictions disabled",2)
 	if FileSupport then
 		writefile(NAPREDICTIONPATH, "false")
-		DoNotif("predictions disabled",2)
 	end
 end)
 
@@ -15806,6 +15806,80 @@ cmd.add({"unclickkillnpc", "uncknpc"}, {"unclickkillnpc (uncknpc)", "Disable cli
 		end
 	end
 	clickKillConnections = {}
+end)
+
+cmd.add({"voidnpc", "vnpc"}, {"voidnpc (vnpc)", "Teleports NPC's to void"}, function()
+	for _, d in ipairs(SafeGetService("Workspace"):GetDescendants()) do
+		if d:IsA("Humanoid") and not Players:GetPlayerFromCharacter(d.Parent) then
+			local root = getPlrHum(d.Parent)
+			if root then
+				root.HipHeight = math.huge
+			end
+		end
+	end
+end)
+
+clickVoidUI = nil
+clickVoidConnections = {}
+clickVoidEnabled = false
+
+cmd.add({"clickvoidnpc", "cvnpc"}, {"clickvoidnpc (cvnpc)", "Click to void NPCs"}, function()
+	clickVoidEnabled = true
+	if clickVoidUI then clickVoidUI:Destroy() end
+	for _, conn in ipairs(clickVoidConnections) do
+		if conn then
+			conn:Disconnect()
+		end
+	end
+
+	clickVoidUI = InstanceNew("ScreenGui")
+	NaProtectUI(clickVoidUI)
+
+	local button = InstanceNew("TextButton")
+	button.Size = UDim2.new(0, 120, 0, 40)
+	button.Text = "ClickVoid: ON"
+	button.Position = UDim2.new(0.5, -60, 0, 10)
+	button.TextScaled = true
+	button.TextColor3 = Color3.new(1, 1, 1)
+	button.Font = Enum.Font.GothamBold
+	button.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+	button.BackgroundTransparency = 0.2
+	button.Parent = clickVoidUI
+
+	local corner = InstanceNew("UICorner", button)
+	corner.CornerRadius = UDim.new(0, 8)
+	gui.draggablev2(button)
+
+	MouseButtonFix(button, function()
+		clickVoidEnabled = not clickVoidEnabled
+		button.Text = clickVoidEnabled and "ClickVoid: ON" or "ClickVoid: OFF"
+	end)
+
+	local mouse = player:GetMouse()
+	local conn = mouse.Button1Down:Connect(function()
+		if not clickVoidEnabled then return end
+
+		local target = mouse.Target
+		if target and target.Parent and CheckIfNPC(target.Parent) then
+			local root = getPlrHum(target.Parent)
+			if root then
+				root.HipHeight = math.huge
+			end
+		end
+	end)
+
+	Insert(clickVoidConnections, conn)
+end)
+
+cmd.add({"unclickvoidnpc", "uncvnpc"}, {"unclickvoidnpc (uncvnpc)","Disable click-void"}, function()
+	clickVoidEnabled = false
+	if clickVoidUI then clickVoidUI:Destroy() end
+	for _, conn in ipairs(clickVoidConnections) do
+		if conn then
+			conn:Disconnect()
+		end
+	end
+	clickVoidConnections = {}
 end)
 
 --[[ FUNCTIONALITY ]]--
