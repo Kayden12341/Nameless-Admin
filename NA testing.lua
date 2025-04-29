@@ -5257,6 +5257,98 @@ cmd.add({"localdate", "yourdate"}, {"localdate (yourdate)", "Shows your current 
 	DoNotif("Your Local Date Is: "..dateStr)
 end)
 
+somersaultBTN = nil
+somersaultKeyConn = nil
+somersaultToggleKey = "x"
+
+cmd.add({"somersault", "frontflip"}, {"somersault (frontflip)", "Makes you do a clean front flip"}, function(...)
+    local function somersaulter()
+        local p = LocalPlayer
+        local c = getChar() or p.CharacterAdded:Wait()
+        local hrp = getRoot(c)
+        local hum = getHum()
+
+        hum.PlatformStand = true
+        --hrp.AssemblyLinearVelocity = Vector3.zero
+        --hrp.AssemblyAngularVelocity = Vector3.zero
+
+        hrp.AssemblyAngularVelocity = hrp.CFrame.RightVector * -40
+        hrp.AssemblyLinearVelocity = hrp.CFrame.LookVector * 30 + Vector3.new(0, 30, 0)
+
+        Delay(0.25, function()
+            hrp.AssemblyAngularVelocity = Vector3.zero
+            hum.PlatformStand = false
+            hum:ChangeState(Enum.HumanoidStateType.GettingUp)
+        end)
+    end
+
+    if IsOnMobile then
+        if somersaultBTN then
+            somersaultBTN:Destroy()
+            somersaultBTN = nil
+        end
+
+        somersaultBTN = InstanceNew("ScreenGui")
+        local btn = InstanceNew("TextButton")
+        local corner = InstanceNew("UICorner")
+        local aspect = InstanceNew("UIAspectRatioConstraint")
+
+        NaProtectUI(somersaultBTN)
+        somersaultBTN.ResetOnSpawn = false
+
+        btn.Parent = somersaultBTN
+        btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+        btn.BackgroundTransparency = 0.1
+        btn.Position = UDim2.new(0.85, 0, 0.5, 0)
+        btn.Size = UDim2.new(0.08, 0, 0.1, 0)
+        btn.Font = Enum.Font.GothamBold
+        btn.Text = "Flip"
+        btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        btn.TextSize = 18
+        btn.TextWrapped = true
+        btn.Active = true
+        btn.TextScaled = true
+
+        corner.CornerRadius = UDim.new(0.2, 0)
+        corner.Parent = btn
+
+        aspect.Parent = btn
+        aspect.AspectRatio = 1.0
+
+        coroutine.wrap(function()
+            MouseButtonFix(btn, function()
+                somersaulter()
+            end)
+        end)()
+
+        gui.draggablev2(btn)
+    else
+        if somersaultKeyConn then
+            somersaultKeyConn:Disconnect()
+        end
+
+        somersaultKeyConn = cmdm.KeyDown:Connect(function(KEY)
+            if KEY:lower() == somersaultToggleKey then
+                somersaulter()
+            end
+        end)
+
+        DoNotif("Press '"..somersaultToggleKey:upper().."' to flip!", 3)
+    end
+end, false)
+
+cmd.add({"unsomersault", "unfrontflip"}, {"unsomersault (unfrontflip)", "Disable somersault button and keybind"}, function(...)
+    if somersaultBTN then
+        somersaultBTN:Destroy()
+        somersaultBTN = nil
+    end
+
+    if somersaultKeyConn then
+        somersaultKeyConn:Disconnect()
+        somersaultKeyConn = nil
+    end
+end, false)
+
 cmd.add({"cartornado", "ctornado"}, {"cartornado (ctornado)", "Tornados a car just sit in the car"}, function()
 	local Player = Players.LocalPlayer
 	local RunService = RunService
