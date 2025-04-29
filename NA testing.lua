@@ -1817,6 +1817,14 @@ cToggleKey = "c"
 cFlySpeed = 1
 cKeybindConn = nil
 
+TFlyEnabled = false
+tflyCORE = nil
+tflyToggleKey = "t"
+tflyButtonUI = nil
+TFLYBTN = nil
+tflyKeyConn = nil
+TflySpeed = 2
+
 -----------------------------
 
 local cmdlp = Players.LocalPlayer
@@ -2074,7 +2082,9 @@ function RenderUserButtons()
 		cancel.Parent = frame
 
 		MouseButtonFix(submit,function()
-			callback(textbox.Text)
+			Spawn(function()
+				callback(textbox.Text)
+			end)
 			if ActivePrompts then
 				ActivePrompts[commandName] = nil
 			end
@@ -8454,62 +8464,164 @@ if IsOnPC then
 	end,true)
 end
 
-TFlyEnabled = false
-tflyCORE = nil
+function toggleTFly()
+	if TFlyEnabled then
+		TFlyEnabled = false
+		for _, v in pairs(SafeGetService("Workspace"):GetDescendants()) do
+			if v:GetAttribute("tflyPart") then
+				v:Destroy()
+			end
+		end
+		local hum = getHum()
+		if hum then hum.PlatformStand = false end
+		if TFLYBTN then
+			TFLYBTN.Text = "TFly"
+			TFLYBTN.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
+		end
+	else
+		TFlyEnabled = true
+		local speed = TflySpeed
+		local Humanoid = getHum()
+
+		tflyCORE = InstanceNew("Part", SafeGetService("Workspace").CurrentCamera)
+		tflyCORE:SetAttribute("tflyPart", true)
+		tflyCORE.Size = Vector3.new(0.05, 0.05, 0.05)
+		tflyCORE.CanCollide = false
+
+		local Weld = InstanceNew("Weld", tflyCORE)
+		Weld.Part0 = tflyCORE
+		Weld.Part1 = Humanoid.RootPart
+		Weld.C0 = CFrame.new(0, 0, 0)
+
+		local pos = InstanceNew("BodyPosition", tflyCORE)
+		local gyro = InstanceNew("BodyGyro", tflyCORE)
+		pos.maxForce = Vector3.new(math.huge, math.huge, math.huge)
+		pos.position = tflyCORE.Position
+		gyro.maxTorque = Vector3.new(9e9, 9e9, 9e9)
+		gyro.cframe = tflyCORE.CFrame
+
+		coroutine.wrap(function()
+			repeat
+				Wait()
+				Humanoid.PlatformStand = true
+				local newPosition = gyro.cframe - gyro.cframe.p + pos.position
+
+				local moveVec = GetCustomMoveVector()
+				moveVec = Vector3.new(moveVec.X, moveVec.Y, -moveVec.Z)
+
+				if moveVec.Magnitude > 0 then
+					local camera = SafeGetService("Workspace").CurrentCamera
+					newPosition = newPosition + (camera.CFrame.RightVector * moveVec.X * speed)
+					newPosition = newPosition + (camera.CFrame.LookVector * moveVec.Z * speed)
+				end
+
+				pos.position = newPosition.p
+				gyro.cframe = SafeGetService("Workspace").CurrentCamera.CoordinateFrame
+			until not TFlyEnabled
+
+			if gyro then gyro:Destroy() end
+			if pos then pos:Destroy() end
+			Humanoid.PlatformStand = false
+		end)()
+
+		if TFLYBTN then
+			TFLYBTN.Text = "UnTFly"
+			TFLYBTN.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+		end
+	end
+end
 
 cmd.add({"tfly", "tweenfly"}, {"tfly [speed] (tweenfly)", "Enables smooth flying"}, function(...)
-	TFlyEnabled = true
-	local speed = (...) or 2
-	local Humanoid = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+	local arg = (...) or nil
+	TflySpeed = arg or 1
 
-	tflyCORE = InstanceNew("Part", SafeGetService("Workspace").CurrentCamera)
-	tflyCORE:SetAttribute("tflyPart", true)
-	tflyCORE.Size = Vector3.new(0.05, 0.05, 0.05)
-	tflyCORE.CanCollide = false
-
-	local Weld = InstanceNew("Weld", tflyCORE)
-	Weld.Part0 = tflyCORE
-	Weld.Part1 = Humanoid.RootPart
-	Weld.C0 = CFrame.new(0, 0, 0)
-
-	local pos = InstanceNew("BodyPosition", tflyCORE)
-	local gyro = InstanceNew("BodyGyro", tflyCORE)
-	pos.maxForce = Vector3.new(math.huge, math.huge, math.huge)
-	pos.position = tflyCORE.Position
-	gyro.maxTorque = Vector3.new(9e9, 9e9, 9e9)
-	gyro.cframe = tflyCORE.CFrame
-
-	repeat
+	if IsOnMobile then
 		Wait()
-		Humanoid.PlatformStand = true
-		local newPosition = gyro.cframe - gyro.cframe.p + pos.position
+		DoNotif(adminName.." detected mobile. Tfly button added for easier use.", 2)
 
-		local moveVec = GetCustomMoveVector()
-		moveVec = Vector3.new(moveVec.X, moveVec.Y, -moveVec.Z)
+		if tflyButtonUI then tflyButtonUI:Destroy() end
+		if TFLYBTN then TFLYBTN:Destroy() end
 
-		if moveVec.Magnitude > 0 then
-			local camera = SafeGetService("Workspace").CurrentCamera
-			newPosition = newPosition + (camera.CFrame.RightVector * moveVec.X * speed)
-			newPosition = newPosition + (camera.CFrame.LookVector * moveVec.Z * speed)
-		end
+		tflyButtonUI = InstanceNew("ScreenGui")
+		TFLYBTN = InstanceNew("TextButton")
+		local corner = InstanceNew("UICorner")
 
-		pos.position = newPosition.p
-		gyro.cframe = SafeGetService("Workspace").CurrentCamera.CoordinateFrame
-	until not TFlyEnabled
+		NaProtectUI(tflyButtonUI)
+		tflyButtonUI.ResetOnSpawn = false
 
-	if gyro then gyro:Destroy() end
-	if pos then pos:Destroy() end
-	Humanoid.PlatformStand = false
+		TFLYBTN.Parent = tflyButtonUI
+		TFLYBTN.BackgroundColor3 = Color3.fromRGB(30,30,30)
+		TFLYBTN.BackgroundTransparency = 0.1
+		TFLYBTN.Position = UDim2.new(0.9,0,0.5,0)
+		TFLYBTN.Size = UDim2.new(0.08,0,0.1,0)
+		TFLYBTN.Font = Enum.Font.GothamBold
+		TFLYBTN.Text = "TFly"
+		TFLYBTN.TextColor3 = Color3.fromRGB(255,255,255)
+		TFLYBTN.TextSize = 18
+		TFLYBTN.TextWrapped = true
+		TFLYBTN.Active = true
+		TFLYBTN.TextScaled = true
+
+		corner.CornerRadius = UDim.new(0.2, 0)
+		corner.Parent = TFLYBTN
+
+		MouseButtonFix(TFLYBTN, toggleTFly)
+		gui.draggablev2(TFLYBTN)
+	else
+		if tflyKeyConn then tflyKeyConn:Disconnect() end
+		tflyKeyConn = cmdm.KeyDown:Connect(function(key)
+			if key:lower() == tflyToggleKey then
+				toggleTFly()
+			end
+		end)
+		DoNotif("TFly keybind set to '"..tflyToggleKey:upper().."'. Press to toggle.")
+	end
+
+	toggleTFly()
 end, true)
 
 cmd.add({"untfly", "untweenfly"}, {"untfly (untweenfly)", "Disables tween flying"}, function()
+	Wait()
+	DoNotif("Not flying anymore", 2)
 	TFlyEnabled = false
 	for _, v in pairs(SafeGetService("Workspace"):GetDescendants()) do
 		if v:GetAttribute("tflyPart") then
 			v:Destroy()
 		end
 	end
+	local hum = getHum()
+	if hum then hum.PlatformStand = false end
+	if tflyButtonUI then
+		tflyButtonUI:Destroy()
+		tflyButtonUI = nil
+	end
+	if TFLYBTN then
+		TFLYBTN:Destroy()
+		TFLYBTN = nil
+	end
+	if tflyKeyConn then
+		tflyKeyConn:Disconnect()
+		tflyKeyConn = nil
+	end
 end)
+
+if IsOnPC then
+	cmd.add({"tflykeybind", "bindtfly", "tflybind"}, {"tflykeybind [key]", "Set keybind for tfly toggle"}, function(...)
+		local key = (...) or ""
+		if key == "" then
+			DoNotif("Please provide a key.")
+			return
+		end
+		tflyToggleKey = key:lower()
+		if tflyKeyConn then tflyKeyConn:Disconnect() end
+		tflyKeyConn = cmdm.KeyDown:Connect(function(k)
+			if k:lower() == tflyToggleKey then
+				toggleTFly()
+			end
+		end)
+		DoNotif("TFly keybind set to '"..tflyToggleKey:upper().."'")
+	end, true)
+end
 
 cmd.add({"noclip","nclip","nc"},{"noclip","Disable your player's collision"},function()
 	if connections["noclip"] then lib.disconnect("noclip") return end
