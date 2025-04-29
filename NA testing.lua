@@ -4542,7 +4542,7 @@ cmd.add({"reach", "swordreach"}, {"reach [number] (swordreach)", "Extends sword 
 	toolHnld.Size = Vector3.new(toolHnld.Size.X, toolHnld.Size.Y, reachsize)
 end,true)
 
-cmd.add({"boxreach", "aura"}, {"boxreach [number] (aura)", "Creates a box-shaped hitbox around your tool"}, function(reachsize)
+cmd.add({"boxreach"}, {"boxreach [number]", "Creates a box-shaped hitbox around your tool"}, function(reachsize)
 	reachsize = tonumber(reachsize) or 25
 
 	local char = getChar()
@@ -4596,6 +4596,66 @@ cmd.add({"resetreach", "normalreach", "unreach"}, {"resetreach (normalreach, unr
 		end
 	end
 end)
+
+KILLINGAURALOL = nil
+
+cmd.add({"aura"}, {"aura [distance]", "Continuously damages nearby players within range using a damage tool"}, function(range)
+	range = tonumber(range) or 20
+
+	local Players = SafeGetService("Players")
+	local LocalPlayer = Players.LocalPlayer
+
+	if not firetouchinterest then
+		return DoNotif('Your exploit does not support firetouchinterest to run this command')
+	end
+
+	if KILLINGAURALOL and KILLINGAURALOL.Connected then
+		KILLINGAURALOL:Disconnect()
+		KILLINGAURALOL = nil
+	end
+
+	local function getToolAndHandle()
+		local char = LocalPlayer.Character
+		if not char then return end
+		local tool = char:FindFirstChildWhichIsA("Tool")
+		if not tool then return end
+		local handle = tool:FindFirstChild("Handle") or tool:FindFirstChildWhichIsA("BasePart")
+		return tool, handle
+	end
+
+	KILLINGAURALOL = RunService.RenderStepped:Connect(function()
+		local Tool, Handle = getToolAndHandle()
+		if Tool and Handle and Tool.Parent == LocalPlayer.Character then
+			for _, player in ipairs(Players:GetPlayers()) do
+				if player ~= LocalPlayer and player.Character then
+					local targetChar = player.Character
+					local humanoid = targetChar:FindFirstChildOfClass("Humanoid")
+					if humanoid and humanoid.Health > 0 then
+						for _, part in ipairs(targetChar:GetChildren()) do
+							if part:IsA("BasePart") and (part.Position - Handle.Position).Magnitude <= range then
+								firetouchinterest(Handle, part, 0)
+								Wait()
+								firetouchinterest(Handle, part, 1)
+							end
+						end
+					end
+				end
+			end
+		end
+	end)
+
+	DoNotif("Aura enabled at range "..tostring(range), 1.2)
+end, true)
+
+cmd.add({"unaura"}, {"unaura", "Stops the running aura loop"}, function()
+	if KILLINGAURALOL and KILLINGAURALOL.Connected then
+		KILLINGAURALOL:Disconnect()
+		KILLINGAURALOL = nil
+		DoNotif("Aura disabled", 1.2)
+	else
+		DoNotif("Aura is not active", 1.2)
+	end
+end, true)
 
 local AntiVoidConnect = nil
 
