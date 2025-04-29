@@ -365,11 +365,13 @@ NAALIASPATH = "Nameless-Admin/Aliases.json"
 NAICONPOSPATH = "Nameless-Admin/IconPosition.json"
 NAUSERBUTTONSPATH = "Nameless-Admin/UserButtons.json"
 NAAUTOEXECPATH = "Nameless-Admin/AutoExecCommands.json"
+NAPREDICTIONPATH = "Nameless-Admin/Prediction.txt"
 NAUserButtons = {}
 UserButtonGuiList = {}
 NAEXECDATA = NAEXECDATA or {commands = {}, args = {}}
+doPREDICTION = true
 
--- Creates folder & files for Prefix, Plugins, and QoT toggle
+-- Creates folder & files for Prefix, Plugins, and etc
 if FileSupport then
 	if not isfolder(NAFILEPATH) then
 		makefolder(NAFILEPATH)
@@ -406,6 +408,10 @@ if FileSupport then
 	if not isfile(NAAUTOEXECPATH) then
         writefile(NAAUTOEXECPATH, "[]")
     end
+
+	if not isfile(NAPREDICTIONPATH) then
+		writefile(NAPREDICTIONPATH, "true")
+	end
 end
 
 local prefixCheck = ";"
@@ -418,11 +424,16 @@ if FileSupport then
 	prefixCheck = readfile(NAPREFIXPATH)
 	NAsavedScale = tonumber(readfile(NAIMAGEBUTTONSIZEPATH))
 	NAQoTEnabled = readfile(NAQOTPATH) == "true"
+	doPREDICTION = readfile(NAPREDICTIONPATH) == "true"
 
-	if prefixCheck:match("[a-zA-Z0-9]") then
+	if prefixCheck == "" or utf8.len(prefixCheck) > 1 or prefixCheck:match("[%w]")
+		or prefixCheck:match("[%[%]%(%)%*%^%$%%{}<>]")
+		or prefixCheck:match("&amp;") or prefixCheck:match("&lt;") or prefixCheck:match("&gt;")
+		or prefixCheck:match("&quot;") or prefixCheck:match("&#x27;") or prefixCheck:match("&#x60;") then
+
 		prefixCheck = ";"
 		writefile(NAPREFIXPATH, ";")
-		DoNotif("Your prefix has been reset to the default (;) because it contained letters or numbers")
+		DoNotif("Your prefix has been reset to the default (;) due to invalid symbol.")
 	end
 
 	if NAsavedScale and NAsavedScale > 0 then
@@ -835,7 +846,7 @@ cmd.run = function(args)
 			command[1](unpack(arguments))
 		else
 			local closest = didYouMean(caller:lower())
-			if closest then
+			if closest and doPREDICTION then
 				local commandFunc = Commands[closest] and Commands[closest][1] or Aliases[closest] and Aliases[closest][1]
 				local requiresInput = Commands[closest] and Commands[closest][3] or Aliases[closest] and Aliases[closest][3]
 
@@ -885,7 +896,6 @@ cmd.run = function(args)
 			end
 		end
 	end)
-	if not success then end
 end
 
 cmd.loop = function(commandName, args)
@@ -15217,8 +15227,6 @@ cmd.add({"keepna"}, {"keepna", "keep executing "..adminName.." every time you te
 	if FileSupport then
 		writefile(NAQOTPATH, "true")
 		DoNotif(adminName.." will now auto-load after teleport (QueueOnTeleport enabled)")
-	else
-		DoNotif("QueueOnTeleport enabled for this session. File support not available to save this setting")
 	end
 end)
 
@@ -15229,8 +15237,22 @@ cmd.add({"unkeepna"}, {"unkeepna", "Stop executing "..adminName.." every time yo
 		if not NAQoTEnabled then
 			DoNotif("QueueOnTeleport has been disabled. "..adminName.." will no longer auto-run after teleport")
 		end
-	else
-		DoNotif("File support not available. Cannot save QueueOnTeleport state")
+	end
+end)
+
+cmd.add({"prediction", "predict"}, {"prediction (predict)", "prompts command prediction if you spelled it wrong"}, function()
+	doPREDICTION=true
+	if FileSupport then
+		writefile(NAPREDICTIONPATH, "true")
+		DoNotif("predictions enabled",2)
+	end
+end)
+
+cmd.add({"unprediction", "unpredict"}, {"unprediction (unpredict)", "disable command predictions"}, function()
+	doPREDICTION=false
+	if FileSupport then
+		writefile(NAPREDICTIONPATH, "false")
+		DoNotif("predictions disabled",2)
 	end
 end)
 
