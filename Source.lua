@@ -8850,7 +8850,7 @@ cmd.add({"freecam","fc","fcam"},{"freecam [speed] (fc,fcam)","Enable free camera
 	if connections["freecam"] then
 		lib.disconnect("freecam")
 		camera.CameraSubject = getChar()
-		Spawn(function() getRoot(getChar()).Anchored = false end)
+		Spawn(function() cmd.run({"unfr"}) end)
 	end
 
 	if fcBTNTOGGLE then fcBTNTOGGLE:Destroy() fcBTNTOGGLE = nil end
@@ -8863,7 +8863,7 @@ cmd.add({"freecam","fc","fcam"},{"freecam [speed] (fc,fcam)","Enable free camera
 		camPart.CFrame = camera.CFrame
 
 		Spawn(function()
-			getRoot(getChar()).Anchored = true
+			cmd.run({"fr",''})
 		end)
 
 		lib.connect("freecam", RunService.RenderStepped:Connect(function(dt)
@@ -8983,7 +8983,7 @@ cmd.add({"freecam","fc","fcam"},{"freecam [speed] (fc,fcam)","Enable free camera
 						lib.disconnect("freecam")
 					end
 					camera.CameraSubject = getChar()
-					Spawn(function() getRoot(getChar()).Anchored = false end)
+					Spawn(function() cmd.run({"unfr"}) end)
 				end
 			end)
 		end)()
@@ -9000,7 +9000,7 @@ cmd.add({"unfreecam","unfc","unfcam"},{"unfreecam (unfc,unfcam)","Disable free c
 	lib.disconnect("freecam")
 	camera.CameraSubject = getChar()
 	Spawn(function()
-		getRoot(getChar()).Anchored = false
+		cmd.run({"unfr"})
 	end)
 	if fcBTNTOGGLE then fcBTNTOGGLE:Destroy() fcBTNTOGGLE = nil end
 end)
@@ -10768,7 +10768,7 @@ end, true)
 freezeBTNTOGGLE = nil
 isFrozennn = false
 
-cmd.add({"freeze","thaw","anchor","fr"},{"freeze (thaw,anchor,fr)","Freezes your character"}, function()
+cmd.add({"freeze","thaw","anchor","fr"},{"freeze (thaw,anchor,fr)","Freezes your character"}, function(bool)
 	local char = getChar()
 	if not char then return end
 
@@ -10779,7 +10779,7 @@ cmd.add({"freeze","thaw","anchor","fr"},{"freeze (thaw,anchor,fr)","Freezes your
 	end
 	isFrozennn = true
 
-	if IsOnMobile then
+	if IsOnMobile and not bool then
 		if freezeBTNTOGGLE then freezeBTNTOGGLE:Destroy() freezeBTNTOGGLE = nil end
 
 		freezeBTNTOGGLE = InstanceNew("ScreenGui")
