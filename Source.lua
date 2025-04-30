@@ -194,43 +194,44 @@ function getSeasonEmoji()
 
 	if month == 1 and day == 1 then
 		return '🎉' -- New Year's Day
-	elseif month == 2 and day >= 1 and day <= 21 then
-		return '🧧' -- Chinese New Year
 	elseif month == 2 and day == 14 then
 		return '❤️' -- Valentine's Day
+	elseif month == 2 and day >= 1 and day <= 21 then
+		return '🧧' -- Chinese New Year (approximate)
 	elseif month == 3 and day == 17 then
 		return '☘️' -- St. Patrick's Day
 	elseif month == 4 and day >= 1 and day <= 15 then
-		return '🥚' -- Easter
-	elseif month == 5 then
-		return '💐' -- Mother's Day
-	elseif month == 6 then
-		return '👔' -- Father's Day
+		return '🥚' -- Easter (approximate)
+	elseif month == 5 and day >= 8 and day <= 14 then
+		return '💐' -- Mother's Day (approximate second Sunday)
+	elseif month == 6 and day >= 15 and day <= 21 then
+		return '👔' -- Father's Day (approximate third Sunday)
 	elseif month == 6 and day == 21 then
 		return '☀️' -- Summer Solstice
 	elseif month == 9 and day == 22 then
 		return '🍂' -- Autumn Equinox
 	elseif month == 10 and day == 31 then
 		return '🎃' -- Halloween
-	elseif month == 11 and day >= 22 and day <= 30 then
-		return '🦃' -- Thanksgiving
+	elseif month == 11 and day >= 22 and day <= 28 then
+		return '🦃' -- Thanksgiving (approximate fourth Thursday)
 	elseif month == 12 and day == 25 then
 		return '🎄' -- Christmas
 	elseif month == 12 and day == 31 then
 		return '🎆' -- New Year's Eve
-	elseif month == 12 or month == 1 or month == 2 then
+	end
+
+	if month == 12 or month <= 2 then
 		return '❄️' -- Winter
-	elseif month == 3 or month == 4 or month == 5 then
+	elseif month >= 3 and month <= 5 then
 		return '🌸' -- Spring
-	elseif month == 6 or month == 7 or month == 8 then
+	elseif month >= 6 and month <= 8 then
 		return '☀️' -- Summer
-	elseif month == 9 or month == 10 or month == 11 then
+	elseif month >= 9 and month <= 11 then
 		return '🍂' -- Autumn
 	end
 
 	return ''
 end
-
 
 if getgenv().NATestingVer then
 	if isAprilFools() then
