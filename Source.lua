@@ -4651,17 +4651,48 @@ cmd.add({"unantivoid2"}, {"unantivoid2", "reverts FallenPartsDestroyHeight"}, fu
 	end
 end)
 
+cmd.add({"droptool"}, {"dropatool", "Drop one of your tools"}, function()
+	local backpack = getBp()
+	local toolToDrop = nil
+
+	if not toolToDrop then
+		for _, tool in ipairs(getChar():GetChildren()) do
+			if tool:IsA("Tool") then
+				toolToDrop = tool
+				break
+			end
+		end
+	end
+
+	Wait()
+
+	if backpack and not toolToDrop then
+		for _, tool in ipairs(backpack:GetChildren()) do
+			if tool:IsA("Tool") then
+				tool.Parent = getChar()
+				toolToDrop = tool
+				break
+			end
+		end
+	end
+
+	if toolToDrop then
+		toolToDrop.Parent = SafeGetService("Workspace")
+	end
+end)
+
+
 cmd.add({"droptools"},{"dropalltools","Drop all of your tools"},function()
 	backpack=getBp()
 	if backpack then
 		for _,tool in pairs(backpack:GetChildren()) do
 			if tool:IsA("Tool") then
-				tool.Parent=character
+				tool.Parent=getChar()
 			end
 		end
 	end
 	Wait()
-	for _,tool in pairs(character:GetChildren()) do
+	for _,tool in pairs(getChar():GetChildren()) do
 		if tool:IsA("Tool") then
 			tool.Parent=SafeGetService("Workspace")
 		end
@@ -4669,12 +4700,12 @@ cmd.add({"droptools"},{"dropalltools","Drop all of your tools"},function()
 end)
 
 cmd.add({"notools"},{"notools","Remove your tools"},function()
-	for _,tool in pairs(character:GetChildren()) do
+	for _,tool in pairs(getChar():GetChildren()) do
 		if tool:IsA("Tool") then
 			tool:Destroy()
 		end
 	end
-	for _,tool in pairs(localPlayer.Backpack:GetChildren()) do
+	for _,tool in pairs(getBp():GetChildren()) do
 		if tool:IsA("Tool") then
 			tool:Destroy()
 		end
@@ -9265,15 +9296,25 @@ if IsOnPC then
 	end)
 end
 
+cmd.add({"grabtools"},{"grabtools","grabs dropped tools"},function()
+	local c=getChar()
+	if c and getHum() then
+		for i,v in pairs(SafeGetService("Workspace"):GetDescendants()) do
+			if v:IsA("Tool") then
+				getHum():EquipTool(v)
+			end
+		end
+	end
+end)
+
 cmd.add({"loopgrabtools"},{"loopgrabtools","Loop grabs dropped tools"},function()
 	loopgrab=true
 	repeat Wait(1)
-		local p=Players.LocalPlayer
-		local c=p.Character
-		if c and c:FindFirstChild("Humanoid") then
+		local c=getChar()
+		if c and getHum() then
 			for i,v in pairs(SafeGetService("Workspace"):GetDescendants()) do
 				if v:IsA("Tool") then
-					c:FindFirstChild("Humanoid"):EquipTool(v)
+					getHum():EquipTool(v)
 				end
 			end
 		end
@@ -12084,7 +12125,7 @@ end)
 cmd.add({"unequiptools"},{"unequiptools","Unequips every tool you are currently holding"},function()
 	if getChar() then
 		getChar():FindFirstChildOfClass('Humanoid'):UnequipTools()
-	end 
+	end
 end)
 
 bangLoop = nil
