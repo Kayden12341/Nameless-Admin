@@ -30,7 +30,7 @@ local NASCREENGUI=nil --Getmodel("rbxassetid://140418556029404")
 
 function SafeGetService(name)
 	local service = game:GetService(name)
-    return if cloneref then cloneref(service) else service
+	return if cloneref then cloneref(service) else service
 end
 
 local HttpService=SafeGetService('HttpService');
@@ -387,8 +387,8 @@ if FileSupport then
 	end
 
 	if not isfile(NAAUTOEXECPATH) then
-        writefile(NAAUTOEXECPATH, "[]")
-    end
+		writefile(NAAUTOEXECPATH, "[]")
+	end
 
 	if not isfile(NAPREDICTIONPATH) then
 		writefile(NAPREDICTIONPATH, "true")
@@ -559,15 +559,15 @@ NASAVEDALIASES = {}
 
 Spawn(function()
 	NACaller(function()
-        local playerScripts = LocalPlayer:WaitForChild("PlayerScripts", 5)
-        local playerModule = playerScripts:WaitForChild("PlayerModule", 5)
-        local controlModule = playerModule:WaitForChild("ControlModule", 5)
+		local playerScripts = LocalPlayer:WaitForChild("PlayerScripts", 5)
+		local playerModule = playerScripts:WaitForChild("PlayerModule", 5)
+		local controlModule = playerModule:WaitForChild("ControlModule", 5)
 
-        local ok, result = pcall(require, controlModule)
-        if ok then
-            ctrlModule = result
-        end
-    end)
+		local ok, result = pcall(require, controlModule)
+		if ok then
+			ctrlModule = result
+		end
+	end)
 end)
 
 customVECTORMOVE = Vector3.zero
@@ -1974,23 +1974,23 @@ function loadButtonIDS()
 end
 
 function loadAutoExec()
-    NAEXECDATA = {commands = {}, args = {}}
+	NAEXECDATA = {commands = {}, args = {}}
 
-    if FileSupport and isfile(NAAUTOEXECPATH) then
-        local success, decoded = pcall(function()
-            return HttpService:JSONDecode(readfile(NAAUTOEXECPATH))
-        end)
-        if success and type(decoded) == "table" then
-            NAEXECDATA = decoded
+	if FileSupport and isfile(NAAUTOEXECPATH) then
+		local success, decoded = pcall(function()
+			return HttpService:JSONDecode(readfile(NAAUTOEXECPATH))
+		end)
+		if success and type(decoded) == "table" then
+			NAEXECDATA = decoded
 
-            if not NAEXECDATA.commands then
-                NAEXECDATA.commands = {}
-            end
-            if not NAEXECDATA.args then
-                NAEXECDATA.args = {}
-            end
-        end
-    end
+			if not NAEXECDATA.commands then
+				NAEXECDATA.commands = {}
+			end
+			if not NAEXECDATA.args then
+				NAEXECDATA.args = {}
+			end
+		end
+	end
 end
 
 function RenderUserButtons()
@@ -2271,14 +2271,6 @@ end
 
 lib.lpchat=lib.LocalPlayerChat
 
-lib.lock=function(instance,par)
-	locks[instance]=true
-	instance.Parent=par or instance.Parent
-	instance.Name="RightGrip"
-end
-local lock=lib.lock
-local locks={}
-
 lib.find=function(t,v)	--mmmmmm
 	for i,e in pairs(t) do
 		if i==v or e==v then
@@ -2361,13 +2353,10 @@ lib.disconnect = function(name)
 		connections[name] = nil
 	end
 end
-
-local m=math			--prepare for annoying and unnecessary tool grip math
-local rad=m.rad
-local clamp=m.clamp
-local sin=m.sin
-local tan=m.tan
-local cos=m.cos
+			--prepare for annoying and unnecessary tool grip math
+local rad=math.rad
+local clamp=math.clamp
+local tan=math.tan
 
 --[[ COMMANDS ]]--
 
@@ -2381,22 +2370,6 @@ cmd.add({"url"}, {"url <link>", "Run the script using URL"}, function(...)
 	local success, result = pcall(function()
 		return game:HttpGet(link)
 	end)
-
-	if not success then
-		return false, "Failed to fetch script: "..tostring(result)
-	end
-
-	local fn, loadErr = loadstring(result)
-	if not fn then
-		return false, "Error compiling script: "..tostring(loadErr)
-	end
-
-	local execSuccess, execResult = pcall(fn)
-	if not execSuccess then
-		return false, "Error running script: "..tostring(execResult)
-	end
-
-	return true, "Script executed successfully"
 end, true)
 
 cmd.add({"loadstring", "ls"}, {"loadstring <code> (ls)", "Run code using loadstring"}, function(...)
@@ -2406,17 +2379,10 @@ cmd.add({"loadstring", "ls"}, {"loadstring <code> (ls)", "Run code using loadstr
 		return false, "No code provided"
 	end
 
-	local fn, err = loadstring(code)
+	local fn, err = assert(loadstring(code))()
 	if not fn then
 		return false, "Error loading code: "..tostring(err)
 	end
-
-	local success, result = pcall(fn)
-	if not success then
-		return false, "Error executing code: "..tostring(result)
-	end
-
-	return true, result
 end, true)
 
 cmd.add({"addalias"}, {"addalias <command> <alias>", "Adds a persistent alias for an existing command"}, function(original, alias)
@@ -2523,183 +2489,183 @@ cmd.add({"addbutton", "ab"}, {"addbutton <command> <label> [<command2>] (ab)", "
 end,true)
 
 cmd.add({"removebutton", "rb"}, {"removebutton (rb)", "Remove a user button"}, function()
-    if not next(NAUserButtons) then
-        DoNotif("No user buttons to remove", 2)
-        return
-    end
+	if not next(NAUserButtons) then
+		DoNotif("No user buttons to remove", 2)
+		return
+	end
 
-    local options = {}
-    for id, data in pairs(NAUserButtons) do
-        local label = data.Label or ("Button "..id)
-        local cmdDisplay = data.Cmd1 or "?"
-        if data.Cmd2 then
-            cmdDisplay = cmdDisplay.." / "..data.Cmd2
-        end
+	local options = {}
+	for id, data in pairs(NAUserButtons) do
+		local label = data.Label or ("Button "..id)
+		local cmdDisplay = data.Cmd1 or "?"
+		if data.Cmd2 then
+			cmdDisplay = cmdDisplay.." / "..data.Cmd2
+		end
 
-        Insert(options, {
-            Text = "["..id.."] "..label.." ("..cmdDisplay..")",
-            Callback = function()
-                NAUserButtons[id] = nil
+		Insert(options, {
+			Text = "["..id.."] "..label.." ("..cmdDisplay..")",
+			Callback = function()
+				NAUserButtons[id] = nil
 
-                if FileSupport then
-                    writefile(NAUSERBUTTONSPATH, HttpService:JSONEncode(NAUserButtons))
-                end
+				if FileSupport then
+					writefile(NAUSERBUTTONSPATH, HttpService:JSONEncode(NAUserButtons))
+				end
 
-                RenderUserButtons()
+				RenderUserButtons()
 
-                DoNotif("Removed user button: ["..id.."] "..label, 2)
-            end
-        })
-    end
+				DoNotif("Removed user button: ["..id.."] "..label, 2)
+			end
+		})
+	end
 
-    Insert(options, {
-        Text = "Cancel",
-        Callback = function()
-            DoNotif("Cancelled removing button", 2)
-        end
-    })
+	Insert(options, {
+		Text = "Cancel",
+		Callback = function()
+			DoNotif("Cancelled removing button", 2)
+		end
+	})
 
-    Notify({
-        Title = "Remove User Button",
-        Description = "Select a button to remove:",
-        Buttons = options
-    })
+	Notify({
+		Title = "Remove User Button",
+		Description = "Select a button to remove:",
+		Buttons = options
+	})
 end)
 
 cmd.add({"clearbuttons", "clearbtns", "cb"}, {"clearbuttons (clearbtns, cb)", "Clear all user buttons"}, function()
-    if not next(NAUserButtons) then
-        DoNotif("No user buttons to clear", 2)
-        return
-    end
+	if not next(NAUserButtons) then
+		DoNotif("No user buttons to clear", 2)
+		return
+	end
 
-    Notify({
-        Title = "Clear All Buttons",
-        Description = "Are you sure you want to clear all user buttons?",
-        Buttons = {
-            {
-                Text = "Yes",
-                Callback = function()
-                    table.clear(NAUserButtons)
+	Notify({
+		Title = "Clear All Buttons",
+		Description = "Are you sure you want to clear all user buttons?",
+		Buttons = {
+			{
+				Text = "Yes",
+				Callback = function()
+					table.clear(NAUserButtons)
 
-                    if FileSupport then
-                        writefile(NAUSERBUTTONSPATH, HttpService:JSONEncode(NAUserButtons))
-                    end
+					if FileSupport then
+						writefile(NAUSERBUTTONSPATH, HttpService:JSONEncode(NAUserButtons))
+					end
 
-                    RenderUserButtons()
+					RenderUserButtons()
 
-                    DoNotif("Cleared all user buttons", 2)
-                end
-            },
-            {
-                Text = "Cancel",
-                Callback = function()
-                    DoNotif("Cancelled clearing buttons", 2)
-                end
-            }
-        }
-    })
+					DoNotif("Cleared all user buttons", 2)
+				end
+			},
+			{
+				Text = "Cancel",
+				Callback = function()
+					DoNotif("Cancelled clearing buttons", 2)
+				end
+			}
+		}
+	})
 end)
 
 cmd.add({"addautoexec", "aaexec", "addae", "addauto", "aexecadd"}, {"addautoexec <command> [arguments] (aaexec, addae, addauto, aexecadd)", "Add a command to autoexecute"}, function(arg1, ...)
-    if not arg1 then
-        DoNotif("Usage: ;addautoexec <command> [arguments...]", 2)
-        return
-    end
+	if not arg1 then
+		DoNotif("Usage: ;addautoexec <command> [arguments...]", 2)
+		return
+	end
 
-    local args = {...}
-    local commandName = arg1:lower()
+	local args = {...}
+	local commandName = arg1:lower()
 
-    if not Commands[commandName] and not Aliases[commandName] then
-        DoNotif("Command ["..commandName.."] does not exist", 2)
-        return
-    end
+	if not Commands[commandName] and not Aliases[commandName] then
+		DoNotif("Command ["..commandName.."] does not exist", 2)
+		return
+	end
 
-    NAEXECDATA = NAEXECDATA or {commands = {}, args = {}}
-    if not NAEXECDATA.commands then
-        NAEXECDATA.commands = {}
-    end
-    if not NAEXECDATA.args then
-        NAEXECDATA.args = {}
-    end
+	NAEXECDATA = NAEXECDATA or {commands = {}, args = {}}
+	if not NAEXECDATA.commands then
+		NAEXECDATA.commands = {}
+	end
+	if not NAEXECDATA.args then
+		NAEXECDATA.args = {}
+	end
 
-    local exists = false
-    for _, cmd in ipairs(NAEXECDATA.commands) do
-        if cmd == commandName then
-            exists = true
-            break
-        end
-    end
-    if not exists then
-        Insert(NAEXECDATA.commands, commandName)
-    end
+	local exists = false
+	for _, cmd in ipairs(NAEXECDATA.commands) do
+		if cmd == commandName then
+			exists = true
+			break
+		end
+	end
+	if not exists then
+		Insert(NAEXECDATA.commands, commandName)
+	end
 
-    if #args > 0 then
-        local argumentString = Concat(args, " ")
-        NAEXECDATA.args[commandName] = argumentString
-    else
-        NAEXECDATA.args[commandName] = ""
-    end
+	if #args > 0 then
+		local argumentString = Concat(args, " ")
+		NAEXECDATA.args[commandName] = argumentString
+	else
+		NAEXECDATA.args[commandName] = ""
+	end
 
-    if FileSupport then
-        writefile(NAAUTOEXECPATH, HttpService:JSONEncode(NAEXECDATA))
-    end
+	if FileSupport then
+		writefile(NAAUTOEXECPATH, HttpService:JSONEncode(NAEXECDATA))
+	end
 
-    DoNotif("Added to AutoExec: "..arg1.." "..(args[1] or ""), 2)
+	DoNotif("Added to AutoExec: "..arg1.." "..(args[1] or ""), 2)
 end,true)
 
 cmd.add({"removeautoexec", "raexec", "removeae", "removeauto", "aexecremove"}, {"removeautoexec (raexec, removeae, removeauto, aexecremove)", "Remove a command from autoexecute"}, function()
-    if #NAEXECDATA.commands == 0 then
-        DoNotif("No AutoExec commands to remove", 2)
-        return
-    end
+	if #NAEXECDATA.commands == 0 then
+		DoNotif("No AutoExec commands to remove", 2)
+		return
+	end
 
-    local options = {}
-    for i, cmdName in ipairs(NAEXECDATA.commands) do
-        local args = NAEXECDATA.args[cmdName]
-        local display = args and args ~= "" and (cmdName.." "..args) or cmdName
-        Insert(options, {
-            Text = display,
-            Callback = function()
-                local removedCommand = table.remove(NAEXECDATA.commands, i)
-                NAEXECDATA.args[removedCommand] = nil
+	local options = {}
+	for i, cmdName in ipairs(NAEXECDATA.commands) do
+		local args = NAEXECDATA.args[cmdName]
+		local display = args and args ~= "" and (cmdName.." "..args) or cmdName
+		Insert(options, {
+			Text = display,
+			Callback = function()
+				local removedCommand = table.remove(NAEXECDATA.commands, i)
+				NAEXECDATA.args[removedCommand] = nil
 
-                if FileSupport then
-                    writefile(NAAUTOEXECPATH, HttpService:JSONEncode(NAEXECDATA))
-                end
+				if FileSupport then
+					writefile(NAAUTOEXECPATH, HttpService:JSONEncode(NAEXECDATA))
+				end
 
-                DoNotif("Removed AutoExec command: "..display, 2)
-            end
-        })
-    end
+				DoNotif("Removed AutoExec command: "..display, 2)
+			end
+		})
+	end
 
 	Insert(options, {
-        Text = "Cancel",
-        Callback = function()
-            DoNotif("Cancelled removing AutoExec", 2)
-        end
-    })
+		Text = "Cancel",
+		Callback = function()
+			DoNotif("Cancelled removing AutoExec", 2)
+		end
+	})
 
-    Notify({
-        Title = "Remove AutoExec Command",
-        Description = "Select which AutoExec to remove:",
-        Buttons = options
-    })
+	Notify({
+		Title = "Remove AutoExec Command",
+		Description = "Select which AutoExec to remove:",
+		Buttons = options
+	})
 end)
 
 cmd.add({"autoexecclear", "aexecclear", "aeclear"}, {"autoexecclear (aexecclear, aeclear)", "Clear all AutoExec commands"}, function()
-    if #NAEXECDATA.commands == 0 then
-        DoNotif("No AutoExec commands to clear", 2)
-        return
-    end
+	if #NAEXECDATA.commands == 0 then
+		DoNotif("No AutoExec commands to clear", 2)
+		return
+	end
 
-    NAEXECDATA.commands = {}
-    NAEXECDATA.args = {}
+	NAEXECDATA.commands = {}
+	NAEXECDATA.args = {}
 
-    if FileSupport then
-        writefile(NAAUTOEXECPATH, HttpService:JSONEncode(NAEXECDATA))
-    end
+	if FileSupport then
+		writefile(NAAUTOEXECPATH, HttpService:JSONEncode(NAEXECDATA))
+	end
 
-    DoNotif("Cleared all AutoExec commands", 2)
+	DoNotif("Cleared all AutoExec commands", 2)
 end)
 
 cmd.add({"executor","exec"},{"executor (exec)","Very simple executor"},function()
@@ -5313,17 +5279,17 @@ somersaultKeyConn = nil
 somersaultToggleKey = "x"
 
 cmd.add({"somersault", "frontflip"}, {"somersault (frontflip)", "Makes you do a clean front flip"}, function(...)
-    local function somersaulter()
+	local function somersaulter()
 		local p = LocalPlayer
 		local c = getChar() or p.CharacterAdded:Wait()
 		local hrp = getRoot(c)
 		local hum = getHum()
-	
+
 		if hum:GetState() ~= Enum.HumanoidStateType.Freefall and hum.FloorMaterial ~= Enum.Material.Air then
 			hum.PlatformStand = true
 			hrp.AssemblyAngularVelocity = hrp.CFrame.RightVector * -40
 			hrp.AssemblyLinearVelocity = hrp.CFrame.LookVector * 30 + Vector3.new(0, 30, 0)
-	
+
 			Delay(0.25, function()
 				hrp.AssemblyAngularVelocity = Vector3.zero
 				hum.PlatformStand = false
@@ -5331,72 +5297,72 @@ cmd.add({"somersault", "frontflip"}, {"somersault (frontflip)", "Makes you do a 
 			end)
 		end
 	end
-	
-    if IsOnMobile then
-        if somersaultBTN then
-            somersaultBTN:Destroy()
-            somersaultBTN = nil
-        end
 
-        somersaultBTN = InstanceNew("ScreenGui")
-        local btn = InstanceNew("TextButton")
-        local corner = InstanceNew("UICorner")
-        local aspect = InstanceNew("UIAspectRatioConstraint")
+	if IsOnMobile then
+		if somersaultBTN then
+			somersaultBTN:Destroy()
+			somersaultBTN = nil
+		end
 
-        NaProtectUI(somersaultBTN)
-        somersaultBTN.ResetOnSpawn = false
+		somersaultBTN = InstanceNew("ScreenGui")
+		local btn = InstanceNew("TextButton")
+		local corner = InstanceNew("UICorner")
+		local aspect = InstanceNew("UIAspectRatioConstraint")
 
-        btn.Parent = somersaultBTN
-        btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-        btn.BackgroundTransparency = 0.1
-        btn.Position = UDim2.new(0.85, 0, 0.5, 0)
-        btn.Size = UDim2.new(0.08, 0, 0.1, 0)
-        btn.Font = Enum.Font.GothamBold
-        btn.Text = "Flip"
-        btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-        btn.TextSize = 18
-        btn.TextWrapped = true
-        btn.Active = true
-        btn.TextScaled = true
+		NaProtectUI(somersaultBTN)
+		somersaultBTN.ResetOnSpawn = false
 
-        corner.CornerRadius = UDim.new(0.2, 0)
-        corner.Parent = btn
+		btn.Parent = somersaultBTN
+		btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+		btn.BackgroundTransparency = 0.1
+		btn.Position = UDim2.new(0.85, 0, 0.5, 0)
+		btn.Size = UDim2.new(0.08, 0, 0.1, 0)
+		btn.Font = Enum.Font.GothamBold
+		btn.Text = "Flip"
+		btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+		btn.TextSize = 18
+		btn.TextWrapped = true
+		btn.Active = true
+		btn.TextScaled = true
 
-        aspect.Parent = btn
-        aspect.AspectRatio = 1.0
+		corner.CornerRadius = UDim.new(0.2, 0)
+		corner.Parent = btn
 
-        coroutine.wrap(function()
-            MouseButtonFix(btn, function()
-                somersaulter()
-            end)
-        end)()
+		aspect.Parent = btn
+		aspect.AspectRatio = 1.0
 
-        gui.draggablev2(btn)
-    else
-        if somersaultKeyConn then
-            somersaultKeyConn:Disconnect()
-        end
+		coroutine.wrap(function()
+			MouseButtonFix(btn, function()
+				somersaulter()
+			end)
+		end)()
 
-        somersaultKeyConn = cmdm.KeyDown:Connect(function(KEY)
-            if KEY:lower() == somersaultToggleKey then
-                somersaulter()
-            end
-        end)
+		gui.draggablev2(btn)
+	else
+		if somersaultKeyConn then
+			somersaultKeyConn:Disconnect()
+		end
 
-        DoNotif("Press '"..somersaultToggleKey:upper().."' to flip!", 3)
-    end
+		somersaultKeyConn = cmdm.KeyDown:Connect(function(KEY)
+			if KEY:lower() == somersaultToggleKey then
+				somersaulter()
+			end
+		end)
+
+		DoNotif("Press '"..somersaultToggleKey:upper().."' to flip!", 3)
+	end
 end, false)
 
 cmd.add({"unsomersault", "unfrontflip"}, {"unsomersault (unfrontflip)", "Disable somersault button and keybind"}, function(...)
-    if somersaultBTN then
-        somersaultBTN:Destroy()
-        somersaultBTN = nil
-    end
+	if somersaultBTN then
+		somersaultBTN:Destroy()
+		somersaultBTN = nil
+	end
 
-    if somersaultKeyConn then
-        somersaultKeyConn:Disconnect()
-        somersaultKeyConn = nil
-    end
+	if somersaultKeyConn then
+		somersaultKeyConn:Disconnect()
+		somersaultKeyConn = nil
+	end
 end, false)
 
 cmd.add({"cartornado", "ctornado"}, {"cartornado (ctornado)", "Tornados a car just sit in the car"}, function()
@@ -6078,16 +6044,16 @@ cmd.add({"disablespawn", "unsetspawn", "ds"}, {"disablespawn (unsetspawn, ds)", 
 end)
 
 cmd.add({"flashback", "deathpos", "deathtp"}, {"flashback (deathpos, deathtp)", "Teleports you to your last death point"}, function()
-    if deathCFrame then
-        local character = getChar()
-        if character and getRoot(character) then
-            getRoot(character).CFrame = deathCFrame
-        else
-            DoNotif("Could not teleport, root is missing", 3)
-        end
-    else
-        DoNotif("No available death location to teleport to! You need to die first", 3)
-    end
+	if deathCFrame then
+		local character = getChar()
+		if character and getRoot(character) then
+			getRoot(character).CFrame = deathCFrame
+		else
+			DoNotif("Could not teleport, root is missing", 3)
+		end
+	else
+		DoNotif("No available death location to teleport to! You need to die first", 3)
+	end
 end)
 
 cmd.add({"hamster"}, {"hamster <number>", "Hamster ball"}, function(...)
@@ -16643,63 +16609,63 @@ gui.menuify = function(menu)
 end
 
 gui.menuifyv2 = function(menu)
-    if menu:IsA("Frame") then menu.AnchorPoint = Vector2.new(0, 0) end
+	if menu:IsA("Frame") then menu.AnchorPoint = Vector2.new(0, 0) end
 
-    local exitButton = menu:FindFirstChild("Exit", true)
-    local minimizeButton = menu:FindFirstChild("Minimize", true)
-    local clearButton = menu:FindFirstChild("Clear", true)
+	local exitButton = menu:FindFirstChild("Exit", true)
+	local minimizeButton = menu:FindFirstChild("Minimize", true)
+	local clearButton = menu:FindFirstChild("Clear", true)
 
-    local minimized = false
-    local isAnimating = false
-    local sizeX = InstanceNew("IntValue", menu)
-    local sizeY = InstanceNew("IntValue", menu)
+	local minimized = false
+	local isAnimating = false
+	local sizeX = InstanceNew("IntValue", menu)
+	local sizeY = InstanceNew("IntValue", menu)
 
-    local function toggleMinimize()
-        if isAnimating then return end
-        minimized = not minimized
-        isAnimating = true
+	local function toggleMinimize()
+		if isAnimating then return end
+		minimized = not minimized
+		isAnimating = true
 
-        if minimized then
-            sizeX.Value = menu.Size.X.Offset
-            sizeY.Value = menu.Size.Y.Offset
-            gui.tween(menu, "Quart", "Out", 0.5, {Size = UDim2.new(0, sizeX.Value, 0, 35)}).Completed:Connect(function()
-                isAnimating = false
-            end)
-        else
-            gui.tween(menu, "Quart", "Out", 0.5, {Size = UDim2.new(0, sizeX.Value, 0, sizeY.Value)}).Completed:Connect(function()
-                isAnimating = false
-            end)
-        end
-    end
+		if minimized then
+			sizeX.Value = menu.Size.X.Offset
+			sizeY.Value = menu.Size.Y.Offset
+			gui.tween(menu, "Quart", "Out", 0.5, {Size = UDim2.new(0, sizeX.Value, 0, 35)}).Completed:Connect(function()
+				isAnimating = false
+			end)
+		else
+			gui.tween(menu, "Quart", "Out", 0.5, {Size = UDim2.new(0, sizeX.Value, 0, sizeY.Value)}).Completed:Connect(function()
+				isAnimating = false
+			end)
+		end
+	end
 
-    MouseButtonFix(minimizeButton, toggleMinimize)
-    MouseButtonFix(exitButton, function()
-        menu.Visible = false
-    end)
+	MouseButtonFix(minimizeButton, toggleMinimize)
+	MouseButtonFix(exitButton, function()
+		menu.Visible = false
+	end)
 
-    if clearButton then
-        clearButton.Visible = true
+	if clearButton then
+		clearButton.Visible = true
 
-        MouseButtonFix(clearButton, function()
-            local container = menu:FindFirstChild("Container", true)
-            if container then
-                local scrollingFrame = container:FindFirstChildOfClass("ScrollingFrame")
-                if scrollingFrame then
-                    local layout = scrollingFrame:FindFirstChildOfClass("UIListLayout", true)
-                    if layout then
-                        for _, v in ipairs(layout.Parent:GetChildren()) do
-                            if v:IsA("TextLabel") then
-                                v:Destroy()
-                            end
-                        end
-                    end
-                end
-            end
-        end)
-    end
+		MouseButtonFix(clearButton, function()
+			local container = menu:FindFirstChild("Container", true)
+			if container then
+				local scrollingFrame = container:FindFirstChildOfClass("ScrollingFrame")
+				if scrollingFrame then
+					local layout = scrollingFrame:FindFirstChildOfClass("UIListLayout", true)
+					if layout then
+						for _, v in ipairs(layout.Parent:GetChildren()) do
+							if v:IsA("TextLabel") then
+								v:Destroy()
+							end
+						end
+					end
+				end
+			end
+		end)
+	end
 
-    gui.draggablev2(menu, menu.Topbar)
-    menu.Visible = false
+	gui.draggablev2(menu, menu.Topbar)
+	menu.Visible = false
 end
 
 gui.loadCommands = function()
@@ -16739,7 +16705,7 @@ end
 
 gui.barSelect = function(speed)
 	speed = speed or 0.4
-	
+
 	centerBar.Visible = true
 	centerBar.Size = UDim2.new(0, 0, 1, 15)
 
@@ -16898,18 +16864,18 @@ gui.searchCommands = function()
 
 		for i, result in ipairs(results) do
 			if i > maxResults then break end
-		
+
 			local frame = result.frame
-		
+
 			if result.text and result.text ~= "" then
 				local displayText = Commands[result.name] and Commands[result.name][2] and Commands[result.name][2][1]
 				frame.Input.Text = displayText or result.name
 				frame.Visible = true
-		
+
 				local width = math.sqrt(i) * 125
 				local yOffset = (i - 1) * 28
 				local newPos = UDim2.new(0.5, 0, 0, yOffset)
-		
+
 				gui.tween(frame, "Quint", "Out", 0.3, {
 					Size = UDim2.new(0.5, width, 0, 25),
 					Position = newPos,
@@ -16986,7 +16952,7 @@ end
 --[[ CMDS COMMANDS SEARCH FUNCTION ]]--
 commandsFilter:GetPropertyChangedSignal("Text"):Connect(function()
 	local searchText = commandsFilter.Text:lower():gsub(";", "")
-	
+
 	for _, label in ipairs(commandsList:GetChildren()) do
 		if label:IsA("TextLabel") then
 			local cmdName = label.Name:lower()
@@ -17439,9 +17405,8 @@ end
 swooshySWOOSH = false
 
 function Swoosh()
-	local targetRotation = isAprilFools() and math.random(540, 1440) or 720
 	TweenService:Create(ImageButton, TweenInfo.new(1.5, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out), {
-		Rotation = targetRotation
+		Rotation = isAprilFools() and math.random(540, 1440) or 720
 	}):Play()
 
 	gui.draggablev2(ImageButton)
