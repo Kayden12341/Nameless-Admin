@@ -5333,25 +5333,24 @@ somersaultToggleKey = "x"
 
 cmd.add({"somersault", "frontflip"}, {"somersault (frontflip)", "Makes you do a clean front flip"}, function(...)
     local function somersaulter()
-        local p = LocalPlayer
-        local c = getChar() or p.CharacterAdded:Wait()
-        local hrp = getRoot(c)
-        local hum = getHum()
-
-        hum.PlatformStand = true
-        --hrp.AssemblyLinearVelocity = Vector3.zero
-        --hrp.AssemblyAngularVelocity = Vector3.zero
-
-        hrp.AssemblyAngularVelocity = hrp.CFrame.RightVector * -40
-        hrp.AssemblyLinearVelocity = hrp.CFrame.LookVector * 30 + Vector3.new(0, 30, 0)
-
-        Delay(0.25, function()
-            hrp.AssemblyAngularVelocity = Vector3.zero
-            hum.PlatformStand = false
-            hum:ChangeState(Enum.HumanoidStateType.GettingUp)
-        end)
-    end
-
+		local p = LocalPlayer
+		local c = getChar() or p.CharacterAdded:Wait()
+		local hrp = getRoot(c)
+		local hum = getHum()
+	
+		if hum:GetState() ~= Enum.HumanoidStateType.Freefall and hum.FloorMaterial ~= Enum.Material.Air then
+			hum.PlatformStand = true
+			hrp.AssemblyAngularVelocity = hrp.CFrame.RightVector * -40
+			hrp.AssemblyLinearVelocity = hrp.CFrame.LookVector * 30 + Vector3.new(0, 30, 0)
+	
+			Delay(0.25, function()
+				hrp.AssemblyAngularVelocity = Vector3.zero
+				hum.PlatformStand = false
+				hum:ChangeState(Enum.HumanoidStateType.GettingUp)
+			end)
+		end
+	end
+	
     if IsOnMobile then
         if somersaultBTN then
             somersaultBTN:Destroy()
@@ -17435,7 +17434,7 @@ ImageButton.AnchorPoint = Vector2.new(0.5, 0)
 ImageButton.BorderSizePixel = 0
 ImageButton.Position = UDim2.new(0.5, 0, -1, 0)
 ImageButton.Size = UDim2.new(0, 32 * NAScale, 0, 32 * NAScale)
-ImageButton.Image = "rbxassetid://77352376040674"
+ImageButton.Image = isAprilFools() and "rbxassetid://104531932157501" or "rbxassetid://77352376040674"
 ImageButton.ZIndex = 9999
 
 UICorner.CornerRadius = UDim.new(0.5, 0)
@@ -17460,7 +17459,7 @@ swooshySWOOSH = false
 
 function Swoosh()
 	local targetRotation = isAprilFools() and math.random(540, 1440) or 720
-	TweenService:Create(ImageButton, TweenInfo.new(1.2, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out), {
+	TweenService:Create(ImageButton, TweenInfo.new(1.5, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out), {
 		Rotation = targetRotation
 	}):Play()
 
