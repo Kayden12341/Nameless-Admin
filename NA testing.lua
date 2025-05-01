@@ -12016,7 +12016,7 @@ end)
 
 jerkAnim, jerkTrack, jerkLoop, jerkDied, jerkParts = nil, nil, nil, nil, {}
 
-cmd.add({"jerkuser", "jorkuser"}, {"jerkuser <player> (jorkuser)", "Lay under them and vibe"}, function(h, d)
+cmd.add({"jerkuser", "jorkuser", "handjob", "hjob", "handj"}, {"jerkuser <player> (jorkuser, handjob, hjob, handj)", "Lay under them and vibe"}, function(h, d)
 	if not IsR6() then DoNotif("command requires R6",3) return end
 	local username = h
 	local players = getPlr(username)
@@ -12096,7 +12096,7 @@ cmd.add({"jerkuser", "jorkuser"}, {"jerkuser <player> (jorkuser)", "Lay under th
 	end)
 end, true)
 
-cmd.add({"unjerkuser", "unjorkuser"}, {"unjerkuser (unjorkuser)", "Stop the jerk user action"}, function()
+cmd.add({"unjerkuser", "unjorkuser", "unhandjob", "unhjob", "unhandj"}, {"unjerkuser (unjorkuser, unhandjob, unhjob, unhandj)", "Stop the jerk user action"}, function()
 	if jerkLoop then jerkLoop:Disconnect() end
 	if jerkTrack then jerkTrack:Stop() end
 	if jerkAnim then jerkAnim:Destroy() end
