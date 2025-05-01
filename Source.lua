@@ -70,6 +70,10 @@ function MockText(text)
 	return Concat(result)
 end
 
+local function maybeMock(text)
+	return isAprilFools() and MockText(text) or text
+end
+
 function randomString()
 	local length = math.random(10, 20)
 	local result = {}
@@ -172,20 +176,43 @@ local testingName = 'NA Testing'
 local adminName = 'NA'
 
 function yayApril(isTesting: boolean)
-	local baseNames = {
-		"Clueless", "Gay", "Infinite", "Sussy", "Broken", "Shadow", "Quirky",
-		"Zoomy", "Wacky", "Booba", "Spicy", "Meme", "Doofy", "Silly",
-		"Goblin", "Bingus", "Chonky", "Floofy", "Yeety", "Bonky", "Derpy",
-		"Cheesy", "Nugget", "Funky", "Floppy", "Chunky", "Snazzy", "Wonky",
-		"Goober", "Dorky"
-	}
+    local baseNames = {
+        "Clueless", "Gay", "Infinite", "Sussy", "Broken", "Shadow", "Quirky",
+        "Zoomy", "Wacky", "Booba", "Spicy", "Meme", "Doofy", "Silly",
+        "Goblin", "Bingus", "Chonky", "Floofy", "Yeety", "Bonky", "Derpy",
+        "Cheesy", "Nugget", "Funky", "Floppy", "Chunky", "Snazzy", "Wonky",
+        "Goober", "Dorky", "Zany", "Glitchy", "Bubbly", "Wizzy", "Turbo",
+        "Pixel", "Nifty", "Jazzy", "Rascal", "Muddled", "Quasar", "Nimbus",
+        "Echo", "Froggy", "Gobsmack", "Hiccup", "Jinx", "Kooky", "Loco",
+        "Mango", "Noodle", "Oddball", "Peculiar", "Quibble", "Rumble",
+        "Snickle", "Tango", "Umbra", "Velcro", "Widdle", "Yonder", "Zephyr",
+        "Bamboozle", "Cranky", "Doodle", "Eerie", "Frisky", "Gizmo", "Hazy",
+        "Icicle", "Jolly", "Karma", "Lullaby", "Mystic", "Nebula", "Opal",
+        "Poppy", "Riddle", "Slinky", "Tickle", "Vortex", "Whimsy", "Xenon",
+        "Yummy", "Zodiac", "Astral", "Blizzard", "Cobalt", "Drifter", "Ember",
+        "Flux", "Glacier", "Harpy", "Inferno", "Jester", "Katana", "Labyrinth",
+        "Mirage", "Nomad", "Oracle", "Phantom", "Quill", "Rogue", "Specter",
+        "Tempest", "Uproar", "Vagabond", "Wraith", "Xylophone", "Yoshi", "Zenith",
+        "Arpeggio", "Basilisk", "Catalyst", "Dynamo", "Equinox", "Fortune",
+        "Griffin", "Horizon", "Illusion", "Jubilee", "Kismet", "Labyrinthine",
+        "Monsoon", "Nightfall", "Obsidian", "Paradox", "Quantum", "Requiem",
+        "Serenade", "Trilogy", "Unicorn", "Vortexial", "Wanderer", "Xenith",
+        "Yield", "Zeppelin", "Avalanche", "Banshee", "Comet", "Delta", "Eclipse",
+        "Fable", "Golem", "Helix", "Isotope", "Jargon", "Kodiak", "Lynx",
+        "Maelstrom", "Nimbus", "Oasis", "Pulse", "Quasar", "Rift", "Savage",
+        "Tempestuous", "Undertow", "Vertex", "Wavelength", "Xanadu", "Yukon",
+        "Zephyrine", "Apex", "Bravado", "Crescent", "Drizzle", "Emissary",
+        "Frenzy", "Gargoyle", "Harbinger", "Incognito", "Jubilation", "Kaleidoscope",
+        "Labour", "Mandala", "Nirvana", "Odyssey", "Palindrome", "Quintessence",
+        "Renaissance", "Symphony", "Tapestry", "Utopia", "Virtuoso", "Whirlpool",
+        "Xeme", "Yonderly", "Zenobia"
+    }
 
-	local suffix = isTesting and "Testing" or "Admin"
-	local name = baseNames[math.random(#baseNames)]
+    local suffix = isTesting and "Testing" or "Admin"
+    local name = baseNames[math.random(#baseNames)]
 
-	return name.." "..suffix
+    return name .. " " .. suffix
 end
-
 
 function getSeasonEmoji()
 	local date = os.date("*t")
@@ -236,13 +263,13 @@ end
 if getgenv().NATestingVer then
 	if isAprilFools() then
 		testingName = yayApril(true)
-		testingName = MockText(testingName)
+		testingName = maybeMock(testingName)
 	end
 	adminName = testingName
 else
 	if isAprilFools() then
 		mainName = yayApril(false)
-		mainName = MockText(mainName)
+		mainName = maybeMock(mainName)
 	end
 	adminName = mainName
 end
@@ -3187,7 +3214,7 @@ cmd.add({"clickfling","mousefling"}, {"clickfling (mousefling)", "Fling a player
 						RootPart.CFrame = getgenv().OldPos * CFrame.new(0, .5, 0)
 						Character:SetPrimaryPartCFrame(getgenv().OldPos * CFrame.new(0, .5, 0))
 						Humanoid:ChangeState("GettingUp")
-						table.foreach(Character:GetChildren(), function(_, x)
+						Foreach(Character:GetChildren(), function(_, x)
 							if x:IsA("BasePart") then
 								x.Velocity, x.RotVelocity = Vector3.new(), Vector3.new()
 							end
@@ -3652,162 +3679,168 @@ cmd.add({"commands","cmds"},{"commands (cmds)","Open the command list"},function
 	gui.commands()
 end)
 
-debugUI = nil
-debugChar = nil
+debugUI, cDEBUGCON, isMinimized = nil, {}, false
 
-cmd.add({"chardebug", "cdebug"}, {"chardebug (cdebug)", "debug your character"}, function()
-	local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-	local humanoid = character:WaitForChild("Humanoid")
-	local rootPart = character:WaitForChild("HumanoidRootPart")
-	local workspaceService = SafeGetService("Workspace")
+function DEBUGclearCONS()
+    for _,c in ipairs(cDEBUGCON) do c:Disconnect() end
+    cDEBUGCON = {}
+end
 
-	if debugUI then
-		debugUI:Destroy()
-		debugUI = nil
+cmd.add({"chardebug","cdebug"},{"chardebug (cdebug)","debug your character"},function()
+	local UI_SIZE     = Vector2.new(520, 300)
+	local HEADER_H    = 40
+	local BG_COLOR    = Color3.fromRGB(20, 20, 20)
+	local CONTENT_BG  = Color3.fromRGB(20, 20, 20)
+	local UPDATE_RATE = 1/30
+
+	local function new(class, props)
+		local inst = InstanceNew(class)
+		for k,v in pairs(props) do inst[k] = v end
+		return inst
 	end
-	if debugChar then
-		debugChar:Disconnect()
-		debugChar = nil
-	end
-	local debugChar = LocalPlayer.CharacterAdded:Connect(function(cc)
-		humanoid=cc:WaitForChild("Humanoid")
-		rootPart=cc:WaitForChild("HumanoidRootPart")
-	end)
+    if debugUI then
+        debugUI:Destroy()
+        debugUI = nil
+        DEBUGclearCONS()
+        RunService:UnbindFromRenderStep("CharDebug")
+        return
+    end
 
-	debugUI = InstanceNew("ScreenGui")
+    debugUI = new("ScreenGui",{Name="CharDebugUI",ResetOnSpawn=false})
 	NaProtectUI(debugUI)
 
-	local container = InstanceNew("Frame")
-	container.Size = UDim2.new(0, 520, 0, 300)
-	container.Position = UDim2.new(0.5, -260, 0.2, 0)
-	container.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-	container.BackgroundTransparency = 0.3
-	container.BorderSizePixel = 0
-	container.Parent = debugUI
+    local window = new("Frame",{
+        Name="Window",
+        Size=UDim2.fromOffset(UI_SIZE.X, HEADER_H),
+        Position=UDim2.new(0.5, -UI_SIZE.X/2, 0.2, 0),
+        BackgroundColor3=BG_COLOR,
+        BorderSizePixel=0,
+        ClipsDescendants=true,
+        Parent=debugUI
+    })
+    new("UICorner",{CornerRadius=UDim.new(0,8),Parent=window})
 
-	local containerCorner = InstanceNew("UICorner")
-	containerCorner.CornerRadius = UDim.new(0.1, 0)
-	containerCorner.Parent = container
+    local header = new("Frame",{
+        Name="Header",
+        Size=UDim2.new(1,0,0,HEADER_H),
+        BackgroundColor3=BG_COLOR,
+        Parent=window
+    })
+    new("UICorner",{CornerRadius=UDim.new(0,8),Parent=header})
 
-	local header = InstanceNew("TextLabel")
-	header.Size = UDim2.new(1, 0, 0, 40)
-	header.BackgroundTransparency = 1
-	header.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
-	header.Text = "Debug Information"
-	header.TextColor3 = Color3.new(1, 1, 1)
-	header.Font = Enum.Font.Code
-	header.TextScaled = true
-	header.Parent = container
+    local title = new("TextLabel",{
+        Name="Title",
+        Size=UDim2.new(1,-80,1,0),
+        Position=UDim2.new(0,10,0,0),
+        BackgroundTransparency=1,
+        Font=Enum.Font.Code,
+        TextSize=18,
+        TextColor3=Color3.new(1,1,1),
+        TextXAlignment=Enum.TextXAlignment.Left,
+        Text="Character Debug",
+        Parent=header
+    })
 
-	local minimizeButton = InstanceNew("TextButton")
-	minimizeButton.Size = UDim2.new(0, 40, 0, 40)
-	minimizeButton.Position = UDim2.new(1, -40, 0, 0)
-	minimizeButton.BackgroundTransparency = 1
-	minimizeButton.Text = "-"
-	minimizeButton.TextScaled = true
-	minimizeButton.TextColor3 = Color3.new(1, 1, 1)
-	minimizeButton.Font = Enum.Font.Code
-	minimizeButton.Parent = header
+    local btn = new("TextButton",{
+        Name="MinimizeBtn",
+        Size=UDim2.new(0,40,1,0),
+        Position=UDim2.new(1,-40,0,0),
+        BackgroundTransparency=1,
+        Font=Enum.Font.Code,
+        TextSize=24,
+        TextColor3=Color3.new(1,1,1),
+        Text="-",
+        Parent=header
+    })
 
-	gui.draggablev2(container)
+    local content = new("Frame",{
+        Name="Content",
+        Size=UDim2.new(1,0,0,UI_SIZE.Y-HEADER_H),
+        Position=UDim2.new(0,0,0,HEADER_H),
+        BackgroundColor3=CONTENT_BG,
+        BackgroundTransparency=0.3,
+        Parent=window
+    })
+    new("UICorner",{CornerRadius=UDim.new(0,8),Parent=content})
 
-	local labelsInfo = {
-		{name = "VelocityLabel", text = "Velocity\nX: 0.00\nY: 0.00\nZ: 0.00"},
-		{name = "PositionLabel", text = "Position\nX: 0.00\nY: 0.00\nZ: 0.00"},
-		{name = "HealthLabel", text = "Health\n0.00 / 0.00"},
-		{name = "FOVLabel", text = "FOV\n0.00"},
-		{name = "StateLabel", text = "State\nUnknown"},
-		{name = "ToolLabel", text = "Tool\nNone"},
-		{name = "JumpPowerLabel", text = "Jump Power\n0.00"},
-		{name = "WalkSpeedLabel", text = "Walk Speed\n0.00"}
-	}
+    local grid = new("UIGridLayout",{
+        Parent=content,
+        CellSize=UDim2.new(0,250,0,50),
+        CellPadding=UDim2.new(0,10,0,10),
+        StartCorner=Enum.StartCorner.TopLeft,
+        SortOrder=Enum.SortOrder.LayoutOrder
+    })
 
-	local labelObjects = {}
-	local labelWidth = 250
-	local labelHeight = 50
-	local spacing = 10
-	local numColumns = 2
-	local startX = 10
-	local startY = header.Size.Y.Offset + 10
+    local stats = {
+        {key="Velocity",  source="root",     fmt="X: %.2f\nY: %.2f\nZ: %.2f", fn=function(r) return r.Velocity.X, r.Velocity.Y, r.Velocity.Z end},
+        {key="Position",  source="root",     fmt="X: %.2f\nY: %.2f\nZ: %.2f", fn=function(r) return r.Position.X, r.Position.Y, r.Position.Z end},
+        {key="Health",    source="humanoid", fmt="%.2f / %.2f",             fn=function(h) return h.Health, h.MaxHealth end},
+        {key="FOV",       source="camera",   fmt="%.2f",                      fn=function(c) return c.FieldOfView end},
+        {key="State",     source="humanoid", fmt="%s",                        fn=function(h) return tostring(h:GetState()) end},
+        {key="Tool",      source="char",     fmt="%s",                        fn=function(c) local t=c:FindFirstChildOfClass("Tool") return (t and t.Name) or "None" end},
+        {key="JumpPower", source="humanoid", fmt="%.2f",                      fn=function(h) return h.JumpPower end},
+        {key="WalkSpeed", source="humanoid", fmt="%.2f",                      fn=function(h) return h.WalkSpeed end},
+    }
 
-	for i, info in ipairs(labelsInfo) do
-		local column = ((i - 1) % numColumns)
-		local row = math.floor((i - 1) / numColumns)
-		local label = InstanceNew("TextLabel")
-		label.Size = UDim2.new(0, labelWidth, 0, labelHeight)
-		label.Position = UDim2.new(0, startX + column * (labelWidth + spacing), 0, startY + row * (labelHeight + spacing))
-		label.BackgroundTransparency = 0.2
-		label.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-		label.BorderSizePixel = 0
-		label.TextColor3 = Color3.new(1, 1, 1)
-		label.TextXAlignment = Enum.TextXAlignment.Center
-		label.TextYAlignment = Enum.TextYAlignment.Center
-		label.Font = Enum.Font.Code
-		label.TextSize = 16
-		label.TextScaled = true
-		label.ClipsDescendants = true
-		label.Text = info.text
-		label.Parent = container
+    local labels = {}
+    for i,stat in ipairs(stats) do
+        local lbl = new("TextLabel",{
+            Name=stat.key,
+            LayoutOrder=i,
+            Size=UDim2.fromOffset(250,50),
+            BackgroundColor3=Color3.fromRGB(30,30,30),
+            BorderSizePixel=0,
+            Font=Enum.Font.Code,
+            TextScaled=true,
+            TextColor3=Color3.new(1,1,1),
+            TextWrapped=true,
+            Text=stat.key.."\n—",
+            Parent=content
+        })
+        new("UICorner",{CornerRadius=UDim.new(0,4),Parent=lbl})
+        labels[stat.key] = lbl
+    end
 
-		local corner = InstanceNew("UICorner")
-		corner.CornerRadius = UDim.new(0.2, 0)
-		corner.Parent = label
+	gui.draggablev2(window, header)
 
-		labelObjects[info.name] = label
-	end
+    btn.MouseButton1Click:Connect(function()
+        isMinimized = not isMinimized
+        local target = isMinimized and UDim2.fromOffset(UI_SIZE.X, HEADER_H) or UDim2.fromOffset(UI_SIZE.X, UI_SIZE.Y)
+        TweenService:Create(window, TweenInfo.new(0.2), {Size = target}):Play()
+        btn.Text = isMinimized and "+" or "-"
+        content.Visible = not isMinimized
+    end)
 
-	local isMinimized = false
-	MouseButtonFix(minimizeButton,function()
-		isMinimized = not isMinimized
-		if isMinimized then
-			for _, label in pairs(labelObjects) do
-				label.Visible = false
-			end
-			container.Size = UDim2.new(0, 520, 0, 40)
-			minimizeButton.Text = "+"
-		else
-			for _, label in pairs(labelObjects) do
-				label.Visible = true
-			end
-			container.Size = UDim2.new(0, 520, 0, 300)
-			minimizeButton.Text = "-"
-		end
-	end)
+    local dtAcc = 0
+    RunService:BindToRenderStep("CharDebug", Enum.RenderPriority.Last.Value, function(dt)
+        dtAcc = dtAcc + dt
+        if dtAcc < UPDATE_RATE then return end
+        dtAcc = 0
 
-	local function updateDebugInfo()
-		local velocity = rootPart.Velocity
-		local position = rootPart.Position
-		local health = humanoid.Health
-		local maxHealth = humanoid.MaxHealth
-		local fov = workspaceService.CurrentCamera.FieldOfView
-		local state = humanoid:GetState()
-		local tool = character:FindFirstChildOfClass("Tool") and character:FindFirstChildOfClass("Tool").Name or "None"
-		local jumpPower = humanoid.JumpPower
-		local walkSpeed = humanoid.WalkSpeed
+        local char = LocalPlayer.Character
+        local hum  = getHum()
+        local root = char and getRoot(char)
+        local cam  = SafeGetService("Workspace").CurrentCamera
+        if not (char and hum and root and cam) then return end
 
-		labelObjects["VelocityLabel"].Text = Format("Velocity\nX: %.2f\nY: %.2f\nZ: %.2f", velocity.X, velocity.Y, velocity.Z)
-		labelObjects["PositionLabel"].Text = Format("Position\nX: %.2f\nY: %.2f\nZ: %.2f", position.X, position.Y, position.Z)
-		labelObjects["HealthLabel"].Text = Format("Health\n%.2f / %.2f", health, maxHealth)
-		labelObjects["FOVLabel"].Text = Format("FOV\n%.2f", fov)
-		labelObjects["StateLabel"].Text = Format("State\n%s", tostring(state))
-		labelObjects["ToolLabel"].Text = Format("Tool\n%s", tool)
-		labelObjects["JumpPowerLabel"].Text = Format("Jump Power\n%.2f", jumpPower)
-		labelObjects["WalkSpeedLabel"].Text = Format("Walk Speed\n%.2f", walkSpeed)
-	end
-
-	RunService:BindToRenderStep("UpdateDebugInfo", Enum.RenderPriority.Last.Value, updateDebugInfo)
+        local sources = { char = char, humanoid = hum, root = root, camera = cam }
+        for _, stat in ipairs(stats) do
+            local src = sources[stat.source]
+            if src then
+                local vals = { stat.fn(src) }
+                labels[stat.key].Text = stat.key.."\n"..Format(stat.fmt, unpack(vals))
+            end
+        end
+    end)
 end)
 
-cmd.add({"unchardebug", "uncdebug"}, {"unchardebug (uncdebug)", "disable character debug"}, function()
-	if debugUI then
-		debugUI:Destroy()
-		debugUI = nil
-	end
-	if debugChar then
-		debugChar:Disconnect()
-		debugChar = nil
-	end
-	RunService:UnbindFromRenderStep("UpdateDebugInfo")
+cmd.add({"unchardebug","uncdebug"},{"unchardebug (uncdebug)","disable character debug"},function()
+    if debugUI then
+        debugUI:Destroy()
+        debugUI = nil
+        DEBUGclearCONS()
+        RunService:UnbindFromRenderStep("CharDebug")
+    end
 end)
 
 cmd.add({"naked"}, {"naked", "no clothing gang"}, function()
@@ -7266,6 +7299,151 @@ cmd.add({"runanim", "playanim", "anim"}, {"runanim <id> (playanim,anim)", "Plays
 end,true)
 
 local storedAnims = {}
+builderAnim = nil
+
+cmd.add({"animbuilder","abuilder"},{"animbuilder (abuilder)","Opens animation builder GUI"},function()
+    if builderAnim then pcall(function() builderAnim:Destroy() end) builderAnim = nil end
+
+    local function getData()
+        local hum = getHum()
+        if not hum then return end
+        local animate = hum.Parent:FindFirstChild("Animate")
+        if not animate then return end
+        return hum, animate
+    end
+
+    local p = LocalPlayer
+    local uid = p.UserId
+    if not storedAnims[uid] then
+        local hum0, animate0 = getData()
+        if not animate0 then return end
+        local store = {}
+        for _, v in pairs(animate0:GetChildren()) do
+            if v:IsA("StringValue") then
+                local a = v:FindFirstChildWhichIsA("Animation")
+                if a then store[v.Name] = a.AnimationId end
+            end
+        end
+        storedAnims[uid] = store
+    end
+
+    builderAnim = InstanceNew("ScreenGui")
+    NaProtectUI(builderAnim)
+
+    local m = InstanceNew("Frame", builderAnim)
+    local fullW, fullH = 420, 515
+    m.Size = UDim2.new(0, fullW, 0, fullH)
+    m.Position = UDim2.new(0.5, -fullW/2, 0.5, -fullH/2)
+    m.BackgroundColor3 = Color3.fromRGB(30,30,30)
+    m.BackgroundTransparency = 0.4
+    m.ClipsDescendants = true
+    InstanceNew("UICorner", m).CornerRadius = UDim.new(0,12)
+
+    local title = InstanceNew("TextLabel", m)
+    title.Size = UDim2.new(1,0,0,30)
+    title.Position = UDim2.new(0,0,0,0)
+    title.BackgroundTransparency = 1
+    title.Text = "Animation Builder"
+    title.TextSize = 20
+    title.Font = Enum.Font.SourceSansSemibold
+    title.TextColor3 = Color3.new(1,1,1)
+
+    local x = InstanceNew("TextButton", m)
+    x.Size = UDim2.new(0,30,0,30)
+    x.Position = UDim2.new(1,-35,0,2)
+    x.Text = "X"
+    x.Font = Enum.Font.SourceSansBold
+    x.TextSize = 18
+    x.BackgroundColor3 = Color3.fromRGB(200,50,50)
+    x.BackgroundTransparency = 0.5
+    InstanceNew("UICorner", x).CornerRadius = UDim.new(0,8)
+    x.MouseButton1Click:Connect(function() pcall(builderAnim.Destroy, builderAnim) builderAnim = nil end)
+
+    local states = {"Idle","Walk","Run","Jump","Fall","Climb","Swim","Sit"}
+    local tb = {}
+    for i, k in ipairs(states) do
+        local r = InstanceNew("Frame", m)
+        r.Size = UDim2.new(1,-20,0,50)
+        r.Position = UDim2.new(0,10,0,40 + (i-1)*55)
+        r.BackgroundColor3 = Color3.fromRGB(50,50,50)
+        r.BackgroundTransparency = 0.3
+        InstanceNew("UICorner", r).CornerRadius = UDim.new(0,10)
+
+        local l = InstanceNew("TextLabel", r)
+        l.Text = k
+        l.Size = UDim2.new(0.3,0,1,0)
+        l.Position = UDim2.new(0,10,0,0)
+        l.BackgroundTransparency = 1
+        l.TextSize = 16
+        l.Font = Enum.Font.SourceSans
+        l.TextColor3 = Color3.new(1,1,1)
+        l.TextXAlignment = Enum.TextXAlignment.Left
+
+        local te = InstanceNew("TextBox", r)
+        te.PlaceholderText = "Insert ID"
+        te.Text = ""
+        te.ClearTextOnFocus = false
+        te.Size = UDim2.new(0.7,-20,0,30)
+        te.Position = UDim2.new(0.3,10,0,10)
+        te.BackgroundColor3 = Color3.fromRGB(70,70,70)
+        te.BackgroundTransparency = 0.2
+        te.TextSize = 16
+        te.Font = Enum.Font.SourceSans
+        te.TextColor3 = Color3.new(1,1,1)
+        InstanceNew("UICorner", te).CornerRadius = UDim.new(0,8)
+        te:GetPropertyChangedSignal("Text"):Connect(function()
+            local clean = te.Text:gsub('%D','') if te.Text~=clean then te.Text=clean end
+        end)
+        tb[string.lower(k)] = te
+    end
+
+    local btnY = fullH - 45
+    local save = InstanceNew("TextButton", m)
+    save.Size = UDim2.new(0.48,0,0,40)
+    save.Position = UDim2.new(0.02,0,0,btnY)
+    save.Text = "Save"
+    save.TextSize = 18
+    save.Font = Enum.Font.SourceSansSemibold
+    save.BackgroundColor3 = Color3.fromRGB(80,160,80)
+    save.BackgroundTransparency = 0.2
+    InstanceNew("UICorner", save).CornerRadius = UDim.new(0,10)
+
+    local revert = InstanceNew("TextButton", m)
+    revert.Size = UDim2.new(0.48,0,0,40)
+    revert.Position = UDim2.new(0.5,0,0,btnY)
+    revert.Text = "Revert"
+    revert.TextSize = 18
+    revert.Font = Enum.Font.SourceSansSemibold
+    revert.BackgroundColor3 = Color3.fromRGB(160,80,80)
+    revert.BackgroundTransparency = 0.2
+    InstanceNew("UICorner", revert).CornerRadius = UDim.new(0,10)
+
+    local function applyAnims(mode)
+        local hum, animate = getData()
+        if not animate then return end
+        for _, k in ipairs(states) do
+            local e = tb[string.lower(k)]
+            if mode == "save" then
+                local id = tonumber(e.Text)
+                if id then local o = animate:FindFirstChild(k:lower())
+                    if o and o:IsA("StringValue") then local a = o:FindFirstChildWhichIsA("Animation") if a then a.AnimationId = "rbxassetid://"..id end end
+                end
+            else
+                local raw = storedAnims[uid] and storedAnims[uid][k:lower()]
+                if raw then local num = raw:match('%d+') if num then local orig = tonumber(num)
+                            if orig then local o = animate:FindFirstChild(k:lower())
+                                    if o and o:IsA("StringValue") then local a = o:FindFirstChildWhichIsA("Animation") if a then a.AnimationId = raw end end
+                                tb[string.lower(k)].Text = tostring(orig)
+                            end
+                        end
+                end
+            end
+        end
+    end
+    save.MouseButton1Click:Connect(function() applyAnims("save") end)
+    revert.MouseButton1Click:Connect(function() applyAnims("revert") end)
+    gui.draggablev2(m,title)
+end)
 
 cmd.add({"setkiller", "killeranim"}, {"setkiller (killeranim)", "Sets killer animation set"}, function()
 	if not IsR6() then DoNotif("command requires R6") return end
@@ -9990,7 +10168,7 @@ cmd.add({"fling"}, {"fling <player>", "Fling the given player"}, function(plr)
 				RootPart.CFrame = getgenv().OldPos * CFrame.new(0, 0.5, 0)
 				Character:SetPrimaryPartCFrame(getgenv().OldPos * CFrame.new(0, 0.5, 0))
 				Humanoid:ChangeState("GettingUp")
-				table.foreach(Character:GetChildren(), function(_, x)
+				Foreach(Character:GetChildren(), function(_, x)
 					if x:IsA("BasePart") then
 						x.Velocity, x.RotVelocity = Vector3.new(), Vector3.new()
 					end
@@ -11177,7 +11355,7 @@ cmd.add({"loopfling"}, {"loopfling <player>", "Loop voids a player"}, function(p
 					RootPart.CFrame = getgenv().OldPos * CFrame.new(0, 0.5, 0)
 					Character:SetPrimaryPartCFrame(getgenv().OldPos * CFrame.new(0, 0.5, 0))
 					Humanoid:ChangeState("GettingUp")
-					table.foreach(Character:GetChildren(), function(_, x)
+					Foreach(Character:GetChildren(), function(_, x)
 						if x:IsA("BasePart") then
 							x.Velocity, x.RotVelocity = Vector3.new(), Vector3.new()
 						end
@@ -17560,10 +17738,6 @@ end
 Spawn(function()
 	local NAresult = tick() - NAbegin
 	local nameCheck = nameChecker(Player)
-
-	local function maybeMock(text)
-		return isAprilFools() and MockText(text) or text
-	end
 
 	Delay(0.3, function()
 		local executorName = identifyexecutor and identifyexecutor() or "Unknown"
