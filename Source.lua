@@ -1047,12 +1047,12 @@ end
 
 function getRoot(char)
 	if char:IsA("Player") then char = char.Character end
-	return char:FindFirstChild("HumanoidRootPart") or char:FindFirstChild("Torso") or char:FindFirstChild("UpperTorso")
+	return char:FindFirstChild("HumanoidRootPart") or char:FindFirstChild("Torso") or char:FindFirstChild("UpperTorso") or char:FindFirstChild("LowerTorso") or char:FindFirstChildWhichIsA("BasePart") or nil
 end
 
 function getTorso(char)
 	if char:IsA("Player") then char = char.Character end
-	return char:FindFirstChild("Torso") or char:FindFirstChild("UpperTorso") or char:FindFirstChild("LowerTorso") or char:FindFirstChild("HumanoidRootPart")
+	return char:FindFirstChild("Torso") or char:FindFirstChild("UpperTorso") or char:FindFirstChild("LowerTorso") or char:FindFirstChild("HumanoidRootPart") or char:FindFirstChildWhichIsA("BasePart") or nil
 end
 
 function getChar()
@@ -7394,7 +7394,7 @@ cmd.add({"animbuilder","abuilder"},{"animbuilder (abuilder)","Opens animation bu
         te:GetPropertyChangedSignal("Text"):Connect(function()
             local clean = te.Text:gsub('%D','') if te.Text~=clean then te.Text=clean end
         end)
-        tb[string.lower(k)] = te
+        tb[Lower(k)] = te
     end
 
     local btnY = fullH - 45
@@ -7422,7 +7422,7 @@ cmd.add({"animbuilder","abuilder"},{"animbuilder (abuilder)","Opens animation bu
         local hum, animate = getData()
         if not animate then return end
         for _, k in ipairs(states) do
-            local e = tb[string.lower(k)]
+            local e = tb[Lower(k)]
             if mode == "save" then
                 local id = tonumber(e.Text)
                 if id then local o = animate:FindFirstChild(k:lower())
@@ -7433,7 +7433,7 @@ cmd.add({"animbuilder","abuilder"},{"animbuilder (abuilder)","Opens animation bu
                 if raw then local num = raw:match('%d+') if num then local orig = tonumber(num)
                             if orig then local o = animate:FindFirstChild(k:lower())
                                     if o and o:IsA("StringValue") then local a = o:FindFirstChildWhichIsA("Animation") if a then a.AnimationId = raw end end
-                                tb[string.lower(k)].Text = tostring(orig)
+                                tb[Lower(k)].Text = tostring(orig)
                             end
                         end
                 end
@@ -7442,7 +7442,7 @@ cmd.add({"animbuilder","abuilder"},{"animbuilder (abuilder)","Opens animation bu
     end
     save.MouseButton1Click:Connect(function() applyAnims("save") end)
     revert.MouseButton1Click:Connect(function() applyAnims("revert") end)
-    gui.draggablev2(m,title)
+    gui.draggable(m)
 end)
 
 cmd.add({"setkiller", "killeranim"}, {"setkiller (killeranim)", "Sets killer animation set"}, function()
