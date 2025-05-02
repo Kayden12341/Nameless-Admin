@@ -2131,22 +2131,23 @@ function RenderUserButtons()
 
 	local totalButtons = #NAUserButtons
 	local totalWidth = totalButtons * (100 + 10)
-	local startX = 0.5 - (totalWidth/2) / NASCREENGUI.AbsoluteSize.X
-
+	local startX = 0.5 - (totalWidth / 2) / NASCREENGUI.AbsoluteSize.X
 	local spacing = 110
-	local index = 0
+	local TOGGLE_COLOR_ON = Color3.fromRGB(0, 170, 0)
+	local TOGGLE_COLOR_OFF = Color3.fromRGB(30, 30, 30)
 
+	local index = 0
 	for id, data in pairs(NAUserButtons) do
 		local btn = InstanceNew("TextButton")
 		btn.Name = "NAUserButton_"..id
 		btn.Text = data.Label
-		btn.Size = UDim2.new(0, 100, 0, 40)
-		btn.AnchorPoint = Vector2.new(0.5, 0)
+		btn.Size = UDim2.new(0, 60, 0, 60)
+		btn.AnchorPoint = Vector2.new(0.5, 1)
 		btn.Position = UDim2.new(startX + (spacing * index) / NASCREENGUI.AbsoluteSize.X, 0, 0.9, 0)
 		btn.Parent = NASCREENGUI
 		btn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 		btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-		btn.TextSize = 16
+		btn.TextScaled = true
 		btn.Font = Enum.Font.GothamBold
 		btn.BorderSizePixel = 0
 		btn.ZIndex = 9999
@@ -2183,7 +2184,6 @@ function RenderUserButtons()
 				saveEnabled = not saveEnabled
 				saveToggle.Text = saveEnabled and "S" or "N"
 				data.RunMode = saveEnabled and "S" or "N"
-
 				if FileSupport then
 					writefile(NAUSERBUTTONSPATH, HttpService:JSONEncode(NAUserButtons))
 				end
@@ -2209,7 +2209,11 @@ function RenderUserButtons()
 					end
 				end
 				cmd.run(finalArgs)
-				toggled = not toggled
+			
+				if data.Cmd2 then
+					toggled = not toggled
+					btn.BackgroundColor3 = toggled and TOGGLE_COLOR_ON or TOGGLE_COLOR_OFF
+				end
 			end
 
 			if requiresArgsNow then
@@ -2221,18 +2225,15 @@ function RenderUserButtons()
 					end
 
 					ActivePrompts[cmdToRunNow] = true
-
 					ButtonInputPrompt(cmdToRunNow, function(input)
 						ActivePrompts[cmdToRunNow] = nil
 						local parsedArguments = ParseArguments(input)
 						if parsedArguments then
 							SavedArguments[id] = parsedArguments
 							data.Args = parsedArguments
-
 							if FileSupport then
 								writefile(NAUSERBUTTONSPATH, HttpService:JSONEncode(NAUserButtons))
 							end
-
 							runCommand(parsedArguments)
 						else
 							runCommand(nil)
@@ -5569,7 +5570,7 @@ cmd.add({"UNCTest","UNC"},{"UNCTest (UNC)","Test how many functions your executo
 	loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/uuuuuuu/main/UNC%20test"))()
 end)
 
-cmd.add({"sUNCtest","sUNC"},{"sUNCtest (sUNC)","uses Super UNC test that test the functions if they're working"},function()
+cmd.add({"sUNCtest","sUNC"},{"sUNCtest (sUNC)","uses sUNC test that test the functions if they're working"},function()
 	getgenv().sUNCDebug = {
 		["printcheckpoints"] = false,
 		["delaybetweentests"] = 0
@@ -5761,7 +5762,7 @@ function enableACFTP()
 		end
 	end)
 
-	DoNotif("Anti CFrame Teleport enabled", 3)
+	DoNotif("Anti CFrame Teleport enabled", 1.5)
 end
 
 function disableACFTP()
@@ -5777,7 +5778,7 @@ function disableACFTP()
 	end
 
 	acftpState = false
-	DoNotif("Anti CFrame Teleport disabled", 3)
+	DoNotif("Anti CFrame Teleport disabled", 1.5)
 end
 
 cmd.add({"anticframeteleport", "acframetp", "acftp"}, {"anticframeteleport (acframetp,acftp)", "Prevents scripts from teleporting you by resetting your CFrame"}, function()
@@ -5900,11 +5901,7 @@ cmd.add({"unantitrip"}, {"unantitrip", "tripping allowed now"}, function()
 end)
 
 cmd.add({"checkrfe"},{"checkrfe","Checks if the game has respect filtering enabled off"},function()
-	if SoundService.RespectFilteringEnabled==true then
-		DoNotif("Respect Filtering Enabled is on")
-	else
-		DoNotif("Respect Filtering Enabled is off")
-	end
+	DoNotif(SoundService.RespectFilteringEnabled and "Respect Filtering Enabled is on" or "Respect Filtering Enabled is off")
 end)
 
 cmd.add({"sit"},{"sit","Sit your player"},function()
@@ -8888,7 +8885,7 @@ cmd.add({"antibang"}, {"antibang", "prevents users to bang you (still WORK IN PR
 	if not root then return end
 	originalPos = root.CFrame
 	local orgHeight = SafeGetService("Workspace").FallenPartsDestroyHeight
-	local anims = {"rbxassetid://5918726674", "rbxassetid://148840371", "rbxassetid://698251653", "rbxassetid://72042024", "rbxassetid://189854234", "rbxassetid://106772613", "rbxassetid://10714360343"}
+	local anims = {"rbxassetid://5918726674", "rbxassetid://148840371", "rbxassetid://698251653", "rbxassetid://72042024", "rbxassetid://189854234", "rbxassetid://106772613", "rbxassetid://10714360343", "rbxassetid://95383980"}
 	local inVoid = false
 	local targetPlayer = nil
 	local toldNotif = false
@@ -12292,7 +12289,7 @@ cmd.add({"keyboard"},{"keyboard","provides a keyboard gui for mobile users"},fun
 	loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/uuuuuuu/refs/heads/main/VirtualKeyboard.lua"))();
 end)
 
-cmd.add({"backpack"},{"backpack","provides a custom backpack gui for mobile users"},function()
+cmd.add({"backpack"},{"backpack","provides a custom backpack gui"},function()
 	loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/uuuuuuu/refs/heads/main/mobileBACKPACK.lua"))();
 end)
 
