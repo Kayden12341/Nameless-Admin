@@ -12273,11 +12273,9 @@ cmd.add({"keyboard"},{"keyboard","provides a keyboard gui for mobile users"},fun
 	loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/uuuuuuu/refs/heads/main/VirtualKeyboard.lua"))();
 end)
 
-if IsOnMobile then
-	cmd.add({"backpack"},{"backpack","provides a custom backpack gui for mobile users"},function()
-		loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/uuuuuuu/refs/heads/main/mobileBACKPACK.lua"))();
-	end)
-end
+cmd.add({"backpack"},{"backpack","provides a custom backpack gui for mobile users"},function()
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/uuuuuuu/refs/heads/main/mobileBACKPACK.lua"))();
+end)
 
 HumanModCons = {}
 
