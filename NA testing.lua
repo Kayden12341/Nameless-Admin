@@ -230,7 +230,7 @@ function yayApril(isTesting: boolean)
     local suffix = isTesting and "Testing" or "Admin"
     local name = baseNames[math.random(#baseNames)]
 
-    return name .. " " .. suffix
+    return name.." "..suffix
 end
 
 function getSeasonEmoji()
@@ -9820,6 +9820,29 @@ cmd.add({"privatemessage", "pm"}, {"privatemessage <player> <text> (pm)", "Sends
 		end
 	end
 end,true)
+
+cmd.add({"mimicchat", "mimic"}, {"mimicchat <player> (mimic)", "Mimics the chat of a player"}, function(name)
+	lib.disconnect("mimicchat")
+
+	local targets = getPlr(name)
+	if #targets == 0 then
+		DoNotif("Player not found",2)
+		return
+	end
+
+	for _, plr in pairs(targets) do
+		DoNotif("Now mimicking "..plr.Name.."'s chat", 2)
+
+		lib.connect("mimicchat", plr.Chatted:Connect(function(msg)
+			lib.LocalPlayerChat(msg, "All")
+		end))
+	end
+end, true)
+
+cmd.add({"stopmimic", "unmimic"}, {"stopmimic (unmimic)", "Stops mimicking a player"}, function()
+	lib.disconnect("mimicchat")
+	DoNotif("Stopped mimicking", 2)
+end, true)
 
 cmd.add({"fixcam", "fix"}, {"fixcam", "Fix your camera"}, function()
 	local ws = SafeGetService("Workspace")
