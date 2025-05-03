@@ -17933,6 +17933,7 @@ Spawn(function() -- init
 	if resizeFrame then resizeFrame.Name = randomString() end
 	if description then description.Name = randomString() end
 	if ModalFixer then ModalFixer.Name = randomString() end
+	if AUTOSCALER then AUTOSCALER.Name = randomString() end
 end)
 
 Spawn(bindToDevConsole)
