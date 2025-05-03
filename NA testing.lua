@@ -16411,7 +16411,7 @@ end
 NaProtectUI(NASCREENGUI)
 
 local description = NASCREENGUI:FindFirstChild("Description")
-
+local AUTOSCALER = NASCREENGUI:FindFirstChild("AutoScale")
 local cmdBar = NASCREENGUI:FindFirstChild("CmdBar")
 local centerBar = cmdBar and cmdBar:FindFirstChild("CenterBar")
 local cmdInput = centerBar and centerBar:FindFirstChild("Input")
@@ -17471,6 +17471,15 @@ function bindToDevConsole()
 	end)
 end
 
+function NAUISCALEUPD()
+	local camera = SafeGetService("Workspace").CurrentCamera
+	if not camera then return end
+
+	local screenHeight = camera.ViewportSize.Y
+	local baseHeight = 720
+	AUTOSCALER.Scale = math.clamp(screenHeight / baseHeight, 0.75, 1.25)
+end
+
 function setupPlayer(plr)
 	plr.Chatted:Connect(function(msg)
 		bindToChat(plr, msg)
@@ -17592,6 +17601,14 @@ Spawn(function()
 			btn.Text = "-"..txt
 		end
 	end
+end)
+
+Spawn(function()
+	NAUISCALEUPD()
+	SafeGetService("Workspace"):GetPropertyChangedSignal("CurrentCamera"):Connect(function()
+		NAUISCALEUPD()
+	end)
+	SafeGetService("Workspace").CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(NAUISCALEUPD)
 end)
 
 --[[ COMMAND BAR BUTTON ]]--
