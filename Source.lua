@@ -8819,7 +8819,7 @@ cmd.add({"untfly", "untweenfly"}, {"untfly (untweenfly)", "Disables tween flying
 end)
 
 if IsOnPC then
-	cmd.add({"tflykeybind", "bindtfly", "tflybind"}, {"tflykeybind [key]", "Set keybind for tfly toggle"}, function(...)
+	cmd.add({"tflykeybind", "bindtfly", "tflybind"}, {"tflykeybind [key] (bindtfly, tflybind)", "Set keybind for tfly toggle"}, function(...)
 		local key = (...) or ""
 		if key == "" then
 			DoNotif("Please provide a key.")
