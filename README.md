@@ -30,7 +30,7 @@ Connect with us on Discord:
 
 <div align="left">
   <a href="https://discord.gg/zS7TpV3p64">
-    <img src="https://img.shields.io/badge/Nameless_Admin_V2_Discord-969ef2?logo=discord&logoColor=blue&labelColor=969ef2" alt="Join Our Discord">
+    <img src="https://img.shields.io/badge/Nameless_Admin_Discord-969ef2?logo=discord&logoColor=blue&labelColor=969ef2" alt="Join Our Discord">
   </a>
   <a href="https://scriptblox.com/u/Aervanix">
     <img src="https://img.shields.io/badge/Aervanix-black.svg?logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgBAMAAACBVGfHAAAAKlBMVEVHcEyMff+Mff+Mff+Mff+Mff+Mff+Mff+Mff+Mff+Mff+Mff+Mff+Mff+DauQDAAAADnRSTlMADFUlMrlw/5X0g+On0vgqudEAAADnSURBVHgBYiAZMKILMIEIZmMgcHFxNgRUIc+IEYUBFIVvbLuKFpE2O4htl3HuQ8wdRH1s2+xiZ9YyePzndOcDEAAgkGa5QBKAidn5Zq0mFXgA/PpglMVafwKhnSaU8DlIBoLbTCDbphRvWGK7COoqOSjC4wEJARJIdgEIN6GF5KANfigh+2BDUDTJTQFaMkkZAhy8ku0iUKUcLYA/yW0I4Ev2FYkQSOZ2ixBKBV4QwGwDKo7UkxPH6cMlDCBJyhWvMOGLZF9lkWLBAimPVVAG/CUNgqj3jJR2DfwM4B/TNEDyid7ZjbYuEbNd7qs3kgsAAAAASUVORK5CYII=" alt="Follow Aervanix on Scriptblox">
