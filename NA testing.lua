@@ -16592,14 +16592,17 @@ gui.resizeable = function(ui, min, max)
 	min = min or Vector2.new(ui.AbsoluteSize.X, ui.AbsoluteSize.Y)
 	max = max or Vector2.new(5000, 5000)
 
+	local screenGui = ui:FindFirstAncestorWhichIsA("ScreenGui") or ui.Parent
+	local scale = AUTOSCALER and AUTOSCALER.Scale or 1
+
 	local rgui = resizeFrame:Clone()
 	rgui.Parent = ui
 
+	local dragging = false
 	local mode
 	local UIPos
 	local lastSize
 	local lastPos = Vector2.new()
-	local dragging = false
 
 	local function updateResize(currentPos)
 		if not dragging or not mode then return end
@@ -16607,7 +16610,8 @@ gui.resizeable = function(ui, min, max)
 		local xy = resizeXY[mode.Name]
 		if not xy then return end
 
-		local delta = currentPos - lastPos
+		local parentSize = screenGui.AbsoluteSize
+		local delta = (currentPos - lastPos) / scale
 
 		local resizeDelta = Vector2.new(
 			delta.X * xy[1].X,
@@ -16615,43 +16619,27 @@ gui.resizeable = function(ui, min, max)
 		)
 
 		local newSize = Vector2.new(
-			lastSize.X + resizeDelta.X,
-			lastSize.Y + resizeDelta.Y
-		)
-
-		newSize = Vector2.new(
-			math.clamp(newSize.X, min.X, max.X),
-			math.clamp(newSize.Y, min.Y, max.Y)
+			math.clamp(lastSize.X + resizeDelta.X, min.X, max.X),
+			math.clamp(lastSize.Y + resizeDelta.Y, min.Y, max.Y)
 		)
 
 		ui.Size = UDim2.new(0, newSize.X, 0, newSize.Y)
 
-		local newPos = UDim2.new(
-			UIPos.X.Scale,
-			UIPos.X.Offset,
-			UIPos.Y.Scale,
-			UIPos.Y.Offset
-		)
+		local deltaXScale = (lastSize.X - newSize.X) / parentSize.X
+		local deltaYScale = (lastSize.Y - newSize.Y) / parentSize.Y
+
+		local newXScale = UIPos.X.Scale
+		local newYScale = UIPos.Y.Scale
 
 		if xy[1].X < 0 then
-			newPos = UDim2.new(
-				newPos.X.Scale,
-				UIPos.X.Offset + (lastSize.X - newSize.X),
-				newPos.Y.Scale,
-				newPos.Y.Offset
-			)
+			newXScale = newXScale + deltaXScale
 		end
 
 		if xy[1].Y < 0 then
-			newPos = UDim2.new(
-				newPos.X.Scale,
-				newPos.X.Offset,
-				newPos.Y.Scale,
-				UIPos.Y.Offset + (lastSize.Y - newSize.Y)
-			)
+			newYScale = newYScale + deltaYScale
 		end
 
-		ui.Position = newPos
+		ui.Position = UDim2.new(newXScale, 0, newYScale, 0)
 	end
 
 	local connection = RunService.RenderStepped:Connect(function()
@@ -17194,23 +17182,10 @@ end
 
 --[[ GUI RESIZE FUNCTION ]]--
 
-if IsOnPC then
-	if chatLogsFrame then
-		gui.resizeable(chatLogsFrame)
-	end
-
-	if NAconsoleFrame then
-		gui.resizeable(NAconsoleFrame)
-	end
-
-	if commandsFrame then
-		gui.resizeable(commandsFrame)
-	end
-
-	if UpdLogsFrame then
-		gui.resizeable(UpdLogsFrame)
-	end
-end
+if chatLogsFrame then gui.resizeable(chatLogsFrame) end
+if NAconsoleFrame then gui.resizeable(NAconsoleFrame) end
+if commandsFrame then gui.resizeable(commandsFrame) end
+if UpdLogsFrame then gui.resizeable(UpdLogsFrame) end
 
 --[[ CMDS COMMANDS SEARCH FUNCTION ]]--
 commandsFilter:GetPropertyChangedSignal("Text"):Connect(function()
@@ -17527,34 +17502,30 @@ setupFLASHBACK(LocalPlayer.Character)
 LocalPlayer.CharacterAdded:Connect(setupFLASHBACK)
 
 mouse.Move:Connect(function()
-	description.Position = UDim2.new(0, mouse.X, 0, mouse.Y)
+	local viewportSize = SafeGetService("Workspace").CurrentCamera and SafeGetService("Workspace").CurrentCamera.ViewportSize or Vector2.new(1920, 1080)
+
+	local xScale = mouse.X / viewportSize.X
+	local yScale = mouse.Y / viewportSize.Y
+
+	description.Position = UDim2.new(xScale, 0, yScale, 0)
+
 	local newSize = gui.txtSize(description, 200, 100)
 	description.Size = UDim2.new(0, newSize.X, 0, newSize.Y)
 end)
 
-function updateCanvasSize(frame)
+function updateCanvasSize(frame, scale)
 	local layout = frame:FindFirstChildOfClass("UIListLayout")
 	if layout then
-		frame.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y)
+		local adjustedHeight = layout.AbsoluteContentSize.Y / scale
+		frame.CanvasSize = UDim2.new(0, 0, 0, adjustedHeight)
 	end
 end
 
 RunService.Stepped:Connect(function()
-	if chatLogs then
-		updateCanvasSize(chatLogs)
-	end
-
-	if NAconsoleLogs then
-		updateCanvasSize(NAconsoleLogs)
-	end
-
-	if commandsList then
-		updateCanvasSize(commandsList)
-	end
-
-	if UpdLogsList then
-		updateCanvasSize(UpdLogsList)
-	end
+	if chatLogs then updateCanvasSize(chatLogs, AUTOSCALER.Scale) end
+	if NAconsoleLogs then updateCanvasSize(NAconsoleLogs, AUTOSCALER.Scale) end
+	if commandsList then updateCanvasSize(commandsList, AUTOSCALER.Scale) end
+	if UpdLogsList then updateCanvasSize(UpdLogsList, AUTOSCALER.Scale) end
 end)
 
 RunService.RenderStepped:Connect(function()
