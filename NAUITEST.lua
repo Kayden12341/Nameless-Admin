@@ -423,7 +423,6 @@ BottomRight.Size = UDim2.new(0, 12, 0, 12)
 
 Description.Name = "Description"
 Description.Parent = AdminUI
-Description.AnchorPoint = Vector2.new(0, 1)
 Description.BackgroundColor3 = Color3.fromRGB(12, 4, 20)
 Description.BackgroundTransparency = 0.300
 Description.BorderColor3 = Color3.fromRGB(53, 53, 53)
