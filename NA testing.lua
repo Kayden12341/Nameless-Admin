@@ -5981,7 +5981,7 @@ cmd.add({"oldroblox"},{"oldroblox","Old skybox and studs"},function()
 	sky.SkyboxUp="rbxassetid://161781260"
 end)
 
-cmd.add({"f3x","fex"},{"f3x","F3X for client"},function()
+cmd.add({"f3x","fex"},{"f3x (fex)","F3X for client"},function()
 	loadstring(game:GetObjects("rbxassetid://6695644299")[1].Source)()
 end)
 
