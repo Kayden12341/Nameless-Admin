@@ -446,7 +446,6 @@ ChatLogs.Parent = AdminUI
 ChatLogs.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
 ChatLogs.BackgroundTransparency = 0.400
 ChatLogs.BorderSizePixel = 0
-ChatLogs.ClipsDescendants = true
 ChatLogs.Position = UDim2.new(0.654038072, 0, 0.596248388, 0)
 ChatLogs.Size = UDim2.new(0, 400, 0, 300)
 
@@ -571,7 +570,6 @@ Commands.Parent = AdminUI
 Commands.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
 Commands.BackgroundTransparency = 0.400
 Commands.BorderSizePixel = 0
-Commands.ClipsDescendants = true
 Commands.Position = UDim2.new(0.0477434583, 0, 0.556921065, 0)
 Commands.Size = UDim2.new(0, 280, 0, 320)
 
@@ -714,7 +712,6 @@ UpdLog.Parent = AdminUI
 UpdLog.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
 UpdLog.BackgroundTransparency = 0.400
 UpdLog.BorderSizePixel = 0
-UpdLog.ClipsDescendants = true
 UpdLog.Position = UDim2.new(0.68653208, 0, 0.0209573247, 0)
 UpdLog.Size = UDim2.new(0, 280, 0, 320)
 
@@ -840,7 +837,6 @@ soRealConsole.Parent = AdminUI
 soRealConsole.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
 soRealConsole.BackgroundTransparency = 0.400
 soRealConsole.BorderSizePixel = 0
-soRealConsole.ClipsDescendants = true
 soRealConsole.Position = UDim2.new(0.321694374, 0, 0.570633888, 0)
 soRealConsole.Size = UDim2.new(0, 400, 0, 300)
 
