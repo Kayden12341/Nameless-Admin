@@ -27,6 +27,7 @@ local Discover = table.find;
 local Concat = table.concat;
 local Defer = task.defer;
 local NASCREENGUI=nil --Getmodel("rbxassetid://140418556029404")
+local sessionStart = os.clock()
 
 function SafeGetService(name)
 	local service = game:GetService(name)
@@ -777,8 +778,10 @@ function isRelAdmin(Player)
 	return false
 end
 
-function nameChecker(plr)
-	return plr.DisplayName == plr.Name and '@'..plr.Name or plr.DisplayName..' (@'..plr.Name..')'
+function nameChecker(p)
+	local d = p.DisplayName
+	if not d then return p.Name end
+	return d:lower() == p.Name:lower() and '@'..p.Name or d..' (@'..p.Name..')'
 end
 
 function loadedResults(res)
@@ -5339,6 +5342,38 @@ cmd.add({"localdate", "yourdate"}, {"localdate (yourdate)", "Shows your current 
 	DoNotif("Your Local Date Is: "..dateStr)
 end)
 
+cmd.add({"servertime", "svtime"}, {"servertime (svtime)", "Shows the server's current time"}, function()
+	local time = os.date("!*t")
+	local clock = Format("%02d:%02d:%02d", time.hour, time.min, time.sec)
+	DoNotif("Server (UTC) Time Is: "..clock)
+end)
+
+cmd.add({"serverdate", "svdate"}, {"serverdate (svdate)", "Shows the server's current date"}, function()
+	local time = os.date("!*t")
+	local dateStr = Format("%02d/%02d/%04d", time.day, time.month, time.year)
+	DoNotif("Server (UTC) Date Is: "..dateStr)
+end)
+
+cmd.add({"datetime", "localdatetime"}, {"datetime (localdatetime)", "Shows your full local date and time"}, function()
+	local time = os.date("*t")
+	local dateTime = Format("%02d/%02d/%04d %02d:%02d:%02d", time.day, time.month, time.year, time.hour, time.min, time.sec)
+	DoNotif("Your Local Date & Time: "..dateTime)
+end)
+
+cmd.add({"uptime"}, {"uptime", "Shows how long the game/session has been running"}, function()
+	local uptime = os.clock() - sessionStart
+	local hours = math.floor(uptime / 3600)
+	local minutes = math.floor((uptime % 3600) / 60)
+	local seconds = math.floor(uptime % 60)
+	local uptimeStr = Format("%02d:%02d:%02d", hours, minutes, seconds)
+	DoNotif("Uptime: "..uptimeStr)
+end)
+
+cmd.add({"timestamp", "epoch"}, {"timestamp (epoch)", "Shows current Unix timestamp"}, function()
+	local timestamp = os.time()
+	DoNotif("Current Unix Timestamp: "..timestamp)
+end)
+
 somersaultBTN = nil
 somersaultKeyConn = nil
 somersaultToggleKey = "x"
@@ -7260,7 +7295,7 @@ end, true)
 cmd.add({"netless","net"},{"netless (net)","Executes netless which makes scripts more stable"},function()
 	for i,v in next,getChar():GetDescendants() do
 		if v:IsA("BasePart") and v.Name~="HumanoidRootPart" then
-			RunService.Heartbeat:connect(function()
+			RunService.Heartbeat:Connect(function()
 				v.Velocity=Vector3.new(-30,0,0)
 			end)
 		end
@@ -7276,23 +7311,23 @@ cmd.add({"reset","die"},{"reset (die)","Makes your health be 0"},function()
 	Player.Character:FindFirstChildOfClass("Humanoid").Health=0
 end)
 
-cmd.add({"runanim", "playanim", "anim"}, {"runanim <id> (playanim,anim)", "Plays an animation by ID"}, function(id)
+cmd.add({"runanim", "playanim", "anim"}, {"runanim <id> [speed] (playanim,anim)", "Plays an animation by ID with optional speed multiplier"}, function(id, speed)
 	local hum = getHum()
 	if not hum then return end
-
-	local a = hum:FindFirstChildOfClass("Animator") or InstanceNew("Animator", hum)
+	id = tostring(id)
+	speed = tonumber(speed) or 1
+	local animator = hum:FindFirstChildOfClass("Animator") or InstanceNew("Animator", hum)
 	local anim = InstanceNew("Animation")
-	anim.AnimationId = "rbxassetid://"..tostring(id)
-
-	local t = a:LoadAnimation(anim)
-	t:Play()
-
-	Delay(t.Length, function()
-		t:Stop()
-		t:Destroy()
+	anim.AnimationId = "rbxassetid://"..id
+	local track = animator:LoadAnimation(anim)
+	track:Play()
+	track:AdjustSpeed(speed)
+	Delay(track.Length / speed, function()
+		track:Stop()
+		track:Destroy()
 		anim:Destroy()
 	end)
-end,true)
+end, true)
 
 local storedAnims = {}
 builderAnim = nil
@@ -7570,8 +7605,6 @@ cmd.add({"unbubblechat","unbchat"},{"unbubblechat (unbchat)","Disabled BubbleCha
 	end
 end)
 
-local hastheyfixedit=nil
-
 cmd.add({"saveinstance","savegame"},{"saveinstance (savegame)","if it bugs out try removing stuff from your AutoExec folder"},function()
 	--saveinstance({})
 	local Params={
@@ -7594,7 +7627,7 @@ cmd.add({"admin"},{"admin","whitelist someone to allow them to use commands"},fu
 	for _, plr in next, Player do
 		if plr~=nil and not Admin[plr.UserId] then
 			Admin[plr.UserId]={plr=plr}
-			ChatMessage("[Nameless Admin] You've got admin. Prefix: ';'",plr.Name)
+			ChatMessage("["..adminName.."] You've got admin. Prefix: ';'",plr.Name)
 			Wait(0.2)
 			DoNotif(nameChecker(plr).." has now been whitelisted to use commands",15)
 		else
@@ -8148,7 +8181,7 @@ cmd.add({"functionspy"},{"functionspy","Check console"},function()
 						hooked[i]=hookfunction(func,function(...)
 							local args={...}
 							if getgenv().functionspy then
-								pcall(function() 
+								pcall(function()
 									out=""
 									out=out..(v..",Args-> {")..("\n"):format()
 									for l,k in pairs(args) do
@@ -8184,7 +8217,7 @@ cmd.add({"functionspy"},{"functionspy","Check console"},function()
 					hooked[i]=hookfunction(v,function(...)
 						local args={...}
 						if getgenv().functionspy then
-							pcall(function() 
+							pcall(function()
 								out=""
 								local funcName = getinfo(v).name or "unknown"
 								out=out..(funcName..",Args-> {")..("\n"):format()
@@ -8838,8 +8871,8 @@ end
 cmd.add({"noclip","nclip","nc"},{"noclip","Disable your player's collision"},function()
 	if connections["noclip"] then lib.disconnect("noclip") return end
 	lib.connect("noclip",RunService.Stepped:Connect(function()
-		if not character then return end
-		for i,v in pairs(character:GetDescendants()) do
+		if not getChar() then return end
+		for i,v in pairs(getChar():GetDescendants()) do
 			if v:IsA("BasePart") then
 				v.CanCollide=false
 			end
@@ -11210,7 +11243,8 @@ cmd.add({"loopfling"}, {"loopfling <player>", "Loop voids a player"}, function(p
 	Loopvoid = true
 	repeat Wait()
 		local mouse = LocalPlayer:GetMouse()
-		local Player = game:GetService("Players").LocalPlayer
+		local Players = game:GetService("Players")
+		local Player = Players.LocalPlayer
 		local AllBool = false
 		local GetPlayer = function(Name)
 			Name = Name:lower()
@@ -17010,7 +17044,22 @@ gui.searchCommands = function()
 			if not command then continue end
 
 			local displayInfo = command[2] and command[2][1] or ""
-			local displayName = displayInfo:lower():gsub("<[^>]+>", ""):gsub("%([^%)]+%)", ""):gsub("%s+", " "):gsub("^%s*(.-)%s*$", "%1")
+			local searchableName = displayInfo:lower()
+			:gsub("<[^>]+>", "")
+			:gsub("%[[^%]]+%]", "")
+			:gsub("%([^%)]+%)", "")
+			:gsub("{[^}]+}", "")
+			:gsub("【[^】]+】", "")
+			:gsub("〖[^〗]+〗", "")
+			:gsub("«[^»]+»", "")
+			:gsub("‹[^›]+›", "")
+			:gsub("「[^」]+」", "")
+			:gsub("『[^』]+』", "")
+			:gsub("（[^）]+）", "")
+			:gsub("〔[^〕]+〕", "")
+			:gsub("‖[^‖]+‖", "")
+			:gsub("%s+", " ")
+			:gsub("^%s*(.-)%s*$", "%1")
 
 			local extraAliases = {}
 			for alias in displayInfo:gmatch("%(([^%)]+)%)") do
@@ -17020,23 +17069,27 @@ gui.searchCommands = function()
 			local score = 999
 			local matchText = cmdName
 
-			if cmdName == searchTerm or (Aliases[searchTerm] == cmdName) or (NASAVEDALIASES[searchTerm] == cmdName) then
+			if cmdName == searchTerm then
 				score = 1
-				matchText = cmdName
 			elseif cmdName:sub(1, searchTermLength) == searchTerm then
 				score = 2
-				matchText = cmdName
+			elseif Aliases[searchTerm] and Aliases[searchTerm][1] == command[1] then
+				score = 3
+				matchText = searchTerm
+			elseif NASAVEDALIASES[searchTerm] and NASAVEDALIASES[searchTerm] == cmdName then
+				score = 3
+				matchText = searchTerm
 			else
 				for alias, realCmd in pairs(Aliases) do
-					if realCmd == cmdName and alias:sub(1, searchTermLength) == searchTerm then
-						score = 3
+					if realCmd[1] == command[1] and alias:sub(1, searchTermLength) == searchTerm then
+						score = 4
 						matchText = alias
 						break
 					end
 				end
 				for alias, realCmd in pairs(NASAVEDALIASES) do
 					if realCmd == cmdName and alias:sub(1, searchTermLength) == searchTerm then
-						score = 3
+						score = 4
 						matchText = alias
 						break
 					end
@@ -17065,7 +17118,7 @@ gui.searchCommands = function()
 				if cmdName:find(searchTerm, 1, true) then
 					score = 6
 					matchText = cmdName
-				elseif displayName:find(searchTerm, 1, true) then
+				elseif searchableName:find(searchTerm, 1, true) then
 					score = 7
 					matchText = displayInfo
 				end
@@ -17098,7 +17151,10 @@ gui.searchCommands = function()
 			local frame = result.frame
 
 			if result.text and result.text ~= "" then
-				local displayText = Commands[result.name] and Commands[result.name][2] and Commands[result.name][2][1]
+				local displayText = Commands[result.name]
+				and Commands[result.name][2]
+				and Commands[result.name][2][1]
+
 				frame.Input.Text = displayText or result.name
 				frame.Visible = true
 
@@ -17173,26 +17229,43 @@ commandsFilter:GetPropertyChangedSignal("Text"):Connect(function()
 	for _, label in ipairs(commandsList:GetChildren()) do
 		if label:IsA("TextLabel") then
 			local cmdName = label.Name:lower()
-			local displayInfo = Commands[cmdName] and Commands[cmdName][2] and Commands[cmdName][2][1] or ""
-			displayInfo = displayInfo:lower()
+			local command = Commands[cmdName]
+			local displayInfo = command and command[2] and command[2][1] or ""
+			
+			local searchableInfo = displayInfo:lower()
+				:gsub("<[^>]+>", "")
+				:gsub("%[[^%]]+%]", "")
+				:gsub("%([^%)]+%)", "")
+				:gsub("{[^}]+}", "")
+				:gsub("【[^】]+】", "")
+				:gsub("〖[^〗]+〗", "")
+				:gsub("«[^»]+»", "")
+				:gsub("‹[^›]+›", "")
+				:gsub("「[^」]+」", "")
+				:gsub("『[^』]+』", "")
+				:gsub("（[^）]+）", "")
+				:gsub("〔[^〕]+〕", "")
+				:gsub("‖[^‖]+‖", "")
+				:gsub("%s+", " ")
+				:gsub("^%s*(.-)%s*$", "%1")
 
 			local extraAliases = {}
-			for alias, realCmd in pairs(Aliases) do
-				if realCmd == cmdName then
+			local baseFunc = command and command[1]
+			for alias, aliasData in pairs(Aliases) do
+				if aliasData[1] == baseFunc then
 					Insert(extraAliases, alias:lower())
 				end
 			end
-			for alias, realCmd in pairs(NASAVEDALIASES) do
-				if realCmd == cmdName then
+			for alias, realCmdName in pairs(NASAVEDALIASES) do
+				if realCmdName == cmdName then
 					Insert(extraAliases, alias:lower())
 				end
 			end
-
 			local matches = false
 
 			if cmdName:sub(1, #searchText) == searchText then
 				matches = true
-			elseif displayInfo:find(searchText, 1, true) then
+			elseif searchableInfo:find(searchText, 1, true) then
 				matches = true
 			else
 				for _, alias in ipairs(extraAliases) do
