@@ -1855,8 +1855,7 @@ function sFLY(vfly, cfly)
 	local root = getRoot(char)
 	if not root then return end
 
-	local Workspace = SafeGetService("Workspace")
-	local Camera = Workspace.CurrentCamera
+	local Camera = SafeGetService("Workspace").CurrentCamera
 
 	goofyFLY = InstanceNew("Part", Camera)
 	goofyFLY.Size = Vector3.new(0.05, 0.05, 0.05)
@@ -5493,8 +5492,8 @@ cmd.add({"cartornado", "ctornado"}, {"cartornado (ctornado)", "Tornados a car ju
 
 		Spawn(function()
 			while isFlying do
-				flyg.CFrame = Workspace.CurrentCamera.CFrame * CFrame.Angles(-math.rad(f * 50 * speed / maxSpeed), 0, 0)
-				flyv.Velocity = Workspace.CurrentCamera.CFrame.LookVector * speed
+				flyg.CFrame = SafeGetService("Workspace").CurrentCamera.CFrame * CFrame.Angles(-math.rad(f * 50 * speed / maxSpeed), 0, 0)
+				flyv.Velocity = SafeGetService("Workspace").CurrentCamera.CFrame.LookVector * speed
 				Wait(0.1)
 
 				if speed < 0 then
@@ -7069,7 +7068,7 @@ cmd.add({"locate"}, {"locate <username>", "locate where the players are"}, funct
 	end
 end, true)
 
-cmd.add({"npcesp", "espnpc"}, {"npcesp espnpc", "locate where the npcs are"}, function()
+cmd.add({"npcesp", "espnpc"}, {"npcesp (espnpc)", "locate where the npcs are"}, function()
 	local target = getPlr("npc")
 	for _, plr in next, target do
 		if plr then
@@ -7078,7 +7077,7 @@ cmd.add({"npcesp", "espnpc"}, {"npcesp espnpc", "locate where the npcs are"}, fu
 	end
 end)
 
-cmd.add({"unnpcesp", "unespnpc"}, {"unnpcesp unespnpc", "stop locating npcs"}, function()
+cmd.add({"unnpcesp", "unespnpc"}, {"unnpcesp (unespnpc)", "stop locating npcs"}, function()
 	local target = getPlr("npc")
 	for _, plr in next, target do
 		if plr then
@@ -16623,10 +16622,19 @@ gui.resizeable = function(ui, min, max)
 		ui.Position = UDim2.new(newXScale, 0, newYScale, 0)
 	end
 
-	local connection = RunService.RenderStepped:Connect(function()
-		if dragging then
-			local currentPos = UserInputService:GetMouseLocation()
-			updateResize(Vector2.new(currentPos.X, currentPos.Y))
+	UserInputService.InputChanged:Connect(function(input)
+		if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+			updateResize(Vector2.new(input.Position.X, input.Position.Y))
+		end
+	end)
+
+	UserInputService.InputEnded:Connect(function(input)
+		if dragging and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
+			dragging = false
+			mode = nil
+			if mouse and mouse.Icon ~= "" then
+				mouse.Icon = ""
+			end
 		end
 	end)
 
@@ -16635,7 +16643,7 @@ gui.resizeable = function(ui, min, max)
 			if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
 				mode = button
 				dragging = true
-				local currentPos = UserInputService:GetMouseLocation()
+				local currentPos = input.Position
 				lastPos = Vector2.new(currentPos.X, currentPos.Y)
 				lastSize = ui.AbsoluteSize
 				UIPos = ui.Position
@@ -16646,37 +16654,27 @@ gui.resizeable = function(ui, min, max)
 			if (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) and mode == button then
 				dragging = false
 				mode = nil
-				if mouse.Icon == resizeXY[button.Name][3] then
+				if mouse and resizeXY[button.Name] and mouse.Icon == resizeXY[button.Name][3] then
 					mouse.Icon = ""
 				end
 			end
 		end)
 
 		button.MouseEnter:Connect(function()
-			if resizeXY[button.Name] then
+			if resizeXY[button.Name] and mouse then
 				mouse.Icon = resizeXY[button.Name][3]
 			end
 		end)
 
 		button.MouseLeave:Connect(function()
-			if not dragging and mouse.Icon == resizeXY[button.Name][3] then
+			if not dragging and resizeXY[button.Name] and mouse and mouse.Icon == resizeXY[button.Name][3] then
 				mouse.Icon = ""
 			end
 		end)
 	end
 
-	UserInputService.InputEnded:Connect(function(input)
-		if (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) and dragging then
-			dragging = false
-			mode = nil
-			mouse.Icon = ""
-		end
-	end)
-
 	return function()
-		if connection then
-			connection:Disconnect()
-		end
+		rgui:Destroy()
 	end
 end
 
@@ -17428,10 +17426,9 @@ function bindToDevConsole()
 end
 
 function NAUISCALEUPD()
-	local camera = SafeGetService("Workspace").CurrentCamera
-	if not camera then return end
+	if not SafeGetService("Workspace").CurrentCamera then return end
 
-	local screenHeight = camera.ViewportSize.Y
+	local screenHeight = SafeGetService("Workspace").CurrentCamera.ViewportSize.Y
 	local baseHeight = 720
 	AUTOSCALER.Scale = math.clamp(screenHeight / baseHeight, 0.75, 1.25)
 end
@@ -17539,6 +17536,8 @@ RunService.RenderStepped:Connect(function()
 	end
 end)
 
+RunService.RenderStepped:Connect(NAUISCALEUPD)
+
 Spawn(function()
 	local template = UpdLogsLabel
 	local list = UpdLogsList
@@ -17553,14 +17552,6 @@ Spawn(function()
 			btn.Text = "-"..txt
 		end
 	end
-end)
-
-Spawn(function()
-	NAUISCALEUPD()
-	SafeGetService("Workspace"):GetPropertyChangedSignal("CurrentCamera"):Connect(function()
-		NAUISCALEUPD()
-	end)
-	SafeGetService("Workspace").CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(NAUISCALEUPD)
 end)
 
 --[[ COMMAND BAR BUTTON ]]--

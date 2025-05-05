@@ -17555,7 +17555,7 @@ RunService.RenderStepped:Connect(function()
 	end
 end)
 
---RunService.RenderStepped:Connect(NAUISCALEUPD)
+RunService.RenderStepped:Connect(NAUISCALEUPD)
 
 Spawn(function()
 	local template = UpdLogsLabel
