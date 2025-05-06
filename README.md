@@ -60,7 +60,7 @@ We extend our gratitude to the original creator for laying the foundation of Nam
 Use the following loadstring to run the original version:
 
 ```lua
-loadstring(game:HttpGet("https://github.com/FilteringEnabled/NamelessAdmin/blob/main/Source?raw=true"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/FilteringEnabled/NamelessAdmin/refs/heads/main/Source"))()
 ```
 
 ### Current Versions
