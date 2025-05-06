@@ -7311,6 +7311,57 @@ cmd.add({"reset","die"},{"reset (die)","Makes your health be 0"},function()
 	Player.Character:FindFirstChildOfClass("Humanoid").Health=0
 end)
 
+damageChatConnection = nil
+damageChatEnabled = false
+
+damageMessages = {
+    "Ouch!", "Ow!", "Aw!", "That hurt!", "Yikes!", "Gah!", "Nooo!",
+    "Stop that!", "Bruh...", "Hmph!", "I felt that!", "What the–?!", "My pixels!", "Dang!",
+    "Seriously?", "Try that again!", "Cut it out!", "That was rude!"
+}
+
+cmd.add({"damagechat", "dmgchat", "painchat"}, {"damagechat (dmgchat, painchat)", "Toggles chat message when you take damage"}, function()
+    local humanoid = getHum()
+
+    if not humanoid then
+        DoNotif("humanoid not found", 2)
+        return
+    end
+
+    if damageChatEnabled then
+        if damageChatConnection then
+            damageChatConnection:Disconnect()
+            damageChatConnection = nil
+        end
+        damageChatEnabled = false
+        DoNotif("Disabled", 2)
+    else
+        local lastHealth = humanoid.Health
+
+        damageChatConnection = humanoid.HealthChanged:Connect(function(newHealth)
+            if newHealth < lastHealth then
+                local msg = damageMessages[math.random(1, #damageMessages)]
+                lib.LocalPlayerChat(msg, "All")
+            end
+            lastHealth = newHealth
+        end)
+
+        damageChatEnabled = true
+        DoNotif("Enabled", 2)
+    end
+end)
+
+cmd.add({"undamagechat", "undmgchat", "unpainchat"}, {"undamagechat (undmgchat, unpainchat)", "Disables damage reaction chat"}, function()
+    if damageChatEnabled and damageChatConnection then
+        damageChatConnection:Disconnect()
+        damageChatConnection = nil
+        damageChatEnabled = false
+        DoNotif("Disabled", 2)
+    else
+        DoNotif("Already disabled", 2)
+    end
+end)
+
 cmd.add({"runanim", "playanim", "anim"}, {"runanim <id> [speed] (playanim,anim)", "Plays an animation by ID with optional speed multiplier"}, function(id, speed)
 	local hum = getHum()
 	if not hum then return end
