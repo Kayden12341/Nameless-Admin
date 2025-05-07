@@ -12168,8 +12168,9 @@ cmd.add({"toolview2", "tview2"}, {"toolview2 (tview2)", "Live-updating tool view
 
 	local main = InstanceNew("Frame")
 	main.Name = "Main"
-	main.Size = UDim2.new(0, 600, 0, 500)
-	main.Position = UDim2.new(0.5, -300, 0.5, -250)
+	main.Size = UDim2.new(0.4, 0, 0.5, 0)
+	main.Position = UDim2.new(0.5, 0, 0.5, 0)
+	main.AnchorPoint = Vector2.new(0.5, 0.5)
 	main.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 	main.BorderSizePixel = 0
 	main.ZIndex = 10
@@ -12364,7 +12365,7 @@ cmd.add({"toolview2", "tview2"}, {"toolview2 (tview2)", "Live-updating tool view
 	minimizeBtn.MouseButton1Click:Connect(function()
 		minimized = not minimized
 		scroll.Visible = not minimized
-		main.Size = minimized and UDim2.new(0, 600, 0, 50) or UDim2.new(0, 600, 0, 500)
+		main.Size = minimized and UDim2.new(0.4, 0, 0.05, 0) or UDim2.new(0.4, 0, 0.5, 0)
 	end)
 
 	closeBtn.MouseButton1Click:Connect(function()
