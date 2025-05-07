@@ -4847,9 +4847,9 @@ end)
 
 cmd.add({"antilag","boostfps"},{"antilag (boostfps)","Low Graphics"},function()
 	local gui = InstanceNew("ScreenGui")
+	NaProtectUI(gui)
 	gui.Name = "AntiLagGUI"
 	gui.ResetOnSpawn = false
-	NaProtectUI(gui)
 
 	local frame = InstanceNew("Frame")
 	frame.AnchorPoint = Vector2.new(0.5, 0)
@@ -11973,6 +11973,392 @@ cmd.add({"tools", "gears"}, {"tools <player> (gears)", "Copies tools from Replic
 	DoNotif("Copied tools from ReplicatedStorage and Lighting", 3)
 end)
 
+tviewBillboards = {}
+
+cmd.add({"toolview", "tview"}, {"toolview <player> (tview)", "3D tool viewer above a player's head"}, function(...)
+	local targets = getPlr(...)
+	for _, plr in ipairs(targets) do
+		local existing = tviewBillboards[plr]
+		if existing then
+			existing:Destroy()
+			tviewBillboards[plr] = nil
+		end
+
+		local char = getPlrChar(plr)
+		if not char then continue end
+
+		local head = char:FindFirstChild("Head")
+		if not head then continue end
+
+		local bb = InstanceNew("BillboardGui")
+		bb.Name = "ToolViewDisplay"
+		bb.Size = UDim2.new(0, 0, 0, 0)
+		bb.StudsOffset = Vector3.new(0, 2.5, 0)
+		bb.Adornee = head
+		bb.AlwaysOnTop = true
+		bb.LightInfluence = 0
+		bb.ResetOnSpawn = false
+		bb.Parent = head
+
+		local container = InstanceNew("Frame")
+		container.BackgroundTransparency = 1
+		container.Size = UDim2.new(0, 0, 0, 50)
+		container.AutomaticSize = Enum.AutomaticSize.X
+		container.ClipsDescendants = false
+		container.Parent = bb
+
+		local layout = InstanceNew("UIListLayout")
+		layout.FillDirection = Enum.FillDirection.Horizontal
+		layout.SortOrder = Enum.SortOrder.LayoutOrder
+		layout.Padding = UDim.new(0, 6)
+		layout.Parent = container
+
+		tviewBillboards[plr] = bb
+
+		local function makeToolBtn(tool)
+			local hasImg = tool.TextureId and tool.TextureId ~= ""
+			local btn = hasImg and InstanceNew("ImageButton") or InstanceNew("TextButton")
+			btn.Size = UDim2.new(0, 50, 0, 50)
+			btn.Name = tool.Name
+			btn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+			btn.AutoButtonColor = false
+			btn.ZIndex = 5
+			InstanceNew("UICorner", btn).CornerRadius = UDim.new(0.2, 0)
+
+			if hasImg then
+				btn.Image = tool.TextureId
+			else
+				btn.Text = tool.Name
+				btn.TextScaled = true
+				btn.TextColor3 = Color3.new(1, 1, 1)
+				btn.Font = Enum.Font.SourceSans
+			end
+
+			return btn
+		end
+
+		local lastToolNames = {}
+
+		local function getToolNames()
+			local names = {}
+			local function add(t)
+				if t:IsA("Tool") then
+					Insert(names, t.Name)
+				end
+			end
+
+			local bp = plr:FindFirstChildOfClass("Backpack")
+			if bp then for _, t in ipairs(bp:GetChildren()) do add(t) end end
+
+			local char = getPlrChar(plr)
+			if char then for _, t in ipairs(char:GetChildren()) do add(t) end end
+
+			table.sort(names)
+			return names
+		end
+
+		local function toolListChanged()
+			local current = getToolNames()
+			if #current ~= #lastToolNames then
+				lastToolNames = current
+				return true
+			end
+			for i = 1, #current do
+				if current[i] ~= lastToolNames[i] then
+					lastToolNames = current
+					return true
+				end
+			end
+			return false
+		end
+
+		local function refresh()
+			for _, c in ipairs(container:GetChildren()) do
+				if c:IsA("GuiButton") then c:Destroy() end
+			end
+
+			local bp = plr:FindFirstChildOfClass("Backpack")
+			if bp then
+				for _, t in ipairs(bp:GetChildren()) do
+					if t:IsA("Tool") then makeToolBtn(t).Parent = container end
+				end
+			end
+
+			local char = getPlrChar(plr)
+			if char then
+				for _, t in ipairs(char:GetChildren()) do
+					if t:IsA("Tool") then makeToolBtn(t).Parent = container end
+				end
+			end
+		end
+
+		refresh()
+
+		local hb
+		hb = RunService.RenderStepped:Connect(function()
+			if not plr.Parent or not plr.Character or not head:IsDescendantOf(SafeGetService("Workspace")) then
+				bb:Destroy()
+				tviewBillboards[plr] = nil
+				if hb then hb:Disconnect() end
+				return
+			end
+
+			if toolListChanged() then
+				refresh()
+			end
+
+			local width = container.AbsoluteSize.X
+			local height = container.AbsoluteSize.Y
+			bb.Size = UDim2.new(0, width, 0, height)
+		end)
+
+		Insert(toolConnections, hb)
+	end
+end, true)
+
+cmd.add({"untoolview", "untview"}, {"untview <player> (untview)", "Removes the tool viewer above a player’s head"}, function(...)
+	local targets = getPlr(...)
+	for _, plr in ipairs(targets) do
+		local bb = tviewBillboards[plr]
+		if bb then
+			bb:Destroy()
+			tviewBillboards[plr] = nil
+		end
+	end
+end, true)
+
+renderConn = nil
+playerAddConn = nil
+playerRemoveConn = nil
+toolConnections = {}
+
+cmd.add({"toolview2", "tview2"}, {"toolview2 (tview2)", "Live-updating tool viewer"}, function()
+	if renderConn then renderConn:Disconnect() end
+	if playerAddConn then playerAddConn:Disconnect() end
+	if playerRemoveConn then playerRemoveConn:Disconnect() end
+	for _, c in pairs(toolConnections) do pcall(function() c:Disconnect() end) end
+	toolConnections = {}
+
+	local old = guiCHECKINGAHHHHH():FindFirstChild("ToolViewGui")
+	if old then old:Destroy() end
+
+	local ui = InstanceNew("ScreenGui")
+	NaProtectUI(ui)
+	ui.Name = "ToolViewGui"
+	ui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+	local main = InstanceNew("Frame")
+	main.Name = "Main"
+	main.Size = UDim2.new(0, 600, 0, 500)
+	main.Position = UDim2.new(0.5, -300, 0.5, -250)
+	main.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+	main.BorderSizePixel = 0
+	main.ZIndex = 10
+	main.Active = true
+	main.Selectable = true
+	main.Parent = ui
+	InstanceNew("UICorner", main).CornerRadius = UDim.new(0, 20)
+
+	local topbar = InstanceNew("Frame")
+	topbar.Size = UDim2.new(1, 0, 0, 35)
+	topbar.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+	topbar.BorderSizePixel = 0
+	topbar.ZIndex = 11
+	topbar.Active = true
+	topbar.Selectable = true
+	topbar.Parent = main
+	InstanceNew("UICorner", topbar).CornerRadius = UDim.new(0, 8)
+
+	local title = InstanceNew("TextLabel")
+	title.Text = "Tool Viewer"
+	title.Size = UDim2.new(1, -70, 1, 0)
+	title.Position = UDim2.new(0, 10, 0, 0)
+	title.BackgroundTransparency = 1
+	title.TextColor3 = Color3.new(1, 1, 1)
+	title.Font = Enum.Font.SourceSansBold
+	title.TextSize = 18
+	title.TextXAlignment = Enum.TextXAlignment.Left
+	title.ZIndex = 11
+	title.Parent = topbar
+
+	local closeBtn = InstanceNew("TextButton")
+	closeBtn.Size = UDim2.new(0, 30, 1, 0)
+	closeBtn.Position = UDim2.new(1, -35, 0, 0)
+	closeBtn.Text = "X"
+	closeBtn.Font = Enum.Font.SourceSansBold
+	closeBtn.TextSize = 16
+	closeBtn.TextColor3 = Color3.new(1, 1, 1)
+	closeBtn.BackgroundColor3 = Color3.fromRGB(180, 50, 50)
+	closeBtn.ZIndex = 11
+	closeBtn.Parent = topbar
+	InstanceNew("UICorner", closeBtn).CornerRadius = UDim.new(0, 6)
+
+	local minimizeBtn = InstanceNew("TextButton")
+	minimizeBtn.Size = UDim2.new(0, 30, 1, 0)
+	minimizeBtn.Position = UDim2.new(1, -70, 0, 0)
+	minimizeBtn.Text = "-"
+	minimizeBtn.Font = Enum.Font.SourceSansBold
+	minimizeBtn.TextSize = 16
+	minimizeBtn.TextColor3 = Color3.new(1, 1, 1)
+	minimizeBtn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+	minimizeBtn.ZIndex = 11
+	minimizeBtn.Parent = topbar
+	InstanceNew("UICorner", minimizeBtn).CornerRadius = UDim.new(0, 6)
+
+	local scroll = InstanceNew("ScrollingFrame")
+	scroll.Name = "Content"
+	scroll.Size = UDim2.new(1, 0, 1, -35)
+	scroll.Position = UDim2.new(0, 0, 0, 35)
+	scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+	scroll.ScrollBarThickness = 6
+	scroll.BackgroundTransparency = 1
+	scroll.BorderSizePixel = 0
+	scroll.ZIndex = 10
+	scroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+	scroll.Parent = main
+
+	local list = InstanceNew("UIListLayout")
+	list.Padding = UDim.new(0, 12)
+	list.SortOrder = Enum.SortOrder.LayoutOrder
+	list.Parent = scroll
+
+	local sections = {}
+
+	local function makeToolBtn(tool)
+		local hasImg = tool.TextureId and tool.TextureId ~= ""
+		local btn = hasImg and InstanceNew("ImageButton") or InstanceNew("TextButton")
+		btn.Size = UDim2.new(0, 50, 0, 50)
+		btn.Name = tool.Name
+		btn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+		btn.AutoButtonColor = false
+		btn.ZIndex = 5
+		InstanceNew("UICorner", btn).CornerRadius = UDim.new(0.2, 0)
+
+		if hasImg then
+			btn.Image = tool.TextureId
+		else
+			btn.Text = tool.Name
+			btn.TextScaled = true
+			btn.TextColor3 = Color3.new(1, 1, 1)
+			btn.Font = Enum.Font.SourceSans
+		end
+
+		return btn
+	end
+
+	local function createSection(plr)
+		local frame = InstanceNew("Frame")
+		frame.Size = UDim2.new(1, -10, 0, 100)
+		frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+		frame.BorderSizePixel = 0
+		frame.ZIndex = 10
+		frame.Parent = scroll
+		InstanceNew("UICorner", frame).CornerRadius = UDim.new(0, 12)
+
+		local name = InstanceNew("TextLabel")
+		name.Size = UDim2.new(1, -10, 0, 30)
+		name.Position = UDim2.new(0, 5, 0, 5)
+		name.BackgroundTransparency = 1
+		name.Text = nameChecker(plr)
+		name.Font = Enum.Font.SourceSansSemibold
+		name.TextSize = 18
+		name.TextColor3 = Color3.new(1, 1, 1)
+		name.TextXAlignment = Enum.TextXAlignment.Left
+		name.ZIndex = 10
+		name.Parent = frame
+
+		local holder = InstanceNew("ScrollingFrame")
+		holder.Name = "ToolHolder"
+		holder.Position = UDim2.new(0, 5, 0, 35)
+		holder.Size = UDim2.new(1, -10, 0, 55)
+		holder.CanvasSize = UDim2.new(0, 0, 0, 0)
+		holder.ScrollBarThickness = 4
+		holder.ScrollingDirection = Enum.ScrollingDirection.X
+		holder.AutomaticCanvasSize = Enum.AutomaticSize.X
+		holder.BackgroundTransparency = 1
+		holder.BorderSizePixel = 0
+		holder.ZIndex = 10
+		holder.Parent = frame
+
+		local hList = InstanceNew("UIListLayout")
+		hList.Padding = UDim.new(0, 6)
+		hList.FillDirection = Enum.FillDirection.Horizontal
+		hList.SortOrder = Enum.SortOrder.LayoutOrder
+		hList.Parent = holder
+
+		sections[plr] = {
+			Frame = frame,
+			Holder = holder
+		}
+	end
+
+	local function updateTools(plr)
+		local sec = sections[plr]
+		if not sec then return end
+
+		for _, btn in ipairs(sec.Holder:GetChildren()) do
+			if btn:IsA("GuiButton") then btn:Destroy() end
+		end
+
+		local tools = {}
+
+		local bp = plr:FindFirstChildOfClass("Backpack")
+		if bp then
+			for _, t in ipairs(bp:GetChildren()) do
+				if t:IsA("Tool") then Insert(tools, t) end
+			end
+		end
+
+		local char = getPlrChar(plr)
+		if char then
+			for _, t in ipairs(char:GetChildren()) do
+				if t:IsA("Tool") then Insert(tools, t) end
+			end
+		end
+
+		for _, t in ipairs(tools) do
+			makeToolBtn(t).Parent = sec.Holder
+		end
+	end
+
+	local function refreshAll()
+		for plr in pairs(sections) do
+			updateTools(plr)
+		end
+	end
+
+	for _, plr in ipairs(Players:GetPlayers()) do
+		createSection(plr)
+	end
+
+	renderConn = RunService.RenderStepped:Connect(refreshAll)
+	playerAddConn = Players.PlayerAdded:Connect(function(plr)
+		createSection(plr)
+	end)
+	playerRemoveConn = Players.PlayerRemoving:Connect(function(plr)
+		local sec = sections[plr]
+		if sec then sec.Frame:Destroy() end
+		sections[plr] = nil
+	end)
+
+	local minimized = false
+	minimizeBtn.MouseButton1Click:Connect(function()
+		minimized = not minimized
+		scroll.Visible = not minimized
+		main.Size = minimized and UDim2.new(0, 600, 0, 50) or UDim2.new(0, 600, 0, 500)
+	end)
+
+	closeBtn.MouseButton1Click:Connect(function()
+		if renderConn then renderConn:Disconnect() end
+		if playerAddConn then playerAddConn:Disconnect() end
+		if playerRemoveConn then playerRemoveConn:Disconnect() end
+		for _, c in pairs(toolConnections) do pcall(function() c:Disconnect() end) end
+		ui:Destroy()
+	end)
+
+	gui.draggable(main,topbar)
+end)
+
 cmd.add({"waveat", "wat"}, {"waveat <player> (wat)", "Wave to a player"}, function(...)
 	local playerName = (...)
 	local targets = getPlr(playerName)
@@ -16884,7 +17270,6 @@ gui.draggablev2 = function(ui, dragui)
 
 	ui.Active = true
 end
-
 
 gui.menuify = function(menu)
 	if menu:IsA("Frame") then menu.AnchorPoint=Vector2.new(0,0) end
