@@ -1497,7 +1497,7 @@ function round(num,numDecimalPlaces)
 	return math.floor(num*mult+0.5) / mult
 end
 
-GaemInfo=MarketplaceService:GetProductInfo(PlaceId)
+GaemInfo=nil
 
 function placeName()
 	--[[while true do
@@ -18394,6 +18394,12 @@ Spawn(loadAliases)
 Spawn(loadButtonIDS)
 Spawn(RenderUserButtons)
 Spawn(loadAutoExec)
+
+Spawn(function()
+	NACaller(function()
+		GaemInfo = MarketplaceService:GetProductInfo(PlaceId)
+	end)
+end)
 
 Spawn(function()
 	NACaller(function()--better saveinstance support
