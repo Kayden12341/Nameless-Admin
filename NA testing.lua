@@ -247,10 +247,10 @@ function getSeasonEmoji()
 		return '🧧' -- Chinese New Year (approximate)
 	elseif month == 3 and day == 17 then
 		return '☘️' -- St. Patrick's Day
+	elseif month == 3 and day >= 8 and day <= 14 then
+		return '💐' -- Mother's Day (approximate second Sunday)
 	elseif month == 4 and day >= 1 and day <= 15 then
 		return '🥚' -- Easter (approximate)
-	elseif month == 5 and day >= 8 and day <= 14 then
-		return '💐' -- Mother's Day (approximate second Sunday)
 	elseif month == 6 and day >= 15 and day <= 21 then
 		return '👔' -- Father's Day (approximate third Sunday)
 	elseif month == 6 and day == 21 then
