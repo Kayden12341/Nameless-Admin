@@ -368,6 +368,8 @@ end
 --local CustomFunctionSupport=isfile and isfolder and writefile and readfile and listfiles;
 local FileSupport = isfile and isfolder and writefile and readfile and makefolder
 NAFILEPATH = "Nameless-Admin"
+NAWAYPOINTFILEPATH = "Nameless-Admin/Waypoints"
+NAPLUGINFILEPATH = "Nameless-Admin/Plugins"
 NAPREFIXPATH = "Nameless-Admin/Prefix.txt"
 NAIMAGEBUTTONSIZEPATH = "Nameless-Admin/ImageButtonSize.txt"
 NAQOTPATH = "Nameless-Admin/QueueOnTeleport.txt"
@@ -385,6 +387,14 @@ doPREDICTION = true
 if FileSupport then
 	if not isfolder(NAFILEPATH) then
 		makefolder(NAFILEPATH)
+	end
+
+	if not isfolder(NAWAYPOINTFILEPATH) then
+		makefolder(NAWAYPOINTFILEPATH)
+	end
+
+	if not isfolder(NAPLUGINFILEPATH) then
+		makefolder(NAPLUGINFILEPATH)
 	end
 
 	if not isfile(NAPREFIXPATH) then
@@ -8920,7 +8930,7 @@ if IsOnPC then
 end
 
 cmd.add({"noclip","nclip","nc"},{"noclip","Disable your player's collision"},function()
-	if connections["noclip"] then lib.disconnect("noclip") return end
+	lib.disconnect("noclip")
 	lib.connect("noclip",RunService.Stepped:Connect(function()
 		if not getChar() then return end
 		for i,v in pairs(getChar():GetDescendants()) do
@@ -9609,24 +9619,118 @@ cmd.add({"undance"},{"undance","Stops the dance command"},function()
 	theanim:Destroy()
 end)
 
-cmd.add({"antichatlogs","antichatlogger"},{"antichatlogs (antichatlogger)","Prevents you from getting banning when typing unspeakable messages (game needs legacy chat service)"},function()
-	if not LegacyChat then
-		return DoNotif("Game doesn't use Legacy Chat Service")
-	end
-	local MsgPost, _ = pcall(function()
-		rawset(require(LocalPlayer:FindFirstChild("PlayerScripts"):FindFirstChild("ChatScript").ChatMain),"MessagePosted", {
-			["fire"] = function(msg)
-				return msg
-			end,
-			["wait"] = function()
-				return
-			end,
-			["connect"] = function()
-				return
+cmd.add({"antichatlogs", "antichatlogger"}, {"antichatlogs (antichatlogger)", "Prevents you from getting banning when typing unspeakable messages (game needs legacy chat service or manual override)"}, function()
+	local CachedChannels = {}
+
+	lib.BypassChatMessage = function(message, recipient)
+		if LegacyChat then
+			local chatEvents = ReplicatedStorage:FindFirstChild("DefaultChatSystemChatEvents")
+			if not chatEvents then return end
+			if recipient and recipient ~= "All" then
+				chatEvents.SayMessageRequest:FireServer("/w "..recipient.." "..message, "All")
+			else
+				chatEvents.SayMessageRequest:FireServer(message, "All")
 			end
-		})
-	end)
-	DoNotif(MsgPost and "Enabled" or "Failed to enable antichatlogs")
+		else
+			local targetChannel
+			if recipient and recipient ~= "All" then
+				targetChannel = CachedChannels[recipient]
+				if not targetChannel then
+					for _, ch in pairs(TextChatService.TextChannels:GetChildren()) do
+						if ch.Name:find("RBXWhisper:") and ch:FindFirstChild(recipient) then
+							targetChannel = ch
+							CachedChannels[recipient] = ch
+							break
+						end
+					end
+				end
+			end
+			if not targetChannel then
+				targetChannel = TextChatService.TextChannels:FindFirstChild("RBXGeneral")
+					or TextChatService.TextChannels:FindFirstChild("General")
+			end
+			if targetChannel then
+				targetChannel:SendAsync(message)
+			end
+		end
+	end
+
+	local function getTargetName(targetChip)
+		if targetChip and targetChip:IsA("TextButton") then
+			local displayName = Match(targetChip.Text or "", "^%[To%s+(.-)%]$")
+			if displayName and displayName ~= "" then
+				for _, plr in ipairs(Players:GetPlayers()) do
+					if plr.DisplayName:lower() == displayName:lower() then
+						return plr.Name
+					end
+				end
+			end
+		end
+		return "All"
+	end
+
+	if LegacyChat then
+		local success = pcall(function()
+			local ChatMain = require(LocalPlayer:WaitForChild("PlayerScripts"):WaitForChild("ChatScript"):WaitForChild("ChatMain"))
+			rawset(ChatMain, "MessagePosted", {
+				fire = function(message)
+					lib.BypassChatMessage(message)
+				end,
+				wait = function() end,
+				connect = function() end
+			})
+		end)
+		DoNotif(success and "Antichatlogs active (Legacy Chat)" or "Failed to hook legacy chat")
+	else
+		Spawn(function()
+			repeat Wait() until COREGUI:FindFirstChild("ExperienceChat")
+			local experienceChat = COREGUI:WaitForChild("ExperienceChat")
+			local appLayout = experienceChat:FindFirstChild("appLayout")
+			if not appLayout then return end
+
+			local chatInputBar = appLayout:FindFirstChild("chatInputBar")
+			if not chatInputBar then return end
+
+			local background = chatInputBar:FindFirstChild("Background")
+			if not background then return end
+
+			local container = background:FindFirstChild("Container")
+			if not container then return end
+
+			local textContainer = container:FindFirstChild("TextContainer")
+			local textBoxContainer = textContainer and textContainer:FindFirstChild("TextBoxContainer")
+			local chatBox = textBoxContainer and textBoxContainer:FindFirstChild("TextBox")
+			local sendButton = container:FindFirstChild("SendButton")
+			local targetChip = textContainer and textContainer:FindFirstChild("TargetChannelChip")
+
+			if chatBox then
+				chatBox.FocusLost:Connect(function(enterPressed)
+					if enterPressed and chatBox.Text ~= "" then
+						local msg = chatBox.Text
+						local recipient = getTargetName(targetChip)
+						chatBox.Text = ""
+						Defer(function()
+							lib.BypassChatMessage(msg, recipient)
+						end)
+					end
+				end)
+			end
+
+			if sendButton and chatBox then
+				sendButton.MouseButton1Click:Connect(function()
+					if chatBox.Text ~= "" then
+						local msg = chatBox.Text
+						local recipient = getTargetName(targetChip)
+						chatBox.Text = ""
+						Defer(function()
+							lib.BypassChatMessage(msg, recipient)
+						end)
+					end
+				end)
+			end
+		end)
+		DoNotif("Antichatlogs active (TextChatService)")
+	end
 end)
 
 cmd.add({"animspoofer","animationspoofer","spoofanim","animspoof"},{"animspoofer (animationspoofer,spoofanim,animspoof)","Loads up an animation spoofer,spoofs animations that use rbxassetid"},function()
@@ -15726,7 +15830,7 @@ cmd.add({"cameranoclip","camnoclip","cnoclip","nccam"},{"cameranoclip (camnoclip
 			end
 		end
 	else
-		if _G._noclipConnection then _G._noclipConnection:Disconnect() end
+		--[[if _G._noclipConnection then _G._noclipConnection:Disconnect() end
 		if _G._noclipInput then _G._noclipInput:Disconnect() end
 		if _G._noclipZoom then _G._noclipZoom:Disconnect() end
 		if _G._noclipBegin then _G._noclipBegin:Disconnect() end
@@ -15775,7 +15879,8 @@ cmd.add({"cameranoclip","camnoclip","cnoclip","nccam"},{"cameranoclip (camnoclip
 			local rot = CFrame.Angles(0, math.rad(rotationX), 0) * CFrame.Angles(math.rad(rotationY), 0, 0)
 			local camPos = targetPos + rot:VectorToWorldSpace(Vector3.new(0, 0, -zoom))
 			camera.CFrame = CFrame.new(camPos, targetPos)
-		end)
+		end)]]
+		LocalPlayer.DevCameraOcclusionMode = Enum.DevCameraOcclusionMode.Invisicam
 	end
 end)
 
@@ -15805,7 +15910,7 @@ cmd.add({"uncameranoclip","uncamnoclip","uncnoclip","unnccam"},{"uncameranoclip 
 			end
 		end
 	else
-		if _G._noclipConnection then _G._noclipConnection:Disconnect() _G._noclipConnection = nil end
+		--[[if _G._noclipConnection then _G._noclipConnection:Disconnect() _G._noclipConnection = nil end
 		if _G._noclipInput then _G._noclipInput:Disconnect() _G._noclipInput = nil end
 		if _G._noclipZoom then _G._noclipZoom:Disconnect() _G._noclipZoom = nil end
 		if _G._noclipBegin then _G._noclipBegin:Disconnect() _G._noclipBegin = nil end
@@ -15824,7 +15929,8 @@ cmd.add({"uncameranoclip","uncamnoclip","uncnoclip","unnccam"},{"uncameranoclip 
 				local newModule = starterModule:Clone()
 				newModule.Parent = scripts
 			end
-		end
+		end]]
+		LocalPlayer.DevCameraOcclusionMode = Enum.DevCameraOcclusionMode.Zoom
 	end
 end)
 
@@ -16125,26 +16231,39 @@ cmd.add({"invisbind", "invisiblebind","bindinvis"}, {"invisbind (invisiblebind, 
 	end
 end,true)
 
-cmd.add({"fireremotes", "fremotes", "frem"}, {"fireremotes (fremotes, frem)", "Fires every remote"}, function()
+cmd.add({"fireremotes", "fremotes", "frem"}, {"fireremotes {argument} (fremotes, frem)", "Fires every remote with arguments"}, function(...)
 	local remoteCount = 0
+	local failedCount = 0
+	local args = {...}
 
-	for _, descendant in ipairs(game:GetDescendants()) do
-		if not descendant:IsDescendantOf(COREGUI) then
-			NACaller(function()
-				if descendant:IsA("RemoteEvent") then
-					if pcall(function() descendant:FireServer() end) then
-						remoteCount += 1
-					end
-				elseif descendant:IsA("RemoteFunction") then
-					if pcall(function() descendant:InvokeServer() end) then
-						remoteCount += 1
-					end
+	if #args == 0 then
+		args = nil
+	else
+		args=Concat(args, " ")
+	end
+
+	for _, obj in ipairs(game:GetDescendants()) do
+		if not obj:IsDescendantOf(COREGUI) and (obj:IsA("RemoteEvent") or obj:IsA("RemoteFunction")) then
+			Spawn(function()
+				local ok
+				if obj:IsA("RemoteEvent") then
+					ok = pcall(function() obj:FireServer(args) end)
+				elseif obj:IsA("RemoteFunction") then
+					ok = pcall(function() obj:InvokeServer(args) end)
+				end
+
+				if ok then
+					remoteCount += 1
+				else
+					failedCount += 1
 				end
 			end)
 		end
 	end
 
-	DoNotif("Fired "..remoteCount.." remotes")
+	Delay(2, function()
+		DoNotif("Fired "..remoteCount.." remotes\nFailed: "..failedCount.." remotes")
+	end)
 end)
 
 cmd.add({"keepna"}, {"keepna", "keep executing "..adminName.." every time you teleport"}, function()
@@ -16181,10 +16300,10 @@ cmd.add({"unprediction", "unpredict"}, {"unprediction (unpredict)", "disable com
 	end
 end)
 
-local fovcon = nil
-local monitorcon = nil
-local camwatchcon = nil
-local loopedFOV = nil
+lFOVconn = nil
+camREFRESH = nil
+camWATCHERS = nil
+loopedFOV = nil
 
 cmd.add({"fov"}, {"fov <number>", "Sets your FOV to a custom value (1–120)"}, function(num)
 	local field = math.clamp(tonumber(num) or 70, 1, 120)
@@ -16196,24 +16315,24 @@ cmd.add({"loopfov", "lfov"}, {"loopfov <number> (lfov)", "Loops your FOV to stay
 	loopedFOV = math.clamp(tonumber(num) or 70, 1, 120)
 
 	local function apply()
-		if fovcon then fovcon:Disconnect() end
-		if monitorcon then monitorcon:Disconnect() end
+		if lFOVconn then lFOVconn:Disconnect() end
+		if camREFRESH then camREFRESH:Disconnect() end
 		local cam = SafeGetService("Workspace").CurrentCamera
 		if not cam then return end
-		fovcon = RunService.RenderStepped:Connect(function()
+		lFOVconn = RunService.RenderStepped:Connect(function()
 			if cam.FieldOfView ~= loopedFOV then
 				cam.FieldOfView = loopedFOV
 			end
 		end)
-		monitorcon = cam:GetPropertyChangedSignal("FieldOfView"):Connect(function()
+		camREFRESH = cam:GetPropertyChangedSignal("FieldOfView"):Connect(function()
 			if cam.FieldOfView ~= loopedFOV then
 				cam.FieldOfView = loopedFOV
 			end
 		end)
 	end
 
-	if camwatchcon then camwatchcon:Disconnect() end
-	camwatchcon = SafeGetService("Workspace"):GetPropertyChangedSignal("CurrentCamera"):Connect(function()
+	if camWATCHERS then camWATCHERS:Disconnect() end
+	camWATCHERS = SafeGetService("Workspace"):GetPropertyChangedSignal("CurrentCamera"):Connect(function()
 		Wait(0.05)
 		apply()
 	end)
@@ -16222,9 +16341,9 @@ cmd.add({"loopfov", "lfov"}, {"loopfov <number> (lfov)", "Loops your FOV to stay
 end, true)
 
 cmd.add({"unloopfov", "unlfov"}, {"unloopfov (unlfov)", "Stops the looped FOV"}, function()
-	if fovcon then fovcon:Disconnect() fovcon = nil end
-	if monitorcon then monitorcon:Disconnect() monitorcon = nil end
-	if camwatchcon then camwatchcon:Disconnect() camwatchcon = nil end
+	if lFOVconn then lFOVconn:Disconnect() lFOVconn = nil end
+	if camREFRESH then camREFRESH:Disconnect() camREFRESH = nil end
+	if camWATCHERS then camWATCHERS:Disconnect() camWATCHERS = nil end
 	loopedFOV = nil
 end)
 
