@@ -9633,8 +9633,17 @@ cmd.add({"antichatlogs", "antichatlogger"}, {"antichatlogs (antichatlogger)", "P
 			end
 		else
 			local targetChannel
+	
 			if recipient and recipient ~= "All" then
 				targetChannel = CachedChannels[recipient]
+				if targetChannel then
+					if not targetChannel:IsDescendantOf(TextChatService)
+						or not targetChannel:FindFirstChild(recipient)
+						or not targetChannel:FindFirstChild(LocalPlayer.Name) then
+						CachedChannels[recipient] = nil
+						targetChannel = nil
+					end
+				end
 				if not targetChannel then
 					for _, ch in pairs(TextChatService.TextChannels:GetChildren()) do
 						if ch.Name:find("RBXWhisper:") and ch:FindFirstChild(recipient) then
@@ -9645,10 +9654,12 @@ cmd.add({"antichatlogs", "antichatlogger"}, {"antichatlogs (antichatlogger)", "P
 					end
 				end
 			end
+	
 			if not targetChannel then
 				targetChannel = TextChatService.TextChannels:FindFirstChild("RBXGeneral")
 					or TextChatService.TextChannels:FindFirstChild("General")
 			end
+	
 			if targetChannel then
 				targetChannel:SendAsync(message)
 			end
