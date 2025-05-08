@@ -2413,7 +2413,12 @@ lib.disconnect = function(name)
 		connections[name] = nil
 	end
 end
-			--prepare for annoying and unnecessary tool grip math
+
+lib.isConnected = function(name)
+    return connections[name] ~= nil
+end
+
+--prepare for annoying and unnecessary tool grip math
 local rad=math.rad
 local clamp=math.clamp
 local tan=math.tan
@@ -3016,17 +3021,13 @@ cmd.add({"discord", "invite", "support", "help"}, {"discord (invite, support, he
 end)
 
 clickflingUI = nil
-clickConnections = {}
 clickflingEnabled = true
 
 cmd.add({"clickfling","mousefling"}, {"clickfling (mousefling)", "Fling a player by clicking them"}, function()
 	clickflingEnabled = true
 	if clickflingUI then clickflingUI:Destroy() end
-	for _, conn in ipairs(clickConnections) do
-		if conn then
-			conn:Disconnect()
-		end
-	end
+	lib.disconnect("clickfling_mouse")
+
 	local Mouse = player:GetMouse()
 	clickflingUI = InstanceNew("ScreenGui")
 	NaProtectUI(clickflingUI)
@@ -3057,7 +3058,7 @@ cmd.add({"clickfling","mousefling"}, {"clickfling (mousefling)", "Fling a player
 		end
 	end)
 
-	local conn = Mouse.Button1Down:Connect(function()
+	lib.connect("clickfling_mouse", Mouse.Button1Down:Connect(function()
 		if not clickflingEnabled then return end
 		local Target = Mouse.Target
 		if Target and Target.Parent and Target.Parent:IsA("Model") and Players:GetPlayerFromCharacter(Target.Parent) then
@@ -3280,21 +3281,15 @@ cmd.add({"clickfling","mousefling"}, {"clickfling (mousefling)", "Fling a player
 				end
 			end
 		end
-	end)
+	end))
 	Insert(clickConnections, conn)
 end)
 
 cmd.add({"unclickfling", "unmousefling"}, {"unclickfling (unmousefling)","disables clickfling"}, function()
 	clickflingEnabled = false
 	if clickflingUI then clickflingUI:Destroy() end
-	for _, conn in ipairs(clickConnections) do
-		if conn then
-			conn:Disconnect()
-		end
-	end
-	clickConnections = {}
+	lib.disconnect("clickfling_mouse")
 end)
-
 
 cmd.add({"ping"}, {"ping", "Shows your ping"}, function()
 	local function createWindow(position, maxSize, minSize, defaultText)
@@ -3900,20 +3895,17 @@ groupRole = function(player)
 	return info
 end
 
-staffNotifier = nil
-
 cmd.add({"trackstaff"}, {"trackstaff", "Track and notify when a staff member joins the server"}, function()
-	if staffNotifier then
-		staffNotifier:Disconnect()
-	end
+	lib.disconnect("staffNotifier")
+
 	if game.CreatorType == Enum.CreatorType.Group then
 		local staffList = {}
-		staffNotifier = Players.PlayerAdded:Connect(function(player)
+		lib.connect("staffNotifier", Players.PlayerAdded:Connect(function(player)
 			local info = groupRole(player)
 			if info.IsStaff then
 				DoNotif(formatUsername(player).." is a "..info.Role)
 			end
-		end)
+		end))
 		for _, player in pairs(Players:GetPlayers()) do
 			local info = groupRole(player)
 			if info.IsStaff then
@@ -3927,9 +3919,7 @@ cmd.add({"trackstaff"}, {"trackstaff", "Track and notify when a staff member joi
 end)
 
 cmd.add({"stoptrackstaff", "untrackstaff"}, {"stoptrackstaff (untrackstaff)", "Stop tracking staff members"}, function()
-	if staffNotifier then
-		staffNotifier:Disconnect()
-	end
+	lib.disconnect("staffNotifier")
 	DoNotif("Tracking disabled")
 end)
 
@@ -3976,13 +3966,11 @@ cmd.add({"unflyfling","unff"}, {"unflyfling (unff)", "stops fly and fling"}, fun
 end)
 
 hiddenfling = false
-walkFLINGER = nil
-connFIXER = nil
 
 cmd.add({"walkfling", "wfling", "wf"}, {"walkfling (wfling,wf)", "probably the best fling lol"}, function()
 	if hiddenfling then return end
 
-	DoNotif("Walkfling enabled",2)
+	DoNotif("Walkfling enabled", 2)
 	hiddenfling = true
 
 	if not NA_storage:FindFirstChild("juisdfj0i32i0eidsuf0iok") then
@@ -3991,11 +3979,8 @@ cmd.add({"walkfling", "wfling", "wf"}, {"walkfling (wfling,wf)", "probably the b
 		detection.Parent = NA_storage
 	end
 
-	if walkFLINGER then
-		walkFLINGER:Disconnect()
-	end
-
-	walkFLINGER = RunService.Heartbeat:Connect(function()
+	lib.disconnect("walkflinger")
+	lib.connect("walkflinger", RunService.Heartbeat:Connect(function()
 		if not hiddenfling then return end
 
 		local lp = Players.LocalPlayer
@@ -4015,37 +4000,27 @@ cmd.add({"walkfling", "wfling", "wf"}, {"walkfling (wfling,wf)", "probably the b
 				hrp.Velocity = originalVelocity + Vector3.new(0, 0.1, 0)
 			end
 		end
-	end)
+	end))
 
 	local lp = Players.LocalPlayer
 	if lp then
-		if connFIXER then
-			connFIXER:Disconnect()
-		end
-
-		connFIXER = lp.CharacterAdded:Connect(function()
+		lib.disconnect("walkfling_charfix")
+		lib.connect("walkfling_charfix", lp.CharacterAdded:Connect(function()
 			if hiddenfling then
 				DoNotif("Re-enabling Walkfling")
 			end
-		end)
+		end))
 	end
 end)
 
 cmd.add({"unwalkfling", "unwfling", "unwf"}, {"unwalkfling (unwfling,unwf)", "stop the walkfling command"}, function()
 	if not hiddenfling then return end
 
-	DoNotif("Walkfling disabled",2)
+	DoNotif("Walkfling disabled", 2)
 	hiddenfling = false
 
-	if walkFLINGER then
-		walkFLINGER:Disconnect()
-		walkFLINGER = nil
-	end
-
-	if connFIXER then
-		connFIXER:Disconnect()
-		connFIXER = nil
-	end
+	lib.disconnect("walkflinger")
+	lib.disconnect("walkfling_charfix")
 end)
 
 cmd.add({"rjre", "rejoinrefresh"}, {"rjre (rejoinrefresh)", "Rejoins and teleports you to your previous position"}, function()
@@ -4610,8 +4585,6 @@ cmd.add({"resetreach", "normalreach", "unreach"}, {"resetreach (normalreach, unr
 	end
 end)
 
-KILLINGAURALOL = nil
-
 cmd.add({"aura"}, {"aura [distance]", "Continuously damages nearby players within range using a damage tool"}, function(range)
 	range = tonumber(range) or 20
 
@@ -4622,10 +4595,7 @@ cmd.add({"aura"}, {"aura [distance]", "Continuously damages nearby players withi
 		return DoNotif('Your exploit does not support firetouchinterest to run this command')
 	end
 
-	if KILLINGAURALOL and KILLINGAURALOL.Connected then
-		KILLINGAURALOL:Disconnect()
-		KILLINGAURALOL = nil
-	end
+	lib.disconnect("aura_loop")
 
 	local function getToolAndHandle()
 		local char = LocalPlayer.Character
@@ -4636,7 +4606,7 @@ cmd.add({"aura"}, {"aura [distance]", "Continuously damages nearby players withi
 		return tool, handle
 	end
 
-	KILLINGAURALOL = RunService.RenderStepped:Connect(function()
+	lib.connect("aura_loop", RunService.RenderStepped:Connect(function()
 		local Tool, Handle = getToolAndHandle()
 		if Tool and Handle and Tool.Parent == LocalPlayer.Character then
 			for _, player in ipairs(Players:GetPlayers()) do
@@ -4655,46 +4625,36 @@ cmd.add({"aura"}, {"aura [distance]", "Continuously damages nearby players withi
 				end
 			end
 		end
-	end)
+	end))
 
 	DoNotif("Aura enabled at range "..tostring(range), 1.2)
 end, true)
 
 cmd.add({"unaura"}, {"unaura", "Stops the running aura loop"}, function()
-	if KILLINGAURALOL and KILLINGAURALOL.Connected then
-		KILLINGAURALOL:Disconnect()
-		KILLINGAURALOL = nil
+	if lib.isConnected("aura_loop") then
+		lib.disconnect("aura_loop")
 		DoNotif("Aura disabled", 1.2)
 	else
 		DoNotif("Aura is not active", 1.2)
 	end
 end, true)
 
-local AntiVoidConnect = nil
-
 cmd.add({"antivoid"},{"antivoid","Prevents you from falling into the void by launching you upwards"},function()
-	if AntiVoidConnect then
-		AntiVoidConnect:Disconnect()
-		AntiVoidConnect = nil
-	end
+	lib.disconnect("antivoid")
 
-	AntiVoidConnect = RunService.Stepped:Connect(function()
+	lib.connect("antivoid", RunService.Stepped:Connect(function()
 		local character = Players.LocalPlayer.Character
 		local root = character and getRoot(character)
 		if root and root.Position.Y <= OrgDestroyHeight + 25 then
 			root.Velocity = Vector3.new(root.Velocity.X, root.Velocity.Y + 250, root.Velocity.Z)
 		end
-	end)
+	end))
 
 	DoNotif("AntiVoid Enabled", 3)
 end)
 
 cmd.add({"unantivoid"},{"unantivoid","Disables antivoid"},function()
-	if AntiVoidConnect then
-		AntiVoidConnect:Disconnect()
-		AntiVoidConnect = nil
-	end
-
+	lib.disconnect("antivoid")
 	DoNotif("AntiVoid Disabled", 3)
 end)
 
@@ -5404,7 +5364,6 @@ cmd.add({"timestamp", "epoch"}, {"timestamp (epoch)", "Shows current Unix timest
 end)
 
 somersaultBTN = nil
-somersaultKeyConn = nil
 somersaultToggleKey = "x"
 
 cmd.add({"somersault", "frontflip"}, {"somersault (frontflip)", "Makes you do a clean front flip"}, function(...)
@@ -5468,15 +5427,12 @@ cmd.add({"somersault", "frontflip"}, {"somersault (frontflip)", "Makes you do a 
 
 		gui.draggablev2(btn)
 	else
-		if somersaultKeyConn then
-			somersaultKeyConn:Disconnect()
-		end
-
-		somersaultKeyConn = cmdm.KeyDown:Connect(function(KEY)
+		lib.disconnect("somersault_key")
+		lib.connect("somersault_key", cmdm.KeyDown:Connect(function(KEY)
 			if KEY:lower() == somersaultToggleKey then
 				somersaulter()
 			end
-		end)
+		end))
 
 		DoNotif("Press '"..somersaultToggleKey:upper().."' to flip!", 3)
 	end
@@ -5488,10 +5444,7 @@ cmd.add({"unsomersault", "unfrontflip"}, {"unsomersault (unfrontflip)", "Disable
 		somersaultBTN = nil
 	end
 
-	if somersaultKeyConn then
-		somersaultKeyConn:Disconnect()
-		somersaultKeyConn = nil
-	end
+	lib.disconnect("somersault_key")
 end, false)
 
 cmd.add({"cartornado", "ctornado"}, {"cartornado (ctornado)", "Tornados a car just sit in the car"}, function()
@@ -5631,8 +5584,6 @@ cmd.add({"respawn", "re"}, {"respawn (re)", "Respawn your character"}, function(
 	respawn()
 end)
 
-antiSITcon = nil
-
 cmd.add({"antisit"},{"antisit","Prevents the player from sitting"},function()
 	local function noSit(character)
 		local humanoid = character:WaitForChild("Humanoid", 5)
@@ -5646,12 +5597,9 @@ cmd.add({"antisit"},{"antisit","Prevents the player from sitting"},function()
 		noSit(LocalPlayer.Character)
 	end
 
-	if antiSITcon then
-		antiSITcon:Disconnect()
-		antiSITcon = nil
-	end
+	lib.disconnect("antisit_conn")
+	lib.connect("antisit_conn", LocalPlayer.CharacterAdded:Connect(noSit))
 
-	antiSITcon = LocalPlayer.CharacterAdded:Connect(noSit)
 	DoNotif("Anti sit enabled", 3)
 end)
 
@@ -5663,11 +5611,7 @@ cmd.add({"unantisit"},{"unantisit","Allows the player to sit again"},function()
 		humanoid.Sit = false
 	end
 
-	if antiSITcon then
-		antiSITcon:Disconnect()
-		antiSITcon = nil
-	end
-
+	lib.disconnect("antisit_conn")
 	DoNotif("Anti sit disabled", 3)
 end)
 
@@ -5901,47 +5845,33 @@ cmd.add({"trip"},{"trip","get up NOW"},function()
 	getRoot(getChar()).Velocity=getRoot(getChar()).CFrame.LookVector*25
 end)
 
-noTripCon = nil
-charTRIP = nil
-
 cmd.add({"antitrip"}, {"antitrip", "no tripping today bruh"}, function()
 	local function doTRIPPER(char)
 		local hum = char:FindFirstChildOfClass("Humanoid")
 		local root = getRoot(char)
 		if not (hum and root) then return end
 
-		if noTripCon then
-			noTripCon:Disconnect()
-		end
-
-		noTripCon = hum.FallingDown:Connect(function()
+		lib.disconnect("trip_fall")
+		lib.connect("trip_fall", hum.FallingDown:Connect(function()
 			root.Velocity = Vector3.zero
 			hum:ChangeState(Enum.HumanoidStateType.GettingUp)
-		end)
+		end))
 	end
 
 	if LocalPlayer.Character then
 		doTRIPPER(LocalPlayer.Character)
 	end
 
-	if charTRIP then
-		charTRIP:Disconnect()
-	end
+	lib.disconnect("trip_char")
+	lib.connect("trip_char", LocalPlayer.CharacterAdded:Connect(doTRIPPER))
 
-	charTRIP = LocalPlayer.CharacterAdded:Connect(doTRIPPER)
-	DoNotif("Antitrip Enabled",2)
+	DoNotif("Antitrip Enabled", 2)
 end)
 
 cmd.add({"unantitrip"}, {"unantitrip", "tripping allowed now"}, function()
-	if noTripCon then
-		noTripCon:Disconnect()
-		noTripCon = nil
-	end
-	if charTRIP then
-		charTRIP:Disconnect()
-		charTRIP = nil
-	end
-	DoNotif("Antitrip Disabled",2)
+	lib.disconnect("trip_fall")
+	lib.disconnect("trip_char")
+	DoNotif("Antitrip Disabled", 2)
 end)
 
 cmd.add({"checkrfe"},{"checkrfe","Checks if the game has respect filtering enabled off"},function()
@@ -6121,11 +6051,12 @@ stationaryRespawn = false
 needsRespawning = false
 hasPosition = false
 spawnPosition = CFrame.new()
-spawnCONNECTION = nil
-spawnCHARCON = nil
 
 cmd.add({"setspawn", "spawnpoint", "ss"}, {"setspawn (spawnpoint, ss)", "Sets your spawn point to the current character's position"}, function()
-	if spawnCONNECTION and spawnCHARCON then return DoNotif("spawn point is already running",3) end
+	if lib.isConnected("spawnCONNECTION") and lib.isConnected("spawnCHARCON") then
+		return DoNotif("spawn point is already running", 3)
+	end
+
 	DoNotif("Spawn has been set")
 	stationaryRespawn = true
 
@@ -6139,29 +6070,25 @@ cmd.add({"setspawn", "spawnpoint", "ss"}, {"setspawn (spawnpoint, ss)", "Sets yo
 		end
 
 		if needsRespawning then
-			if getChar() and getRoot(getChar()) then getRoot(getChar()).CFrame = spawnPosition end
+			if getChar() and getRoot(getChar()) then
+				getRoot(getChar()).CFrame = spawnPosition
+			end
 		end
 	end
 
-	spawnCONNECTION=RunService.Stepped:Connect(handleRespawn)
+	lib.connect("spawnCONNECTION", RunService.Stepped:Connect(handleRespawn))
 
-	spawnCHARCON=LocalPlayer.CharacterAdded:Connect(function()
+	lib.connect("spawnCHARCON", LocalPlayer.CharacterAdded:Connect(function()
 		Wait(1)
 		needsRespawning = false
 		hasPosition = false
-	end)
+	end))
 end)
 
 cmd.add({"disablespawn", "unsetspawn", "ds"}, {"disablespawn (unsetspawn, ds)", "Disables the previously set spawn point"}, function()
 	DoNotif("Spawn point has been disabled")
-	if spawnCONNECTION then
-		spawnCONNECTION:Disconnect()
-		spawnCONNECTION = nil
-	end
-	if spawnCHARCON then
-		spawnCHARCON:Disconnect()
-		spawnCHARCON = nil
-	end
+	lib.disconnect("spawnCONNECTION")
+	lib.disconnect("spawnCHARCON")
 	stationaryRespawn = false
 	needsRespawning = false
 	hasPosition = false
@@ -6207,7 +6134,7 @@ cmd.add({"hamster"}, {"hamster <number>", "Hamster ball"}, function(...)
 	params.FilterType = Enum.RaycastFilterType.Blacklist
 	params.FilterDescendantsInstances = {character}
 
-	local tc = RunService.RenderStepped:Connect(function(delta)
+	lib.connect("hamster_render", RunService.RenderStepped:Connect(function(delta)
 		ball.CanCollide = true
 		humanoid.PlatformStand = true
 		if UserInputService:GetFocusedTextBox() then return end
@@ -6220,7 +6147,7 @@ cmd.add({"hamster"}, {"hamster <number>", "Hamster ball"}, function(...)
 			ball.RotVelocity = ball.RotVelocity + (right * moveVec.Z * delta * SPEED_MULTIPLIER)
 			ball.RotVelocity = ball.RotVelocity + (forward * moveVec.X * delta * SPEED_MULTIPLIER)
 		end
-	end)
+	end))
 
 	UserInputService.JumpRequest:Connect(function()
 		local result = SafeGetService("Workspace"):Raycast(
@@ -6233,22 +6160,23 @@ cmd.add({"hamster"}, {"hamster <number>", "Hamster ball"}, function(...)
 		end
 	end)
 
+	humanoid.Died:Connect(function()
+		lib.disconnect("hamster_render")
+	end)
+
 	Camera.CameraSubject = ball
-	humanoid.Died:Connect(function() tc:Disconnect() end)
 end, true)
 
-local antiAFKConnection = nil
-
 cmd.add({"antiafk","noafk"},{"antiafk (noafk)","Prevents you from being kicked for being AFK"},function()
-	if not antiAFKConnection then
+	if not lib.isConnected("antiAFK") then
 		local player = Players.LocalPlayer
 		local virtualUser = SafeGetService("VirtualUser")
 
-		antiAFKConnection = player.Idled:Connect(function()
+		lib.connect("antiAFK", player.Idled:Connect(function()
 			virtualUser:Button2Down(Vector2.new(0, 0), SafeGetService("Workspace").CurrentCamera.CFrame)
 			Wait(1)
 			virtualUser:Button2Up(Vector2.new(0, 0), SafeGetService("Workspace").CurrentCamera.CFrame)
-		end)
+		end))
 
 		DoNotif("Anti AFK has been enabled")
 	else
@@ -6257,9 +6185,8 @@ cmd.add({"antiafk","noafk"},{"antiafk (noafk)","Prevents you from being kicked f
 end)
 
 cmd.add({"unantiafk","unnoafk"},{"unantiafk (unnoafk)","Allows you to be kicked for being AFK"},function()
-	if antiAFKConnection then
-		antiAFKConnection:Disconnect()
-		antiAFKConnection = nil
+	if lib.isConnected("antiAFK") then
+		lib.disconnect("antiAFK")
 		DoNotif("Anti AFK has been disabled")
 	else
 		DoNotif("Anti AFK is already disabled")
@@ -6267,19 +6194,17 @@ cmd.add({"unantiafk","unnoafk"},{"unantiafk (unnoafk)","Allows you to be kicked 
 end)
 
 local tpUI = nil
-tpConnections = {}
 
 cmd.add({"clicktp", "tptool"}, {"clicktp (tptool)", "Teleport where your mouse is"}, function()
 	local TweenService = SafeGetService("TweenService")
 	local player = Players.LocalPlayer
 	local mouse = player:GetMouse()
+
 	if tpUI then
 		tpUI:Destroy()
 		tpUI = nil
-		for _, conn in ipairs(tpConnections) do
-			conn:Disconnect()
-		end
-		tpConnections = {}
+		lib.disconnect("tp_down")
+		lib.disconnect("tp_up")
 	end
 
 	tpUI = InstanceNew("ScreenGui")
@@ -6330,49 +6255,42 @@ cmd.add({"clicktp", "tptool"}, {"clicktp (tptool)", "Teleport where your mouse i
 		tweenTpButton.Text = tweenTpEnabled and "Disable Tween TP" or "Enable Tween TP"
 	end)
 
-	local function CustomClick(onClick)
-		local initialMousePosition = nil
-		local dragThreshold = 10
-		local downConn = mouse.Button1Down:Connect(function()
-			initialMousePosition = Vector2.new(mouse.X, mouse.Y)
-		end)
-		Insert(tpConnections, downConn)
+	local initialMousePosition = nil
+	local dragThreshold = 10
 
-		local upConn = mouse.Button1Up:Connect(function()
-			if initialMousePosition then
-				local currentMousePosition = Vector2.new(mouse.X, mouse.Y)
-				local distance = (currentMousePosition - initialMousePosition).Magnitude
-				if distance <= dragThreshold then
-					onClick(mouse)
+	lib.connect("tp_down", mouse.Button1Down:Connect(function()
+		initialMousePosition = Vector2.new(mouse.X, mouse.Y)
+	end))
+
+	lib.connect("tp_up", mouse.Button1Up:Connect(function()
+		if initialMousePosition then
+			local currentMousePosition = Vector2.new(mouse.X, mouse.Y)
+			local distance = (currentMousePosition - initialMousePosition).Magnitude
+			if distance <= dragThreshold then
+				if clickTpEnabled then
+					local pos = mouse.Hit + Vector3.new(0, 2.5, 0)
+					local targetCFrame = CFrame.new(pos.X, pos.Y, pos.Z)
+					getRoot(player.Character).CFrame = targetCFrame
+				elseif tweenTpEnabled then
+					local pos = mouse.Hit + Vector3.new(0, 2.5, 0)
+					local humanoidRootPart = getRoot(player.Character)
+					local tweenInfo = TweenInfo.new(
+						1,
+						Enum.EasingStyle.Quad,
+						Enum.EasingDirection.Out,
+						0,
+						false,
+						0
+					)
+					local tween = TweenService:Create(humanoidRootPart, tweenInfo, {
+						CFrame = CFrame.new(pos.X, pos.Y, pos.Z)
+					})
+					tween:Play()
 				end
 			end
-			initialMousePosition = nil
-		end)
-		Insert(tpConnections, upConn)
-	end
-
-	CustomClick(function(mouse)
-		if clickTpEnabled then
-			local pos = mouse.Hit + Vector3.new(0, 2.5, 0)
-			local targetCFrame = CFrame.new(pos.X, pos.Y, pos.Z)
-			getRoot(player.Character).CFrame = targetCFrame
-		elseif tweenTpEnabled then
-			local pos = mouse.Hit + Vector3.new(0, 2.5, 0)
-			local humanoidRootPart = getRoot(player.Character)
-			local tweenInfo = TweenInfo.new(
-				1,
-				Enum.EasingStyle.Quad,
-				Enum.EasingDirection.Out,
-				0,
-				false,
-				0
-			)
-			local tween = TweenService:Create(humanoidRootPart, tweenInfo, {
-				CFrame = CFrame.new(pos.X, pos.Y, pos.Z)
-			})
-			tween:Play()
 		end
-	end)
+		initialMousePosition = nil
+	end))
 
 	gui.draggablev2(clickTpButton)
 	gui.draggablev2(tweenTpButton)
@@ -6383,10 +6301,8 @@ cmd.add({"unclicktp", "untptool"}, {"unclicktp (untptool)", "Remove teleport but
 		tpUI:Destroy()
 		tpUI = nil
 	end
-	for _, conn in ipairs(tpConnections) do
-		conn:Disconnect()
-	end
-	tpConnections = {}
+	lib.disconnect("tp_down")
+	lib.disconnect("tp_up")
 end)
 
 cmd.add({"dex"},{"dex","Using this you can see the parts / guis / scripts etc with this. A really good and helpful script."},function()
@@ -6596,14 +6512,11 @@ cmd.add({"unlockws","unlockworkspace"},{"unlockws (unlockworkspace)","Unlocks th
 	end
 end)
 
-vehicleloopspeed = nil
 vspeedBTN = nil
 
 cmd.add({"vehiclespeed", "vspeed"}, {"vehiclespeed <amount> (vspeed)", "Change the vehicle speed"}, function(amount)
-	if vehicleloopspeed then
-		vehicleloopspeed:Disconnect()
-		vehicleloopspeed = nil
-	end
+	lib.disconnect("vehicleloopspeed")
+
 	if vspeedBTN then
 		vspeedBTN:Destroy()
 		vspeedBTN = nil
@@ -6611,14 +6524,14 @@ cmd.add({"vehiclespeed", "vspeed"}, {"vehiclespeed <amount> (vspeed)", "Change t
 
 	local intens = tonumber(amount) or 1
 
-	vehicleloopspeed = RunService.Stepped:Connect(function()
+	lib.connect("vehicleloopspeed", RunService.Stepped:Connect(function()
 		local subject = SafeGetService("Workspace").CurrentCamera.CameraSubject
 		if subject and subject:IsA("Humanoid") and subject.SeatPart then
 			subject.SeatPart:ApplyImpulse(subject.SeatPart.CFrame.LookVector * Vector3.new(intens, 0, intens))
 		elseif subject and subject:IsA("BasePart") then
 			subject:ApplyImpulse(subject.CFrame.LookVector * Vector3.new(intens, 0, intens))
 		end
-	end)
+	end))
 
 	DoNotif("Vehicle speed set to "..intens)
 
@@ -6721,26 +6634,20 @@ cmd.add({"vehiclespeed", "vspeed"}, {"vehiclespeed <amount> (vspeed)", "Change t
 			local newIntens = tonumber(speedBox.Text) or 1
 			intens = newIntens
 
-			if vehicleloopspeed then
-				vehicleloopspeed:Disconnect()
-			end
-
-			vehicleloopspeed = RunService.Stepped:Connect(function()
+			lib.disconnect("vehicleloopspeed")
+			lib.connect("vehicleloopspeed", RunService.Stepped:Connect(function()
 				local subject = SafeGetService("Workspace").CurrentCamera.CameraSubject
 				if subject and subject:IsA("Humanoid") and subject.SeatPart then
 					subject.SeatPart:ApplyImpulse(subject.SeatPart.CFrame.LookVector * Vector3.new(intens, 0, intens))
 				elseif subject and subject:IsA("BasePart") then
 					subject:ApplyImpulse(subject.CFrame.LookVector * Vector3.new(intens, 0, intens))
 				end
-			end)
+			end))
 
 			btn.Text = "vSpeed ON"
 			btn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
 		else
-			if vehicleloopspeed then
-				vehicleloopspeed:Disconnect()
-				vehicleloopspeed = nil
-			end
+			lib.disconnect("vehicleloopspeed")
 
 			local subject = SafeGetService("Workspace").CurrentCamera.CameraSubject
 			if subject then
@@ -6803,21 +6710,17 @@ cmd.add({"vehiclespeed", "vspeed"}, {"vehiclespeed <amount> (vspeed)", "Change t
 	speedBox.FocusLost:Connect(function()
 		if not vSpeedOn then return end
 		local newIntens = tonumber(speedBox.Text) or 1
-
 		intens = newIntens
 
-		if vehicleloopspeed then
-			vehicleloopspeed:Disconnect()
-		end
-
-		vehicleloopspeed = RunService.Stepped:Connect(function()
+		lib.disconnect("vehicleloopspeed")
+		lib.connect("vehicleloopspeed", RunService.Stepped:Connect(function()
 			local subject = SafeGetService("Workspace").CurrentCamera.CameraSubject
 			if subject and subject:IsA("Humanoid") and subject.SeatPart then
 				subject.SeatPart:ApplyImpulse(subject.SeatPart.CFrame.LookVector * Vector3.new(intens, 0, intens))
 			elseif subject and subject:IsA("BasePart") then
 				subject:ApplyImpulse(subject.CFrame.LookVector * Vector3.new(intens, 0, intens))
 			end
-		end)
+		end))
 
 		DoNotif("vSpeed updated to "..intens, 2)
 	end)
@@ -6828,10 +6731,7 @@ cmd.add({"vehiclespeed", "vspeed"}, {"vehiclespeed <amount> (vspeed)", "Change t
 end, true)
 
 cmd.add({"unvehiclespeed", "unvspeed"}, {"unvehiclespeed (unvspeed)", "Stops the vehiclespeed command"}, function()
-	if vehicleloopspeed then
-		vehicleloopspeed:Disconnect()
-		vehicleloopspeed = nil
-	end
+	lib.disconnect("vehicleloopspeed")
 
 	if vspeedBTN then
 		vspeedBTN:Destroy()
@@ -6883,7 +6783,6 @@ end
 
 local GameSettings = UserSettings():GetService("UserGameSettings")
 
-local ShiftLockConnection = nil
 local OriginalRotationType = nil
 local ShiftLockEnabled = false
 
@@ -6898,11 +6797,11 @@ function EnableShiftLock()
 		OriginalRotationType = currentRotation
 	end
 
-	ShiftLockConnection = RunService.RenderStepped:Connect(function()
+	lib.connect("shiftlock_loop", RunService.RenderStepped:Connect(function()
 		pcall(function()
 			GameSettings.RotationType = Enum.RotationType.CameraRelative
 		end)
-	end)
+	end))
 
 	ShiftLockEnabled = true
 	DoNotif("ShiftLock Enabled", 2)
@@ -6911,10 +6810,7 @@ end
 function DisableShiftLock()
 	if not ShiftLockEnabled then return end
 
-	if ShiftLockConnection then
-		ShiftLockConnection:Disconnect()
-		ShiftLockConnection = nil
-	end
+	lib.disconnect("shiftlock_loop")
 
 	pcall(function()
 		GameSettings.RotationType = OriginalRotationType or Enum.RotationType.MovementRelative
@@ -7290,7 +7186,7 @@ cmd.add({"creep", "scare"}, {"creep <player> (scare)", "Teleports from a player 
 	root.CFrame = target.Character.Humanoid.RootPart.CFrame * CFrame.new(0, -10, 4)
 	Wait()
 
-	if connections and connections["noclip"] then
+	if lib.isConnected("noclip") then
 		lib.disconnect("noclip")
 	end
 
@@ -7340,10 +7236,7 @@ cmd.add({"reset","die"},{"reset (die)","Makes your health be 0"},function()
 	Player.Character:FindFirstChildOfClass("Humanoid").Health=0
 end)
 
-damageChatConnection = nil
-damageChatEnabled = false
-
-damageMessages = {
+local damageMessages = {
     "Ouch!", "Ow!", "Aw!", "That hurt!", "Yikes!", "Gah!", "Nooo!",
     "Stop that!", "Bruh...", "Hmph!", "I felt that!", "What the–?!", "My pixels!", "Dang!",
     "Seriously?", "Try that again!", "Cut it out!", "That was rude!"
@@ -7353,38 +7246,34 @@ cmd.add({"damagechat", "dmgchat", "painchat"}, {"damagechat (dmgchat, painchat)"
     local humanoid = getHum()
 
     if not humanoid then
-        DoNotif("humanoid not found", 2)
+        DoNotif("Humanoid not found", 2)
         return
     end
 
-    if damageChatEnabled then
-        if damageChatConnection then
-            damageChatConnection:Disconnect()
-            damageChatConnection = nil
-        end
-        damageChatEnabled = false
+    local connName = "damagechat"
+
+    if lib.isConnected(connName) then
+        lib.disconnect(connName)
         DoNotif("Disabled", 2)
-    else
-        local lastHealth = humanoid.Health
-
-        damageChatConnection = humanoid.HealthChanged:Connect(function(newHealth)
-            if newHealth < lastHealth then
-                local msg = damageMessages[math.random(1, #damageMessages)]
-                lib.LocalPlayerChat(msg, "All")
-            end
-            lastHealth = newHealth
-        end)
-
-        damageChatEnabled = true
-        DoNotif("Enabled", 2)
+        return
     end
+
+    local lastHealth = humanoid.Health
+
+    lib.connect(connName, humanoid.HealthChanged:Connect(function(newHealth)
+        if newHealth < lastHealth then
+            local msg = damageMessages[math.random(1, #damageMessages)]
+            lib.LocalPlayerChat(msg, "All")
+        end
+        lastHealth = newHealth
+    end))
+
+    DoNotif("Enabled", 2)
 end)
 
 cmd.add({"undamagechat", "undmgchat", "unpainchat"}, {"undamagechat (undmgchat, unpainchat)", "Disables damage reaction chat"}, function()
-    if damageChatEnabled and damageChatConnection then
-        damageChatConnection:Disconnect()
-        damageChatConnection = nil
-        damageChatEnabled = false
+    if lib.isConnected("damagechat") then
+        lib.disconnect("damagechat")
         DoNotif("Disabled", 2)
     else
         DoNotif("Already disabled", 2)
@@ -7834,13 +7723,8 @@ cmd.add({"pingserverhop","pshop"},{"pingserverhop (pshop)","serverhop to a serve
 	end
 end)
 
-autoRejoinConnection = nil
-
 cmd.add({"autorejoin", "autorj"}, {"autorejoin (autorj)", "Rejoins the server if you get kicked / disconnected"}, function()
-	if autoRejoinConnection then
-		autoRejoinConnection:Disconnect()
-		autoRejoinConnection = nil
-	end
+	lib.disconnect("autorejoin")
 
 	local function handleRejoin()
 		if #Players:GetPlayers() <= 1 then
@@ -7852,17 +7736,16 @@ cmd.add({"autorejoin", "autorj"}, {"autorejoin (autorj)", "Rejoins the server if
 		end
 	end
 
-	autoRejoinConnection = GuiService.ErrorMessageChanged:Connect(function()
+	lib.connect("autorejoin", GuiService.ErrorMessageChanged:Connect(function()
 		Spawn(handleRejoin)
-	end)
+	end))
 
 	DoNotif("Auto Rejoin is now enabled!")
 end)
 
 cmd.add({"unautorejoin", "unautorj"}, {"unautorejoin (unautorj)", "Disables auto rejoin command"}, function()
-	if autoRejoinConnection then
-		autoRejoinConnection:Disconnect()
-		autoRejoinConnection = nil
+	if lib.isConnected("autorejoin") then
+		lib.disconnect("autorejoin")
 		DoNotif("Auto Rejoin is now disabled!")
 	else
 		DoNotif("Auto Rejoin is already disabled!")
@@ -8964,18 +8847,16 @@ cmd.add({"clip","c"},{"clip","Enable your player's collision"},function()
 	lib.disconnect("noclip")
 end)
 
-bangCon = nil
 originalPos = nil
 platformPart = nil
 activationTime = nil
 
 cmd.add({"antibang"}, {"antibang", "prevents users to bang you (still WORK IN PROGRESS)"}, function()
-	if bangCon then
-		bangCon:Disconnect()
-		bangCon = nil
-	end
+	lib.disconnect("antibang_loop")
+
 	local root = getRoot(LocalPlayer.Character)
 	if not root then return end
+
 	originalPos = root.CFrame
 	local orgHeight = SafeGetService("Workspace").FallenPartsDestroyHeight
 	local anims = {"rbxassetid://5918726674", "rbxassetid://148840371", "rbxassetid://698251653", "rbxassetid://72042024", "rbxassetid://189854234", "rbxassetid://106772613", "rbxassetid://10714360343", "rbxassetid://95383980"}
@@ -8989,7 +8870,7 @@ cmd.add({"antibang"}, {"antibang", "prevents users to bang you (still WORK IN PR
 		root = getRoot(char)
 	end)
 
-	bangCon = RunService.Stepped:Connect(function()
+	lib.connect("antibang_loop", RunService.Stepped:Connect(function()
 		for _, p in pairs(SafeGetService("Players"):GetPlayers()) do
 			if p ~= LocalPlayer and p.Character and getRoot(p.Character) then
 				if (getRoot(p.Character).Position - root.Position).Magnitude <= 10 then
@@ -9044,20 +8925,18 @@ cmd.add({"antibang"}, {"antibang", "prevents users to bang you (still WORK IN PR
 				end
 			end
 		end
-	end)
-	DoNotif("Antibang Enabled",3)
+	end))
+
+	DoNotif("Antibang Enabled", 3)
 end)
 
 cmd.add({"unantibang"}, {"unantibang", "disables antibang"}, function()
-	if bangCon then
-		bangCon:Disconnect()
-		bangCon = nil
-	end
+	lib.disconnect("antibang_loop")
 	if platformPart then
 		platformPart:Destroy()
 		platformPart = nil
 	end
-	DoNotif("Antibang Disabled",3)
+	DoNotif("Antibang Disabled", 3)
 end)
 
 cmd.add({"orbit"}, {"orbit <player> <distance>", "Orbit around a player"}, function(p, d)
@@ -9135,7 +9014,7 @@ cmd.add({"freecam","fc","fcam"},{"freecam [speed] (fc,fcam)","Enable free camera
 	argg = (...)
 	local speed = argg or 5
 
-	if connections["freecam"] then
+	if lib.isConnected("freecam") then
 		lib.disconnect("freecam")
 		camera.CameraSubject = getChar()
 		Spawn(function() cmd.run({"unfr"}) end)
@@ -9267,7 +9146,7 @@ cmd.add({"freecam","fc","fcam"},{"freecam [speed] (fc,fcam)","Enable free camera
 					mOn = false
 					btn.Text = "FC"
 					btn.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
-					if connections["freecam"] then
+					if lib.isConnected("freecam") then
 						lib.disconnect("freecam")
 					end
 					camera.CameraSubject = getChar()
@@ -9767,13 +9646,12 @@ cmd.add({"animspoofer","animationspoofer","spoofanim","animspoof"},{"animspoofer
 	loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/Nameless-Admin/main/Animation%20Spoofer"))()
 end)
 
-local transCONN
-
 cmd.add({"bodytransparency","btransparency", "bodyt"}, {"bodytransparency <number> (btransparency,bodyt)", "Sets LocalTransparencyModifier of bodyparts to whatever number you put (0-1)"}, function(v)
 	local vv = tonumber(v) or 0
-	if transCONN then transCONN:Disconnect() end
 
-	transCONN = RunService.RenderStepped:Connect(function()
+	lib.disconnect("body_transparency")
+
+	lib.connect("body_transparency", RunService.RenderStepped:Connect(function()
 		local char = LocalPlayer.Character
 		if char then
 			for _, p in ipairs(char:GetChildren()) do
@@ -9782,30 +9660,25 @@ cmd.add({"bodytransparency","btransparency", "bodyt"}, {"bodytransparency <numbe
 				end
 			end
 		end
-	end)
+	end))
 
-	DoNotif("Body transparency set to "..vv,1.5)
-end,true)
+	DoNotif("Body transparency set to "..vv, 1.5)
+end, true)
 
 cmd.add({"unbodytransparency", "unbtransparency", "unbodyt"}, {"unbodytransparency (unbtransparency,unbodyt)", "Stops transparency loop"}, function()
-	if transCONN then
-		transCONN:Disconnect()
-		transCONN = nil
+	if lib.isConnected("body_transparency") then
+		lib.disconnect("body_transparency")
 	else
-		DoNotif("No loop running",2)
+		DoNotif("No loop running", 2)
 	end
 end)
-
-local animCONN
 
 cmd.add({"animationspeed", "animspeed", "aspeed"}, {"animationspeed <speed> (animspeed,aspeed)", "Adjusts the speed of currently playing animations"}, function(speed)
 	local targetSpeed = tonumber(speed) or 1
 
-	if animCONN then
-		animCONN:Disconnect()
-	end
+	lib.disconnect("animation_speed")
 
-	animCONN = RunService.Heartbeat:Connect(function()
+	lib.connect("animation_speed", RunService.Heartbeat:Connect(function()
 		local character = getChar()
 		local humanoid = character:FindFirstChildOfClass("Humanoid") or character:FindFirstChildOfClass("AnimationController")
 		if humanoid then
@@ -9815,15 +9688,14 @@ cmd.add({"animationspeed", "animspeed", "aspeed"}, {"animationspeed <speed> (ani
 				end
 			end
 		end
-	end)
+	end))
 
 	DoNotif("Animation speed set to "..targetSpeed)
 end, true)
 
 cmd.add({"unanimationspeed", "unanimspeed", "unaspeed"}, {"unanimationspeed (unanimspeed,unaspeed)", "Stops the animation speed adjustment loop"}, function()
-	if animCONN then
-		animCONN:Disconnect()
-		animCONN = nil
+	if lib.isConnected("animation_speed") then
+		lib.disconnect("animation_speed")
 		DoNotif("Animation speed disabled")
 	else
 		DoNotif("No active animation speed to disable")
@@ -9885,10 +9757,9 @@ cmd.add({"firework"}, {"firework", "pop"}, function()
 	local startTime = tick()
 	local angle = 0
 
-	local connection
-	connection = RunService.Heartbeat:Connect(function(dt)
+	lib.connect("firework_spin", RunService.Heartbeat:Connect(function(dt)
 		if tick() - startTime > spinTime then
-			connection:Disconnect()
+			lib.disconnect("firework_spin")
 			bv:Destroy()
 			bg:Destroy()
 			part:Destroy()
@@ -9905,7 +9776,7 @@ cmd.add({"firework"}, {"firework", "pop"}, function()
 
 		angle += math.rad(spinSpeed * dt)
 		bg.CFrame = CFrame.new(root.Position) * CFrame.Angles(0, angle, 0)
-	end)
+	end))
 end)
 
 cmd.add({"placename","pname"},{"placename (pname)","Copies the game's place name to your clipboard"},function()
@@ -10470,17 +10341,14 @@ cmd.add({"torandom","tr"},{"torandom (tr)","Teleports to a random player"},funct
 	end
 end)
 
-timeCHARcons = {}
-timePlayerCon = nil
-
 cmd.add({"timestop", "tstop"}, {"timestop (tstop)", "freezes all players (ZA WARUDO)"}, function()
 	local target = getPlr("others")
 	if #target == 0 then return end
 
-	for _, con in pairs(timeCHARcons) do
-		con:Disconnect()
+	for _, plr in pairs(Players:GetPlayers()) do
+		lib.disconnect("timestop_char_"..plr.UserId)
 	end
-	timeCHARcons = {}
+	lib.disconnect("timestop_playeradd")
 
 	for _, plr in pairs(target) do
 		local char = getPlrChar(plr)
@@ -10491,45 +10359,37 @@ cmd.add({"timestop", "tstop"}, {"timestop (tstop)", "freezes all players (ZA WAR
 				end
 			end
 		end
-		timeCHARcons[plr] = plr.CharacterAdded:Connect(function(char)
+
+		lib.connect("timestop_char_"..plr.UserId, plr.CharacterAdded:Connect(function(char)
 			char:WaitForChild("HumanoidRootPart", 3)
 			for _, v in pairs(char:GetDescendants()) do
 				if v:IsA("BasePart") then
 					v.Anchored = true
 				end
 			end
-		end)
+		end))
 	end
 
-	if timePlayerCon then
-		timePlayerCon:Disconnect()
-	end
-
-	timePlayerCon = Players.PlayerAdded:Connect(function(plr)
-		timeCHARcons[plr] = plr.CharacterAdded:Connect(function(char)
+	lib.connect("timestop_playeradd", Players.PlayerAdded:Connect(function(plr)
+		lib.connect("timestop_char_"..plr.UserId, plr.CharacterAdded:Connect(function(char)
 			char:WaitForChild("HumanoidRootPart", 3)
 			for _, v in pairs(char:GetDescendants()) do
 				if v:IsA("BasePart") then
 					v.Anchored = true
 				end
 			end
-		end)
-	end)
+		end))
+	end))
 end)
 
 cmd.add({"untimestop", "untstop"}, {"untimestop (untstop)", "unfreeze all players"}, function()
 	local target = getPlr("all")
 	if #target == 0 then return end
 
-	for _, con in pairs(timeCHARcons) do
-		con:Disconnect()
+	for _, plr in pairs(Players:GetPlayers()) do
+		lib.disconnect("timestop_char_"..plr.UserId)
 	end
-	timeCHARcons = {}
-
-	if timePlayerCon then
-		timePlayerCon:Disconnect()
-		timePlayerCon = nil
-	end
+	lib.disconnect("timestop_playeradd")
 
 	for _, plr in pairs(target) do
 		local char = getPlrChar(plr)
@@ -10552,52 +10412,42 @@ cmd.add({"goto","to","tp","teleport"},{"goto <player/X,Y,Z>","Teleport to the gi
 	end
 end,true)
 
-local StaringConnection = nil
-local nearCON = nil
-
 function stareFIXER(char, facePos)
 	local root = getRoot(char)
 	if not root then return end
 	local pos = root.Position
 	local flatTarget = Vector3.new(facePos.X, pos.Y, facePos.Z)
 	if (flatTarget - pos).Magnitude < 0.1 then return end
-	local look = CFrame.lookAt(pos, flatTarget)
 	root.CFrame = CFrame.new(pos, flatTarget)
 end
 
 cmd.add({"lookat", "stare"}, {"stare <player> (lookat)", "Stare at a player"}, function(...)
 	local Username = (...)
 	local Target = getPlr(Username)
+
 	for _, plr in next, Target do
-		if StaringConnection then
-			StaringConnection:Disconnect()
-			StaringConnection = nil
-		end
+		lib.disconnect("stare_direct")
+
 		local lp = Players.LocalPlayer
 		if not (lp.Character and getRoot(lp.Character)) then return end
 		if not (plr and plr.Character and getRoot(plr.Character)) then return end
+
 		lp.Character.Humanoid.AutoRotate = false
+
 		local function Stare()
 			if lp.Character and plr.Character and getRoot(plr.Character) then
 				stareFIXER(lp.Character, getRoot(plr.Character).Position)
-			else
-				if not Players:FindFirstChild(plr.Name) then
-					if StaringConnection then
-						StaringConnection:Disconnect()
-						StaringConnection = nil
-					end
-				end
+			elseif not Players:FindFirstChild(plr.Name) then
+				lib.disconnect("stare_direct")
 			end
 		end
-		StaringConnection = RunService.RenderStepped:Connect(Stare)
+
+		lib.connect("stare_direct", RunService.RenderStepped:Connect(Stare))
 	end
 end, true)
 
 cmd.add({"unlookat", "unstare"}, {"unstare (unlookat)", "Stops staring"}, function()
-	if StaringConnection then
-		StaringConnection:Disconnect()
-		StaringConnection = nil
-	end
+	lib.disconnect("stare_direct")
 	local char = Players.LocalPlayer.Character
 	if char and char:FindFirstChild("Humanoid") then
 		char.Humanoid.AutoRotate = true
@@ -10605,15 +10455,13 @@ cmd.add({"unlookat", "unstare"}, {"unstare (unlookat)", "Stops staring"}, functi
 end)
 
 cmd.add({"starenear", "stareclosest"}, {"starenear (stareclosest)", "Stare at the closest player"}, function()
-	if nearCON then
-		nearCON:Disconnect()
-		nearCON = nil
-	end
+	lib.disconnect("stare_nearest")
 
 	local function getClosest()
 		local lp = Players.LocalPlayer
 		local char = lp.Character
 		if not (char and getRoot(char)) then return nil end
+
 		local closest, dist = nil, math.huge
 		local pos = getRoot(char).Position
 		for _, p in ipairs(Players:GetPlayers()) do
@@ -10644,86 +10492,71 @@ cmd.add({"starenear", "stareclosest"}, {"starenear (stareclosest)", "Stare at th
 		end
 	end
 
-	nearCON = RunService.RenderStepped:Connect(stare)
+	lib.connect("stare_nearest", RunService.RenderStepped:Connect(stare))
 end)
 
 cmd.add({"unstarenear", "unstareclosest"}, {"unstarenear (unstareclosest)", "Stop staring at closest player"}, function()
-	if nearCON then
-		nearCON:Disconnect()
-		nearCON = nil
-	end
+	lib.disconnect("stare_nearest")
 	local char = Players.LocalPlayer.Character
 	if char and char:FindFirstChild("Humanoid") then
 		char.Humanoid.AutoRotate = true
 	end
 end)
 
-local conn, loop, plrLeftCon = nil, nil, nil
 local specGui, currentPlayerIndex = nil, 1
 
 function cleanup()
-	if conn then
-		conn:Disconnect()
-		conn = nil
-	end
-	if loop then
-		coroutine.close(loop)
-		loop = nil
-	end
-	if plrLeftCon then
-		plrLeftCon:Disconnect()
-		plrLeftCon = nil
-	end
+	lib.disconnect("spectate_char")
+	lib.disconnect("spectate_loop")
+	lib.disconnect("spectate_leave")
+
 	if specGui then
 		specGui:Destroy()
-		specGui=nil
+		specGui = nil
 	end
+
 	SafeGetService("Workspace").CurrentCamera.CameraSubject = getHum()
 end
 
 function spectatePlayer(targetPlayer)
 	if not targetPlayer then return end
 
-	if conn then
-		conn:Disconnect()
-		conn = nil
-	end
-	if loop then
-		coroutine.close(loop)
-		loop = nil
-	end
-	if plrLeftCon then
-		plrLeftCon:Disconnect()
-		plrLeftCon = nil
-	end
+	lib.disconnect("spectate_char")
+	lib.disconnect("spectate_loop")
+	lib.disconnect("spectate_leave")
 
-	conn = targetPlayer.CharacterAdded:Connect(function(character)
+	lib.connect("spectate_char", targetPlayer.CharacterAdded:Connect(function(character)
 		repeat Wait() until character:FindFirstChildWhichIsA("Humanoid")
 		SafeGetService("Workspace").CurrentCamera.CameraSubject = character:FindFirstChildWhichIsA("Humanoid")
-	end)
+	end))
 
-	plrLeftCon = Players.PlayerRemoving:Connect(function(player)
+	lib.connect("spectate_leave", Players.PlayerRemoving:Connect(function(player)
 		if player == targetPlayer then
 			cleanup()
 			DoNotif("Player left - camera reset")
 		end
-	end)
+	end))
 
-	loop = coroutine.create(function()
-		while conn do
+	local loop = coroutine.create(function()
+		while true do
 			if targetPlayer.Character and targetPlayer.Character:FindFirstChildWhichIsA("Humanoid") then
 				SafeGetService("Workspace").CurrentCamera.CameraSubject = targetPlayer.Character:FindFirstChildWhichIsA("Humanoid")
 			end
 			Wait()
 		end
 	end)
-
+	lib.connect("spectate_loop", {
+		Disconnect = function()
+			if coroutine.status(loop) ~= "dead" then
+				coroutine.close(loop)
+			end
+		end
+	})
 	coroutine.resume(loop)
 end
 
 cmd.add({"watch", "view", "spectate"}, {"watch <Player> (view, spectate)", "Spectate player"}, function(...)
 	cleanup()
-
 	local targetPlayer = getPlr((...))
 	for _, plr in next, targetPlayer do
 		if not plr then return end
@@ -11711,46 +11544,56 @@ end
 	LocalPlayer:SetAttribute("CustomNAtagger", tag)
 end, true)]]
 
-headSit, sitDied, platformParts = nil, nil, {}
+platformParts = {}
 
 cmd.add({"headsit"}, {"headsit <player>", "sit on someone's head"}, function(p)
 	local ppp = getPlr(p)
+
 	for _, plr in next, ppp do
 		if not plr then return end
+
 		local char = getChar()
 		local hum = char and char:FindFirstChildOfClass("Humanoid")
 		if not hum then return end
-		if headSit then headSit:Disconnect() headSit = nil end
-		if sitDied then sitDied:Disconnect() sitDied = nil end
+
+		lib.disconnect("headsit_follow")
+		lib.disconnect("headsit_died")
+
 		local charRoot = getRoot(char)
 		local target = plr.Character
 		if not charRoot or not target then return end
+
 		hum.Sit = true
-		sitDied = hum.Died:Connect(function()
-			if headSit then headSit:Disconnect() headSit = nil end
+
+		lib.connect("headsit_died", hum.Died:Connect(function()
+			lib.disconnect("headsit_follow")
+			lib.disconnect("headsit_died")
 			for _, part in pairs(platformParts) do
 				part:Destroy()
 			end
 			platformParts = {}
-			if sitDied then sitDied:Disconnect() sitDied = nil end
-		end)
+		end))
+
 		for _, part in pairs(platformParts) do
 			part:Destroy()
 		end
 		platformParts = {}
+
 		local thick = 1
 		local halfWidth = 2
 		local halfDepth = 2
 		local halfHeight = 3
+
 		local walls = {
-			{offset = CFrame.new(0, 0, halfDepth + thick/500), size = Vector3.new(4, 6, thick)},
-			{offset = CFrame.new(0, 0, -(halfDepth + thick/500)), size = Vector3.new(4, 6, thick)},
-			{offset = CFrame.new(halfWidth + thick/500, 0, 0), size = Vector3.new(thick, 6, 4)},
-			{offset = CFrame.new(-(halfWidth + thick/500), 0, 0), size = Vector3.new(thick, 6, 4)},
-			{offset = CFrame.new(0, halfHeight + thick/500, 0), size = Vector3.new(4, thick, 4)},
-			{offset = CFrame.new(0, -(halfHeight + thick/500), 0), size = Vector3.new(4, thick, 4)}
+			{offset = CFrame.new(0, 0, halfDepth + thick / 500), size = Vector3.new(4, 6, thick)},
+			{offset = CFrame.new(0, 0, -(halfDepth + thick / 500)), size = Vector3.new(4, 6, thick)},
+			{offset = CFrame.new(halfWidth + thick / 500, 0, 0), size = Vector3.new(thick, 6, 4)},
+			{offset = CFrame.new(-(halfWidth + thick / 500), 0, 0), size = Vector3.new(thick, 6, 4)},
+			{offset = CFrame.new(0, halfHeight + thick / 500, 0), size = Vector3.new(4, thick, 4)},
+			{offset = CFrame.new(0, -(halfHeight + thick / 500), 0), size = Vector3.new(4, thick, 4)}
 		}
-		for i, wall in ipairs(walls) do
+
+		for _, wall in ipairs(walls) do
 			local part = InstanceNew("Part")
 			part.Size = wall.size
 			part.Anchored = true
@@ -11759,10 +11602,16 @@ cmd.add({"headsit"}, {"headsit <player>", "sit on someone's head"}, function(p)
 			part.Parent = SafeGetService("Workspace").CurrentCamera
 			Insert(platformParts, part)
 		end
-		headSit = RunService.Heartbeat:Connect(function()
-			if not SafeGetService("Players"):FindFirstChild(plr.Name) or not plr.Character or not plr.Character:FindFirstChild("Head") or hum.Sit == false then
-				if headSit then headSit:Disconnect() headSit = nil end
-				if sitDied then sitDied:Disconnect() sitDied = nil end
+
+		lib.connect("headsit_follow", RunService.Heartbeat:Connect(function()
+			if not SafeGetService("Players"):FindFirstChild(plr.Name)
+				or not plr.Character
+				or not plr.Character:FindFirstChild("Head")
+				or hum.Sit == false then
+
+				lib.disconnect("headsit_follow")
+				lib.disconnect("headsit_died")
+
 				for _, part in pairs(platformParts) do
 					part:Destroy()
 				end
@@ -11770,21 +11619,24 @@ cmd.add({"headsit"}, {"headsit <player>", "sit on someone's head"}, function(p)
 			else
 				local targetHead = plr.Character:FindFirstChild("Head")
 				charRoot.CFrame = targetHead.CFrame * CFrame.new(0, 1.6, 0.4)
+
 				for i, wall in ipairs(walls) do
 					platformParts[i].CFrame = charRoot.CFrame * wall.offset
 				end
 			end
-		end)
+		end))
 	end
 end, true)
 
 cmd.add({"unheadsit"}, {"unheadsit", "Stop the headsit command."}, function()
-	if headSit then headSit:Disconnect() headSit = nil end
-	if sitDied then sitDied:Disconnect() sitDied = nil end
+	lib.disconnect("headsit_follow")
+	lib.disconnect("headsit_died")
+
 	for _, part in pairs(platformParts) do
 		part:Destroy()
 	end
 	platformParts = {}
+
 	local char = getChar()
 	local hum = char and char:FindFirstChildOfClass("Humanoid")
 	if hum then
@@ -11792,23 +11644,18 @@ cmd.add({"unheadsit"}, {"unheadsit", "Stop the headsit command."}, function()
 	end
 end)
 
-wallhopConn = nil
-
 cmd.add({"wallhop"},{"wallhop","wallhop helper"},function()
 	local char = getChar()
 	local root = getRoot(char)
 	local hum = char:FindFirstChildOfClass("Humanoid")
 
-	if wallhopConn then
-		wallhopConn:Disconnect()
-	end
+	lib.disconnect("wallhop_loop")
 
 	local canHop = true
 
-	wallhopConn = RunService.Heartbeat:Connect(function()
+	lib.connect("wallhop_loop", RunService.Heartbeat:Connect(function()
 		if not char or not root or not hum or hum.Health <= 0 then
-			wallhopConn:Disconnect()
-			wallhopConn = nil
+			lib.disconnect("wallhop_loop")
 			return
 		end
 
@@ -11848,63 +11695,66 @@ cmd.add({"wallhop"},{"wallhop","wallhop helper"},function()
 		if root.Velocity.Y > 0 then
 			canHop = true
 		end
-	end)
+	end))
 end)
 
 cmd.add({"unwallhop"},{"unwallhop","disable wallhop helper"},function()
-	if wallhopConn then
-		wallhopConn:Disconnect()
-		wallhopConn = nil
-	end
+	lib.disconnect("wallhop_loop")
 end)
 
 cmd.add({"jump"},{"jump","jump."},function()
 	getHum():ChangeState(Enum.HumanoidStateType.Jumping)
 end)
 
-local jL = nil
+cmd.add({"loopjump", "bhop"}, {"loopjump (bhop)", "Continuously jump."}, function()
+	lib.disconnect("loopjump")
 
-cmd.add({"loopjump","bhop"}, {"loopjump (bhop)", "Continuously jump."}, function()
-	if jL then jL:Disconnect() end
-	jL = RunService.Heartbeat:Connect(function()
+	lib.connect("loopjump", RunService.Heartbeat:Connect(function()
 		local h = getHum()
 		if h and h:GetState() ~= Enum.HumanoidStateType.Freefall then
 			h:ChangeState(Enum.HumanoidStateType.Jumping)
 		end
-	end)
+	end))
 end)
 
-cmd.add({"unloopjump","unbhop"}, {"unloopjump (unbhop)", "Stop continuous jumping."}, function()
-	if jL then jL:Disconnect() jL = nil end
+cmd.add({"unloopjump", "unbhop"}, {"unloopjump (unbhop)", "Stop continuous jumping."}, function()
+	lib.disconnect("loopjump")
 end)
 
-headStand, standDied, standParts = nil, nil, {}
+standParts = {}
 
 cmd.add({"headstand"}, {"headstand <player>", "Stand on someone's head."}, function(p)
-	if headStand then headStand:Disconnect() headStand = nil end
+	lib.disconnect("headstand_follow")
+	lib.disconnect("headstand_died")
+
 	local targets = getPlr(p)
 	if #targets == 0 then return end
+
 	local plr = targets[1]
 	local char = getChar()
 	if not char then return end
 	local hum = char:FindFirstChildOfClass("Humanoid")
 	if not hum then return end
-	standDied = hum.Died:Connect(function()
-		if headStand then headStand:Disconnect() headStand = nil end
+
+	lib.connect("headstand_died", hum.Died:Connect(function()
+		lib.disconnect("headstand_follow")
+		lib.disconnect("headstand_died")
 		for _, part in pairs(standParts) do
 			part:Destroy()
 		end
 		standParts = {}
-		if standDied then standDied:Disconnect() standDied = nil end
-	end)
+	end))
+
 	for _, part in pairs(standParts) do
 		part:Destroy()
 	end
 	standParts = {}
+
 	local thick = 1
 	local halfWidth = 2
 	local halfDepth = 2
 	local halfHeight = 3
+
 	local walls = {
 		{offset = CFrame.new(0, 0, halfDepth + thick/500), size = Vector3.new(4, 6, thick)},
 		{offset = CFrame.new(0, 0, -(halfDepth + thick/500)), size = Vector3.new(4, 6, thick)},
@@ -11913,7 +11763,8 @@ cmd.add({"headstand"}, {"headstand <player>", "Stand on someone's head."}, funct
 		{offset = CFrame.new(0, halfHeight + thick/500, 0), size = Vector3.new(4, thick, 4)},
 		{offset = CFrame.new(0, -(halfHeight + thick/500), 0), size = Vector3.new(4, thick, 4)}
 	}
-	for i, wall in ipairs(walls) do
+
+	for _, wall in ipairs(walls) do
 		local part = InstanceNew("Part")
 		part.Size = wall.size
 		part.Anchored = true
@@ -11922,7 +11773,8 @@ cmd.add({"headstand"}, {"headstand <player>", "Stand on someone's head."}, funct
 		part.Parent = SafeGetService("Workspace").CurrentCamera
 		Insert(standParts, part)
 	end
-	headStand = RunService.Heartbeat:Connect(function()
+
+	lib.connect("headstand_follow", RunService.Heartbeat:Connect(function()
 		local plrCharacter = plr.Character
 		if Players:FindFirstChild(plr.Name) and plrCharacter and getRoot(plrCharacter) and getRoot(char) then
 			local charRoot = getRoot(char)
@@ -11931,40 +11783,36 @@ cmd.add({"headstand"}, {"headstand <player>", "Stand on someone's head."}, funct
 				standParts[i].CFrame = charRoot.CFrame * wall.offset
 			end
 		else
-			if headStand then headStand:Disconnect() headStand = nil end
-			if standDied then standDied:Disconnect() standDied = nil end
+			lib.disconnect("headstand_follow")
+			lib.disconnect("headstand_died")
 			for _, part in pairs(standParts) do
 				part:Destroy()
 			end
 			standParts = {}
 		end
-	end)
+	end))
 end, true)
 
 cmd.add({"unheadstand"}, {"unheadstand", "Stop the headstand command."}, function()
-	if headStand then headStand:Disconnect() headStand = nil end
-	if standDied then standDied:Disconnect() standDied = nil end
+	lib.disconnect("headstand_follow")
+	lib.disconnect("headstand_died")
+
 	for _, part in pairs(standParts) do
 		part:Destroy()
 	end
 	standParts = {}
 end)
 
-local loopws = false
-local loopjp = false
-local WScons = {}
-local JPcons = {}
-
 getgenv().NamelessWs = nil
-getgenv().NamelessJP = nil
+local loopws = false
 
 cmd.add({"loopwalkspeed", "loopws", "lws"}, {"loopwalkspeed <number> (loopws,lws)", "Loop walkspeed"}, function(...)
 	local val = tonumber(...) or 16
 	getgenv().NamelessWs = val
 	loopws = true
 
-	for _, conn in ipairs(WScons) do conn:Disconnect() end
-	table.clear(WScons)
+	lib.disconnect("loopws_apply")
+	lib.disconnect("loopws_char")
 
 	local function getHum()
 		local char = LocalPlayer and LocalPlayer.Character
@@ -11975,7 +11823,7 @@ cmd.add({"loopwalkspeed", "loopws", "lws"}, {"loopwalkspeed <number> (loopws,lws
 		local hum = getHum()
 		if hum then
 			hum.WalkSpeed = val
-			Insert(WScons, hum:GetPropertyChangedSignal("WalkSpeed"):Connect(function()
+			lib.connect("loopws_apply", hum:GetPropertyChangedSignal("WalkSpeed"):Connect(function()
 				if loopws and hum.WalkSpeed ~= val then
 					hum.WalkSpeed = val
 				end
@@ -11985,7 +11833,7 @@ cmd.add({"loopwalkspeed", "loopws", "lws"}, {"loopwalkspeed <number> (loopws,lws
 
 	applyWS()
 
-	Insert(WScons, LocalPlayer.CharacterAdded:Connect(function()
+	lib.connect("loopws_char", LocalPlayer.CharacterAdded:Connect(function()
 		repeat Wait() until getHum()
 		if loopws then applyWS() end
 	end))
@@ -11993,17 +11841,20 @@ end, true)
 
 cmd.add({"unloopwalkspeed", "unloopws", "unlws"}, {"unloopwalkspeed (unloopws,unlws)", "Disable loop walkspeed"}, function()
 	loopws = false
-	for _, conn in ipairs(WScons) do conn:Disconnect() end
-	table.clear(WScons)
+	lib.disconnect("loopws_apply")
+	lib.disconnect("loopws_char")
 end)
+
+getgenv().NamelessJP = nil
+local loopjp = false
 
 cmd.add({"loopjumppower", "loopjp", "ljp"}, {"loopjumppower <number> (loopjp,ljp)", "Loop JumpPower"}, function(...)
 	local val = tonumber(...) or 50
 	getgenv().NamelessJP = val
 	loopjp = true
 
-	for _, conn in ipairs(JPcons) do conn:Disconnect() end
-	table.clear(JPcons)
+	lib.disconnect("loopjp_apply")
+	lib.disconnect("loopjp_char")
 
 	local function getHum()
 		local char = LocalPlayer and LocalPlayer.Character
@@ -12016,14 +11867,14 @@ cmd.add({"loopjumppower", "loopjp", "ljp"}, {"loopjumppower <number> (loopjp,ljp
 
 		if hum.UseJumpPower then
 			hum.JumpPower = val
-			Insert(JPcons, hum:GetPropertyChangedSignal("JumpPower"):Connect(function()
+			lib.connect("loopjp_apply", hum:GetPropertyChangedSignal("JumpPower"):Connect(function()
 				if loopjp and hum.JumpPower ~= val then
 					hum.JumpPower = val
 				end
 			end))
 		else
 			hum.JumpHeight = val
-			Insert(JPcons, hum:GetPropertyChangedSignal("JumpHeight"):Connect(function()
+			lib.connect("loopjp_apply", hum:GetPropertyChangedSignal("JumpHeight"):Connect(function()
 				if loopjp and hum.JumpHeight ~= val then
 					hum.JumpHeight = val
 				end
@@ -12033,7 +11884,7 @@ cmd.add({"loopjumppower", "loopjp", "ljp"}, {"loopjumppower <number> (loopjp,ljp
 
 	applyJP()
 
-	Insert(JPcons, LocalPlayer.CharacterAdded:Connect(function()
+	lib.connect("loopjp_char", LocalPlayer.CharacterAdded:Connect(function()
 		repeat Wait() until getHum()
 		if loopjp then applyJP() end
 	end))
@@ -12041,8 +11892,8 @@ end, true)
 
 cmd.add({"unloopjumppower", "unloopjp", "unljp"}, {"unloopjumppower (unloopjp,unljp)", "Disable loop jump power"}, function()
 	loopjp = false
-	for _, conn in ipairs(JPcons) do conn:Disconnect() end
-	table.clear(JPcons)
+	lib.disconnect("loopjp_apply")
+	lib.disconnect("loopjp_char")
 end)
 
 cmd.add({"stopanimations", "stopanims", "stopanim", "noanim"}, {"stopanimations (stopanims,stopanim,noanim)", "Stops running animations"}, function()
@@ -12526,7 +12377,7 @@ cmd.add({"waveat", "wat"}, {"waveat <player> (wat)", "Wave to a player"}, functi
 	end
 end, true)
 
-bang, bangAnim, bangLoop, bangDied, bangParts = nil, nil, nil, nil, {}
+bang, bangAnim, bangParts = nil, nil, {}
 
 cmd.add({"headbang", "mouthbang", "headfuck", "mouthfuck", "facebang", "facefuck", "hb", "mb"}, {"headbang <player> (mouthbang,headfuck,mouthfuck,facebang,facefuck,hb,mb)", "Bang them in the mouth because you are gay"}, function(h, d)
 	local speed = d or 10
@@ -12534,38 +12385,40 @@ cmd.add({"headbang", "mouthbang", "headfuck", "mouthfuck", "facebang", "facefuck
 	local players = getPlr(username)
 	if #players == 0 then return end
 	local plr = players[1]
+
 	bangAnim = InstanceNew("Animation")
-	if not IsR15(Players.LocalPlayer) then
-		bangAnim.AnimationId = "rbxassetid://148840371"
-	else
-		bangAnim.AnimationId = "rbxassetid://5918726674"
-	end
+	bangAnim.AnimationId = IsR15(Players.LocalPlayer) and "rbxassetid://5918726674" or "rbxassetid://148840371"
+
 	local humanoid = getChar():FindFirstChildOfClass("Humanoid")
 	if not humanoid then return end
+
 	bang = humanoid:LoadAnimation(bangAnim)
 	bang:Play(0.1, 1, 1)
 	bang:AdjustSpeed(speed)
+
 	local bangplr = plr.Name
-	bangDied = humanoid.Died:Connect(function()
-		if bangLoop then
-			bangLoop:Disconnect()
-		end
+
+	lib.disconnect("bang_loop")
+	lib.disconnect("bang_died")
+
+	lib.connect("bang_died", humanoid.Died:Connect(function()
+		lib.disconnect("bang_loop")
+		lib.disconnect("bang_died")
 		bang:Stop()
 		bangAnim:Destroy()
-		bangDied:Disconnect()
 		for _, part in pairs(bangParts) do
 			part:Destroy()
 		end
 		bangParts = {}
-	end)
+	end))
+
 	for _, part in pairs(bangParts) do
 		part:Destroy()
 	end
 	bangParts = {}
+
 	local thick = 0.2
-	local halfWidth = 2
-	local halfDepth = 2
-	local halfHeight = 3
+	local halfWidth, halfDepth, halfHeight = 2, 2, 3
 	local walls = {
 		{offset = CFrame.new(0, 0, halfDepth + thick/500), size = Vector3.new(4, 6, thick)},
 		{offset = CFrame.new(0, 0, -(halfDepth + thick/500)), size = Vector3.new(4, 6, thick)},
@@ -12574,7 +12427,8 @@ cmd.add({"headbang", "mouthbang", "headfuck", "mouthfuck", "facebang", "facefuck
 		{offset = CFrame.new(0, halfHeight + thick/500, 0), size = Vector3.new(4, thick, 4)},
 		{offset = CFrame.new(0, -(halfHeight + thick/500), 0), size = Vector3.new(4, thick, 4)}
 	}
-	for i, wall in ipairs(walls) do
+
+	for _, wall in ipairs(walls) do
 		local part = InstanceNew("Part")
 		part.Size = wall.size
 		part.Anchored = true
@@ -12583,55 +12437,61 @@ cmd.add({"headbang", "mouthbang", "headfuck", "mouthfuck", "facebang", "facefuck
 		part.Parent = SafeGetService("Workspace").CurrentCamera
 		Insert(bangParts, part)
 	end
+
 	local bangOffset = CFrame.new(0, 1, -1.1)
-	bangLoop = RunService.Stepped:Connect(function()
+
+	lib.connect("bang_loop", RunService.Stepped:Connect(function()
 		pcall(function()
-			local targetCharacter = Players[bangplr].Character
+			local targetCharacter = Players[bangplr] and Players[bangplr].Character
 			if targetCharacter then
 				local otherHead = targetCharacter:FindFirstChild("Head")
 				local localRoot = getRoot(getChar())
 				if otherHead and localRoot then
 					localRoot.CFrame = otherHead.CFrame * bangOffset
 				end
+
 				local charPos = getChar().PrimaryPart.Position
 				local targetRoot = getRoot(plr.Character)
 				if targetRoot then
 					local newCFrame = CFrame.new(charPos, Vector3.new(targetRoot.Position.X, charPos.Y, targetRoot.Position.Z))
 					Players.LocalPlayer.Character:SetPrimaryPartCFrame(newCFrame)
 				end
+
 				for i, wall in ipairs(walls) do
 					bangParts[i].CFrame = localRoot.CFrame * wall.offset
 				end
 			end
 		end)
-	end)
+	end))
 end, true)
 
 cmd.add({"unheadbang", "unmouthbang", "unhb", "unmb"}, {"unheadbang (unmouthbang,unhb,unmb)", "Stops headbang"}, function()
-	if bangLoop then
-		bangLoop:Disconnect()
-		bang:Stop()
-		bangAnim:Destroy()
-		bangDied:Disconnect()
-	end
+	lib.disconnect("bang_loop")
+	lib.disconnect("bang_died")
+
+	if bang then bang:Stop() end
+	if bangAnim then bangAnim:Destroy() end
+
 	for _, part in pairs(bangParts) do
 		part:Destroy()
 	end
 	bangParts = {}
 end)
 
-jerkAnim, jerkTrack, jerkLoop, jerkDied, jerkParts = nil, nil, nil, nil, {}
+jerkAnim, jerkTrack, jerkParts = nil, nil, {}
 
-cmd.add({"jerkuser", "jorkuser", "handjob", "hjob", "handj"}, {"jerkuser <player> (jorkuser, handjob, hjob, handj)", "Lay under them and vibe"}, function(h, d)
-	if not IsR6() then DoNotif("command requires R6",3) return end
-	local username = h
-	local players = getPlr(username)
+cmd.add({"jerkuser", "jorkuser", "handjob", "hjob", "handj"}, {"jerkuser <player> (jorkuser, handjob, hjob, handj)", "Lay under them and vibe"}, function(h)
+	if not IsR6() then
+		DoNotif("command requires R6", 3)
+		return
+	end
+
+	local players = getPlr(h)
 	if #players == 0 then return end
 	local plr = players[1]
 
 	local char = getChar()
 	if not char then return end
-
 	local humanoid = char:FindFirstChildOfClass("Humanoid")
 	if not humanoid then return end
 
@@ -12646,18 +12506,13 @@ cmd.add({"jerkuser", "jorkuser", "handjob", "hjob", "handj"}, {"jerkuser <player
 
 	local root = getRoot(char)
 	if not root then return end
-
 	root.CFrame = root.CFrame * CFrame.Angles(math.pi * 0.5, math.pi, 0)
 
-	for _, part in pairs(jerkParts) do
-		part:Destroy()
-	end
+	for _, part in pairs(jerkParts) do part:Destroy() end
 	jerkParts = {}
 
 	local thick = 0.2
-	local halfWidth = 2
-	local halfDepth = 2
-	local halfHeight = 3
+	local halfWidth, halfDepth, halfHeight = 2, 2, 3
 	local walls = {
 		{offset = CFrame.new(0, 0, halfDepth + thick / 500), size = Vector3.new(4, 6, thick)},
 		{offset = CFrame.new(0, 0, -(halfDepth + thick / 500)), size = Vector3.new(4, 6, thick)},
@@ -12667,7 +12522,7 @@ cmd.add({"jerkuser", "jorkuser", "handjob", "hjob", "handj"}, {"jerkuser <player
 		{offset = CFrame.new(0, -(halfHeight + thick / 500), 0), size = Vector3.new(4, thick, 4)}
 	}
 
-	for i, wall in ipairs(walls) do
+	for _, wall in ipairs(walls) do
 		local part = InstanceNew("Part")
 		part.Size = wall.size
 		part.Anchored = true
@@ -12677,36 +12532,41 @@ cmd.add({"jerkuser", "jorkuser", "handjob", "hjob", "handj"}, {"jerkuser <player
 		Insert(jerkParts, part)
 	end
 
+	lib.disconnect("jerk_loop")
+	lib.disconnect("jerk_died")
+
 	local jerkOffset = CFrame.new(0, -2.5, -0.25) * CFrame.Angles(math.pi * 0.5, 0, math.pi)
-	jerkLoop = RunService.Stepped:Connect(function()
+
+	lib.connect("jerk_loop", RunService.Stepped:Connect(function()
 		pcall(function()
 			for i, wall in ipairs(walls) do
 				jerkParts[i].CFrame = root.CFrame * wall.offset
 			end
+
 			local targetChar = plr.Character
 			local targetRoot = targetChar and getRoot(targetChar)
 			if targetRoot then
 				root.CFrame = targetRoot.CFrame * jerkOffset
 			end
 		end)
-	end)
+	end))
 
-	jerkDied = humanoid.Died:Connect(function()
-		if jerkLoop then jerkLoop:Disconnect() end
+	lib.connect("jerk_died", humanoid.Died:Connect(function()
+		lib.disconnect("jerk_loop")
+		lib.disconnect("jerk_died")
 		if jerkTrack then jerkTrack:Stop() end
 		if jerkAnim then jerkAnim:Destroy() end
-		for _, part in pairs(jerkParts) do
-			part:Destroy()
-		end
+		for _, part in pairs(jerkParts) do part:Destroy() end
 		jerkParts = {}
-	end)
+	end))
 end, true)
 
 cmd.add({"unjerkuser", "unjorkuser", "unhandjob", "unhjob", "unhandj"}, {"unjerkuser (unjorkuser, unhandjob, unhjob, unhandj)", "Stop the jerk user action"}, function()
-	if jerkLoop then jerkLoop:Disconnect() end
+	lib.disconnect("jerk_loop")
+	lib.disconnect("jerk_died")
+
 	if jerkTrack then jerkTrack:Stop() end
 	if jerkAnim then jerkAnim:Destroy() end
-	if jerkDied then jerkDied:Disconnect() end
 
 	local char = getChar()
 	local root = char and getRoot(char)
@@ -12725,137 +12585,98 @@ cmd.add({"unjerkuser", "unjorkuser", "unhandjob", "unhjob", "unhandj"}, {"unjerk
 	jerkParts = {}
 end)
 
-suckLOOP = nil
 suckANIM = nil
-suckDIED = nil
 doSUCKING = nil
 SUCKYSUCKY = {}
 
 cmd.add({"suck", "dicksuck"}, {"suck <player> <number> (dicksuck)", "suck it"}, function(h, d)
-	if suckLOOP then
-		suckLOOP = nil
-	end
-	if doSUCKING then
-		doSUCKING:Stop()
-	end
-	if suckANIM then
-		suckANIM:Destroy()
-	end
-	if suckDIED then
-		suckDIED:Disconnect()
-	end
-	for _, p in pairs(SUCKYSUCKY) do
-		p:Destroy()
-	end
+	lib.disconnect("suck_loop")
+	lib.disconnect("suck_died")
+
+	if doSUCKING then doSUCKING:Stop() end
+	if suckANIM then suckANIM:Destroy() end
+	for _, part in pairs(SUCKYSUCKY) do part:Destroy() end
 	SUCKYSUCKY = {}
 
-	local speed = d or 10
+	local speed = tonumber(d) or 10
 	local tweenDuration = 1 / speed
-	local tweenInfo = TweenInfo.new(tweenDuration, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
-	local username = h
-	local targets = getPlr(username)
+	local targets = getPlr(h)
 	if #targets == 0 then return end
 	local plr = targets[1]
 
 	suckANIM = InstanceNew("Animation")
-	local isR15 = IsR15(Players.LocalPlayer)
-	if not isR15 then
-		suckANIM.AnimationId = "rbxassetid://189854234"
-	else
-		suckANIM.AnimationId = "rbxassetid://5918726674"
-	end
-	local hum = getChar():FindFirstChildOfClass("Humanoid")
+	suckANIM.AnimationId = IsR15(Players.LocalPlayer)
+		and "rbxassetid://5918726674"
+		or "rbxassetid://189854234"
+
+	local hum = getHum()
+	if not hum then return end
+
 	doSUCKING = hum:LoadAnimation(suckANIM)
 	doSUCKING:Play(0.1, 1, 1)
 	doSUCKING:AdjustSpeed(speed)
 
-	suckDIED = hum.Died:Connect(function()
-		if suckLOOP then
-			suckLOOP = nil
-		end
-		doSUCKING:Stop()
-		suckANIM:Destroy()
-		if suckDIED then
-			suckDIED:Disconnect()
-		end
-		for _, part in pairs(SUCKYSUCKY) do
-			part:Destroy()
-		end
+	lib.connect("suck_died", hum.Died:Connect(function()
+		lib.disconnect("suck_loop")
+		lib.disconnect("suck_died")
+		if doSUCKING then doSUCKING:Stop() end
+		if suckANIM then suckANIM:Destroy() end
+		for _, part in pairs(SUCKYSUCKY) do part:Destroy() end
 		SUCKYSUCKY = {}
-	end)
+	end))
 
 	local thick = 0.2
-	local halfWidth = 2
-	local halfDepth = 2
-	local halfHeight = 3
+	local halfWidth, halfDepth, halfHeight = 2, 2, 3
 	local walls = {
-		{offset = CFrame.new(0, 0, halfDepth + thick/500), size = Vector3.new(4, 6, thick)},
-		{offset = CFrame.new(0, 0, -(halfDepth + thick/500)), size = Vector3.new(4, 6, thick)},
-		{offset = CFrame.new(halfWidth + thick/500, 0, 0), size = Vector3.new(thick, 6, 4)},
-		{offset = CFrame.new(-(halfWidth + thick/500), 0, 0), size = Vector3.new(thick, 6, 4)},
-		{offset = CFrame.new(0, halfHeight + thick/500, 0), size = Vector3.new(4, thick, 4)},
-		{offset = CFrame.new(0, -(halfHeight + thick/500), 0), size = Vector3.new(4, thick, 4)}
+		{offset = CFrame.new(0, 0, halfDepth + thick / 500), size = Vector3.new(4, 6, thick)},
+		{offset = CFrame.new(0, 0, -(halfDepth + thick / 500)), size = Vector3.new(4, 6, thick)},
+		{offset = CFrame.new(halfWidth + thick / 500, 0, 0), size = Vector3.new(thick, 6, 4)},
+		{offset = CFrame.new(-(halfWidth + thick / 500), 0, 0), size = Vector3.new(thick, 6, 4)},
+		{offset = CFrame.new(0, halfHeight + thick / 500, 0), size = Vector3.new(4, thick, 4)},
+		{offset = CFrame.new(0, -(halfHeight + thick / 500), 0), size = Vector3.new(4, thick, 4)}
 	}
-	for i, wall in ipairs(walls) do
+	for _, wall in ipairs(walls) do
 		local part = InstanceNew("Part")
 		part.Size = wall.size
 		part.Anchored = true
 		part.CanCollide = true
 		part.Transparency = 1
 		part.Parent = SafeGetService("Workspace").CurrentCamera
-		Insert(SUCKYSUCKY, part)
+		table.insert(SUCKYSUCKY, part)
 	end
 
-	suckLOOP = coroutine.wrap(function()
-		while true do
-			local targetCharacter = plr.Character
-			local localCharacter = getChar()
-			if targetCharacter and getRoot(targetCharacter) and localCharacter and getRoot(localCharacter) then
-				local targetHRP = getRoot(targetCharacter)
-				local localHRP = getRoot(localCharacter)
-				local forwardCFrame = targetHRP.CFrame * CFrame.new(0, -2.3, -2.5) * CFrame.Angles(0, math.pi, 0)
-				local backwardCFrame = targetHRP.CFrame * CFrame.new(0, -2.3, -1.3) * CFrame.Angles(0, math.pi, 0)
-				local tweenForward = TweenService:Create(
-					localHRP,
-					TweenInfo.new(0.15, Enum.EasingStyle.Linear, Enum.EasingDirection.Out),
-					{CFrame = forwardCFrame}
-				)
-				tweenForward:Play()
-				tweenForward.Completed:Wait()
-				local tweenBackward = TweenService:Create(
-					localHRP,
-					TweenInfo.new(0.15, Enum.EasingStyle.Linear, Enum.EasingDirection.Out),
-					{CFrame = backwardCFrame}
-				)
-				tweenBackward:Play()
-				tweenBackward.Completed:Wait()
-				for i, wall in ipairs(walls) do
-					SUCKYSUCKY[i].CFrame = localHRP.CFrame * wall.offset
-				end
-			else
-				break
+	coroutine.wrap(function()
+		lib.connect("suck_loop", RunService.Stepped:Connect(function()
+			local localChar, targetChar = getChar(), plr.Character
+			if not localChar or not targetChar then return end
+			local localHRP = getRoot(localChar)
+			local targetHRP = getRoot(targetChar)
+			if not localHRP or not targetHRP then return end
+
+			local forward = targetHRP.CFrame * CFrame.new(0, -2.3, -2.5) * CFrame.Angles(0, math.pi, 0)
+			local backward = targetHRP.CFrame * CFrame.new(0, -2.3, -1.3) * CFrame.Angles(0, math.pi, 0)
+
+			local tweenF = TweenService:Create(localHRP, TweenInfo.new(0.15, Enum.EasingStyle.Linear), {CFrame = forward})
+			tweenF:Play()
+			tweenF.Completed:Wait()
+
+			local tweenB = TweenService:Create(localHRP, TweenInfo.new(0.15, Enum.EasingStyle.Linear), {CFrame = backward})
+			tweenB:Play()
+			tweenB.Completed:Wait()
+
+			for i, wall in ipairs(walls) do
+				SUCKYSUCKY[i].CFrame = localHRP.CFrame * wall.offset
 			end
-		end
-	end)
-	suckLOOP()
+		end))
+	end)()
 end, true)
 
 cmd.add({"unsuck", "undicksuck"}, {"unsuck (undicksuck)", "no more fun"}, function()
-	if suckLOOP then
-		suckLOOP = nil
-	end
-	if doSUCKING then
-		doSUCKING:Stop()
-	end
-	if suckANIM then
-		suckANIM:Destroy()
-	end
-	if suckDIED then
-		suckDIED:Disconnect()
-	end
-	for _, p in pairs(SUCKYSUCKY) do
-		p:Destroy()
-	end
+	lib.disconnect("suck_loop")
+	lib.disconnect("suck_died")
+	if doSUCKING then doSUCKING:Stop() end
+	if suckANIM then suckANIM:Destroy() end
+	for _, part in pairs(SUCKYSUCKY) do part:Destroy() end
 	SUCKYSUCKY = {}
 end)
 
@@ -12936,67 +12757,48 @@ cmd.add({"unequiptools"},{"unequiptools","Unequips every tool you are currently 
 	end
 end)
 
-bangLoop = nil
 bangAnim = nil
-bangDied = nil
 doBang = nil
 BANGPARTS = {}
 
 cmd.add({"bang", "fuck"}, {"bang <player> <number> (fuck)", "fucks the player by attaching to them"}, function(h, d)
-	if bangLoop then
-		bangLoop:Disconnect()
-	end
-	if doBang then
-		doBang:Stop()
-	end
-	if bangAnim then
-		bangAnim:Destroy()
-	end
-	if bangDied then
-		bangDied:Disconnect()
-	end
-	for _, p in pairs(BANGPARTS) do
-		p:Destroy()
-	end
+	lib.disconnect("bang_loop")
+	lib.disconnect("bang_died")
+
+	if doBang then doBang:Stop() end
+	if bangAnim then bangAnim:Destroy() end
+	for _, p in pairs(BANGPARTS) do p:Destroy() end
 	BANGPARTS = {}
 
-	local speed = d or 10
-	local username = h
-	local targets = getPlr(username)
+	local speed = tonumber(d) or 10
+	local targets = getPlr(h)
 	if #targets == 0 then return end
 	local plr = targets[1]
 
 	bangAnim = InstanceNew("Animation")
-	if not IsR15(Players.LocalPlayer) then
-		bangAnim.AnimationId = "rbxassetid://148840371"
-	else
-		bangAnim.AnimationId = "rbxassetid://5918726674"
-	end
-	local hum = getChar():FindFirstChildOfClass("Humanoid")
+	bangAnim.AnimationId = IsR15(Players.LocalPlayer)
+		and "rbxassetid://5918726674"
+		or "rbxassetid://148840371"
+
+	local hum = getHum()
+	if not hum then return end
+
 	doBang = hum:LoadAnimation(bangAnim)
 	doBang:Play(0.1, 1, 1)
 	doBang:AdjustSpeed(speed)
 
-	local bangplr = plr.Name
-	bangDied = hum.Died:Connect(function()
-		if bangLoop then
-			bangLoop:Disconnect()
-		end
-		doBang:Stop()
-		bangAnim:Destroy()
-		if bangDied then
-			bangDied:Disconnect()
-		end
-		for _, part in pairs(BANGPARTS) do
-			part:Destroy()
-		end
+	lib.connect("bang_died", hum.Died:Connect(function()
+		lib.disconnect("bang_loop")
+		lib.disconnect("bang_died")
+		if doBang then doBang:Stop() end
+		if bangAnim then bangAnim:Destroy() end
+		for _, p in pairs(BANGPARTS) do p:Destroy() end
 		BANGPARTS = {}
-	end)
+	end))
 
+	-- Cage/Collision padding
 	local thick = 0.2
-	local halfWidth = 2
-	local halfDepth = 2
-	local halfHeight = 3
+	local halfWidth, halfDepth, halfHeight = 2, 2, 3
 	local walls = {
 		{offset = CFrame.new(0, 0, halfDepth + thick/500), size = Vector3.new(4, 6, thick)},
 		{offset = CFrame.new(0, 0, -(halfDepth + thick/500)), size = Vector3.new(4, 6, thick)},
@@ -13005,82 +12807,63 @@ cmd.add({"bang", "fuck"}, {"bang <player> <number> (fuck)", "fucks the player by
 		{offset = CFrame.new(0, halfHeight + thick/500, 0), size = Vector3.new(4, thick, 4)},
 		{offset = CFrame.new(0, -(halfHeight + thick/500), 0), size = Vector3.new(4, thick, 4)}
 	}
-	for i, wall in ipairs(walls) do
+	for _, wall in ipairs(walls) do
 		local part = InstanceNew("Part")
 		part.Size = wall.size
 		part.Anchored = true
 		part.CanCollide = true
 		part.Transparency = 1
 		part.Parent = SafeGetService("Workspace").CurrentCamera
-		Insert(BANGPARTS, part)
+		table.insert(BANGPARTS, part)
 	end
 
 	local bangOffset = CFrame.new(0, 0, 1.1)
-	bangLoop = RunService.Stepped:Connect(function()
-		pcall(function()
-			local targetRoot = getRoot(Players[bangplr].Character)
-			local localRoot = getRoot(getChar())
-			if targetRoot and localRoot then
-				localRoot.CFrame = targetRoot.CFrame * bangOffset
-				for i, wall in ipairs(walls) do
-					BANGPARTS[i].CFrame = localRoot.CFrame * wall.offset
-				end
-			end
-		end)
-	end)
+
+	lib.connect("bang_loop", RunService.Stepped:Connect(function()
+		local targetChar = plr.Character
+		local localChar = getChar()
+		if not targetChar or not localChar then return end
+
+		local targetRoot = getRoot(targetChar)
+		local localRoot = getRoot(localChar)
+		if not targetRoot or not localRoot then return end
+
+		localRoot.CFrame = targetRoot.CFrame * bangOffset
+		for i, wall in ipairs(walls) do
+			BANGPARTS[i].CFrame = localRoot.CFrame * wall.offset
+		end
+	end))
 end, true)
 
 cmd.add({"unbang", "unfuck"}, {"unbang (unfuck)", "Unbangs the player"}, function()
-	if bangLoop then
-		bangLoop:Disconnect()
-	end
-	if doBang then
-		doBang:Stop()
-	end
-	if bangAnim then
-		bangAnim:Destroy()
-	end
-	if bangDied then
-		bangDied:Disconnect()
-	end
-	for _, p in pairs(BANGPARTS) do
-		p:Destroy()
-	end
+	lib.disconnect("bang_loop")
+	lib.disconnect("bang_died")
+	if doBang then doBang:Stop() end
+	if bangAnim then bangAnim:Destroy() end
+	for _, p in pairs(BANGPARTS) do p:Destroy() end
 	BANGPARTS = {}
 end)
 
 inversebangLoop = nil
 inversebangAnim = nil
 inversebangAnim2 = nil
-inversebangDied = nil
 doInversebang = nil
 doInversebang2 = nil
 INVERSEBANGPARTS = {}
 
-cmd.add({"inversebang", "ibang", "inverseb"}, {"inversebang <player> <number> (inversebang/inverseb)", "you're the one getting fucked today ;)"},function(h, d)
-	if inversebangLoop then
-		inversebangLoop = nil
-	end
-	if doInversebang then
-		doInversebang:Stop()
-	end
-	if inversebangAnim then
-		inversebangAnim:Destroy()
-	end
-	if inversebangAnim2 then
-		inversebangAnim2:Destroy()
-	end
-	if inversebangDied then
-		inversebangDied:Disconnect()
-	end
-	for _, p in pairs(INVERSEBANGPARTS) do
-		p:Destroy()
-	end
+cmd.add({"inversebang", "ibang", "inverseb"}, {"inversebang <player> <number> (inversebang/inverseb)", "you're the one getting fucked today ;)"}, function(h, d)
+	lib.disconnect("inversebang_loop")
+	lib.disconnect("inversebang_died")
+
+	if doInversebang then doInversebang:Stop() end
+	if doInversebang2 then doInversebang2:Stop() end
+	if inversebangAnim then inversebangAnim:Destroy() end
+	if inversebangAnim2 then inversebangAnim2:Destroy() end
+	for _, p in pairs(INVERSEBANGPARTS) do p:Destroy() end
 	INVERSEBANGPARTS = {}
 
 	local speed = d or 10
-	local username = h
-	local targets = getPlr(username)
+	local targets = getPlr(h)
 	if #targets == 0 then return end
 	local plr = targets[1]
 
@@ -13092,47 +12875,38 @@ cmd.add({"inversebang", "ibang", "inverseb"}, {"inversebang <player> <number> (i
 		inversebangAnim2.AnimationId = "rbxassetid://106772613"
 	else
 		inversebangAnim.AnimationId = "rbxassetid://10714360343"
-		inversebangAnim2 = nil
 	end
+
 	local hum = getChar():FindFirstChildOfClass("Humanoid")
 	doInversebang = hum:LoadAnimation(inversebangAnim)
 	doInversebang:Play(0.1, 1, 1)
 	doInversebang:AdjustSpeed(speed)
+
 	if not isR15 and inversebangAnim2 then
 		doInversebang2 = hum:LoadAnimation(inversebangAnim2)
 		doInversebang2:Play(0.1, 1, 1)
 		doInversebang2:AdjustSpeed(speed)
 	end
 
-	inversebangDied = hum.Died:Connect(function()
-		if inversebangLoop then
-			inversebangLoop = nil
-		end
+	lib.connect("inversebang_died", hum.Died:Connect(function()
+		lib.disconnect("inversebang_loop")
 		doInversebang:Stop()
-		if doInversebang2 then
-			doInversebang2:Stop()
-		end
+		if doInversebang2 then doInversebang2:Stop() end
 		inversebangAnim:Destroy()
-		if inversebangDied then
-			inversebangDied:Disconnect()
-		end
-		for _, part in pairs(INVERSEBANGPARTS) do
-			part:Destroy()
-		end
+		if inversebangAnim2 then inversebangAnim2:Destroy() end
+		for _, p in pairs(INVERSEBANGPARTS) do p:Destroy() end
 		INVERSEBANGPARTS = {}
-	end)
+	end))
 
 	local thick = 0.2
-	local halfWidth = 2
-	local halfDepth = 2
-	local halfHeight = 3
+	local halfWidth, halfDepth, halfHeight = 2, 2, 3
 	local walls = {
 		{offset = CFrame.new(0, 0, halfDepth + thick/500), size = Vector3.new(4, 6, thick)},
 		{offset = CFrame.new(0, 0, -(halfDepth + thick/500)), size = Vector3.new(4, 6, thick)},
 		{offset = CFrame.new(halfWidth + thick/500, 0, 0), size = Vector3.new(thick, 6, 4)},
 		{offset = CFrame.new(-(halfWidth + thick/500), 0, 0), size = Vector3.new(thick, 6, 4)},
 		{offset = CFrame.new(0, halfHeight + thick/500, 0), size = Vector3.new(4, thick, 4)},
-		{offset = CFrame.new(0, -(halfHeight + thick/500), 0), size = Vector3.new(4, thick, 4)}
+		{offset = CFrame.new(0, -(halfHeight + thick/500), 0), size = Vector3.new(4, thick, 4)},
 	}
 	for i, wall in ipairs(walls) do
 		local part = InstanceNew("Part")
@@ -13144,66 +12918,43 @@ cmd.add({"inversebang", "ibang", "inverseb"}, {"inversebang <player> <number> (i
 		Insert(INVERSEBANGPARTS, part)
 	end
 
-	local bangOffset = CFrame.new(0, 0, 1.1)
+	lib.connect("inversebang_loop", RunService.Heartbeat:Connect(function()
+		local targetChar = plr.Character
+		local localChar = getChar()
+		if not (targetChar and getRoot(targetChar) and localChar and getRoot(localChar)) then return end
 
-	inversebangLoop = coroutine.wrap(function()
-		while true do
-			local targetCharacter = plr.Character
-			local localCharacter = getChar()
-			if targetCharacter and getRoot(targetCharacter) and localCharacter and getRoot(localCharacter) then
-				local targetHRP = getRoot(targetCharacter)
-				local localHRP = getRoot(localCharacter)
-				local forwardCFrame = targetHRP.CFrame * CFrame.new(0, 0, -2.5)
-				local backwardCFrame = targetHRP.CFrame * CFrame.new(0, 0, -1.3)
-				local tweenForward = TweenService:Create(
-					localHRP,
-					TweenInfo.new(0.15, Enum.EasingStyle.Linear, Enum.EasingDirection.Out),
-					{CFrame = forwardCFrame}
-				)
-				tweenForward:Play()
-				tweenForward.Completed:Wait()
-				local tweenBackward = TweenService:Create(
-					localHRP,
-					TweenInfo.new(0.15, Enum.EasingStyle.Linear, Enum.EasingDirection.Out),
-					{CFrame = backwardCFrame}
-				)
-				tweenBackward:Play()
-				tweenBackward.Completed:Wait()
-				for i, wall in ipairs(walls) do
-					INVERSEBANGPARTS[i].CFrame = localHRP.CFrame * wall.offset
-				end
-			else
-				break
-			end
+		local targetHRP = getRoot(targetChar)
+		local localHRP = getRoot(localChar)
+		local forward = targetHRP.CFrame * CFrame.new(0, 0, -2.5)
+		local backward = targetHRP.CFrame * CFrame.new(0, 0, -1.3)
+
+		local tweenF = TweenService:Create(localHRP, TweenInfo.new(0.15, Enum.EasingStyle.Linear), {CFrame = forward})
+		tweenF:Play()
+		tweenF.Completed:Wait()
+
+		local tweenB = TweenService:Create(localHRP, TweenInfo.new(0.15, Enum.EasingStyle.Linear), {CFrame = backward})
+		tweenB:Play()
+		tweenB.Completed:Wait()
+
+		for i, wall in ipairs(walls) do
+			INVERSEBANGPARTS[i].CFrame = localHRP.CFrame * wall.offset
 		end
-	end)
-	inversebangLoop()
+	end))
 end, true)
 
 cmd.add({"uninversebang", "unibang", "uninverseb"}, {"uninversebang (unibang)", "no more fun"}, function()
-	if inversebangLoop then
-		inversebangLoop = nil
-	end
-	if doInversebang then
-		doInversebang:Stop()
-	end
-	if doInversebang2 then
-		doInversebang2:Stop()
-	end
-	if inversebangAnim then
-		inversebangAnim:Destroy()
-	end
-	if inversebangDied then
-		inversebangDied:Disconnect()
-	end
-	for _, p in pairs(INVERSEBANGPARTS) do
-		p:Destroy()
-	end
+	lib.disconnect("inversebang_loop")
+	lib.disconnect("inversebang_died")
+	if doInversebang then doInversebang:Stop() end
+	if doInversebang2 then doInversebang2:Stop() end
+	if inversebangAnim then inversebangAnim:Destroy() end
+	if inversebangAnim2 then inversebangAnim2:Destroy() end
+	for _, p in pairs(INVERSEBANGPARTS) do p:Destroy() end
 	INVERSEBANGPARTS = {}
 end)
 
 sussyID = "rbxassetid://106772613"
-susTrack, susCONN = nil, nil
+susTrack = nil
 
 cmd.add({"suslay", "laysus"}, {"suslay (laysus)", "Lay down in a suspicious way"}, function()
 	if not IsR6() then return DoNotif("R6 only") end
@@ -13213,10 +12964,7 @@ cmd.add({"suslay", "laysus"}, {"suslay (laysus)", "Lay down in a suspicious way"
 		susTrack = nil
 	end
 
-	if susCONN then
-		susCONN:Disconnect()
-		susCONN = nil
-	end
+	lib.disconnect("sus_jump")
 
 	local hum = getHum()
 	local root = hum.RootPart
@@ -13234,16 +12982,13 @@ cmd.add({"suslay", "laysus"}, {"suslay (laysus)", "Lay down in a suspicious way"
 	susTrack = hum:LoadAnimation(anim)
 	susTrack:Play()
 
-	susCONN = hum:GetPropertyChangedSignal("Jump"):Connect(function()
+	lib.connect("sus_jump", hum:GetPropertyChangedSignal("Jump"):Connect(function()
 		if susTrack then
 			susTrack:Stop()
 			susTrack = nil
 		end
-		if susCONN then
-			susCONN:Disconnect()
-			susCONN = nil
-		end
-	end)
+		lib.disconnect("sus_jump")
+	end))
 end)
 
 cmd.add({"unsuslay"}, {"unsuslay", "Stand up from the sussy lay"}, function()
@@ -13254,10 +12999,7 @@ cmd.add({"unsuslay"}, {"unsuslay", "Stand up from the sussy lay"}, function()
 		susTrack = nil
 	end
 
-	if susCONN then
-		susCONN:Disconnect()
-		susCONN = nil
-	end
+	lib.disconnect("sus_jump")
 end)
 
 cmd.add({"jerk", "jork"}, {"jerk (jork)", "jorking it"}, function()
@@ -13308,8 +13050,6 @@ cmd.add({"jerk", "jork"}, {"jerk (jork)", "jorking it"}, function()
 end)
 
 huggiePARTS = {}
-platCON = nil
-hugConnections = {}
 hugUI = nil
 currentHugTracks = {}
 currentHugTarget = nil
@@ -13320,14 +13060,17 @@ cmd.add({"hug", "clickhug"}, {"hug (clickhug)", "huggies time (click on a target
 	if IsR6() then
 		local mouse = LocalPlayer:GetMouse()
 
-		for _, conn in pairs(hugConnections) do if conn then conn:Disconnect() end end
+		lib.disconnect("hug_toggle")
+		lib.disconnect("hug_side")
+		lib.disconnect("hug_click")
+		lib.disconnect("hug_plat")
+
 		for _, track in pairs(currentHugTracks) do pcall(function() track:Stop() end) end
 		currentHugTracks = {}
-		hugConnections = {}
+
 		if hugUI then hugUI:Destroy() end
 		hugFromFront = false
 		currentHugTarget = nil
-		if platCON then platCON:Disconnect() platCON = nil end
 		for _, part in pairs(huggiePARTS) do part:Destroy() end
 		huggiePARTS = {}
 
@@ -13388,8 +13131,8 @@ cmd.add({"hug", "clickhug"}, {"hug (clickhug)", "huggies time (click on a target
 					local anim2 = InstanceNew("Animation")
 					anim2.AnimationId = "rbxassetid://225975820"
 					local track2 = humanoid:LoadAnimation(anim2)
-					Insert(currentHugTracks, track1)
-					Insert(currentHugTracks, track2)
+					table.insert(currentHugTracks, track1)
+					table.insert(currentHugTracks, track2)
 					track1:Play()
 					track2:Play()
 
@@ -13413,17 +13156,16 @@ cmd.add({"hug", "clickhug"}, {"hug (clickhug)", "huggies time (click on a target
 							part.CanCollide = true
 							part.Transparency = 1
 							part.Parent = SafeGetService("Workspace").CurrentCamera
-							Insert(huggiePARTS, part)
+							table.insert(huggiePARTS, part)
 						end
-						platCON = RunService.Heartbeat:Connect(function()
+						lib.connect("hug_plat", RunService.Heartbeat:Connect(function()
 							local charRoot = getRoot(LocalPlayer.Character)
 							if charRoot then
 								for i, wall in ipairs(walls) do
 									huggiePARTS[i].CFrame = charRoot.CFrame * wall.offset
 								end
 							end
-						end)
-						Insert(hugConnections, platCON)
+						end))
 					end
 
 					Spawn(function()
@@ -13441,7 +13183,7 @@ cmd.add({"hug", "clickhug"}, {"hug (clickhug)", "huggies time (click on a target
 			end
 		end
 
-		local conn1 = MouseButtonFix(toggleHugButton, function()
+		lib.connect("hug_toggle", MouseButtonFix(toggleHugButton, function()
 			hugModeEnabled = not hugModeEnabled
 			if hugModeEnabled then
 				toggleHugButton.Text = "Hug Mode: ON"
@@ -13452,18 +13194,16 @@ cmd.add({"hug", "clickhug"}, {"hug (clickhug)", "huggies time (click on a target
 				currentHugTarget = nil
 				for _, part in pairs(huggiePARTS) do part:Destroy() end
 				huggiePARTS = {}
-				if platCON then platCON:Disconnect() platCON = nil end
+				lib.disconnect("hug_plat")
 			end
-		end)
-		Insert(hugConnections, conn1)
+		end))
 
-		local conn2 = MouseButtonFix(sideToggleButton, function()
+		lib.connect("hug_side", MouseButtonFix(sideToggleButton, function()
 			hugFromFront = not hugFromFront
 			sideToggleButton.Text = (hugFromFront and "Hug Side: Front") or "Hug Side: Back"
-		end)
-		Insert(hugConnections, conn2)
+		end))
 
-		local conn3 = LocalPlayer:GetMouse().Button1Down:Connect(function()
+		lib.connect("hug_click", LocalPlayer:GetMouse().Button1Down:Connect(function()
 			if not hugModeEnabled then return end
 			local target = mouse.Target
 			if target and target.Parent then
@@ -13472,22 +13212,23 @@ cmd.add({"hug", "clickhug"}, {"hug (clickhug)", "huggies time (click on a target
 					performHug(targetPlayer.Character)
 				end
 			end
-		end)
-		Insert(hugConnections, conn3)
+		end))
 	else
 		DoNotif("command requires R6")
 	end
 end)
 
 cmd.add({"unhug"}, {"unhug", "no huggies :("}, function()
-	for _, conn in pairs(hugConnections) do if conn then conn:Disconnect() end end
+	lib.disconnect("hug_toggle")
+	lib.disconnect("hug_side")
+	lib.disconnect("hug_click")
+	lib.disconnect("hug_plat")
+
 	for _, track in pairs(currentHugTracks) do pcall(function() track:Stop() end) end
 	currentHugTracks = {}
-	hugConnections = {}
 	currentHugTarget = nil
 	hugFromFront = false
 	hugModeEnabled = false
-	if platCON then platCON:Disconnect() platCON = nil end
 	for _, part in pairs(huggiePARTS) do part:Destroy() end
 	huggiePARTS = {}
 	if hugUI then hugUI:Destroy() hugUI = nil end
@@ -13723,7 +13464,7 @@ cmd.add({"cbring", "clientbring"}, {"clientbring <player> (cbring)", "Brings the
 	local username = (...)
 	local target = getPlr(username)
 	if #target == 0 then return end
-	if connections["noclip"] then
+	if lib.isConnected("noclip") then
 		lib.disconnect("noclip")
 	end
 	for _, conn in ipairs(bringc) do
@@ -13759,7 +13500,7 @@ cmd.add({"uncbring", "unclientbring"}, {"unclientbring (uncbring)", "Disable Cli
 		conn:Disconnect()
 	end
 	bringc = {}
-	if connections["noclip"] then
+	if lib.isConnected("noclip") then
 		lib.disconnect("noclip")
 	end
 end)
@@ -13790,21 +13531,17 @@ cmd.add({"mute", "muteboombox"}, {"mute <player> (muteboombox)", "Mutes the play
 end, true)
 
 TPWalk = false
-TPWalkingConnection = nil
 
 cmd.add({"tpwalk", "tpwalk"}, {"tpwalk <number>", "More undetectable walkspeed script"}, function(...)
 	if TPWalk then
 		TPWalk = false
-		if TPWalkingConnection then
-			TPWalkingConnection:Disconnect()
-			TPWalkingConnection = nil
-		end
+		lib.disconnect("TPWalkingConnection")
 	end
 
 	TPWalk = true
 	local Speed = ...
 
-	TPWalkingConnection = RunService.Stepped:Connect(function(_, deltaTime)
+	lib.connect("TPWalkingConnection", RunService.Stepped:Connect(function(_, deltaTime)
 		if TPWalk then
 			local humanoid = getChar():FindFirstChildWhichIsA("Humanoid")
 			if humanoid and humanoid.MoveDirection.Magnitude > 0 then
@@ -13813,15 +13550,12 @@ cmd.add({"tpwalk", "tpwalk"}, {"tpwalk <number>", "More undetectable walkspeed s
 				getChar():TranslateBy(translation)
 			end
 		end
-	end)
-end,true)
+	end))
+end, true)
 
 cmd.add({"untpwalk"}, {"untpwalk", "Stops the tpwalk command"}, function()
 	TPWalk = false
-	if TPWalkingConnection then
-		TPWalkingConnection:Disconnect()
-		TPWalkingConnection = nil
-	end
+	lib.disconnect("TPWalkingConnection")
 end)
 
 muteLOOP = {}
@@ -14115,17 +13849,15 @@ cmd.add({"noproximitypromptlimits","nopplimits","removepplimits"},{"noproximityp
 	end
 end,true)
 
-doIpp=nil
-
 cmd.add({"instantproximityprompts","instantpp","ipp"},{"instantproximityprompts (instantpp,ipp)","Disable the cooldown for proximity prompts"},function()
-	if doIpp then doIpp:Disconnect() doIpp=nil end
-	doIpp=ProximityPromptService.PromptButtonHoldBegan:Connect(function(pp)
-		fireproximityprompt(pp,1)
-	end)
+	lib.disconnect("instantpp")
+	lib.connect("instantpp", ProximityPromptService.PromptButtonHoldBegan:Connect(function(pp)
+		fireproximityprompt(pp, 1)
+	end))
 end)
 
 cmd.add({"uninstantproximityprompts","uninstantpp","unipp"},{"uninstantproximityprompts (uninstantpp,unipp)","Undo the cooldown removal"},function()
-	if doIpp then doIpp:Disconnect() doIpp=nil end
+	lib.disconnect("instantpp")
 end)
 
 cmd.add({"r6"},{"r6","Shows a prompt that will switch your character rig type into R6"},function()
@@ -14155,17 +13887,17 @@ cmd.add({"maxslopeangle", "msa"}, {"maxslopeangle (msa)", "Changes your characte
 	end
 end,true)
 
-goedMoed = nil
-
 cmd.add({"godmode", "god"}, {"godmode (god)", "Toggles invincibility"}, function()
 	local humanoid = getHum()
 	if humanoid then
-		if goedMoed then goedMoed:Disconnect() goedMoed=nil end
-		goedMoed=humanoid:GetPropertyChangedSignal("Health"):Connect(function()
+		lib.disconnect("godmode")
+
+		lib.connect("godmode", humanoid:GetPropertyChangedSignal("Health"):Connect(function()
 			if humanoid.Health ~= humanoid.MaxHealth then
 				humanoid.Health = humanoid.MaxHealth
 			end
-		end)
+		end))
+
 		humanoid.Health = humanoid.MaxHealth
 		DoNotif("Godmode ON", 2)
 	else
@@ -14174,7 +13906,8 @@ cmd.add({"godmode", "god"}, {"godmode (god)", "Toggles invincibility"}, function
 end)
 
 cmd.add({"ungodmode", "ungod"}, {"ungodmode (ungod)", "Disables invincibility"}, function()
-	if goedMoed then goedMoed:Disconnect() goedMoed=nil DoNotif("Godmode OFF", 2) end
+	lib.disconnect("godmode")
+	DoNotif("Godmode OFF", 2)
 end)
 
 cmd.add({"controllock", "ctrllock"}, {"controllock (ctrllock)", "Sets your Shiftlock keybinds to the control keys"}, function()
@@ -14806,8 +14539,6 @@ end, true)
 
 OGGRAVV = SafeGetService("Workspace").Gravity
 SWIMMERRRR = false
-BEATMYSWIM = nil
-IDKGRAVRESETTER = nil
 
 function ZEhumSTATE(humanoid, enabled)
 	local states = Enum.HumanoidStateType:GetEnumItems()
@@ -14832,12 +14563,12 @@ cmd.add({"swim"}, {"swim {speed}", "Swim in the air"}, function(speed)
 		humanoid:ChangeState(Enum.HumanoidStateType.Swimming)
 		humanoid.WalkSpeed = speed or 16
 
-		IDKGRAVRESETTER = humanoid.Died:Connect(function()
+		lib.connect("swim_die", humanoid.Died:Connect(function()
 			SafeGetService("Workspace").Gravity = OGGRAVV
 			SWIMMERRRR = false
-		end)
+		end))
 
-		BEATMYSWIM = RunService.Heartbeat:Connect(function()
+		lib.connect("swim_heartbeat", RunService.Heartbeat:Connect(function()
 			pcall(function()
 				if humanoid and hrp then
 					local move = humanoid.MoveDirection
@@ -14845,7 +14576,7 @@ cmd.add({"swim"}, {"swim {speed}", "Swim in the air"}, function(speed)
 					hrp.Velocity = velocity
 				end
 			end)
-		end)
+		end))
 
 		SWIMMERRRR = true
 	end
@@ -14859,8 +14590,8 @@ cmd.add({"unswim"}, {"unswim", "Stops the swim script"}, function()
 		SafeGetService("Workspace").Gravity = OGGRAVV
 		SWIMMERRRR = false
 
-		if IDKGRAVRESETTER then IDKGRAVRESETTER:Disconnect() end
-		if BEATMYSWIM then BEATMYSWIM:Disconnect() BEATMYSWIM = nil end
+		lib.disconnect("swim_die")
+		lib.disconnect("swim_heartbeat")
 
 		ZEhumSTATE(humanoid, true)
 		humanoid:ChangeState(Enum.HumanoidStateType.RunningNoPhysics)
@@ -15336,12 +15067,9 @@ cmd.add({"firetouchinterests", "fti"}, {"firetouchinterests (fti)", "Fires every
 	DoNotif("Fired "..count.." touch interests")
 end)
 
-local jumpyCON = nil
-local jumpyChar = nil
-
 cmd.add({"infjump", "infinitejump"}, {"infjump (infinitejump)", "Enables infinite jumping"}, function()
 	Wait()
-	DoNotif("Infinite Jump Enabled",2)
+	DoNotif("Infinite Jump Enabled", 2)
 
 	local function getHumanoid()
 		local character = plr.Character or plr.CharacterAdded:Wait()
@@ -15349,15 +15077,12 @@ cmd.add({"infjump", "infinitejump"}, {"infjump (infinitejump)", "Enables infinit
 	end
 
 	local function doINFJUMPY()
-		if jumpyCON then
-			jumpyCON:Disconnect()
-			jumpyCON = nil
-		end
+		lib.disconnect("infjump_jump")
 
 		local debounce = false
 		local humanoid = getHumanoid()
 
-		jumpyCON = UserInputService.JumpRequest:Connect(function()
+		lib.connect("infjump_jump", UserInputService.JumpRequest:Connect(function()
 			if not debounce and humanoid:GetState() ~= Enum.HumanoidStateType.Dead then
 				debounce = true
 				humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
@@ -15366,59 +15091,41 @@ cmd.add({"infjump", "infinitejump"}, {"infjump (infinitejump)", "Enables infinit
 					debounce = false
 				end)
 			end
-		end)
+		end))
 	end
 
 	doINFJUMPY()
 
-	if jumpyChar then
-		jumpyChar:Disconnect()
-	end
-
-	jumpyChar = plr.CharacterAdded:Connect(function(char)
+	lib.disconnect("infjump_char")
+	lib.connect("infjump_char", plr.CharacterAdded:Connect(function(char)
 		char:WaitForChild("Humanoid")
 		doINFJUMPY()
-	end)
+	end))
 end)
 
 cmd.add({"uninfjump", "uninfinitejump"}, {"uninfjump (uninfinitejump)", "Disables infinite jumping"}, function()
 	Wait()
 	DoNotif("Infinite Jump Disabled", 2)
 
-	if jumpyCON then
-		jumpyCON:Disconnect()
-		jumpyCON = nil
-	end
-
-	if jumpyChar then
-		jumpyChar:Disconnect()
-		jumpyChar = nil
-	end
+	lib.disconnect("infjump_jump")
+	lib.disconnect("infjump_char")
 end)
 
-local flyjump=nil
-
 cmd.add({"flyjump"},{"flyjump","Allows you to hold space to fly up"},function()
+	Wait()
+	DoNotif("FlyJump Enabled", 3)
 
-	Wait();
-
-	DoNotif("FlyJump Enabled",3)
-
-
-	if flyjump then flyjump:Disconnect() end
-	flyjump=UserInputService.JumpRequest:Connect(function()
+	lib.disconnect("flyjump")
+	lib.connect("flyjump", UserInputService.JumpRequest:Connect(function()
 		Player.Character:FindFirstChildWhichIsA("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
-	end)
+	end))
 end)
 
 cmd.add({"unflyjump","noflyjump"},{"unflyjump (noflyjump)","Disables flyjump"},function()
+	Wait()
+	DoNotif("FlyJump Disabled", 3)
 
-	Wait();
-
-	DoNotif("FlyJump Disabled",3)
-
-
-	if flyjump then flyjump:Disconnect() end
+	lib.disconnect("flyjump")
 end)
 
 cmd.add({"xray","xrayon"},{"xray (xrayon)","Makes you be able to see through walls"},function()
@@ -15555,37 +15262,28 @@ cmd.add({"fullbright","fullb","fb"},{"fullbright (fullb,fb)","Makes games that a
 	getgenv().FullBrightEnabled=not getgenv().FullBrightEnabled
 end)
 
-local dayCon=nil
-
-cmd.add({"loopday","lday"},{"loopday (lday)","Sunshiiiine!"},function()
-	if dayCon then
-		dayCon:Disconnect()
-	end
+cmd.add({"loopday", "lday"}, {"loopday (lday)", "Sunshiiiine!"}, function()
+	lib.disconnect("loopday")
 
 	Lighting.ClockTime = 14
 
-	dayCon=Lighting:GetPropertyChangedSignal("ClockTime"):Connect(function()
+	lib.connect("loopday", Lighting:GetPropertyChangedSignal("ClockTime"):Connect(function()
 		if Lighting.ClockTime ~= 14 then
 			Lighting.ClockTime = 14
 		end
-	end)
+	end))
 end)
 
-cmd.add({"unloopday","unlday"},{"unloopday (unlday)","No more sunshine"},function()
-	if dayCon then
-		dayCon:Disconnect()
-	end
+cmd.add({"unloopday", "unlday"}, {"unloopday (unlday)", "No more sunshine"}, function()
+	lib.disconnect("loopday")
 end)
-
-fbCon, fbCon1, fbCon2, fbCon3, fbCon4 = nil, nil, nil, nil, nil
-nightCon, nightCon1, nightCon2, nightCon3, nightCon4 = nil, nil, nil, nil, nil
 
 cmd.add({"loopfullbright", "loopfb", "lfb"}, {"loopfullbright (loopfb,lfb)", "Sunshiiiine!"}, function()
-	if fbCon then fbCon:Disconnect() end
-	if fbCon1 then fbCon1:Disconnect() end
-	if fbCon2 then fbCon2:Disconnect() end
-	if fbCon3 then fbCon3:Disconnect() end
-	if fbCon4 then fbCon4:Disconnect() end
+	lib.disconnect("fbCon")
+	lib.disconnect("fbCon1")
+	lib.disconnect("fbCon2")
+	lib.disconnect("fbCon3")
+	lib.disconnect("fbCon4")
 
 	Lighting.Brightness = 1
 	Lighting.ClockTime = 12
@@ -15593,47 +15291,47 @@ cmd.add({"loopfullbright", "loopfb", "lfb"}, {"loopfullbright (loopfb,lfb)", "Su
 	Lighting.GlobalShadows = false
 	Lighting.Ambient = Color3.fromRGB(178, 178, 178)
 
-	fbCon = Lighting:GetPropertyChangedSignal("Brightness"):Connect(function()
+	lib.connect("fbCon", Lighting:GetPropertyChangedSignal("Brightness"):Connect(function()
 		if Lighting.Brightness ~= 1 then
 			Lighting.Brightness = 1
 		end
-	end)
-	fbCon1 = Lighting:GetPropertyChangedSignal("ClockTime"):Connect(function()
+	end))
+	lib.connect("fbCon1", Lighting:GetPropertyChangedSignal("ClockTime"):Connect(function()
 		if Lighting.ClockTime ~= 12 then
 			Lighting.ClockTime = 12
 		end
-	end)
-	fbCon2 = Lighting:GetPropertyChangedSignal("FogEnd"):Connect(function()
+	end))
+	lib.connect("fbCon2", Lighting:GetPropertyChangedSignal("FogEnd"):Connect(function()
 		if Lighting.FogEnd ~= 786543 then
 			Lighting.FogEnd = 786543
 		end
-	end)
-	fbCon3 = Lighting:GetPropertyChangedSignal("GlobalShadows"):Connect(function()
+	end))
+	lib.connect("fbCon3", Lighting:GetPropertyChangedSignal("GlobalShadows"):Connect(function()
 		if Lighting.GlobalShadows ~= false then
 			Lighting.GlobalShadows = false
 		end
-	end)
-	fbCon4 = Lighting:GetPropertyChangedSignal("Ambient"):Connect(function()
+	end))
+	lib.connect("fbCon4", Lighting:GetPropertyChangedSignal("Ambient"):Connect(function()
 		if Lighting.Ambient ~= Color3.fromRGB(178, 178, 178) then
 			Lighting.Ambient = Color3.fromRGB(178, 178, 178)
 		end
-	end)
+	end))
 end)
 
 cmd.add({"unloopfullbright", "unloopfb", "unlfb"}, {"unloopfullbright (unloopfb,unlfb)", "No more sunshine"}, function()
-	if fbCon then fbCon:Disconnect() end
-	if fbCon1 then fbCon1:Disconnect() end
-	if fbCon2 then fbCon2:Disconnect() end
-	if fbCon3 then fbCon3:Disconnect() end
-	if fbCon4 then fbCon4:Disconnect() end
+	lib.disconnect("fbCon")
+	lib.disconnect("fbCon1")
+	lib.disconnect("fbCon2")
+	lib.disconnect("fbCon3")
+	lib.disconnect("fbCon4")
 end)
 
 cmd.add({"loopnight", "loopn", "ln"}, {"loopnight (loopn,ln)", "Moonlight."}, function()
-	if nightCon then nightCon:Disconnect() end
-	if nightCon1 then nightCon1:Disconnect() end
-	if nightCon2 then nightCon2:Disconnect() end
-	if nightCon3 then nightCon3:Disconnect() end
-	if nightCon4 then nightCon4:Disconnect() end
+	lib.disconnect("nightCon")
+	lib.disconnect("nightCon1")
+	lib.disconnect("nightCon2")
+	lib.disconnect("nightCon3")
+	lib.disconnect("nightCon4")
 
 	Lighting.Brightness = 1
 	Lighting.ClockTime = 0
@@ -15641,76 +15339,69 @@ cmd.add({"loopnight", "loopn", "ln"}, {"loopnight (loopn,ln)", "Moonlight."}, fu
 	Lighting.GlobalShadows = false
 	Lighting.Ambient = Color3.fromRGB(178, 178, 178)
 
-	nightCon = Lighting:GetPropertyChangedSignal("Brightness"):Connect(function()
+	lib.connect("nightCon", Lighting:GetPropertyChangedSignal("Brightness"):Connect(function()
 		if Lighting.Brightness ~= 1 then
 			Lighting.Brightness = 1
 		end
-	end)
-	nightCon1 = Lighting:GetPropertyChangedSignal("ClockTime"):Connect(function()
+	end))
+	lib.connect("nightCon1", Lighting:GetPropertyChangedSignal("ClockTime"):Connect(function()
 		if Lighting.ClockTime ~= 0 then
 			Lighting.ClockTime = 0
 		end
-	end)
-	nightCon2 = Lighting:GetPropertyChangedSignal("FogEnd"):Connect(function()
+	end))
+	lib.connect("nightCon2", Lighting:GetPropertyChangedSignal("FogEnd"):Connect(function()
 		if Lighting.FogEnd ~= 786543 then
 			Lighting.FogEnd = 786543
 		end
-	end)
-	nightCon3 = Lighting:GetPropertyChangedSignal("GlobalShadows"):Connect(function()
+	end))
+	lib.connect("nightCon3", Lighting:GetPropertyChangedSignal("GlobalShadows"):Connect(function()
 		if Lighting.GlobalShadows ~= false then
 			Lighting.GlobalShadows = false
 		end
-	end)
-	nightCon4 = Lighting:GetPropertyChangedSignal("Ambient"):Connect(function()
+	end))
+	lib.connect("nightCon4", Lighting:GetPropertyChangedSignal("Ambient"):Connect(function()
 		if Lighting.Ambient ~= Color3.fromRGB(178, 178, 178) then
 			Lighting.Ambient = Color3.fromRGB(178, 178, 178)
 		end
-	end)
+	end))
 end)
 
 cmd.add({"unloopnight", "unloopn", "unln"}, {"unloopnight (unloopn,unln)", "No more moonlight."}, function()
-	if nightCon then nightCon:Disconnect() end
-	if nightCon1 then nightCon1:Disconnect() end
-	if nightCon2 then nightCon2:Disconnect() end
-	if nightCon3 then nightCon3:Disconnect() end
-	if nightCon4 then nightCon4:Disconnect() end
+	lib.disconnect("nightCon")
+	lib.disconnect("nightCon1")
+	lib.disconnect("nightCon2")
+	lib.disconnect("nightCon3")
+	lib.disconnect("nightCon4")
 end)
 
-fogLoop=nil
-fogCon=nil
-
 cmd.add({"loopnofog","lnofog","lnf", "loopnf"},{"loopnofog (lnofog,lnf,loopnf)","See clearly forever!"},function()
-	local Lighting=Lighting
-	if fogLoop then
-		fogLoop:Disconnect()
-	end
-	if fogCon then
-		fogCon:Disconnect()
-	end
-	Lighting.FogEnd=786543
+	local Lighting = Lighting
+
+	lib.disconnect("nofog_con")
+	lib.disconnect("nofog_loop")
+
+	Lighting.FogEnd = 786543
+
 	function fogFunc()
-		for i,v in pairs(Lighting:GetDescendants()) do
+		for i, v in pairs(Lighting:GetDescendants()) do
 			if v:IsA("Atmosphere") then
 				v:Destroy()
 			end
 		end
 	end
-	fogCon=Lighting:GetPropertyChangedSignal("FogEnd"):Connect(function()
-		if Lighting.FogEnd~=786543 then
-			Lighting.FogEnd=786543
-		end
-	end)
 
-	fogLoop = RunService.RenderStepped:Connect(fogFunc)
+	lib.connect("nofog_con", Lighting:GetPropertyChangedSignal("FogEnd"):Connect(function()
+		if Lighting.FogEnd ~= 786543 then
+			Lighting.FogEnd = 786543
+		end
+	end))
+
+	lib.connect("nofog_loop", RunService.RenderStepped:Connect(fogFunc))
 end)
 
 cmd.add({"unloopnofog","unlnofog","unlnf","unloopnf"},{"unloopnofog (unlnofog,unlnf,unloopnf)","No more sight."},function()
-	if fogLoop then
-		fogLoop:Disconnect()
-	end
-	if fogCon then
-		fogCon:Disconnect()
-	end
+	lib.disconnect("nofog_con")
+	lib.disconnect("nofog_loop")
 end)
 
 cmd.add({"brightness"},{"brightness","Changes the brightness lighting property"},function(...)
@@ -15745,27 +15436,21 @@ cmd.add({"gamma", "exposure"},{"gamma (exposure)","gamma vision (real)"},functio
 	Lighting.ExposureCompensation = expose
 end,true)
 
-gammaLoop = nil
-
 cmd.add({"loopgamma", "loopexposure"},{"loopgamma (loopexposure)","loop gamma vision (mega real)"},function(num)
 	expose = tonumber(num) or 0
-	if gammaLoop then
-		gammaLoop:Disconnect()
-	end
+	lib.disconnect("loopgamma")
 
 	Lighting.ExposureCompensation = expose
 
-	gammaLoop = Lighting:GetPropertyChangedSignal("ExposureCompensation"):Connect(function()
+	lib.connect("loopgamma", Lighting:GetPropertyChangedSignal("ExposureCompensation"):Connect(function()
 		if Lighting.ExposureCompensation ~= expose then
 			Lighting.ExposureCompensation = expose
 		end
-	end)
-end,true)
+	end))
+end, true)
 
 cmd.add({"unloopgamma", "unlgamma", "unloopexposure", "unlexposure"},{"unloopgamma (unlgamma, unloopexposure, unlexposure)","stop gamma vision (real)"},function()
-	if gammaLoop then
-		gammaLoop:Disconnect()
-	end
+	lib.disconnect("loopgamma")
 end)
 
 cmd.add({"unsuspendvc", "fixvc", "rejoinvc", "restorevc"},{"unsuspendvc (fixvc, rejoinvc, restorevc)","allows you to use Voice Chat again"},function()
@@ -15910,7 +15595,13 @@ cmd.add({"cameranoclip","camnoclip","cnoclip","nccam"},{"cameranoclip (camnoclip
 			local camPos = targetPos + rot:VectorToWorldSpace(Vector3.new(0, 0, -zoom))
 			camera.CFrame = CFrame.new(camPos, targetPos)
 		end)]]
-		LocalPlayer.DevCameraOcclusionMode = Enum.DevCameraOcclusionMode.Invisicam
+		if lib.isConnected("ilovesolara") then lib.disconnect("ilovesolara") player.DevCameraOcclusionMode=Enum.DevCameraOcclusionMode.Zoom return end
+		lib.connect("ilovesolara",player:GetPropertyChangedSignal("DevCameraOcclusionMode"):Connect(function()
+			if player.DevCameraOcclusionMode~=Enum.DevCameraOcclusionMode.Invisicam then
+				player.DevCameraOcclusionMode=Enum.DevCameraOcclusionMode.Invisicam
+			end
+		end))
+		player.DevCameraOcclusionMode=Enum.DevCameraOcclusionMode.Invisicam
 	end
 end)
 
@@ -15960,6 +15651,7 @@ cmd.add({"uncameranoclip","uncamnoclip","uncnoclip","unnccam"},{"uncameranoclip 
 				newModule.Parent = scripts
 			end
 		end]]
+		lib.disconnect("ilovesolara")
 		LocalPlayer.DevCameraOcclusionMode = Enum.DevCameraOcclusionMode.Zoom
 	end
 end)
@@ -16261,25 +15953,18 @@ cmd.add({"invisbind", "invisiblebind","bindinvis"}, {"invisbind (invisiblebind, 
 	end
 end,true)
 
-cmd.add({"fireremotes", "fremotes", "frem"}, {"fireremotes {argument} (fremotes, frem)", "Fires every remote with arguments"}, function(...)
+cmd.add({"fireremotes", "fremotes", "frem"}, {"fireremotes (fremotes, frem)", "Fires every remote with arguments"}, function()
 	local remoteCount = 0
 	local failedCount = 0
-	local args = {...}
-
-	if #args == 0 then
-		args = nil
-	else
-		args=Concat(args, " ")
-	end
 
 	for _, obj in ipairs(game:GetDescendants()) do
 		if not obj:IsDescendantOf(COREGUI) and (obj:IsA("RemoteEvent") or obj:IsA("RemoteFunction")) then
 			Spawn(function()
 				local ok
 				if obj:IsA("RemoteEvent") then
-					ok = pcall(function() obj:FireServer(args) end)
+					ok = pcall(function() obj:FireServer() end)
 				elseif obj:IsA("RemoteFunction") then
-					ok = pcall(function() obj:InvokeServer(args) end)
+					ok = pcall(function() obj:InvokeServer() end)
 				end
 
 				if ok then
@@ -16330,9 +16015,6 @@ cmd.add({"unprediction", "unpredict"}, {"unprediction (unpredict)", "disable com
 	end
 end)
 
-lFOVconn = nil
-camREFRESH = nil
-camWATCHERS = nil
 loopedFOV = nil
 
 cmd.add({"fov"}, {"fov <number>", "Sets your FOV to a custom value (1–120)"}, function(num)
@@ -16345,35 +16027,38 @@ cmd.add({"loopfov", "lfov"}, {"loopfov <number> (lfov)", "Loops your FOV to stay
 	loopedFOV = math.clamp(tonumber(num) or 70, 1, 120)
 
 	local function apply()
-		if lFOVconn then lFOVconn:Disconnect() end
-		if camREFRESH then camREFRESH:Disconnect() end
+		lib.disconnect("fov_loop")
+		lib.disconnect("fov_refresh")
+
 		local cam = SafeGetService("Workspace").CurrentCamera
 		if not cam then return end
-		lFOVconn = RunService.RenderStepped:Connect(function()
+
+		lib.connect("fov_loop", RunService.RenderStepped:Connect(function()
 			if cam.FieldOfView ~= loopedFOV then
 				cam.FieldOfView = loopedFOV
 			end
-		end)
-		camREFRESH = cam:GetPropertyChangedSignal("FieldOfView"):Connect(function()
+		end))
+
+		lib.connect("fov_refresh", cam:GetPropertyChangedSignal("FieldOfView"):Connect(function()
 			if cam.FieldOfView ~= loopedFOV then
 				cam.FieldOfView = loopedFOV
 			end
-		end)
+		end))
 	end
 
-	if camWATCHERS then camWATCHERS:Disconnect() end
-	camWATCHERS = SafeGetService("Workspace"):GetPropertyChangedSignal("CurrentCamera"):Connect(function()
+	lib.disconnect("fov_watch")
+	lib.connect("fov_watch", SafeGetService("Workspace"):GetPropertyChangedSignal("CurrentCamera"):Connect(function()
 		Wait(0.05)
 		apply()
-	end)
+	end))
 
 	apply()
 end, true)
 
 cmd.add({"unloopfov", "unlfov"}, {"unloopfov (unlfov)", "Stops the looped FOV"}, function()
-	if lFOVconn then lFOVconn:Disconnect() lFOVconn = nil end
-	if camREFRESH then camREFRESH:Disconnect() camREFRESH = nil end
-	if camWATCHERS then camWATCHERS:Disconnect() camWATCHERS = nil end
+	lib.disconnect("fov_loop")
+	lib.disconnect("fov_refresh")
+	lib.disconnect("fov_watch")
 	loopedFOV = nil
 end)
 
@@ -16419,14 +16104,12 @@ cmd.add({"loadtools", "ltools"}, {"loadtools (ltools)", "Restores your saved too
 	DoNotif("Tools loaded: "..#storedTools,2)
 end)
 
-local noEQ = nil
-local humEQ = nil
-
 cmd.add({"preventtools", "noequip", "antiequip"}, {"preventtools (noequip,antiequip)", "Prevents any item from being equipped"}, function()
 	local p = Players.LocalPlayer
 	local c = p.Character
-	if noEQ then noEQ:Disconnect() noEQ = nil end
-	if humEQ then humEQ:Disconnect() humEQ = nil end
+
+	lib.disconnect("noequip_char")
+	lib.disconnect("noequip_hum")
 
 	local h = c and c:FindFirstChildWhichIsA("Humanoid")
 	if not h then return end
@@ -16443,15 +16126,15 @@ cmd.add({"preventtools", "noequip", "antiequip"}, {"preventtools (noequip,antieq
 		end
 	end
 
-	noEQ = c.ChildAdded:Connect(onTool)
-	humEQ = h.ChildAdded:Connect(onTool)
+	lib.connect("noequip_char", c.ChildAdded:Connect(onTool))
+	lib.connect("noequip_hum", h.ChildAdded:Connect(onTool))
 
 	DoNotif("Tool prevention on", 3)
 end)
 
 cmd.add({"unpreventtools", "unnoequip", "unantiequip"}, {"unpreventtools (unnoequip,unantiequip)", "Self-explanatory"}, function()
-	if noEQ then noEQ:Disconnect() noEQ = nil end
-	if humEQ then humEQ:Disconnect() humEQ = nil end
+	lib.disconnect("noequip_char")
+	lib.disconnect("noequip_hum")
 	DoNotif("Tool prevention off", 2)
 end)
 
@@ -16478,28 +16161,35 @@ cmd.add({"jp", "jumppower"}, {"jumppower <number> (jp)", "Sets your JumpPower"},
 end, true)
 
 cmd.add({"oofspam"},{"oofspam","Spams oof"},function()
-	getgenv().enabled=true
-	getgenv().speed=100
-	local HRP=Humanoid.RootPart or getRoot(Humanoid.Parent)
+	getgenv().enabled = true
+	getgenv().speed = 100
+	local HRP = Humanoid.RootPart or getRoot(Humanoid.Parent)
 	if not Humanoid or not getgenv().enabled then
-		if Humanoid and Humanoid.Health <=0 then
+		if Humanoid and Humanoid.Health <= 0 then
 			Humanoid:Destroy()
 		end
 		return
 	end
-	Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead,false)
-	Humanoid.BreakJointsOnDeath=false
-	Humanoid.RequiresNeck=false
-	local con; con=RunService.Stepped:Connect(function()
-		if not Humanoid then return con:Disconnect() end
+	Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, false)
+	Humanoid.BreakJointsOnDeath = false
+	Humanoid.RequiresNeck = false
+
+	lib.connect("oofspam_forcerun", RunService.Stepped:Connect(function()
+		if not Humanoid then return lib.disconnect("oofspam_forcerun") end
 		Humanoid:ChangeState(Enum.HumanoidStateType.Running)
-	end)
-	LocalPlayer.Character=nil
-	LocalPlayer.Character=Character
-	Wait(Players.RespawnTime+0.1)
-	while Wait(1/getgenv().speed) do
+	end))
+
+	LocalPlayer.Character = nil
+	LocalPlayer.Character = Character
+	Wait(Players.RespawnTime + 0.1)
+
+	lib.connect("oofspam_loop", RunService.Heartbeat:Connect(function()
+		if not getgenv().enabled then
+			lib.disconnect("oofspam_loop")
+			return
+		end
 		Humanoid:ChangeState(Enum.HumanoidStateType.Dead)
-	end
+	end))
 end)
 
 cmd.add({"httpspy"},{"httpspy","HTTP Spy"},function()
@@ -16814,17 +16504,13 @@ cmd.add({"unactnpc", "stopnpc"}, {"unactnpc (stopnpc)", "Stop acting like an NPC
 end)
 
 clickkillUI = nil
-clickKillConnections = {}
 clickkillEnabled = false
 
 cmd.add({"clickkillnpc", "cknpc"}, {"clickkillnpc (cknpc)", "Click on an NPC to kill it"}, function()
 	clickkillEnabled = true
+
 	if clickkillUI then clickkillUI:Destroy() end
-	for _, conn in ipairs(clickKillConnections) do
-		if conn then
-			conn:Disconnect()
-		end
-	end
+	lib.disconnect("clickkill_mouse")
 
 	local Mouse = player:GetMouse()
 
@@ -16853,7 +16539,7 @@ cmd.add({"clickkillnpc", "cknpc"}, {"clickkillnpc (cknpc)", "Click on an NPC to 
 		toggleButton.Text = clickkillEnabled and "ClickKill: ON" or "ClickKill: OFF"
 	end)
 
-	local conn = Mouse.Button1Down:Connect(function()
+	lib.connect("clickkill_mouse", Mouse.Button1Down:Connect(function()
 		if not clickkillEnabled then return end
 
 		local Target = Mouse.Target
@@ -16866,20 +16552,13 @@ cmd.add({"clickkillnpc", "cknpc"}, {"clickkillnpc (cknpc)", "Click on an NPC to 
 				end
 			end
 		end
-	end)
-
-	Insert(clickKillConnections, conn)
+	end))
 end)
 
 cmd.add({"unclickkillnpc", "uncknpc"}, {"unclickkillnpc (uncknpc)", "Disable clickkillnpc"}, function()
 	clickkillEnabled = false
 	if clickkillUI then clickkillUI:Destroy() end
-	for _, conn in ipairs(clickKillConnections) do
-		if conn then
-			conn:Disconnect()
-		end
-	end
-	clickKillConnections = {}
+	lib.disconnect("clickkill_mouse")
 end)
 
 cmd.add({"voidnpcs", "vnpcs"}, {"voidnpcs (vnpcs)", "Teleports NPC's to void"}, function()
@@ -16894,17 +16573,13 @@ cmd.add({"voidnpcs", "vnpcs"}, {"voidnpcs (vnpcs)", "Teleports NPC's to void"}, 
 end)
 
 clickVoidUI = nil
-clickVoidConnections = {}
 clickVoidEnabled = false
 
 cmd.add({"clickvoidnpc", "cvnpc"}, {"clickvoidnpc (cvnpc)", "Click to void NPCs"}, function()
 	clickVoidEnabled = true
+
 	if clickVoidUI then clickVoidUI:Destroy() end
-	for _, conn in ipairs(clickVoidConnections) do
-		if conn then
-			conn:Disconnect()
-		end
-	end
+	lib.disconnect("clickvoid_mouse")
 
 	clickVoidUI = InstanceNew("ScreenGui")
 	NaProtectUI(clickVoidUI)
@@ -16930,7 +16605,7 @@ cmd.add({"clickvoidnpc", "cvnpc"}, {"clickvoidnpc (cvnpc)", "Click to void NPCs"
 	end)
 
 	local mouse = player:GetMouse()
-	local conn = mouse.Button1Down:Connect(function()
+	lib.connect("clickvoid_mouse", mouse.Button1Down:Connect(function()
 		if not clickVoidEnabled then return end
 
 		local target = mouse.Target
@@ -16940,20 +16615,13 @@ cmd.add({"clickvoidnpc", "cvnpc"}, {"clickvoidnpc (cvnpc)", "Click to void NPCs"
 				root.HipHeight = math.huge
 			end
 		end
-	end)
-
-	Insert(clickVoidConnections, conn)
+	end))
 end)
 
 cmd.add({"unclickvoidnpc", "uncvnpc"}, {"unclickvoidnpc (uncvnpc)","Disable click-void"}, function()
 	clickVoidEnabled = false
 	if clickVoidUI then clickVoidUI:Destroy() end
-	for _, conn in ipairs(clickVoidConnections) do
-		if conn then
-			conn:Disconnect()
-		end
-	end
-	clickVoidConnections = {}
+	lib.disconnect("clickvoid_mouse")
 end)
 
 --[[ FUNCTIONALITY ]]--
