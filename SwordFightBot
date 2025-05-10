@@ -1,0 +1,222 @@
+getgenv().swordtGayFighterAhh = false
+
+local p = game:GetService("Players")
+local l = p.LocalPlayer
+local m = l:GetMouse()
+local rs = game:GetService("RunService")
+local uis = game:GetService("UserInputService")
+
+function protectUI(sGui)
+	local function blank(...) return ... end
+	local cloneref = cloneref or blank
+	local function safe(s) return cloneref(game:GetService(s)) or game:GetService(s) end
+	if sGui:IsA("ScreenGui") then
+		sGui.ZIndexBehavior = Enum.ZIndexBehavior.Global
+		sGui.DisplayOrder = 999999999
+		sGui.ResetOnSpawn = false
+		sGui.IgnoreGuiInset = true
+	end
+	local cg = safe("CoreGui")
+	local pl = safe("Players").LocalPlayer
+	local function hide(inst, var)
+		if inst then
+			if var then inst[var] = "\0" else inst.Name = "\0" end
+			inst.Archivable = false
+		end
+	end
+	if cg and cg:FindFirstChild("RobloxGui") then
+		hide(sGui)
+		sGui.Parent = cg:FindFirstChild("RobloxGui")
+	elseif cg then
+		hide(sGui)
+		sGui.Parent = cg
+	elseif pl and pl:FindFirstChild("PlayerGui") then
+		hide(sGui)
+		sGui.Parent = pl:FindFirstChild("PlayerGui")
+	end
+	return sGui
+end
+
+NAdragV2 = function(ui, drag)
+	if not drag then drag = ui end
+	local uis = game:GetService("UserInputService")
+	local sg = ui:FindFirstAncestorWhichIsA("ScreenGui") or ui.Parent
+	local d, i, s, p
+
+	local function upd(inp)
+		local delta = inp.Position - s
+		local ps = sg.AbsoluteSize
+		local us = ui.AbsoluteSize
+		local nx = p.X.Scale + (delta.X / ps.X)
+		local ny = p.Y.Scale + (delta.Y / ps.Y)
+		local a = ui.AnchorPoint
+		local minX = a.X * (us.X / ps.X)
+		local maxX = 1 - (1 - a.X) * (us.X / ps.X)
+		local minY = a.Y * (us.Y / ps.Y)
+		local maxY = 1 - (1 - a.Y) * (us.Y / ps.Y)
+		nx = math.clamp(nx, minX, maxX)
+		ny = math.clamp(ny, minY, maxY)
+		ui.Position = UDim2.new(nx, 0, ny, 0)
+	end
+
+	drag.InputBegan:Connect(function(inp)
+		if inp.UserInputType == Enum.UserInputType.MouseButton1 or inp.UserInputType == Enum.UserInputType.Touch then
+			d = true
+			s = inp.Position
+			p = ui.Position
+			inp.Changed:Connect(function()
+				if inp.UserInputState == Enum.UserInputState.End then d = false end
+			end)
+		end
+	end)
+
+	drag.InputChanged:Connect(function(inp)
+		if inp.UserInputType == Enum.UserInputType.MouseMovement or inp.UserInputType == Enum.UserInputType.Touch then
+			i = inp
+		end
+	end)
+
+	uis.InputChanged:Connect(function(inp)
+		if inp == i and d then upd(inp) end
+	end)
+
+	sg:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
+		local ps = sg.AbsoluteSize
+		local us = ui.AbsoluteSize
+		local pos = ui.Position
+		local a = ui.AnchorPoint
+		local minX = a.X * (us.X / ps.X)
+		local maxX = 1 - (1 - a.X) * (us.X / ps.X)
+		local minY = a.Y * (us.Y / ps.Y)
+		local maxY = 1 - (1 - a.Y) * (us.Y / ps.Y)
+		local nx = math.clamp(pos.X.Scale, minX, maxX)
+		local ny = math.clamp(pos.Y.Scale, minY, maxY)
+		ui.Position = UDim2.new(nx, 0, ny, 0)
+	end)
+
+	ui.Active = true
+end
+
+rs.RenderStepped:Connect(function()
+	if swordtGayFighterAhh then
+		task.spawn(function()
+			local t = l.Character and l.Character:FindFirstChildOfClass("Tool")
+			if t and t:FindFirstChild("Handle") then
+				t:Activate()
+				for _, v in pairs(p:GetPlayers()) do
+					if v ~= l and v.Character then
+						local ch = v.Character
+						local h = ch:FindFirstChild("Humanoid")
+						local hrp = ch:FindFirstChild("HumanoidRootPart")
+						if h and h.Health > 0 and hrp and (l:DistanceFromCharacter(hrp.Position) <= 15) then
+							for _, bp in pairs(ch:GetChildren()) do
+								if bp:IsA("BasePart") then
+									firetouchinterest(t.Handle, bp, 0)
+									firetouchinterest(t.Handle, bp, 1)
+								end
+							end
+						end
+					end
+				end
+			end
+		end)
+	end
+end)
+
+local function gc()
+	local cp, d = nil, math.huge
+	for _, v in pairs(p:GetPlayers()) do
+		if v ~= l and v.Character then
+			local ch = v.Character
+			local hrp = ch:FindFirstChild("HumanoidRootPart")
+			local h = ch:FindFirstChild("Humanoid")
+			if hrp and h and h.Health > 0 and not ch:FindFirstChildOfClass("ForceField") then
+				local mag = (hrp.Position - l.Character.HumanoidRootPart.Position).Magnitude
+				if mag < d then
+					cp = v
+					d = mag
+				end
+			end
+		end
+	end
+	return cp
+end
+
+local currentTargetConnection
+local currentTrackedTarget
+
+task.spawn(function()
+	while task.wait() do
+		if swordtGayFighterAhh and l.Character and l.Character:FindFirstChild("HumanoidRootPart") then
+			local t = gc()
+			if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") then
+				local tp = t.Character.HumanoidRootPart
+				local lp = l.Character.HumanoidRootPart
+				local myPos = lp.Position
+				local targetPos = Vector3.new(tp.Position.X, myPos.Y, tp.Position.Z)
+				lp.CFrame = CFrame.new(myPos, targetPos) * CFrame.Angles(0, math.rad(25), 0)
+				local moveTarget = Vector3.new(tp.Position.X - 3, lp.Position.Y, tp.Position.Z)
+				l.Character.Humanoid:MoveTo(moveTarget)
+
+				if not currentTrackedTarget or currentTrackedTarget ~= t then
+					if currentTargetConnection then
+						currentTargetConnection:Disconnect()
+					end
+
+					local humanoid = t.Character:FindFirstChildOfClass("Humanoid")
+					if humanoid then
+						currentTargetConnection = humanoid.StateChanged:Connect(function(_, newState)
+							if newState == Enum.HumanoidStateType.Freefall or newState == Enum.HumanoidStateType.Jumping then
+								local myHumanoid = l.Character and l.Character:FindFirstChildOfClass("Humanoid")
+								if myHumanoid and myHumanoid:GetState() ~= Enum.HumanoidStateType.Freefall and myHumanoid:GetState() ~= Enum.HumanoidStateType.Jumping then
+									myHumanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+								end
+							end
+						end)
+						currentTrackedTarget = t
+					end
+				end
+			end
+		end
+	end
+end)
+
+task.spawn(function()
+	local ch = l.Character or l.CharacterAdded:Wait()
+	local h = ch:WaitForChild("Humanoid")
+	h:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)
+	h:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
+end)
+
+if uis.TouchEnabled then
+	local gui = protectUI(Instance.new("ScreenGui"))
+	local b = Instance.new("TextButton", gui)
+	b.Size = UDim2.new(0, 120, 0, 50)
+    b.AnchorPoint = Vector2.new(0.5,0)
+	b.Position = UDim2.new(0.5, 0, 0.9, 0)
+	b.AnchorPoint = Vector2.new(0, 1)
+	b.Text = "Sword Fighter: OFF"
+	b.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+	b.TextColor3 = Color3.new(1, 1, 1)
+	b.Font = Enum.Font.GothamBold
+	b.TextScaled = true
+
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0.25, 0)
+	corner.Parent = b
+
+	b.MouseButton1Click:Connect(function()
+		swordtGayFighterAhh = not swordtGayFighterAhh
+		l.Character.Humanoid.AutoRotate = not swordtGayFighterAhh
+		b.Text = swordtGayFighterAhh and "Sword Fighter: ON" or "Sword Fighter: OFF"
+	end)
+
+	NAdragV2(b)
+end
+
+m.KeyDown:Connect(function(k)
+	if k:lower() == "x" then
+		swordtGayFighterAhh = not swordtGayFighterAhh
+		l.Character.Humanoid.AutoRotate = not swordtGayFighterAhh
+	end
+end)
